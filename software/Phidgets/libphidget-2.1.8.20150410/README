@@ -1,0 +1,167 @@
+                          Phidgets for Linux
+                      Version 2.1.8, 3 May 2012
+
+Installation
+============
+
+     ./configure; make; make install
+
+   This installs the library libphidget21.so and the header phidget21.h.
+Java support is compiled in by default, as well as support for Avahi
+zeroconf if it is available.
+
+   *Note: USB devices are by default only usable by root in Linux.
+          Install udev/hotplug scripts to use Phidgets from a normal 
+		  user account (see below).
+	
+Requirements
+============
+
+libusb 1.0
+
+   This is generally already installed. The libusb dev files may need to
+be installed - this is usually a package called libusb-1.0-0-dev. If
+libusb-1.0 is not available, libusb-0.1 will be used as a fallback,
+however, libusb-0.1 is not recommended because of a memory leak which
+will never be fixed.
+
+   Some embedded systems / older distros may need to manually set up
+the userspace USB device tree. Usually this is handled by udev and 
+exists in /dev/bus/usb. This can also be handled by mounting usbfs in 
+fstab, which shows up in /proc/bus/usb.
+
+Options
+=======
+
+   Configure options:
+   
+   To disable Java support:
+
+     ./configure --disable-jni
+   
+   To use mdnsresponder instead of avahi for zeroconf:
+   
+     ./configure --enable-zeroconf=bonjour
+	 
+   To disable zeroconf completely:
+   
+     ./configure --disable-zeroconf
+	 
+   To use built-ins for .local lookup:
+   
+     ./configure --enable-zeroconf-lookup
+
+   To enable LabVIEW support:
+   
+     ./configure --enable-labview
+     make LABVIEW_CINTOOLS_PATH=/usr/local/natinst/LabVIEW-2010/cintools
+	 
+   Note: replace 'LabVIEW-2010' with your version
+   
+   To use old libusb-0.1
+   
+     ./configure --enable-oldlibusb
+
+Usage
+=====
+
+   Compile your projects with -lphidget21 and include phidget21.h in the
+source file.
+
+Java
+====
+
+   Java support is compiled in by default - 'make jni' is no longer
+required. This support is provided via JNI extentions compiled into
+libphidget21.so.
+
+   To disable Java support, configure with the --disable-jni option.
+
+   The libphidget21.so install path may need to be manually specified
+in order for Java to find the library, there are two ways to do this;
+either specify in an environment variable:
+
+     LD_LIBRARY_PATH=/usr/lib
+
+   Or specify on the Java command line:
+   
+     java -Djava.library.path=/usr/lib some_java_app
+	 
+   Note that the /usr install prefix can be changed during the configure
+step by specifying --prefix.
+
+   phidget21.jar is the java half of the Phidgets->Java interface. This
+library can be downloaded from the website, or built from source:
+
+     make phidget21.jar
+	 
+   You must use a phidget21.jar that was built from the same phidget21
+library as you have installed or you will get errors.
+
+Hotplug / udev
+==============
+
+   On linux, by default, USB devices are not writeable by anybody but 
+root.
+
+   On modern systems (kernel > 2.6.7), this is solved with a udev 
+ruleset. This is the ideal solution.
+
+   On older systems, this can be solved with a hotplug script.
+   
+udev
+====
+
+   The udev rules file will make all phidgets world writeable (mode 666)
+as soon as they are attached. Note that some systems may already have 
+generic USB rulesets defined.  The udev rules are run in order from 
+smallest to largest number - the Phidgets rules, at number 99, should 
+be high enough so that any USB rules will be overridden.
+
+   To Install:
+
+     cp udev/99-phidgets.rules /etc/udev/rules.d
+
+Hotplug
+=======
+
+   A hotplug script has been included that will make phidgets writeable 
+when the are plugged in.
+
+   Because of this, there can sometimes be an issue accessing/opening a 
+device as soon as it is plugged in, before the hotplug script has run to
+make it accesible. In this case you will see an error 4: "A phidget 
+matching the type and or serial number could not be found."
+
+   Never rely on the hotplug scripts it you're using the phidget manager
+to open or access devices as soon as they appear as this will sometimes 
+fail.
+
+   To Install:
+   
+     cp hotplug/* /etc/hotplug/usb
+     chmod 755 /etc/hotplug/usb/phidgets
+	 
+Examples
+========
+
+   There are three examples in the examples directory. manager is just a
+simple program that will list all phidgets attached to the system, as 
+they are plugged in or removed. ifkit connects to an interface kit and 
+displays changes, while setting outputs. phidgetsbclist lists all SBCs
+on the network (requires seroconf support).
+
+   There is also a seperate download avialable with C examples for most 
+phidgets, on the phdigets.com website.
+
+FreeBSD
+=======
+
+   The library has been tested with FreeBSD 8.1 and found to work.
+The configure/make/make install can be run unmodified.
+
+   When compiling binaries that include libphidget21, the -pthread
+flag must be passed to the compiler, because the threading functions
+are part of the C library, unlike on Linux.
+
+     gcc example.c -lphidget21 -pthread -o example

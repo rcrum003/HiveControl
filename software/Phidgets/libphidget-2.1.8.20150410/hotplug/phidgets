@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ "$ACTION" = "add" ] && [ -f "$DEVICE" ]
+then
+	chmod 666 "$DEVICE"
+fi
+

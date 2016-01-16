@@ -1,0 +1,471 @@
+2.1.8
+new webservice version - 1.0.8
+-support for new devices
+-support for error events
+
+2.1.7.20110203
+fixed crash on close of remote Phidget on MacOS
+C# ifkit example bugfix - crashed on 1015/1016
+webservice improvements
+Switch to IP address for SBC config in browser
+Faster IP lookup for SBCs in control panel
+
+2.1.7.20101222 / 2.1.7.20101223
+fixed getServerID on Linux
+removed report ack
+this was causing some bad side effects
+manual .local lookups on Windows
+much faster then letting Windows do it itself
+Support for new Labview library
+Fixed PhidgetIR bug where library would crash if repeat code is longer then IR_MAX_REPEAT_LENGTH
+
+2.1.7.20101103
+Decreased Phidget Webservice event latency on Windows
+Preliminary support for 1002, 1011, 1040, 1045, 1046, 1054, 1065, 1204 (C, .NET)
+Webservice version updated to 1.0.7
+support for 1045, 1011, 1204
+Fixed a bug where webservice connections could be unexpectedly lost
+Bugfix: couldn't set interfacekit data rate over webservice.
+Fixed some memory leaks in the Mac library
+Fixed bug where blocking for >2 seconds in an events handler when opening remotely could cause a crash.
+
+2.1.7.20100803
+Windows only release
+fixed setLabel in WindowsCE
+fixed getHashCode in .NET library - needed for working with Phidgets in Labview via .NET
+
+2.1.7.20100621
+Linux only release - autotools updates
+call ldconfig automatically
+remove old phidget21 library (pre-autotools) when installing new one.
+
+2.1.7.20100620
+Linux only release - added version.sh for autoreconf
+
+2.1.7.20100618
+Linux only release - added udev/hotplug files
+
+2.1.7.20100617
+Linux only release
+Transitioned to autotools in linux for phidget21 / webservice
+phidget21 library and webservice are now separate downloads
+
+2.1.7.20100525
+full support for PhidgetSpatial and PhidgetIR in all libraries
+fixed 1031 not attaching in AS3.0
+Better error messages in JNI
+Updated error codes, device ID/Class lists in Java, Flash, COM, etc.
+Fixed TemperatureSensor version 200,201,202 bug - ambient sensor would not report negative temperatures.
+Revised temperaturesensor API to report tempMin/tempMax and errors more accurately.
+Added initial events for encoder digital inputs
+full support for 1047
+Added new device support to WindowsCE
+Updated mac examples for 1047, 1048
+
+2.1.6.20100504
+Windows only Release
+Added 1131 and 1132 to InterfaceKit example in MSI
+
+2.1.6.20100428
+limit data rate maximum to 16ms over the webservice for devices that expose dataRate (InterfaceKit, Spatial)
+fixed bug where TextLCD 8/8/8 would stay in Bonjour list after webservice is shutdown
+set/get Brightness for 1203_2
+Support 1048 in C# example
+webservice version incremented to 1.0.6
+TextLCD set/get brightness
+PhidgetIR support
+PhidgetSpatial support
+1047 support (enable, index)
+
+2.1.6.20100406
+Support for 1018_2, 1203_2 (dataRate)
+Webservice version incremented to 1.0.5
+
+2.1.6.20100401
+Updated InterfaceKit example with new sensors
+make Windows connect cancelable
+make pending zeroconf lookups cancelable during close
+
+2.1.6.20100318
+Mac only release
+Added WillSleep and Wakeup events to give user control of Phidgets immediately before and after a system sleep (MacOS Only).
+
+2.1.6.20100317
+Windows only release
+Some of the examples were being built using an out of date .NET library
+
+2.1.6.20100310
+MaxMSP fix - 2.1.6.20100126 introduced a bug for some Phidgets where openremote/open by serial didn't work and MaxMSP would sometimes crash.
+No code changes to any of the other libraries.
+
+2.1.6.20100304
+stopped property changes trigger events over webservice so they are noticed.
+more compatible with how local open works
+added 5 new servos
+fixed bug where remote close would not set detached so a subsequent open would not always connect.
+handle UninitializeZeroconf better - shut down thread before closing handles, fixes hang on SBC
+fixed bug on Mac where detaching 2 or more Phidgets at the same time caused a crash
+fixed close blocking because of a pending connect (mac, linux)
+Final support for 1031 in all libraries.
+
+2.1.6.20100129
+Implemented initial events in Flash
+Flash behaviour should now be identical to C library local and remote.
+Fix RFID issue where close could cause crash
+increment webservice version to 1.0.4
+fixed RFID remote open
+Flash would never get an attach event if the reader had been previously opened
+Initial tag event would not be fired when a tag was present and the antenna was enabled prior to open
+fixed openRemote failing on Mac
+fixed deadlock in webservice which could be hit by opening/closing a device over and over again.
+fixed bug in stepper, which caused seg fault on SBC on position change events.
+
+2.1.6.20100126
+added network open support in Max/MSP
+
+2.1.6.20100115
+Increased network performance for Linux/MacOS
+Added five servo types
+
+2.1.6.20091215
+Fixed busy loop in Linux openRemote
+JNI Library relocated to /Library/Java/Extensions on MacOS
+
+2.1.6.20091211
+Heartbeat now works on Linux as well (had to make sockets non-blocking)
+
+2.1.6.20091130
+Added heartbeat to webservice (client side)
+Better detects network failures by using active polling timeouts
+Fixed 0/8/8 over webservice
+
+2.1.6.20091020
+Fixed 1052 counting issue on 1070 (-1 reported as 255)
+Fixed issue where Phidget21 would try to reinstall from a limited user account or when the Control Panel was disabled.
+64-bit kernel support in Snow Leopard
+
+2.1.6.20090928
+Support for PhidgetSBC (1070)
+zeroconf can handle starting up before the mdns daemon, and will keep trying to connect.
+fixed 1066 not showing up on Mac
+added advanced servo example to mac pref pane
+implemented proper error handling in COM
+default behavious remains the same, enable proper error handling with 'EnableVerboseErrors'
+implemented error events in Java
+
+2.1.6.20090917
+Updated webservice protocol version to 1.0.3
+Fixed stepper under AS3.0
+added setServoType, getServoType, setServoParameters to PhidgetServo and PhidgetAdvancedServo
+possible race condition fixed in webservice (pdictclient.c:907)
+
+2.1.6.20090902
+Support MacOSX 10.6, drop support for 10.3.9, require 10.4 or newer
+Fully 64-bit compliant, library supports ppc, i386, x86_64
+
+2.1.6.20090806
+Added 1049 support
+Fixed RFID tag events over webservice
+
+2.1.6.20090804
+Added 1051_2 support
+Fixed various small initialization issues - stepper, adv servo, rfid
+Added 32-bit library install to 64-bit installer
+VB6.0, etc. need the 32-bit COM library on 64-bit windows
+
+2.1.6.20090708
+Added DeviceID to zeroconf
+fixed RFID.LastTag in .NET
+Changed the error codes returned by error events; error events now have their own set of error codes rather then sharing the function return codes.
+Added support for 1047, 1048
+Added error event codes rather then trying to reuse the EPHIDGET return codes.
+fixed TextLCD issue where display could get corrupted during a detach/attach
+made mac more reliable on attach
+more error logging on mac
+
+2.1.6.20090525
+fixed RFID not attaching via webservice if a tag is present.
+bugfix related to double free on detach event.
+Implemented getKey
+Added MIPS II support to Windows CE
+
+2.1.6.20090430
+Added ActiveX interface to COM library
+Added stepper and advancedServo to Flex .swc library
+
+2.1.6.20090417
+added PhidgetIR prototype support to C library
+properly handles sleeping on OSX
+fixed some webservice field initializations in Flash and C
+fixed security exceptions in Phidget Control Panel under Vista
+added Phidget Control Panel to start menu
+Fixed AdvancedServo in Flash - wouldn't attach
+
+2.1.6.20090317
+Phidget control panel properly supports Vista UAC and Limited user accounts in XP, etc.
+Added 64-bit release of Phidget21.msi for Windows
+
+2.1.6.20090312
+added 1064, 1059 to WindowsCE
+fixed opening 1051 over webservice
+fixed opening 1015/1016 over webservice broken in last release
+
+2.1.6.20090302
+Advanced servo bugfix: stopped would stop being true if min/max was set to exclude current position.
+linux USB improvements when many Phidgets are attached and opened at once.
+1031 support in phidget21, webservice, .NET - hidden until product release
+CPhidgetLED_setVoltage
+CPhidgetLED_getVoltage
+CPhidgetLED_setCurrentLimit
+CPhidgetLED_getCurrentLimit
+unknown timechange == PUNK_INT in encoder position change event
+1st position change event
+>30 seconds time change
+AS3 updates
+updated to 1.0.2 webservice
+encoder position change events report relative change rather then absolute position
+encoder adds getTimeChange function for timing encoder changes
+webservice updated to 1.0.2
+Authorization is asynchronous
+Doesn't match the old version checking, so errors will not be nice when trying to connect to an old webservice
+Sends out all initial data, so it's just like opening locally
+supports interfacekit Raw sensor value
+supports labels on remoteIP managers
+avahi bugfix
+webservice more stable against forcefully closed clients
+closing a network Phidget won't block - ever.
+no longer using quit, just closing the socket
+added libavahi-client.so.3 reference to linux library.
+Fixed bug with opening one phidget with serial and no serial at the same time over the webservice
+
+2.1.5.20090105
+Phidget control panel stability improvements
+added CPhidgetSBC_getHostname
+advanced servo 1 motor current sense equation - support should now be complete
+webservice and network code bugfixes - crash / deadlock during close, problems with concurrent connections, etc.
+fixed close on remote and remoteIP managers
+name of RFID changed from "Phidget RFID 4-output" to "Phidget RFID 2-output" - updated anything referencing old name.
+
+2.1.5.20081023
+added advanced servo and stepper examples to VB6.0, VB.NET and C
+added deviceClass and deviceID
+updated Mac examples
+webservice protocol version enforcement
+internal fix/rework of device id's etc.
+Fixed memory leaks in webservice and phidget21 network code.
+Dictionary and network stability improvements.
+duplicate calls to open or close are now silently ignored.
+
+2.1.4.20080924
+Old TextLCD 0/8/8's can now have both halves open at the same time on Windows
+fixed bug with composite devices on linux
+fixed manager on linux to better deal with unique devices
+
+2.1.4.20080922
+Updated Delphi files
+TextLCD can display 0x80-0xFF characters from Java
+getAttachedDevices works for mdns managers
+fixed a deadlock in the webservice
+better network error handling / password support for windows C# examples
+waitForAttachment will return EPHIDGET_CLOSED if the handle is closed while it is waiting.
+added EPHIDGET_CLOSED
+joining central threads checks whether they are trying to be joined by themselves first (avoid deadlocks).
+changed context of error event to be free from locks (can call close, open, etc. from them).
+
+2.1.4.20080821
+zeroconf threads exit cleanly on last _close (apple zeroconf)
+Added advanced servo and stepper to Max
+
+2.1.4.20080811
+Fixed manager on Mac (wasn't working at all since 2.1.4.20080808)
+
+2.1.4.20080808
+added CPhidgetSBC and CPhidgetSBCManager to the c library - these interfaces are hidden from users and meant to be used internally (for now).
+CPhidgetManager_open no longer blocks to send out initial attach events. These initial events are sent from the CentralThread context like all other attach events.
+fixed CThread_wait_on_event on Linux
+added CPhidgetGeneric interface for prototyping to C, .NET libraries. product ID is 0x99. These are only visible in debug releases, only to be used internally.
+
+2.1.4.20080715
+udev rules fixed for product IDs with alpha-hex values
+blocking in an attach event does not block calls to open anymore
+RFID tag event handlers can now handle blocking - tag lost is timed after the tag handler exits.
+
+2.1.4.20080623
+Flex .swc library was out of sync
+fixed CPhidgetManager_getAttachedDevices for network managers
+Added CPhidgetManager_freeAttachedDevicesArray
+
+2.1.4.20080613
+Max/MSP RFID fixed
+0/0/8 and advanced servo added to CE
+fixed flash policy file server in webservice
+webservice with password and asynchronous together work now
+
+2.1.4.20080602
+phidget21.h -> phidget21int.h so as not to be confused with generated phidget21.h
+some changes to Makefile fro crosscompiling
+no more vbscript in msi
+
+2.1.4.20080513
+removed long long from COM - not supported by VB6.0
+added LastTag to RFID in .NET
+
+2.1.4.20080428
+support Mac OS X 10.3.9 again
+Rev up to 2.1.4
+finalize Phidget Stepper API - Phidget Stepper requires 2.1.4 as a minimum
+fixed serverConnect and serverDisconnect handlers for manager and dictionary in COM
+Changed:
+PhidgetStepper and PhidgetAdvancedServo
+MotorPosition -> Position
+MotorOn -> Engaged
+MotorStopped -> Stopped
+Added:
+CPhidgetStepper_getCurrentLimit
+CPhidgetEncoder_getPosition
+CPhidgetEncoder_setPosition
+CPhidgetMotorControl_getVelocity
+CPhidgetMotorControl_setVelocity
+CPhidgetMotorControl_set_OnVelocityChange_Handler
+CPhidgetServo_setEngaged
+CPhidgetServo_getEngaged
+CPhidgetServo_getPosition
+CPhidgetServo_setPosition
+CPhidgetServo_set_OnPositionChange_Handler
+CPhidgetServo_getPositionMax
+CPhidgetServo_getPositionMin
+Count functions
+Deprecated:
+CPhidgetEncoder_getEncoderPosition
+CPhidgetEncoder_setEncoderPosition
+CPhidgetMotorControl_getMotorSpeed
+CPhidgetMotorControl_setMotorSpeed
+CPhidgetMotorControl_set_OnMotorChange_Handler
+CPhidgetServo_setMotorOn
+CPhidgetServo_getMotorOn
+CPhidgetServo_getMotorPosition
+CPhidgetServo_setMotorPosition
+CPhidgetServo_set_OnMotorPositionChange_Handler
+CPhidgetServo_getMotorPositionMax
+CPhidgetServo_getMotorPositionMin
+Num functions
+Added ability to deprecate funcitons in the C library - compiler will issue a warning when they are used.
+added names to some arguments in phidget21.h
+fixes to the webservice for initial state stuff - now it behaves almost like non-webservice, with guaranteed initial events, but we don't guarantee initial state in the attach event yet. Min/Max, Num motors, inputs, etc. are all guaranteed in the attach handler.
+Finalized support for Phidget Stepper
+
+2.1.3.20080402
+Fixed windows BUG - Device Type was showing up wrong
+CPhidgetStepper_getPosition -> CPhidgetStepper_getCurrentPosition
+
+2.1.3.20080327
+added:
+CPhidgetAdvancedServo_setMotorPositionMax
+CPhidgetAdvancedServo_setMotorPositionMin
+CPhidgetAdvancedServo_getMotorStopped
+changes to API:
+CPhidgetStepper_setMotorPosition -> CPhidgetStepper_setTargetMotorPosition
+added CPhidgetStepper_getTargetMotorPosition
+Stepper MotorSpeed -> Velocity
+Stepper and AdvancedServo MaxVelocity -> VelocityLimit
+add waitForAttachment to COM
+COM getbool (not indexed) will now return FALSE on false (rather then always returning true)
+fixed write thread timeouts - was setting attached after starting write thread so write thread would see a detached device and exit immediately
+
+2.1.3.20080206
+changed long long to __int64, to be happy in borland C++
+added:
+CPhidgetStepper_getMaxMotorSpeed
+CPhidgetStepper_setMotorOn
+CPhidgetStepper_getMotorOn
+CPhidgetStepper_getMotorStopped
+CPhidgetStepper_setCurrentMotorPosition
+removed CPhidgetStepper_setVelocity
+added CPhidgetStepper_setMaxVelocity, CPhidgetStepper_getMaxVelocity
+
+2.1.3.20080114
+Added new functions to Flash API
+Added new functions to Webservice Protocol
+Added new functions to COM Library
+Added new functions to Java Library
+All device fiels in C library cleaned up and made consistent
+Open in windows is exclusive - this needs to be tested for stability
+No data will be returned / accepted if it lies outside of max/min range
+if a data value is unknown, user variable is set to PUNK_INT, PUNK_DBL, or PUNK_BOOL, and return value is EPHIDGET_UNKNOWNVAL
+Proper Device initializations on Attach:
+triggers are set to defaults on attach
+device state is read in and preserved on attach
+during attach event, all sensor data, etc. is provided if available
+no data events until after the attach event returns
+everything initialized by the time waitForAttachment returns
+after attach event returns, a full set of initial state data events are thrown
+.NET collections are readonly, and never NULL (but empty when phidget detached)
+.NET callbacks no longer catch and hide all exceptions
+make sure to use try/catch blocks especially in Attach when accessing properties that may not be initialized.
+added min/max functions:
+CPhidgetAccelerometer_getAccelerationMax
+CPhidgetAccelerometer_getAccelerationMin
+CPhidgetAdvancedServo_getAccelerationMax
+CPhidgetAdvancedServo_getAccelerationMin
+CPhidgetAdvancedServo_getVelocityMax
+CPhidgetAdvancedServo_getVelocityMin
+CPhidgetAdvancedServo_getMotorPositionMax
+CPhidgetAdvancedServo_getMotorPositionMin
+CPhidgetMotorControl_getAccelerationMax
+CPhidgetMotorControl_getAccelerationMin
+CPhidgetPHSensor_getPHMax
+CPhidgetPHSensor_getPHMin
+CPhidgetPHSensor_getPotentialMax
+CPhidgetPHSensor_getPotentialMin
+CPhidgetServo_getMotorPositionMax
+CPhidgetServo_getMotorPositionMin
+CPhidgetStepper_getAccelerationMax
+CPhidgetStepper_getAccelerationMin
+CPhidgetStepper_getMotorSpeedMax
+CPhidgetStepper_getMotorSpeedMin
+CPhidgetStepper_getMotorPositionMax
+CPhidgetStepper_getMotorPositionMin
+CPhidgetTemperatureSensor_getPotentialMax
+CPhidgetTemperatureSensor_getPotentialMin
+CPhidgetTemperatureSensor_getAmbientTemperatureMax
+CPhidgetTemperatureSensor_getAmbientTemperatureMin
+CPhidgetTemperatureSensor_getTemperatureMax
+CPhidgetTemperatureSensor_getTemperatureMin
+Added functions:
+CPhidgetTemperatureSensor_getAmbientTemperature
+CPhidgetTemperatureSensor_getThermocoupleType
+CPhidgetTemperatureSensor_setThermocoupleType
+CPhidget_set_OnServerConnectHandler
+CPhidget_set_OnServerDisconnectHandler
+CPhidgetDictionary_set_OnServerConnectHandler
+CPhidgetDictionary_set_OnServerDisconnectHandler
+CPhidgetManager_set_OnServerConnectHandler
+CPhidgetManager_set_OnServerDisconnectHandler
+CPhidgetDictionary_getServerID
+CPhidgetDictionary_getServerAddress
+CPhidgetDictionary_getServerStatus
+CPhidgetManager_getServerID
+CPhidgetManager_getServerAddress
+CPhidgetManager_getServerStatus
+CPhidgetServo_setMotorOn
+CPhidgetServo_getMotorOn
+Removed functions:
+CPhidgetServo_setMotorOff
+TemperatureSensor:
+Ambient sensor is accessed with it's own function
+first thermocouple is Index 0 everywhere
+no ambient sensor events
+getServerID is implemented
+changed the internal network structure (added CPhidgetRemote)
+reworked the USB code (mostly on Windows)
+Better handles closing, ESD events, timeouts
+fixed issues with Encoder, RFID stopping reading after a certain time.
+added USB error flag
+openRemote functions have been implemented
+these require bonjour (mac / windows) or avahi (linux) to be installed on both the client and server
+if they are not, you get EPHIDGET_UNSUPPORTED when you call them
+openRemoteIP functions are asynchronous and persistent
+include cphidgetconstants.h in phidget21.h for users
+
+2.1.2.20071108
+Start of changelog

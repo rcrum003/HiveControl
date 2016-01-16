@@ -1,0 +1,6 @@
+
+Script to pull weather from a local Ambient Weather Station 1400.
+This was created because WUnderground limits weather pulls to 500 a day per key 
+and we have 4 hives pulling weather and storing it.
+
+

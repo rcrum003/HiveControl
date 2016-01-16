@@ -1,0 +1,12 @@
+/*
+* Phidget21 Header for Matlab
+*/
+
+#ifndef PHIDGET_H
+#define PHIDGET_H 
+
+#if !defined(__int64) 
+#if !defined(__BORLANDC__) && !defined(_MSC_VER) 
+typedef long long __int64; 
+#endif 
+#endif

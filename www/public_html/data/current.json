@@ -1,0 +1,29 @@
+[{
+"current_conditions": {
+		"observation_location": {
+		"full":"Beeyard, Fairfield, CT",
+		"yardname":"Beeyard",
+		"city":"Fairfield",
+		"state":"Connecticut",
+		"country":"US",
+		"country_iso3166":"US",
+		"latitude":"41.142033",
+		"longitude":"-73.241989",
+		"elevation":"11 ft"
+		},
+		"hive": {
+		"id":"Ryan",
+		"observation_time":"2016-01-16 15:35:01",
+		"temp_f":"0",
+		"relative_humidity":"0",
+		"dewpoint_f":"0",
+          "rawweight":"122.43",
+		"weight_lbs":"91.21"
+		},
+		"weather": {
+		"a_temp_f":"50.2",
+		"a_relative_humidity":"55",
+		"a_dewpoint_f":"34.00"
+}
+}
+}]

@@ -1,0 +1,54 @@
+my %data = ();
+@scale_list=("none","CPW200plus","HX711","Phidget Bridge");
+@hive_temp_list=("none","TEMPerHUM","DHT21","DHT22");
+@ambient_temp_list=("none","TEMPerHUM","DHT21","DHT22");
+@ambient_light_list=("none","TSL2561","TSL2591");
+@ambient_rain_list=("none","yes");
+@hive_status_list=("Testing","Online");
+@hive_power_list=("AC","Solar");
+@hive_internet_list=("Wi-Fi","Ethernet");
+@hive_computer_list=("Pi","X86");
+
+   $sql = "SELECT
+             hive_id,
+             hive, 
+             name, 
+             nasa, 
+             status, 
+             city, 
+             state, 
+             country, 
+             altitude_feet,
+             orientation_string, 
+             start_date, 
+             temperature_sensor, 
+             humidity_sensor, 
+             power, 
+             computer, 
+             connectivity,
+             last_update
+           FROM  HIVE_PARAMETERS";
+
+
+      $hive_parameters="UPDATE";
+      $hive_id = $row[0];
+      $hive = $row[1];
+      $hive_name = $row[2];
+      $nasa_identifier = $row[3];
+      $hive_status = $row[4];
+      $hive_city = $row[5];
+      $hive_state = $row[6];
+      $hive_country = $row[7];
+      $hive_elevation = $row[8];
+      $hive_orientation = $row[9];
+      $start_date = $row[10];
+      $temperature_sensor = $row[11];
+      $humidity_sensor = $row[12];
+      $hive_power = $row[13];
+      $hive_computer = $row[14];
+      $hive_internet = $row[15];
+      $last_update = $row[16];
+      if ( $hive_status  ==  5) {$hive_status  = "Online"; }
+      elsif ( $hive_status ==  4) {$hive_status  = "Testing"; }
+
+

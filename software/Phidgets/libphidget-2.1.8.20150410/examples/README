@@ -1,0 +1,13 @@
+Phidgets examples for Linux
+Version 2.1.4
+August 22, 2008
+--------------------------------------------------------------------------
+Included are two simple examples to get you started with Phidgets
+and linux in C.
+
+A full set of linux examples are available from www.phidets.com, as
+well as examples in many other languages.
+
+Also included here is the phidgetsbclist utility, which will list all
+of the PhidgetSBCs found on the network. This utility requires that
+Avahi be installed to work properly.

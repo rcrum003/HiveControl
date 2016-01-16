@@ -1,0 +1,56 @@
+
+      /*Strong signal*/
+      .signal.signal-strong .signal-base {
+        fill:#569e26;
+      }
+      .signal.signal-strong .signal-wave * {
+        stroke:#569e26;
+      }
+
+      /*Medium signal*/
+      .signal.signal-medium .signal-base {
+        fill:#efc411;
+      }
+      .signal.signal-medium .signal-wave * {
+        stroke:#efc411;
+      }
+      .signal.signal-medium .signal-wave-outer {
+        opacity:.3;
+        stroke-width:.5;
+      }
+
+      /*Weak signal*/
+      .signal.signal-weak .signal-base {
+        fill:#b52808;
+      }
+      .signal.signal-weak .signal-wave * {
+        stroke:#b52808;
+      }
+      .signal.signal-weak .signal-wave-outer ,
+      .signal.signal-weak .signal-wave-middle {
+        opacity:.3;
+        stroke-width:.5;
+      }
+
+      /*No signal*/
+      .signal.signal-none .signal-base {
+        fill:#848484;
+      }
+      .signal.signal-none .signal-wave * {
+        stroke:#848484;
+        opacity:.3;
+        stroke-width:.5;
+      }
+
+      .svg-inject {
+        margin:20px 0;
+      }
+
+      .svg-inject + .svg-inject {
+        margin-left: 30px
+      }
+
+      .icons {
+        margin:50px 0;
+      }
+

@@ -1,0 +1,40 @@
+
+<response>
+  <current_observation>
+		<display_location>
+		<full>FAIRFIELD, CT</full>
+		<city>FAIRFIELD</city>
+		<state>CT</state>
+		<country>US</country>
+		<latitude>41.142</latitude>
+		<longitude>-73.242</longitude>
+		</display_location>
+		<station_id>KCTFAIRF23</station_id>
+		<temperature_string>34.9 F (1.6 C)</temperature_string>
+		<temp_f>34.9</temp_f>
+		<temp_c>1.6</temp_c>
+		<relative_humidity>44%</relative_humidity>
+		<wind_string>West at 8.1 MPH, Gust to 9.8</wind_string>
+		<wind_dir>West</wind_dir>
+		<wind_degrees>288</wind_degrees>
+		<wind_mph>8.1</wind_mph>
+		<wind_gust_mph>9.8</wind_gust_mph>
+		<wind_kph>13.03</wind_kph>
+		<wind_gust_kph>15.77</wind_gust_kph>
+		<pressure_mb>1012</pressure_mb>
+		<pressure_in>29.90</pressure_in>
+		<pressure_trend>-</pressure_trend>
+		<dewpoint_f>14.74</dewpoint_f>
+		<dewpoint_c>-9.5</dewpoint_c>
+		<windchill_string>NA</windchill_string>
+		<windchill_f>NA</windchill_f>
+		<windchill_c>NA</windchill_c>
+	        <solarradiation>6906.20</solarradiation>
+		<UV>1</UV>
+		<precip_1hr_in>0.00</precip_1hr_in>
+		<precip_1hr_metric>0</precip_1hr_metric>
+		<precip_today_string>0.00 in (0 mm)</precip_today_string>
+		<precip_today_in>0.00</precip_today_in>
+		<precip_today_metric>0</precip_today_metric>
+	</current_observation>
+</response>

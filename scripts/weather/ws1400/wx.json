@@ -1,0 +1,38 @@
+{
+"response": {
+"version":"0.1",
+"features": {
+"conditions": 1
+  }
+	}
+  ,	"current_observation": {
+		"station_id":"KCTFAIRF23",
+		"observation_time":"2015-11-06 22:43:09",
+		"temperature_string":"67.3 F (19.6 C)",
+		"temp_f":"67.3",
+		"temp_c":"19.6",
+		"relative_humidity":"88%",
+		"wind_string":" East at 0.0 MPH, Gust to 0.0",
+		"wind_dir":"East",
+		"wind_degrees":"75",
+		"wind_mph":"0.0",
+		"wind_gust_mph":"0.0",
+		"wind_kph":"0",
+		"wind_gust_kph":"0",
+		"pressure_mb":"1005",
+		"pressure_in":"29.70",
+		"pressure_trend":"-",
+		"dewpoint_f":"62.98",
+		"dewpoint_c":"17.2",
+		"windchill_string":"NA",
+		"windchill_f":"NA",
+		"windchill_c":"NA",
+		"solarradiation":"0.00",
+		"UV":"0",
+		"precip_1hr_in":"0.00",
+		"precip_1hr_metric":"0",
+		"precip_today_string":"0.00 in (0 mm)",
+		"precip_today_in":"0.00",
+		"precip_today_metric":"0"
+ }
+}
