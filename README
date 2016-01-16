@@ -1,0 +1,27 @@
+===============================================
+HiveControl
+===============================================
+This is a supporting application to the Hivetool.org software.
+
+Current version supports:
+Weight, Temperature, Webcam, Weather, GDD
+
+-----------------------
+Weight Logging
+-----------------------
+Weight logging modules currently supports HX711 (included with Hivetool Developer Kit) or the Phidget 1046 module.
+
+Installing:
+1. You will need to calibrate your scale (ie, zero it out)
+2. See the /scripts/weight/ directory for how we do this.
+
+
+------------------------
+Temperature
+------------------------
+Temperature logging currently supports the TemperHUM sensors.
+
+
+-------------------------
+Weather
+-------------------------
