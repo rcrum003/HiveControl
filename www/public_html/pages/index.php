@@ -66,10 +66,6 @@ if(isset($_GET["period"])) {
     <!-- Custom CSS -->
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     
-    <!-- Fustion Charts instead of the others -->
-    <script type="text/javascript" src="../js/fusioncharts.js"></script>
-    <script type="text/javascript" src="../js/fusioncharts.widgets.js"></script>
-    <script type="text/javascript" src="../js/themes/fusioncharts.theme.fint.js"></script>
 
     <!-- Custom Fonts -->
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -277,8 +273,8 @@ if(isset($_GET["period"])) {
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
 
     
-<script src="https://code.highcharts.com/highcharts.js"></script>
-<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="/js/highcharts/highcharts.js"></script>
+<script src="/js/highcharts/modules/exporting.js"></script>
 
   <?php 
 
