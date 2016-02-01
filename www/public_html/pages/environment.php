@@ -243,8 +243,8 @@ $today_pop = $parsed_json->{'forecast'}->{'simpleforecast'}->{'forecastday'}[0]-
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
     
     <!-- High Charts -->
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="/js/highcharts/highcharts.js"></script>
+    <script src="/js/highcharts/modules/exporting.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>

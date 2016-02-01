@@ -227,8 +227,8 @@ if(isset($_GET["chart"])) {
     <script src="../dist/js/sb-admin-2.js"></script>
 
     <!-- High Charts -->
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="/js/highcharts/highcharts.js"></script>
+    <script src="/js/highcharts/modules/exporting.js"></script>
     
 
     <?php 
