@@ -273,8 +273,11 @@ if(isset($_GET["period"])) {
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
 
     
-<script src="/js/highcharts/highcharts.js"></script>
-<script src="/js/highcharts/modules/exporting.js"></script>
+    <script src="/js/highcharts/highcharts.js"></script>
+    <script src="/js/highcharts/modules/exporting.js"></script>
+
+  <!-- Full Screen Popups -->
+    <script src="/js/popup.js"></script>    
 
   <?php 
 

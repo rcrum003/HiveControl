@@ -97,7 +97,7 @@ if(isset($_GET["chart"])) {
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <div class="pull-center" id="container"></div>
+                            <div class="pull-center" id="allcontainer"></div>
                         </div>
                     </div>
                 </div>
@@ -124,7 +124,8 @@ if(isset($_GET["chart"])) {
         #Since this document already has variables, we can pass variables by just including it.
         # Period and chart variables will be used in the charts.
     
-    include($_SERVER["DOCUMENT_ROOT"] . "/pages/datawidgets/temp_chart.php"); ?>
+
+    include($_SERVER["DOCUMENT_ROOT"] . "/pages/datawidgets/all_chart.php"); ?>
     
     
     <!-- Custom Theme JavaScript -->

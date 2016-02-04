@@ -163,7 +163,6 @@ $(function () {
             name: 'Hive Temp (°F)',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
-            dashStyle: 'longdash', 
             color: Highcharts.getOptions().colors[2]
         },
         {
@@ -180,7 +179,6 @@ $(function () {
             yAxis: 3,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
             color: '#87CEFA',
-            dashStyle: 'longdash',
             visible: true
         },
         {
@@ -201,8 +199,7 @@ $(function () {
             type: 'line',
             yAxis: 2,
             name: 'Hive Weight Net (lbs)',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "],
-            dashStyle: 'longdash', 
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
             color: '#FFD700',
             visible: true
         },
@@ -212,11 +209,18 @@ $(function () {
            name: 'Hive Weight Gross (lbs)',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
            color: '#000000',
-           dashStyle: 'longdash',
            visible: false
         }
         ]
     });
+        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
+            text: 'Enlarge Chart',
+            onclick: function () {
+                centeredPopup('/pages/fullscreen/all.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
+                return false;
+            }
+        });
+
 });
 </script>";
 

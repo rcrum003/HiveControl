@@ -76,7 +76,7 @@ $(function () {
                 selected: 2
             },
            
-    yAxis: [{ // Primary yAxis
+    yAxis: [{ // Temp yAxis
             labels: {
                 format: '{value}°F',
                 style: {
@@ -88,10 +88,28 @@ $(function () {
                 style: {
                     color: Highcharts.getOptions().colors[2]
                 }
-            }
-            
+            },
+            max: 80
+        },
+        { // Humidity yAxis
+            gridLineWidth: 0,
+            title: {
+                text: 'Humidity',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value} %',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: false,
+            max: 100
 
-        }, { // Secondary yAxis
+        }, 
+        { // Rain yAxis
             gridLineWidth: 0,
             title: {
                 text: 'Rain',
@@ -133,40 +151,51 @@ $(function () {
         series: [{
             type: 'line',
             name: 'Hive Temp (°F)',
+            yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
-            dashStyle: 'longdash', 
-            color: '#FFD700',
+            color: Highcharts.getOptions().colors[2]
         },
         {
             type: 'line',
             name: 'Outside Temp (°F)',
+            yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
             visible: true,
-            color: '#808080',
+            color: '#808080'
         },
         {
             type: 'line',
             name: 'Hive Humidty (%)',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
+            yAxis: 1,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
             color: '#87CEFA',
-            dashStyle: 'longdash',
-           visible: false
+            visible: false
         },
         {
             type: 'line',
             name: 'Outside Humidty (%)',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
-           visible: false
+            yAxis: 1,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
+            visible: false
         },
         {
             type: 'column',
-            yAxis: 1,
+            yAxis: 2,
             name: 'Rain',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
             visible: true
         }
         ]
-    });
+        });
+
+        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
+            text: 'Enlarge Chart',
+            onclick: function () {
+                centeredPopup('/pages/fullscreen/temp.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
+                return false;
+            }
+        });
+    
 });
 </script>";
 

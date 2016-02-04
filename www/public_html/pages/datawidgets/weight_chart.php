@@ -152,6 +152,14 @@ $(function () {
         }
         ]
     });
+
+        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
+            text: 'Enlarge Chart',
+            onclick: function () {
+                centeredPopup('/pages/fullscreen/weight.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
+                return false;
+            }
+        });
 });
 </script>";
 

@@ -83,8 +83,9 @@ if(isset($_GET["chart"])) {
 
 </head>
 
-<body>        
-            <div class="row">
+<body>
+
+           <div class="row">
                 <div class="col-lg-12">
             <?PHP if(isset($error)){ 
                 echo '<div class="alert alert-danger">'; echo $error; echo'</div>';} ?>
@@ -119,12 +120,14 @@ if(isset($_GET["chart"])) {
     <script src="/js/highcharts/highcharts.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
     
-
     <?php 
         #Since this document already has variables, we can pass variables by just including it.
         # Period and chart variables will be used in the charts.
-    
-    include($_SERVER["DOCUMENT_ROOT"] . "/pages/datawidgets/temp_chart.php"); ?>
+    #echo "Period is $period";
+    #echo "Chart is $chart";
+
+include($_SERVER["DOCUMENT_ROOT"] . "/pages/datawidgets/weight_chart.php"); ?>
+
     
     
     <!-- Custom Theme JavaScript -->

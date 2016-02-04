@@ -121,7 +121,7 @@ if(isset($_GET["chart"])) {
                 <div class="col-lg-8">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Weight Analyis 
+                            Weight Analysis
                         </div>
                         <div class="panel-body">
                             <div class="pull-center" id="container"></div>
@@ -230,7 +230,9 @@ if(isset($_GET["chart"])) {
     <script src="/js/highcharts/highcharts.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
     
-
+    <!-- Full Screen Popups -->
+    <script src="/js/popup.js"></script>   
+     
     <?php 
         #Since this document already has variables, we can pass variables by just including it.
         # Period and chart variables will be used in the charts.
