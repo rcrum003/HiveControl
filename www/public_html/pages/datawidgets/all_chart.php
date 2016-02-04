@@ -36,6 +36,7 @@ $sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, wea
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->

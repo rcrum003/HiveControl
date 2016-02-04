@@ -44,6 +44,9 @@ if ( $period  == 'day') {
     // Get Percip by Day/Hour
 }
 
+include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
+
+
 echo "
 <!-- Chart Code -->
 

@@ -144,29 +144,13 @@ if($v->validate()) {
     $GDD_START_DATE = test_input_allow_slash($_POST["GDD_START_DATE"]);
     $key = test_input($_POST["KEY"]);
     $wxstation = test_input($_POST["WXSTATION"]);
+    $www_chart_theme = test_input($_POST["www_chart_theme"]);
     
-    
-
-    // Make sure not to blank out these settings - TODO
-   // if ($_POST['WEATHER_LEVEL'] == "hive" ) {
-   // $key = test_input($_POST["KEY"]);
-   // $wxstation = test_input($_POST["WXSTATION"]);
-    // echo "Doing WX"; echo "$key"; echo "$wxstation";
-   // } elseif ($_POST['WEATHER_LEVEL']) {
-        # code...
-   // }
-   // else {
-   //     $key = $result['KEY'];
-   //     $wxstation = $result['WXSTATION'];
-
-        // echo "Doing else"; echo "$key"; echo "$wxstation";
-    //}
-
 
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,www_chart_theme=? WHERE id=1");
+    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$www_chart_theme));
     sleep(3);
 
     // Refresh the fields in the form
@@ -700,6 +684,22 @@ if($v->validate()) {
                                         <td>GDD Start Date</td>
                                         <td><input type="text" name="GDD_START_DATE" value="<?PHP echo $result['GDD_START_DATE'];?>"></td> 
                                         <td>Beginning date to start calculating GDD each year. - year, month, day (format 20150301) - Recommend the last freezing day. Most people recommend March 1, and most GDD plant values are based on a 3/1 start date. </td>
+                                       </tr>
+                                       <tr class="odd gradeX">
+                                        <td>Chart Theme</td>
+                                        <td><select name="www_chart_theme">
+                                        <option value="" <?php if ($result['www_chart_theme'] == "") {echo "selected='selected'";} ?>>Default</option>
+                                        <option value="dark-blue" <?php if ($result['www_chart_theme'] == "dark-blue") {echo "selected='selected'";} ?>>Dark Blue</option>
+                                        <option value="dark-unica" <?php if ($result['www_chart_theme'] == "dark-unica") {echo "selected='selected'";} ?>>Dark Unica</option>
+                                        <option value="gray" <?php if ($result['www_chart_theme'] == "gray") {echo "selected='selected'";} ?>>Gray</option>
+                                        <option value="grid-light" <?php if ($result['www_chart_theme'] == "grid-light") {echo "selected='selected'";} ?>>Grid Light</option>
+                                        <option value="grid" <?php if ($result['www_chart_theme'] == "grid") {echo "selected='selected'";} ?>>Grid</option>
+                                        <option value="sand-signika" <?php if ($result['www_chart_theme'] == "sand-signika") {echo "selected='selected'";} ?>>Sand Signika</option> 
+                                        <option value="skies" <?php if ($result['www_chart_theme'] == "skies") {echo "selected='selected'";} ?>>Skies</option> 
+                                        </select>
+                                        </td>
+                                        <td>Configure your preferred theme for the highcharts used throughout the site. </td>
+                                        
                                        </tr>
                                      </tr>
     
