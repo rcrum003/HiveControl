@@ -29,9 +29,9 @@ DATASOURCE="$HOMEDIR/data/hive-data.db"
 
 YESTERDAY=`date  --date="yesterday" +%Y%m%d`
 # Get the data from the DB
-MAXTEMP=$(sqlite3 $DATASOURCE "SELECT MAX(weather_tempf) from weather WHERE strftime('%Y%m%d', datetime(observationDateTime,'localtime')) is '$YESTERDAY';")
-MINTEMP=$(sqlite3 $DATASOURCE "SELECT MIN(weather_tempf) from weather WHERE strftime('%Y%m%d', datetime(observationDateTime,'localtime')) is '$YESTERDAY';")
-#GDD=$(sqlite3 $DATASOURCE "SELECT (ROUND((MAX(weather_tempf) + MIN(weather_tempf))/2)  - $GDD_BASE_TEMP) as GDD from weather WHERE strftime('%Y%m%d', datetime(observationDateTime,'localtime')) is '$YESTERDAY';")
+MAXTEMP=$(sqlite3 $DATASOURCE "SELECT MAX(weather_tempf) from allhivedata WHERE strftime('%Y%m%d', datetime(date,'localtime')) is '$YESTERDAY';")
+MINTEMP=$(sqlite3 $DATASOURCE "SELECT MIN(weather_tempf) from allhivedata WHERE strftime('%Y%m%d', datetime(date,'localtime')) is '$YESTERDAY';")
+#GDD=$(sqlite3 $DATASOURCE "SELECT (ROUND((MAX(weather_tempf) + MIN(weather_tempf))/2)  - $GDD_BASE_TEMP) as GDD from allhivedata WHERE strftime('%Y%m%d', datetime(date,'localtime')) is '$YESTERDAY';")
 
 if [[ $(echo "$MAXTEMP > 86" |bc) -eq 1 ]]; then
 	echo "Max Temp was higher than 86"
