@@ -8,6 +8,8 @@ This is a supporting application to the Hivetool.org software.
 ## Current version supports:
 Weight, Temperature, Webcam, Weather, GDD
 
+[Supported Sensors](https://github.com/rcrum003/HiveControl/wiki/Sensor-Support)
+
 -----------------------
 Weight Logging
 -----------------------
