@@ -1,7 +1,6 @@
 
 
-===============================================
-HiveControl
+# HiveControl
 ===============================================
 This is a supporting application to the Hivetool.org software.
 
