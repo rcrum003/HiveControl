@@ -1,10 +1,11 @@
 
 
 # HiveControl
-===============================================
 This is a supporting application to the Hivetool.org software.
 
-Current version supports:
+[![Gitter](https://badges.gitter.im/rcrum003/HiveControl.svg)](https://gitter.im/rcrum003/HiveControl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+## Current version supports:
 Weight, Temperature, Webcam, Weather, GDD
 
 -----------------------
