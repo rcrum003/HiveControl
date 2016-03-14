@@ -1,0 +1,7 @@
+These scripts are useful if you don't have a Weather Station near by that can pull 
+Solar Radiation.
+It required a LUX sensor on the raspberry PI.
+
+In the HiveControl web pages, we give you the option to show LUX or Solar Radiation.
+
+

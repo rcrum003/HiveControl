@@ -33,7 +33,7 @@ $regex1 = "/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/";
 
 $v = new Valitron\Validator($_POST);
 $v->rule('required', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR'], 1)->message('{field} is required');
-$v->rule('slug', ['HIVENAME']);
+$v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
 $v->rule('integer', ['YARDID', 'BEEKEEPERID'],  1)->message('{field} can only be an integer');
 $v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
 $v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
@@ -145,12 +145,17 @@ if($v->validate()) {
     $key = test_input($_POST["KEY"]);
     $wxstation = test_input($_POST["WXSTATION"]);
     $www_chart_theme = test_input($_POST["www_chart_theme"]);
-    
+    $NASA_HONEYBEE_NET_ID = test_input($_POST["NASA_HONEYBEE_NET_ID"]);
+    $POWER = test_input($_POST["POWER"]);
+    $INTERNET = test_input($_POST["INTERNET"]);
+    $STATUS = test_input($_POST["STATUS"]);
+    $COMPUTER = test_input($_POST["COMPUTER"]);
+    $START_DATE = test_input($_POST["START_DATE"]);
 
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,www_chart_theme=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$www_chart_theme));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,www_chart_theme=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=? WHERE id=1");
+    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$www_chart_theme,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE));
     sleep(3);
 
     // Refresh the fields in the form
@@ -685,6 +690,72 @@ if($v->validate()) {
                                         <td><input type="text" name="GDD_START_DATE" value="<?PHP echo $result['GDD_START_DATE'];?>"></td> 
                                         <td>Beginning date to start calculating GDD each year. - year, month, day (format 20150301) - Recommend the last freezing day. Most people recommend March 1, and most GDD plant values are based on a 3/1 start date. </td>
                                        </tr>
+
+                                       <tr class="odd gradeX">
+                                        <td>NASA HoneyBee Net ID</td>
+                                        <td><input type="text" name="NASA_HONEYBEE_NET_ID" value="<?PHP echo $result['NASA_HONEYBEE_NET_ID'];?>"></td> 
+                                        <td>ID provided by NASA, if sharing data with NASA </td>
+                              </tr>
+                                   <! ***************************************************** -->
+
+                                   <tr class="odd gradeX">
+                                        <td>Power Source</td>
+                                        <td><select name="POWER">
+                                        <option value="AC" <?php if ($result['POWER'] == "AC") {echo "selected='selected'";} ?>>AC</option>
+                                        <option value="solar" <?php if ($result['POWER'] == "solar") {echo "selected='selected'";} ?>>Solar</option> 
+                                        </select>
+                                        </td>
+                                        <td>Specify if your hive is on AC or solar power</td>
+                                       </tr>
+
+                                   <! ***************************************************** -->
+
+                                
+                                   <tr class="odd gradeX">
+                                        <td>Internet</td>
+                                        <td><select name="INTERNET">
+                                        <option value="wi-fi" <?php if ($result['INTERNET'] == "wi-fi") {echo "selected='selected'";} ?>>Wi-Fi</option>
+                                        <option value="ethernet" <?php if ($result['INTERNET'] == "ethernet") {echo "selected='selected'";} ?>>Ethernet</option> 
+                                        </select>
+                                        </td>
+                                        <td>Specify if your hive is using Wi-Fi or Ethernet</td>
+                                       </tr>
+
+                                   <! ***************************************************** -->
+
+
+                                   <tr class="odd gradeX">
+                                        <td>Status</td>
+                                        <td><select name="STATUS">
+                                        <option value="testing" <?php if ($result['STATUS'] == "testing") {echo "selected='selected'";} ?>>Testing</option>
+                                        <option value="online" <?php if ($result['STATUS'] == "online") {echo "selected='selected'";} ?>>Online</option> 
+                                        <option value="offline" <?php if ($result['STATUS'] == "offline") {echo "selected='selected'";} ?>>Offline</option>
+                                        </select>
+                                        </td>
+                                        <td>Specify the status of your hive (used for Hivetool.org data reporting).</td>
+                                       </tr>
+
+                                   <! ***************************************************** -->
+
+                                   <tr class="odd gradeX">
+                                        <td>Computer</td>
+                                        <td><select name="COMPUTER">
+                                        <option value="pi" <?php if ($result['COMPUTER'] == "pi") {echo "selected='selected'";} ?>>PI</option>
+                                        <option value="arduino" <?php if ($result['COMPUTER'] == "arduino") {echo "selected='selected'";} ?>>Arduino</option>
+                                        <option value="x86" <?php if ($result['COMPUTER'] == "x86") {echo "selected='selected'";} ?>>Other x86</option>  
+                                        </select>
+                                        </td>
+                                        <td>Specify what computing platform you are using (used for Hivetool reporting).</td>
+                                   </tr>
+
+                                   <! ***************************************************** -->
+
+                                   </tr>
+                                       <tr class="odd gradeX">
+                                        <td>Start Date</td>
+                                        <td><input type="text" name="START_DATE" value="<?PHP echo $result['START_DATE'];?>"></td> 
+                                        <td>Date you put this hive into Online status for Hivetool.org. </td>
+                                   </tr>
                                        <tr class="odd gradeX">
                                         <td>Chart Theme</td>
                                         <td><select name="www_chart_theme">
@@ -786,7 +857,7 @@ if($v->validate()) {
                             
 
                                     echo 'Username <input type="text" name="HT_USERNAME" value="'; echo $result['HT_USERNAME']; echo '"><BR>';
-                                    echo 'Password <input type="text" name="HT_PASSWORD" value="'; echo $result['HT_PASSWORD']; echo '"><BR>';    
+                                    echo 'Password <input type="password" name="HT_PASSWORD" value="'; echo $result['HT_PASSWORD']; echo '"><BR>';    
                                     echo 'URL <BR><input type="text" name="HT_URL" value="'; echo $result['HT_URL']; echo '"><BR>';    
                                 }
                                 else {

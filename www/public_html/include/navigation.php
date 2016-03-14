@@ -28,6 +28,9 @@
                                 <li>
                                     <a href="/pages/weight.php?chart=line&period=week">Weight</a>
                                 </li>
+                                <li>
+                                    <a href="/pages/light.php?chart=line&period=week">Light</a>
+                                </li>
                                 
                             </ul>
                         <li>

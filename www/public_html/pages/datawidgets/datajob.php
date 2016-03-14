@@ -127,9 +127,19 @@ switch ($type) {
         $sth = $conn->prepare("SELECT hiveid, date, hiveweight, hiverawweight FROM allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY date");
 		$sth->execute();
         break;
+    case "light_data":
+        $sth = $conn->prepare("SELECT hiveid, date, solarradiation, uv, lux FROM allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY date");
+        $sth->execute();
+        break;
+    case "light_chart":
+         $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, solarradiation, uv, lux FROM allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY datetime");
+        $sth->execute();
+        $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-
-
+        foreach ($result as $r) {
+            $out[] = array((float)$r['datetime'],(float)$r['solarradiation'],(float)$r['uv'],(float)$r['lux']);
+        } 
+        break;
    
     }
 
