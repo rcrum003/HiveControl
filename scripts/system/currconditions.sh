@@ -38,9 +38,15 @@ echo "--- TEMP ---"
 if [ $ENABLE_HIVE_TEMP_CHK = "yes" ]; then
 	# Data Fetchers/Parsers in one
 	#echo "Checking TEMP" >> $LOG
+	if [ $TEMPTYPE = "temperhum" ]; then
 	GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh`
+	elif [[ $TEMPTYPE = "dht22" ]]; then
+	GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
+	elif [[ $TEMPTYPE = "dht21" ]]; then
+	GETTEMP=`$HOMEDIR/scripts/temp/dht21.sh`
+	fi
 	HIVETEMPF=$(echo $GETTEMP |awk '{print $1}')
-	HIVETEMPC=`$HOMEDIR/scripts/temp/temperhumC.sh |awk '{print $1}'`
+	HIVETEMPC=$(echo $GETTEMP |awk '{print $4}')
 	HIVEHUMIDITY=$(echo $GETTEMP |awk '{print $2}')
 	HIVEDEW=$(echo $GETTEMP |awk '{print $3}')
 fi
@@ -144,7 +150,6 @@ fi
 		
 echo "--- LUX DONE --- "
 
-fi
 #echo "$YARDID,$WEATHER_STATIONID,'$OBSERVATIONDATETIME',$A_TEMP,$B_HUMIDITY,$A_DEW,'$A_TEMP_C','$A_WIND_MPH',$A_WIND_DIR','$wind_degrees','$wind_gust_mph','$wind_kph','$wind_gust_kph','$pressure_mb','$A_PRES_IN','$A_PRES_TREND','$weather_dewc','$solarradiation','$UV','$precip_1hr_in','$precip_1hr_metric','$precip_today_string','$precip_today_in','$precip_today_metric'"
 
 # Insert Weather Data into local DB

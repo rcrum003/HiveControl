@@ -106,6 +106,7 @@ if($v->validate()) {
     $HIVEDEVICE = test_input($_POST["HIVEDEVICE"]);
     $ENABLE_LUX = test_input($_POST["ENABLE_LUX"]);
     $LUX_SOURCE = test_input($_POST["LUX_SOURCE"]);
+    $HIVE_TEMP_GPIO = test_input($_POST["HIVE_TEMP_GPIO"]);
 
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -115,8 +116,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO));
     sleep(1);
 
 
@@ -177,7 +178,7 @@ if($v->validate()) {
                                                 echo '
                                                 <input type="radio" name="TEMPTYPE" value="temperhum"'; if ($result['TEMPTYPE'] == "temperhum") {echo "checked";} echo '> TemperHum
                                                 <br><input type="radio" name="TEMPTYPE" value="dht22"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22 
-                                                <br><input type="radio" name="TEMPTYPE" value="dht21"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT21';
+                                                <br><input type="radio" name="TEMPTYPE" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21';
                                             }
                                             ?></td>
                                             <td>
@@ -186,7 +187,15 @@ if($v->validate()) {
                                                         echo '<br><a href="#" title="Specify Device" data-toggle="popover" data-placement="bottom" data-content="Specify the device you want to use (usually /dev/hidraw1, if you only have one device. Use
                                                         temperhum -e from the console to see choices)"><p class="fa fa-question-circle fa-fw"></P></a>Device:
                                                          <input type="text" name="HIVEDEVICE" value="'; echo $result['HIVEDEVICE']; echo '"">';
-                                                }
+                                                    }
+                                                    if ($result['TEMPTYPE'] == "dht22") {
+                                                        echo '<br><a href="#" title="Specify GPIO" data-toggle="popover" data-placement="bottom" data-content="Specify the GPIO you want to use to connect to this sensor"><p class="fa fa-question-circle fa-fw"></P></a>GPIO:
+                                                         <input type="text" name="HIVE_TEMP_GPIO" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
+                                                    }
+                                                    if ($result['TEMPTYPE'] == "dht21") {
+                                                        echo '<br><a href="#" title="Specify GPIO" data-toggle="popover" data-placement="bottom" data-content="Specify the GPIO you want to use to connect to this sensor"><p class="fa fa-question-circle fa-fw"></P></a>GPIO:
+                                                         <input type="text" name="HIVE_TEMP_GPIO" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
+                                                    }
                                             }?>
                                             </td>
                                         </tr>

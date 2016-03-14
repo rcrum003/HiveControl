@@ -4,7 +4,7 @@
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-$sth = $conn->prepare("SELECT hivetempf, hivetempc, hiveHum, hiveweight, strftime('%s',date)*1000 AS datetime, date FROM hivedata WHERE date > datetime('now','-7 days')");
+$sth = $conn->prepare("SELECT hivetempf, hivetempc, hiveHum, hiveweight, strftime('%s',date)*1000 AS datetime, date FROM allhivedata WHERE date > datetime('now','-7 days')");
 $sth->execute();
 
 
