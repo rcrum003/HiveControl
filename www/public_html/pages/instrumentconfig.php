@@ -17,7 +17,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $v = new Valitron\Validator($_POST);
 $v->rule('required', ['ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_LUX'], 1)->message('{field} is required');
-$v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX'], ['no', 'yes']);
+$v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK'], ['no', 'yes']);
+$v->rule('integer', ['HIVE_TEMP_GPIO'], 1)->message('{field} must be a integer');
+$v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT'], 1)->message('{field} must be numeric');
+$v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE'], 1)->message('{field} must be alphaNum only');
 
 
 }
@@ -107,6 +110,8 @@ if($v->validate()) {
     $ENABLE_LUX = test_input($_POST["ENABLE_LUX"]);
     $LUX_SOURCE = test_input($_POST["LUX_SOURCE"]);
     $HIVE_TEMP_GPIO = test_input($_POST["HIVE_TEMP_GPIO"]);
+    $HIVE_WEIGHT_SLOPE = test_input($_POST["HIVE_WEIGHT_SLOPE"]);
+    $HIVE_WEIGHT_INTERCEPT = test_input($_POST["HIVE_WEIGHT_INTERCEPT"]);
 
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -116,8 +121,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT));
     sleep(1);
 
 
@@ -218,7 +223,18 @@ if($v->validate()) {
                                             }
                                             ?>
                                             </td>
-                                            <td></td>
+                                            <td>
+                                                 <?PHP if ($result['ENABLE_HIVE_WEIGHT_CHK'] == "yes") {
+                                                    
+                                                    echo '<br><a href="#" title="Define Zero/Intercept" data-toggle="popover" data-placement="bottom" data-content="Specify the Zero or Intercept value - see hivetool.org for instructions
+                                                        "><p class="fa fa-question-circle fa-fw"></P></a>Zero/Intercept:
+                                                         <input type="text" name="HIVE_WEIGHT_INTERCEPT" value="'; echo $result['HIVE_WEIGHT_INTERCEPT']; echo '"">';
+
+                                                    echo '<br><a href="#" title="Specify Cali/Slope" data-toggle="popover" data-placement="bottom" data-content="Specify the Calibration or Slope value - see hivetool.org for instructions"><p class="fa fa-question-circle fa-fw"></P></a>Calibration/Slope:
+                                                         <input type="text" name="HIVE_WEIGHT_SLOPE" value="'; echo $result['HIVE_WEIGHT_SLOPE']; echo '"">';
+                                            }?>
+
+                                            </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>

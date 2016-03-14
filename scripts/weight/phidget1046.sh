@@ -1,10 +1,15 @@
 #!/bin/bash
-
-
 # Get base numbers from Phidget 1046 device
+# Version 2 
+# Supports setting the Zero/Multiplier via the webpage
 
-ZERO="0.05700"
-MULTIPLIER="57.4545"
+source /home/hivetool2/scripts/hiveconfig.inc
+
+ZERO="$HIVE_WEIGHT_INTERCEPT"
+MULTIPLIER="$HIVE_WEIGHT_SLOPE"
+
+#ZERO="0.05700"
+#MULTIPLIER="57.4545"
 
 
 SCALE=`python /home/hivetool2/scripts/weight/getrawphidget.py`

@@ -3,16 +3,18 @@
 # read the scale
 # 
 #
-# v2 patch 
+# v3 patch 
 # Changed Count to RAW for better readability
 # Added a check to make sure RAW is a number to assist setups that don't always return a number
 # In this case, every couple of times, we were getting "No data to consider"
 # Also, commented out the Warning
 
-#HX711_ZERO=$HIVE_WEIGHT_INTERCEPT
-#HX711_CALI=$HIVE_WEIGHT_SLOPE
-HX711_ZERO=37800
-HX711_CALI=9928.50
+source /home/hivetool2/scripts/hiveconfig.inc
+
+HX711_ZERO=$HIVE_WEIGHT_INTERCEPT
+HX711_CALI=$HIVE_WEIGHT_SLOPE
+#HX711_ZERO=37800
+#HX711_CALI=9928.50
 #
 # read the scale
 DATA_GOOD=0
