@@ -22,14 +22,18 @@ do
         TEMPF=`echo $TEMPerHUM | grep  -o "temperature \-*[0-9]*\.[0-9]" | grep -o "\-*[0-9]*\.[0-9]"`
         TEMPC=$(echo "scale=1; (($TEMPF-32)*5)/9" |bc)
         DEW=`echo $TEMPerHUM |grep -o "point \-*[0-9]*\.[0-9]" | grep -o "\-*[0-9]*\.[0-9]"` 
-	      HUMIDITY_TEST=`echo "$HUMIDITY < 0" | bc`
-        TEMP_TEST=`echo "$TEMPF > -50" | bc`
-        if [ $HUMIDITY_TEST -eq 0 ] && [ $TEMP_TEST -ne 0 ]
+        HUMIDITY_MINTEST=`echo "$HUMIDITY < 0" | bc`
+        TEMP_MINTEST=`echo "$TEMPF > -50" | bc`
+        HUMIDITY_MAXTEST=`echo "$HUMIDITY > 100" | bc`
+        TEMP_MAXTEST=`echo "$TEMPF > 150" | bc`
+        if [ $HUMIDITY_MINTEST -eq 0 ] && [ $TEMP_MINTEST -ne 0 ] && [ $HUMIDITY_MAXTEST -eq 0 ] && [ $TEMP_MAXTEST -eq 0 ]
         then
          DATA_GOOD=1
         else
          HUMIDITY="0"
-         TEMP="0"
+         TEMPF="0"
+         TEMPC="0"
+         dewpoint_f="0"
         fi
       fi
       let "COUNTER += 1"
