@@ -15,7 +15,7 @@
 # The DB only accepts one GDD row per date, no matter how many times you run the script.
 # This protects against run-away scripts, and ensures our Seasonal GDD stays accurate
 
-set -x
+#set -x
 
 source /home/hivetool2/scripts/hiveconfig.inc
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
@@ -48,19 +48,25 @@ if [[ $( echo "$GDD < 0" |bc) -eq 1 ]]; then
 	#echo "GDD was less than 0, so we set gdd to 0"
 fi
 
-# Now that we have yesterdays daily gdd, lets calculate season GDD
-SEASONGDD=$(sqlite3 $DATASOURCE "SELECT SUM(daygdd) from gdd WHERE gdddate BETWEEN '$GDD_START_DATE' AND '$YESTERDAY';")
-SEASONGDD2=$(echo "$SEASONGDD + $GDD" | bc )  
+#Check to see if the DB was empty
+dbempty=$(sqlite3 $DATASOURCE "select count(*) from gdd;")
+if [[ $dbempty == "0" ]]; then
+	echo "first time running this db"
+	#Insert initial set of data on first run
+	sqlite3 $DATASOURCE "insert into gdd (calcdate, gdddate,daygdd,seasongdd) values ('$DATE','$YESTERDAY',$GDD,$GDD);"
 
+elif [[ $dbempty > "0" ]]; then	
+	# Now that we have yesterdays daily gdd, lets calculate season GDD
+	SEASONGDD=$(sqlite3 $DATASOURCE "SELECT SUM(daygdd) from gdd WHERE gdddate BETWEEN '$GDD_START_DATE' AND '$YESTERDAY';")
+	SEASONGDD2=$(echo "$SEASONGDD + $GDD" | bc )  
 
-echo $DATE,$GDD,$SEASONGDD2
+	echo $DATE,$GDD,$SEASONGDD2
+	echo "SeasonGDD = $SEASONGDD"
+	echo "SEASONGDD2 = $SEASONGDD2"
 
-echo "SeasonGDD = $SEASONGDD"
-echo "SEASONGDD2 = $SEASONGDD2"
-
-# Insert Weather Data into local DB, date, daygdd, seasongdd
-sqlite3 $DATASOURCE "insert into gdd (calcdate, gdddate,daygdd,seasongdd) values ('$DATE','$YESTERDAY',$GDD,$SEASONGDD2);"
-
+	# Insert Weather Data into local DB, date, daygdd, seasongdd
+	sqlite3 $DATASOURCE "insert into gdd (calcdate, gdddate,daygdd,seasongdd) values ('$DATE','$YESTERDAY',$GDD,$SEASONGDD2);"
+fi
 # Dump to a Webfile so we can see it on the dashboard
 echo "$GDD" > $PUBLIC_HTML_DIR/data/todaygdd.txt
 echo "$SEASONGDD2" > $PUBLIC_HTML_DIR/data/seasongdd.txt
