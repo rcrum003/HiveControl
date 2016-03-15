@@ -131,7 +131,7 @@ if(isset($_GET["chart"])) {
                 <div class="col-lg-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Stats - ( Raw / All )
+                            Stats - ( wm/2 / lx )
                         </div>
                                                 <div class="panel-body">
                             <div class="table-responsive">
@@ -141,28 +141,16 @@ if(isset($_GET["chart"])) {
 
                                     <tbody>
                                         <tr>
-                                            <td>Avg Weight (lbs)</td>
-                                            <td><?PHP echo "$avghivelight  / $avghiverawlight"; ?></td>
-                                         
-                                            
+                                            <td>Avg Light</td>
+                                            <td><?PHP echo "$avgsolarradiation  / $avglux"; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Start/End Weight</td>
-                                            <td><?PHP echo "$startlight  / $endlight"; ?></td>
-                                           
-                                        </tr>
-                                          <tr>
-                                            <td>Weight Gain/Loss</td>
-                                            <td><?PHP echo "$difflight"; ?></td>
-                                           
+                                            <td>Max Light</td>
+                                            <td><?PHP echo "$maxsolarradiation  / $maxlux "; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Max Weight (lbs)</td>
-                                            <td><?PHP echo "$maxhivelight  / $maxhiverawlight "; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Min Weight (lbs)</td>
-                                            <td><?PHP echo "$minhivelight  / $minhiverawlight "; ?></td>
+                                            <td>Min Light</td>
+                                            <td><?PHP echo "$minsolarradiation  / $minlux "; ?></td>
                                         </tr>
                                     </tbody>
                                 </table>

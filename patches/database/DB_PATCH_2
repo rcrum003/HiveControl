@@ -1,0 +1,5 @@
+UPDATE allhivedata SET solarradiation="0" WHERE solarradiation="";
+UPDATE allhivedata SET solarradiation="0" WHERE solarradiation is null;
+UPDATE allhivedata SET solarradiation="0" WHERE solarradiation="--";
+UPDATE allhivedata SET lux="0" WHERE lux="";
+UPDATE allhivedata SET lux="0" WHERE lux is null;

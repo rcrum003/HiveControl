@@ -30,22 +30,19 @@ switch ($period) {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
-$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight), 1) as hiveweight, MAX(hiveweight) as maxhiveweight, MIN(hiveweight) as minhiveweight, ROUND(AVG(hiverawweight), 1) as hiverawweight, MAX(hiverawweight) as maxhiverawweight, MIN(hiverawweight) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY date 
-ASC LIMIT 1) as startweight, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now','$sqlperiod')");
+$sth = $conn->prepare("SELECT ROUND(AVG(solarradiation), 1) as solarradiation, MAX(solarradiation) as maxsolarradiation, MIN(solarradiation) as minsolarradiation, ROUND(AVG(lux), 1) as lux, MAX(lux) as maxlux, MIN(lux) as minlux,  strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod')");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
 // Calculate the gainloss difference for the specifified period
 
-$avghiveweight = $result['hiveweight'];
-$maxhiveweight = $result['maxhiveweight'];
-$minhiveweight = $result['minhiveweight'];
-$avghiverawweight = $result['hiverawweight'];
-$maxhiverawweight = $result['maxhiverawweight'];
-$minhiverawweight = $result['minhiverawweight'];
-$startweight = $result['startweight'];
-$endweight = $result['endweight'];
-$diffweight = round(($endweight - $startweight), 2);
+$avgsolarradiation = $result['solarradiation'];
+$maxsolarradiation = $result['maxsolarradiation'];
+$minsolarradiation = $result['minsolarradiation'];
+$avglux = $result['lux'];
+$maxlux = $result['maxlux'];
+$minlux = $result['minlux'];
+
 
 
 ?>

@@ -32,7 +32,7 @@ switch ($period) {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
-$sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod')");
+$sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, solarradiation, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod')");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -135,6 +135,40 @@ $(function () {
             },
             opposite: true
 
+        },
+        { // Solarradiation yAxis
+            gridLineWidth: 0,
+            title: {
+                text: 'Solar',
+                style: {
+                    color: Highcharts.getOptions().colors[8]
+                }
+            },
+            labels: {
+                format: '{value} wm/2',
+                style: {
+                    color: Highcharts.getOptions().colors[8]
+                }
+            },
+            opposite: true
+
+        },
+        { // Lux yAxis
+            gridLineWidth: 0,
+            title: {
+                text: 'Lux',
+                style: {
+                    color: Highcharts.getOptions().colors[8]
+                }
+            },
+            labels: {
+                format: '{value} lx',
+                style: {
+                    color: Highcharts.getOptions().colors[8]
+                }
+            },
+            opposite: true
+
         }
         ],
         plotOptions: {
@@ -211,6 +245,22 @@ $(function () {
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
            color: '#000000',
            visible: false
+        },
+        {
+            type: 'line',
+            name: 'Solar (wm/2)',
+            yAxis: 4,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
+            color: '#ff0000',
+            visible: false
+        },
+        {
+            type: 'line',
+            name: 'Lux (lx)',
+            yAxis: 5,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
+            color: '#ff6666',
+            visible: false
         }
         ]
     });

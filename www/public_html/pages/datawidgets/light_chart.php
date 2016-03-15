@@ -35,8 +35,8 @@ if ($chart == 'line') {
  
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-// Get Light Data First
-$sth = $conn->prepare("SELECT solarradiation, uv, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod')");
+// Get Hive Data First
+$sth = $conn->prepare("SELECT solarradiation, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod')");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -44,14 +44,11 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
     $('#container').highcharts({
         chart: {
-            
-            zoomType: 'x'
+            zoomType: 'xy'
         },
         title: {
             text: '', 
@@ -75,22 +72,25 @@ $(function () {
                 selected: 2
             },
            
-        yAxis: [{ // Primary yAxis
+    yAxis: [
+        { // Solarradiation yAxis
+            gridLineWidth: 0,
+            title: {
+                text: 'Solar',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
             labels: {
                 format: '{value} wm/2',
                 style: {
-                    color: Highcharts.getOptions().colors[1]
+                    color: Highcharts.getOptions().colors[0]
                 }
             },
-            title: {
-                text: 'SolarRadiation',
-                style: {
-                    color: Highcharts.getOptions().colors[1]
-                }
-            }
-            
+            opposite: false
 
-        }, { // Secondary yAxis
+        },
+        { // Lux yAxis
             gridLineWidth: 0,
             title: {
                 text: 'Lux',
@@ -99,14 +99,15 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} lux',
+                format: '{value} lx',
                 style: {
                     color: Highcharts.getOptions().colors[0]
                 }
             },
             opposite: true
 
-        }],
+        }
+        ],
         plotOptions: {
             line: {
                 dataLabels: {
@@ -129,24 +130,25 @@ $(function () {
             shared: true
 
         },
-        series: [{
+        series: [
+        {
             type: 'line',
-            name: 'Solar Radiation (wm/2)',
+            name: 'Solar (wm/2)',
+            yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
-            dashStyle: 'longdash', 
-            color: '#FFD700',
+            color: '#ff0000',
+            visible: true
         },
         {
-           type: 'line',
-           name: 'Lux',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
-           color: '#000000',
-           dashStyle: 'longdash',
-           visible: true
-        }        
+            type: 'line',
+            name: 'Lux (lx)',
+            yAxis: 1,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
+            color: '#cc00ff',
+            visible: true
+        }
         ]
     });
-
         Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
             text: 'Enlarge Chart',
             onclick: function () {
@@ -154,6 +156,7 @@ $(function () {
                 return false;
             }
         });
+
 });
 </script>";
 
