@@ -36,6 +36,11 @@ $sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, wea
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+$sth1 = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now','$sqlperiod')");
+$sth1->execute();
+$result1 = $sth1->fetchAll(PDO::FETCH_ASSOC);
+
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
@@ -169,6 +174,23 @@ $(function () {
             },
             opposite: true
 
+        },
+        { // GDD yAxis
+            gridLineWidth: 0,
+            title: {
+                text: 'GDD',
+                style: {
+                    color: '#996633'
+                }
+            },
+            labels: {
+                format: '{value} gdd',
+                style: {
+                    color: '#996633'
+                }
+            },
+            opposite: false
+
         }
         ],
         plotOptions: {
@@ -260,6 +282,14 @@ $(function () {
             yAxis: 5,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
             color: '#ff6666',
+            visible: false
+        },
+        {
+            type: 'line',
+            name: 'GDD',
+            yAxis: 6,
+            data: ["; foreach($result1 as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
+            color: '#996633',
             visible: false
         }
         ]
