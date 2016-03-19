@@ -33,7 +33,7 @@ $regex1 = "/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/";
 
 $v = new Valitron\Validator($_POST);
 $v->rule('required', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR'], 1)->message('{field} is required');
-$v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
+$v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER', 'SITE_TYPE', 'SITE_ORIENT']);
 $v->rule('integer', ['YARDID', 'BEEKEEPERID'],  1)->message('{field} can only be an integer');
 $v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
 $v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
@@ -100,7 +100,7 @@ function test_input_allow_slash($data) {
        <?PHP include "../include/navigation.php" ?>
         <!-- /Navigation -->
 
-        <div id="page-wrapper">
+        
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Settings - Basic</h1>
@@ -151,11 +151,12 @@ if($v->validate()) {
     $STATUS = test_input($_POST["STATUS"]);
     $COMPUTER = test_input($_POST["COMPUTER"]);
     $START_DATE = test_input($_POST["START_DATE"]);
-
+    $SITE_ORIENT = test_input($_POST["SITE_ORIENT"]);
+    $SITE_TYPE = test_input($_POST["SITE_TYPE"]);
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,www_chart_theme=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$www_chart_theme,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,www_chart_theme=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,SITE_ORIENT=?,SITE_TYPE=? WHERE id=1");
+    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$www_chart_theme,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$SITE_ORIENT,$SITE_TYPE));
     sleep(3);
 
     // Refresh the fields in the form
@@ -772,6 +773,25 @@ if($v->validate()) {
                                         <td>Configure your preferred theme for the highcharts used throughout the site. </td>
                                         
                                        </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Site Layout</td>
+                                        <td><select name="SITE_ORIENT">
+                                        <option value="normal" <?php if ($result['SITE_ORIENT'] == "") {echo "selected='selected'";} ?>>Default</option>
+                                        <option value="wide" <?php if ($result['SITE_ORIENT'] == "wide") {echo "selected='selected'";} ?>>Wide</option>
+                                        </select>
+                                        </td>
+                                        <td>Configure your preferred site layout. </td>
+                                       </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Site Type</td>
+                                        <td><select name="SITE_TYPE">
+                                        <option value="normal" <?php if ($result['SITE_TYPE'] == "") {echo "selected='selected'";} ?>>Default</option>
+                                        <option value="compact" <?php if ($result['SITE_TYPE'] == "compact") {echo "selected='selected'";} ?>>Compact</option>
+                                        </select>
+                                        </td>
+                                        <td>Configure your preferred site detail type. Compact removes the stats bars from the dashboard. </td>
+                                       </tr>
+
                                      </tr>
     
                                        <tr class="odd gradeX">

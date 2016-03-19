@@ -46,10 +46,9 @@
        <?PHP include "../include/navigation.php" ?>
         <!-- /Navigation -->
 
-        <div id="page-wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Weather Forecast <?php echo $id; ?></h1>
+                    <h1 class="page-header">Weather Forecast</h1>
                 </div>
                 <!-- /.col-lg-12 -->
             </div>

@@ -88,10 +88,9 @@ if(isset($_GET["period"])) {
        <?PHP include "../include/navigation.php" ?>
         <!-- /Navigation -->
 
-        <div id="page-wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Dashboard - <?php echo $id; ?></h1>
+                    <h1 class="page-header">Dashboard </h1>
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
@@ -177,7 +176,7 @@ if(isset($_GET["period"])) {
                                 </div>
                             </div>
                         </div>
-                        <a href="#">
+                        <a href="/pages/gdd.php?chart=line&period=week">
                             <div class="panel-footer">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -203,7 +202,15 @@ if(isset($_GET["period"])) {
                 <!-- /.col-lg-12 -->
                         </div>
             <div class="row">
-                <div class="col-lg-8">
+            
+            <?PHP 
+            if ($SITE_TYPE == "normal") {
+                echo '<div class="col-lg-8">';
+            }
+            if ($SITE_TYPE == "compact") {
+                echo '<div class="col-lg-12">';
+            }
+            ?>
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Hive Charts 
@@ -214,7 +221,10 @@ if(isset($_GET["period"])) {
                     </div>
                 </div>
                 <!-- /.col-lg-6 -->
-
+            <?PHP 
+            if ($SITE_TYPE == "normal") {
+                echo '
+            
                 <div class="col-lg-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -228,12 +238,14 @@ if(isset($_GET["period"])) {
                         <div class="panel-heading">
                             System Status 
                         </div>
-                        <div class="panel-body">
-                            <?PHP include "status.php"; ?> 
-                        </div>
+                        <div class="panel-body">';
+            include "status.php"; 
+                        echo '</div>
+
                     </div>
 
                 </div>
+                ';} ?>
                     <!-- /.panel -->
                 </div>
                 <!-- /.col-lg-6 -->

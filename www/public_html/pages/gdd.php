@@ -93,7 +93,7 @@ if(isset($_GET["chart"])) {
 
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Light Analysis</h1>
+                    <h1 class="page-header">Growing Degree Days Analysis</h1>
             <?PHP if(isset($error)){ 
                 echo '<div class="alert alert-danger">'; echo $error; echo'</div>';} ?>
                 </div>
@@ -103,11 +103,11 @@ if(isset($_GET["chart"])) {
                 <div class="col-lg-12">
         
         <!-- Button Bar -->
-         <a href="/pages/light.php?chart=line&period=day"><button type="button" class="btn btn btn-<?PHP if ($period == "day"){echo "primary";} else {echo "default";}?>">Day</button></a>
-            <a href="/pages/light.php?chart=line&period=week"><button type="button" class="btn btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
-            <a href="/pages/light.php?chart=line&period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
-            <a href="/pages/light.php?chart=line&period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
-            <a href="/pages/light.php?chart=line&period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
+         <a href="/pages/gdd.php?chart=line&period=day"><button type="button" class="btn btn btn-<?PHP if ($period == "day"){echo "primary";} else {echo "default";}?>">Day</button></a>
+            <a href="/pages/gdd.php?chart=line&period=week"><button type="button" class="btn btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
+            <a href="/pages/gdd.php?chart=line&period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
+            <a href="/pages/gdd.php?chart=line&period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
+            <a href="/pages/gdd.php?chart=line&period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
             <br>
                 </div>
                 <!-- /.col-lg-12 -->
@@ -117,7 +117,7 @@ if(isset($_GET["chart"])) {
 
             <!-- /.row -->
             <div class="row">
-                <div class="col-lg-9">
+                <div class="col-lg-8">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Light Analysis
@@ -127,53 +127,24 @@ if(isset($_GET["chart"])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Stats - ( wm/2 / lx )
-                        </div>
-                                                <div class="panel-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <?PHP include "datawidgets/light_stats.php"; 
-                                    ?>
-
-                                    <tbody>
-                                        <tr>
-                                            <td>Avg Light</td>
-                                            <td><?PHP echo "$avgsolarradiation  / $avglux"; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Max Light</td>
-                                            <td><?PHP echo "$maxsolarradiation  / $maxlux "; ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Min Light</td>
-                                            <td><?PHP echo "$minsolarradiation  / $minlux "; ?></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- /.table-responsive -->
-                        </div>
-                    </div>
-
-                    <div class="panel panel-default">
+                <div class="col-lg-4">
+                
+                <div class="panel panel-default">
                         <div class="panel-heading">
                             Download Raw Data
                         </div> 
                            <div class="panel-body">
                             <div class="table-responsive">
                                 <table class="table">
-                                    <?PHP include "datawidgets/light_stats.php"; 
+                                    <?PHP include "datawidgets/gdd_stats.php"; 
                                     ?>
 
                                     <tbody>
                                         <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=light_data&period=<?PHP echo $period;?>&output=csv">CSV</a></td>
+                                            <td><a href="/pages/datawidgets/datajob.php?type=gdd_data&period=<?PHP echo $period;?>&output=csv">CSV</a></td>
                                         </tr>
                                         <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=light_data&period=<?PHP echo $period;?>&output=json">JSON</a></td>
+                                            <td><a href="/pages/datawidgets/datajob.php?type=gdd_data&period=<?PHP echo $period;?>&output=json">JSON</a></td>
                                             <td></td>
                                            
                                         </tr>
@@ -226,7 +197,7 @@ if(isset($_GET["chart"])) {
     #echo "Period is $period";
     #echo "Chart is $chart";
 
-    include "datawidgets/light_chart.php"; ?>
+    include "datawidgets/gdd_chart.php"; ?>
     
     
     <!-- Custom Theme JavaScript -->

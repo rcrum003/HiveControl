@@ -98,7 +98,7 @@ $today_pop = $parsed_json->{'forecast'}->{'simpleforecast'}->{'forecastday'}[0]-
        <?PHP include "../include/navigation.php" ?>
         <!-- /Navigation -->
 
-        <div id="page-wrapper">
+        
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Hive Video Stream</h1>

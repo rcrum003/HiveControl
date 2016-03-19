@@ -91,7 +91,7 @@ if(isset($_GET["chart"])) {
        <?PHP include "../include/navigation.php" ?>
         <!-- /Navigation -->
 
-        <div id="page-wrapper">
+        
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Weight Analysis</h1>
@@ -118,7 +118,7 @@ if(isset($_GET["chart"])) {
 
             <!-- /.row -->
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-lg-9">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Weight Analysis
@@ -128,7 +128,7 @@ if(isset($_GET["chart"])) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-3">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Stats - ( Raw / All )

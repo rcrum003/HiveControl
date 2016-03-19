@@ -78,7 +78,7 @@ function test_input_allow_slash($data) {
        <?PHP include "../include/navigation.php" ?>
         <!-- /Navigation -->
 
-        <div id="page-wrapper">
+        
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Edit Hive Body Configuration</h1>
