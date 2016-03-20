@@ -39,9 +39,9 @@ if [ $ENABLE_HIVE_TEMP_CHK = "yes" ]; then
 	# Data Fetchers/Parsers in one
 	#echo "Checking TEMP" >> $LOG
 	if [ $TEMPTYPE = "temperhum" ]; then
-	GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh`
+	GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh $HIVEDEVICE`
 	elif [[ $TEMPTYPE = "dht22" ]]; then
-	GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
+	GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh $HIVE_TEMP_GPIO`
 	elif [[ $TEMPTYPE = "dht21" ]]; then
 	GETTEMP=`$HOMEDIR/scripts/temp/dht21.sh`
 	fi
@@ -88,6 +88,18 @@ weather_dewc=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_c |awk '{print $2}'`
 elif [ $WEATHER_LEVEL = "localws" ]; then
 echo "Getting from LocalWS"
 GETNOW=`$HOMEDIR/scripts/weather/ws1400/getWS1400.sh`
+#Get the data fields that differ from the main set
+A_WIND_MPH=`/bin/echo $GETNOW | JSON.sh -b |grep wind_mph |awk -F"\"" '{print $6}'`
+OBSERVATIONDATETIME=`/bin/echo $GETNOW | JSON.sh -b |grep observation_time |awk -F"\"" '{print $6}'`
+wind_degrees=`/bin/echo $GETNOW | JSON.sh -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+wind_gust_mph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+wind_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_kph |awk -F"\"" '{print $6}'`
+wind_gust_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+weather_dewc=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+
+elif [ $WEATHER_LEVEL = "localsensors" ]; then
+echo "Getting from LocalSenrors"
+GETNOW=`$HOMEDIR/scripts/weather/localsensors/localsensors.sh`
 #Get the data fields that differ from the main set
 A_WIND_MPH=`/bin/echo $GETNOW | JSON.sh -b |grep wind_mph |awk -F"\"" '{print $6}'`
 OBSERVATIONDATETIME=`/bin/echo $GETNOW | JSON.sh -b |grep observation_time |awk -F"\"" '{print $6}'`

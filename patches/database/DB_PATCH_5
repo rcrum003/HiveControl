@@ -59,7 +59,9 @@ CREATE TABLE hiveconfig (
     HIVE_TEMP_MEASURE,
     HIVE_WEIGHT_SLOPE,
     HIVE_WEIGHT_INTERCEPT,
-    SITE_ORIENT
+    SITE_ORIENT,
+    SITE_TYPE,
+    WXTEMPTYPE
 );
 
 INSERT INTO hiveconfig (
@@ -120,7 +122,9 @@ INSERT INTO hiveconfig (
                            HIVE_TEMP_GPIO,
                            HIVE_TEMP_MEASURE,
                            HIVE_WEIGHT_SLOPE,
-                           HIVE_WEIGHT_INTERCEPT
+                           HIVE_WEIGHT_INTERCEPT,
+                           SITE_ORIENT,
+                           SITE_TYPE
                        )
                        SELECT HOMEDIR,
                               YARDID,
@@ -179,7 +183,9 @@ INSERT INTO hiveconfig (
                               HIVE_TEMP_GPIO,
                               HIVE_TEMP_MEASURE,
                               HIVE_WEIGHT_SLOPE,
-                              HIVE_WEIGHT_INTERCEPT
+                              HIVE_WEIGHT_INTERCEPT,
+                              SITE_ORIENT,
+                              SITE_TYPE
                          FROM sqlitestudio_temp_table;
 
 DROP TABLE sqlitestudio_temp_table;
@@ -246,7 +252,10 @@ CREATE TABLE hiveconfig (
     HIVE_WEIGHT_SLOPE,
     HIVE_WEIGHT_INTERCEPT,
     SITE_ORIENT,
-    SITE_TYPE
+    SITE_TYPE,
+    WXTEMPTYPE,
+    WX_TEMP_GPIO,
+    WX_TEMPER_DEVICE
 );
 
 INSERT INTO hiveconfig (
@@ -308,7 +317,9 @@ INSERT INTO hiveconfig (
                            HIVE_TEMP_MEASURE,
                            HIVE_WEIGHT_SLOPE,
                            HIVE_WEIGHT_INTERCEPT,
-                           SITE_ORIENT
+                           SITE_ORIENT,
+                           SITE_TYPE,
+                           WXTEMPTYPE
                        )
                        SELECT HOMEDIR,
                               YARDID,
@@ -368,12 +379,9 @@ INSERT INTO hiveconfig (
                               HIVE_TEMP_MEASURE,
                               HIVE_WEIGHT_SLOPE,
                               HIVE_WEIGHT_INTERCEPT,
-                              SITE_ORIENT
+                              SITE_ORIENT,
+                              SITE_TYPE,
+                              WXTEMPTYPE
                          FROM sqlitestudio_temp_table;
 
 DROP TABLE sqlitestudio_temp_table;
-
-UPDATE hiveconfig SET SITE_TYPE="normal";
-UPDATE hiveconfig SET SITE_ORIENT="normal";
-
-
