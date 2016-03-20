@@ -9,7 +9,7 @@
 # In this case, every couple of times, we were getting "No data to consider"
 # Also, commented out the Warning
 
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 
 HX711_ZERO=$HIVE_WEIGHT_INTERCEPT
 HX711_CALI=$HIVE_WEIGHT_SLOPE

@@ -385,7 +385,7 @@ configure:12204: result: /sbin/ldconfig
 configure:12214: checking for library containing dlopen
 configure:12245: gcc -o conftest -g -O2   conftest.c  >&5
 /tmp/cc2w9hXi.o: In function `main':
-/home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `dlopen'
+/home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `dlopen'
 collect2: ld returned 1 exit status
 configure:12245: $? = 1
 configure: failed program was:
@@ -433,7 +433,7 @@ configure:12272: checking for library containing sqrt
 configure:12303: gcc -o conftest -g -O2   conftest.c -ldl  >&5
 conftest.c:30:6: warning: conflicting types for built-in function 'sqrt' [enabled by default]
 /tmp/cceq6lVn.o: In function `main':
-/home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `sqrt'
+/home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `sqrt'
 collect2: ld returned 1 exit status
 configure:12303: $? = 1
 configure: failed program was:
@@ -481,7 +481,7 @@ configure:12320: result: -lm
 configure:12330: checking for library containing pthread_join
 configure:12361: gcc -o conftest -g -O2   conftest.c -lm -ldl  >&5
 /tmp/ccoYDW1T.o: In function `main':
-/home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `pthread_join'
+/home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `pthread_join'
 collect2: ld returned 1 exit status
 configure:12361: $? = 1
 configure: failed program was:
@@ -532,7 +532,7 @@ configure:12438: result: none required
 configure:12637: checking for library containing libusb_init
 configure:12668: gcc -o conftest -g -O2   conftest.c -lpthread -lm -ldl  >&5
 /tmp/ccM8yzcR.o: In function `main':
-/home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `libusb_init'
+/home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/conftest.c:34: undefined reference to `libusb_init'
 collect2: ld returned 1 exit status
 configure:12668: $? = 1
 configure: failed program was:
@@ -697,7 +697,7 @@ lt_cv_to_tool_file_cmd=func_convert_file_noop
 ## Output variables. ##
 ## ----------------- ##
 
-ACLOCAL='${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing aclocal-1.14'
+ACLOCAL='${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing aclocal-1.14'
 AMDEPBACKSLASH='\'
 AMDEP_FALSE='#'
 AMDEP_TRUE=''
@@ -707,9 +707,9 @@ AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
 AM_DEFAULT_VERBOSITY='0'
 AM_V='$(V)'
 AR='ar'
-AUTOCONF='${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing autoconf'
-AUTOHEADER='${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing autoheader'
-AUTOMAKE='${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing automake-1.14'
+AUTOCONF='${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing autoconf'
+AUTOHEADER='${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing autoheader'
+AUTOMAKE='${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing automake-1.14'
 AWK='mawk'
 CC='gcc'
 CCDEPMODE='depmode=gcc3'
@@ -750,7 +750,7 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 LIPO=''
 LN_S='ln -s'
 LTLIBOBJS=''
-MAKEINFO='${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing makeinfo'
+MAKEINFO='${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing makeinfo'
 MANIFEST_TOOL=':'
 MKDIR_P='/bin/mkdir -p'
 NEW_LIBUSB_FALSE='#'
@@ -818,7 +818,7 @@ host_vendor='unknown'
 htmldir='${docdir}'
 includedir='${prefix}/include'
 infodir='${datarootdir}/info'
-install_sh='${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/install-sh'
+install_sh='${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/install-sh'
 libdir='${exec_prefix}/lib'
 libexecdir='${exec_prefix}/libexec'
 localedir='${datarootdir}/locale'

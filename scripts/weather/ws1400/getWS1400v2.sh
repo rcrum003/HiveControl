@@ -8,8 +8,8 @@
 #set -x #echo on
 URL="http://ws1400ip/livedata.htm"
 # Record the date we pulled it - ignore what time the receiver says so we stay in sync with the local computer time
-source /home/hivetool2/scripts/hiveconfig.inc
-source /home/hivetool2/scripts/data/logger.inc
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 

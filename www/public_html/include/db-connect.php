@@ -1,7 +1,7 @@
 <?php
 
 try {
-    $conn = new PDO("sqlite:/home/hivetool2/data/hive-data.db");
+    $conn = new PDO("sqlite:/home/HiveControl/data/hive-data.db");
     // set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     //echo "Connected successfully"; 

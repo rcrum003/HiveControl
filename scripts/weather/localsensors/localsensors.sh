@@ -8,11 +8,10 @@
 #set -x #echo on
 # Get config data
 # Mainly DHT GPIO and the local Rain bucket GPIO.
-source /home/hivetool2/scripts/hiveconfig.inc
-source /home/hivetool2/scripts/data/logger.inc
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
-
 
 # =======================================
 # Get the data from the device

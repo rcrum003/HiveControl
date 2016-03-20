@@ -8,13 +8,13 @@
 SHELL=/bin/bash
 
 #Get Config parameters from DB
-/home/hivetool2/scripts/data/hiveconfig.sh
+/home/HiveControl/scripts/data/hiveconfig.sh
 
 # Set some basics
-PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/hivetool2/scripts/weather:/home/hivetool2/scripts/system
+PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather:/home/HiveControl/scripts/system
 HOST=`hostname`
 #Load the results of the script above
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 # ------ GET HIVE WEIGHT ----

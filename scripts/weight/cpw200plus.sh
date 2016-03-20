@@ -38,19 +38,19 @@ do
     SCALE=`echo $SCALE | gawk --posix '/^\+ [0-9]{1,3}\.[0-9] lb$/'`
     sleep 1
   else
-    echo "$DATE ERROR stty failed to set $DEVICE"  >> /home/hivetool2/logs/error.log
+    echo "$DATE ERROR stty failed to set $DEVICE"  >> /home/HiveControl/logs/error.log
   fi
 let "COUNTER += 1"
 done
 
 if [[ $COUNTER -gt 10 ]]
 then
-  echo "$DATE ERROR reading Scale $DEVICE" >> /home/hivetool2/logs/error.log 
+  echo "$DATE ERROR reading Scale $DEVICE" >> /home/HiveControl/logs/error.log 
   SCALE=-555
 fi 
 if test $COUNTER -gt 2 
 then 
-  echo "$DATE WARNING reading Scale /dev/ttyS0: retried $COUNTER" >> /home/hivetool2/logs/error.log  
+  echo "$DATE WARNING reading Scale /dev/ttyS0: retried $COUNTER" >> /home/HiveControl/logs/error.log  
 fi
 echo "$SCALE"
 

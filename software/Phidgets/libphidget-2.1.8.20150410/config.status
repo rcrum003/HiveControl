@@ -432,7 +432,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410'
+ac_pwd='/home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -883,12 +883,12 @@ S["mkdir_p"]="$(MKDIR_P)"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/install-sh"
-S["MAKEINFO"]="${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing autoheader"
-S["AUTOMAKE"]="${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing automake-1.14"
-S["AUTOCONF"]="${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing autoconf"
-S["ACLOCAL"]="${SHELL} /home/hivetool2/software/Phidgets/libphidget-2.1.8.20150410/missing aclocal-1.14"
+S["install_sh"]="${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/install-sh"
+S["MAKEINFO"]="${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing autoheader"
+S["AUTOMAKE"]="${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing automake-1.14"
+S["AUTOCONF"]="${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing autoconf"
+S["ACLOCAL"]="${SHELL} /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410/missing aclocal-1.14"
 S["VERSION"]="2.1.8.20150410"
 S["PACKAGE"]="libphidget"
 S["CYGPATH_W"]="echo"

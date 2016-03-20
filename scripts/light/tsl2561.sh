@@ -7,8 +7,8 @@
 # Let us know, and we'll add support. 
 
 # Source variables
-source /home/hivetool2/scripts/hiveconfig.inc
-source /home/hivetool2/scripts/data/logger.inc
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
 
 echo "Using an TS2561 - Not supported" >> $LOG
 echo $0

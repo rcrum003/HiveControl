@@ -6,9 +6,9 @@
 # Need to monitor future data sets when we go into the yard, because unknown how much of a swing will happen when we 
 # remove a super.
 #echo "Started"
-WEIGHTRUNDIR=/home/hivetool2/scripts/weight
+WEIGHTRUNDIR=/home/HiveControl/scripts/weight
 # Get some variables from our central file
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 
 #echo "Got my source"
 COUNTER=0

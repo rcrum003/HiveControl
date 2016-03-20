@@ -9,11 +9,11 @@
 
 
 #source common variables
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 DATETIME=$(TZ=":$TIMEZONE" date '+%F %T')
 
 DATE=$(TZ=":$TIMZEONE" date '+%F')
-#LOG="/home/hivetool2/logs/hivetooltest.log"
+#LOG="/home/HiveControl/logs/hivetooltest.log"
 
 #Let's inject this data into the DB, and do all of our logic in the webpage
 

@@ -19,7 +19,7 @@
 #---------------------------------------------------------------------
 # Parameters
 
-source /home/hivetool2/scripts/hivetool.inc
+source /home/HiveControl/scripts/hivetool.inc
 
 # Base our source based on the weather source you are  using
 

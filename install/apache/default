@@ -1,12 +1,12 @@
 <VirtualHost *:80>
 	ServerAdmin webmaster@localhost
 
-	DocumentRoot /home/hivetool2/www/public_html
+	DocumentRoot /home/HiveControl/www/public_html
 	<Directory />
 		Options FollowSymLinks
 		AllowOverride None
 	</Directory>
-	<Directory /home/hivetool2/www/public_html>
+	<Directory /home/HiveControl/www/public_html>
 		Options Indexes FollowSymLinks MultiViews
 		AllowOverride None
 		Order allow,deny

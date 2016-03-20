@@ -6,7 +6,7 @@ count=2
 while [ $count -lt 2000 ]; do
 
 # Get base numbers from Phidget 1046 device
-SCALE=`python /home/hivetool2/scripts/weight/getraw.py`
+SCALE=`python /home/HiveControl/scripts/weight/getraw.py`
 INPUT_0=`echo $SCALE | grep  -o "Weight0 = \-*[0-9]*\.[0-9]*" | grep -o "\-*[0-9]*\.[0-9]*"`
 INPUT_1=`echo $SCALE | grep  -o "Weight1 = \-*[0-9]*\.[0-9]*" | grep -o "\-*[0-9]*\.[0-9]*"`
 INPUT_2=`echo $SCALE | grep  -o "Weight2 = \-*[0-9]*\.[0-9]*" | grep -o "\-*[0-9]*\.[0-9]*"`

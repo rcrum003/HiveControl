@@ -1,7 +1,7 @@
 #!/bin/bash
 # Take a picture every 5 minutes and upload the series once an hour for analysis to the yardcontroller
 
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 
 #Take a full picture
 raspistill -drc high -ex auto -awb auto -o $PUBLIC_HTML_DIR/images/current.jpg

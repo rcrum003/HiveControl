@@ -7,8 +7,8 @@
  
 
 # Source variables
-source /home/hivetool2/scripts/hiveconfig.inc
-source /home/hivetool2/scripts/data/logger.inc
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
 
 
 DATA_GOOD=0

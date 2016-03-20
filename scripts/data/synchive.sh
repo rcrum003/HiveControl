@@ -1,9 +1,9 @@
 #!/bin/bash
 # Script to sync data from local beehives to the yard controller
-source /home/hivetool2/scripts/hiveconfig.inc
-source /home/hivetool2/scripts/data/logger.inc
-LOCALDATABASE=/home/hivetool2/data/hive-data.db
-RUNDIR=/home/hivetool2/data/
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
+LOCALDATABASE=/home/HiveControl/data/hive-data.db
+RUNDIR=/home/HiveControl/data/
 
 echo "$TIMEZONE"
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
@@ -19,7 +19,7 @@ LOCALCOUNT=`wc $RUNDIR/syncme.sql |awk '{print $1}'`
 # Connect to the yardcontroller and insert our data
 #=========================================
 MYSQLCMD=/usr/bin/mysql
-CONFIG=/home/hivetool2/security/.my.cnf #This is where we store our host, username, password - this is more secure
+CONFIG=/home/HiveControl/security/.my.cnf #This is where we store our host, username, password - this is more secure
 REMOTEDB=beeyard
 MYSQL="$MYSQLCMD --defaults-file=$CONFIG --local-infile=1 --show-warnings $REMOTEDB"
 $MYSQL -v -v -e "load data local infile '$RUNDIR/syncme.sql' into table hivedata fields terminated by '|' (hiveid,datetime,hivetempf,hivetempc,hivehum,hiveweight,yardid,recentlyupdated,beekeeperid);"

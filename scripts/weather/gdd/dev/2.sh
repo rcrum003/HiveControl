@@ -12,7 +12,7 @@
 # Or you can chose to have the data be wrong for one season
 
 
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 
 DATASOURCE="$HOMEDIR/data/hive-data.db"
 

@@ -3,8 +3,8 @@
 # Version 2
 
 #Set some default variables
-LOCALDATABASE=/home/hivetool2/data/hive-data.db
-CONFIGOUT="/home/hivetool2/scripts/hiveconfig.inc"
+LOCALDATABASE=/home/HiveControl/data/hive-data.db
+CONFIGOUT="/home/HiveControl/scripts/hiveconfig.inc"
 source $CONFIGOUT
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')

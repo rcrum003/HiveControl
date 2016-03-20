@@ -3,7 +3,7 @@
 # Version 2 
 # Supports setting the Zero/Multiplier via the webpage
 
-source /home/hivetool2/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/hiveconfig.inc
 
 ZERO="$HIVE_WEIGHT_INTERCEPT"
 MULTIPLIER="$HIVE_WEIGHT_SLOPE"
@@ -12,7 +12,7 @@ MULTIPLIER="$HIVE_WEIGHT_SLOPE"
 #MULTIPLIER="57.4545"
 
 
-SCALE=`python /home/hivetool2/scripts/weight/getrawphidget.py`
+SCALE=`python /home/HiveControl/scripts/weight/getrawphidget.py`
 INPUT_0=`echo $SCALE | grep  -o "Weight0 = \-*[0-9]*\.[0-9]*" | grep -o "\-*[0-9]*\.[0-9]*"`
 INPUT_1=`echo $SCALE | grep  -o "Weight1 = \-*[0-9]*\.[0-9]*" | grep -o "\-*[0-9]*\.[0-9]*"`
 INPUT_2=`echo $SCALE | grep  -o "Weight2 = \-*[0-9]*\.[0-9]*" | grep -o "\-*[0-9]*\.[0-9]*"`
