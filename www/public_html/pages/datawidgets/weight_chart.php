@@ -79,13 +79,13 @@ $(function () {
             labels: {
                 format: '{value} lbs',
                 style: {
-                    color: Highcharts.getOptions().colors[1]
+                    color: '"; echo "$color_netweight"; echo "'
                 }
             },
             title: {
                 text: 'Weight',
                 style: {
-                    color: Highcharts.getOptions().colors[1]
+                    color: '"; echo "$color_netweight"; echo "'
                 }
             }
             
@@ -95,13 +95,13 @@ $(function () {
             title: {
                 text: 'Rain',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_rain"; echo "'
                 }
             },
             labels: {
                 format: '{value} in',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_rain"; echo "'
                 }
             },
             opposite: true
@@ -134,13 +134,13 @@ $(function () {
             name: 'Hive Weight Net (lbs)',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "],
             dashStyle: 'longdash', 
-            color: '#FFD700',
+            color: '"; echo "$color_netweight"; echo "'
         },
         {
            type: 'line',
            name: 'Hive Weight Gross (lbs)',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
-           color: '#000000',
+           color: '"; echo "$color_grossweight"; echo "',
            dashStyle: 'longdash',
            visible: true
         },
@@ -149,6 +149,7 @@ $(function () {
             yAxis: 1,
             name: 'Rain',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            color: '"; echo "$color_rain"; echo "',
             visible: true
         }
         ]

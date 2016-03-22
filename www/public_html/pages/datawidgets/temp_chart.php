@@ -83,13 +83,13 @@ $(function () {
             labels: {
                 format: '{value}°F',
                 style: {
-                    color: Highcharts.getOptions().colors[2]
+                    color: '"; echo "$color_hivetemp"; echo "'
                 }
             },
             title: {
                 text: 'Temperature',
                 style: {
-                    color: Highcharts.getOptions().colors[2]
+                    color: '"; echo "$color_hivetemp"; echo "'
                 }
             },
             max: 80
@@ -99,13 +99,13 @@ $(function () {
             title: {
                 text: 'Humidity',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_hivehum"; echo "'
                 }
             },
             labels: {
                 format: '{value} %',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_hivehum"; echo "'
                 }
             },
             opposite: false,
@@ -117,13 +117,13 @@ $(function () {
             title: {
                 text: 'Rain',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_rain"; echo "'
                 }
             },
             labels: {
                 format: '{value} in',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_rain"; echo "'
                 }
             },
             opposite: true
@@ -156,7 +156,7 @@ $(function () {
             name: 'Hive Temp (°F)',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
-            color: Highcharts.getOptions().colors[2]
+            color: '"; echo "$color_hivetemp"; echo "'
         },
         {
             type: 'line',
@@ -164,14 +164,14 @@ $(function () {
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
             visible: true,
-            color: '#808080'
+            color: '"; echo "$color_outtemp"; echo "'
         },
         {
             type: 'line',
             name: 'Hive Humidty (%)',
             yAxis: 1,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
-            color: '#87CEFA',
+            color: '"; echo "$color_hivehum"; echo "',
             visible: false
         },
         {
@@ -179,6 +179,7 @@ $(function () {
             name: 'Outside Humidty (%)',
             yAxis: 1,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
+            color: '"; echo "$color_outhum"; echo "',
             visible: false
         },
         {
@@ -186,6 +187,7 @@ $(function () {
             yAxis: 2,
             name: 'Rain',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            color: '"; echo "$color_rain"; echo "',
             visible: true
         }
         ]

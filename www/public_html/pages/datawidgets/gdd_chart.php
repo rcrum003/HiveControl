@@ -73,18 +73,18 @@ $(function () {
             },
            
     yAxis: [
-        { // Solarradiation yAxis
+        { //GDD yAxis
             gridLineWidth: 0,
             title: {
                 text: 'GDD',
                 style: {
-                    color: '#996633'
+                    color: '"; echo "$color_gdd"; echo "'
                 }
             },
             labels: {
                 format: '{value} gdd',
                 style: {
-                    color: '#996633'
+                    color: '"; echo "$color_gdd"; echo "'
                 }
             },
             opposite: false
@@ -119,7 +119,7 @@ $(function () {
             name: 'GDD',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
-            color: '#ff0000',
+            color: '"; echo "$color_gdd"; echo "',
             visible: true
         }
         ]

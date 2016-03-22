@@ -26,7 +26,6 @@ switch ($period) {
         break;
     }
 
-
     # Echo back the Javascript code
  
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
@@ -79,13 +78,13 @@ $(function () {
             labels: {
                 format: '{value}°F',
                 style: {
-                    color: Highcharts.getOptions().colors[2]
+                    color: '"; echo "$color_hivetemp"; echo "'
                 }
             },
             title: {
                 text: 'Temperature',
                 style: {
-                    color: Highcharts.getOptions().colors[2]
+                    color: '"; echo "$color_hivetemp"; echo "'
                 }
             }
             
@@ -95,13 +94,13 @@ $(function () {
             title: {
                 text: 'Rain',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_rain"; echo "'
                 }
             },
             labels: {
                 format: '{value} in',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_rain"; echo "'
                 }
             },
             opposite: true
@@ -112,13 +111,13 @@ $(function () {
             title: {
                 text: 'Weight',
                 style: {
-                    color: Highcharts.getOptions().colors[6]
+                    color: '"; echo "$color_netweight"; echo "'
                 }
             },
             labels: {
                 format: '{value} lbs',
                 style: {
-                    color: Highcharts.getOptions().colors[6]
+                    color: '"; echo "$color_netweight"; echo "'
                 }
             },
             opposite: false
@@ -129,13 +128,13 @@ $(function () {
             title: {
                 text: 'Humidity',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_hivehum"; echo "'
                 }
             },
             labels: {
                 format: '{value} %',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_hivehum"; echo "'
                 }
             },
             opposite: true
@@ -146,13 +145,13 @@ $(function () {
             title: {
                 text: 'Solar',
                 style: {
-                    color: Highcharts.getOptions().colors[8]
+                    color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
             labels: {
                 format: '{value} wm/2',
                 style: {
-                    color: Highcharts.getOptions().colors[8]
+                    color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
             opposite: true
@@ -163,13 +162,13 @@ $(function () {
             title: {
                 text: 'Lux',
                 style: {
-                    color: Highcharts.getOptions().colors[8]
+                    color: '"; echo "$color_lux"; echo "'
                 }
             },
             labels: {
                 format: '{value} lx',
                 style: {
-                    color: Highcharts.getOptions().colors[8]
+                    color: '"; echo "$color_lux"; echo "'
                 }
             },
             opposite: true
@@ -180,13 +179,13 @@ $(function () {
             title: {
                 text: 'GDD',
                 style: {
-                    color: '#996633'
+                    color: '"; echo "$color_gdd"; echo "'
                 }
             },
             labels: {
                 format: '{value} gdd',
                 style: {
-                    color: '#996633'
+                    color: '"; echo "$color_gdd"; echo "'
                 }
             },
             opposite: false
@@ -220,7 +219,7 @@ $(function () {
             name: 'Hive Temp (°F)',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
-            color: Highcharts.getOptions().colors[2]
+            color: '"; echo "$color_hivetemp"; echo "'
         },
         {
             type: 'line',
@@ -228,14 +227,14 @@ $(function () {
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
             visible: false,
-            color: '#808080'
+            color: '"; echo "$color_outtemp"; echo "'
         },
         {
             type: 'line',
             name: 'Hive Humidty (%)',
             yAxis: 3,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
-            color: '#87CEFA',
+            color: '"; echo "$color_hivehum"; echo "',
             visible: true
         },
         {
@@ -243,6 +242,7 @@ $(function () {
             name: 'Outside Humidty (%)',
             yAxis: 3,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
+            color: '"; echo "$color_outhum"; echo "',
             visible: false
         },
         {
@@ -250,6 +250,7 @@ $(function () {
             yAxis: 1,
             name: 'Rain',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            color: '"; echo "$color_rain"; echo "',
             visible: false
         },
         {
@@ -257,7 +258,7 @@ $(function () {
             yAxis: 2,
             name: 'Hive Weight Net (lbs)',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
-            color: '#FFD700',
+            color: '"; echo "$color_netweight"; echo "',
             visible: true
         },
         {
@@ -265,7 +266,7 @@ $(function () {
            yAxis: 2,
            name: 'Hive Weight Gross (lbs)',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
-           color: '#000000',
+           color: '"; echo "$color_grossweight"; echo "',
            visible: false
         },
         {
@@ -273,7 +274,7 @@ $(function () {
             name: 'Solar (wm/2)',
             yAxis: 4,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
-            color: '#ff0000',
+            color: '"; echo "$color_solarradiation"; echo "',
             visible: false
         },
         {
@@ -281,7 +282,7 @@ $(function () {
             name: 'Lux (lx)',
             yAxis: 5,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
-            color: '#ff6666',
+            color: '"; echo "$color_lux"; echo "',
             visible: false
         },
         {
@@ -289,7 +290,7 @@ $(function () {
             name: 'GDD',
             yAxis: 6,
             data: ["; foreach($result1 as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
-            color: '#996633',
+            color: '"; echo "$color_gdd"; echo "',
             visible: false
         }
         ]

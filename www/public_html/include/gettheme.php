@@ -13,7 +13,7 @@ echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";
 
 #Set default colors, since every chart pulls from this file
 
-$color_hivetemp="#FF1493"; #Green #FF1493 008000
+$color_hivetemp="#FF1493"; 
 $color_hivehum="#0000FF"; #Blue
 $color_outtemp="#8A2BE2"; #Blue Vilolet
 $color_outhum="#000080"; #Navy

@@ -78,13 +78,13 @@ $(function () {
             title: {
                 text: 'Solar',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
             labels: {
                 format: '{value} wm/2',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
             opposite: false
@@ -95,13 +95,13 @@ $(function () {
             title: {
                 text: 'Lux',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_lux"; echo "'
                 }
             },
             labels: {
                 format: '{value} lx',
                 style: {
-                    color: Highcharts.getOptions().colors[0]
+                    color: '"; echo "$color_lux"; echo "'
                 }
             },
             opposite: true
@@ -136,7 +136,7 @@ $(function () {
             name: 'Solar (wm/2)',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
-            color: '#ff0000',
+            color: '"; echo "$color_solarradiation"; echo "',
             visible: true
         },
         {
@@ -144,7 +144,7 @@ $(function () {
             name: 'Lux (lx)',
             yAxis: 1,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
-            color: '#cc00ff',
+            color: '"; echo "$color_lux"; echo "',
             visible: true
         }
         ]
