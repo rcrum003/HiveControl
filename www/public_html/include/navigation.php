@@ -69,13 +69,13 @@ echo '
                     </a>
                     <ul class="dropdown-menu">
                         <li>
-                                    <a href="hiveconfig.php">Basic Config</a>
+                                    <a href="/pages/admin/hiveconfig.php">Basic Config</a>
                                 </li>
                                 <li>
-                                    <a href="instrumentconfig.php">Instruments</a>
+                                    <a href="/pages/admin/instrumentconfig.php">Instruments</a>
                                 </li>
                                 <li>
-                                    <a href="hivebodyconfig.php">Hive Body</a>
+                                    <a href="/pages/admin/hivebodyconfig.php">Hive Body</a>
                                 </li>
                     </ul>
                     <!-- /.dropdown-user -->
