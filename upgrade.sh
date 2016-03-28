@@ -4,28 +4,12 @@
 # Includes methods to upgrade databases, as well as pull new files
 # Gets the current version installed and brings up to the latest version when running the script
 
+#Move all of this code into a script that checks for new code once a day.
+# If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
+
 #Get the latest upgrade script
-Upgrade_ver="1"
-	#Get the version available
-	Upgrade_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh)
+Upgrade_ver="2"
 
-#Get our current HiveControl Version
-Installed_Ver=$(cat /home/HiveControl/VERSION)
-echo "Installed $Installed_Ver"
-
-#Get the latest HiveControl version
-Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
-echo "Newest version is $Latest_Ver"
-
-if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
-		echo "Nothing to do, you are at the latest version"
-		exit
-fi
-if [[  $(echo "$Installed_Ver > $Latest_Ver" | bc) -eq 1 ]]; then
-		echo "Hey, you are running a newer version that we have in the repository! - Exiting"
-		exit
-fi
-echo "We have some upgrading to do!"
 
 #Back everything up, just in case (mainly the database)
 echo "============================================="
@@ -37,6 +21,9 @@ echo "============================================="
 WWWTempRepo="/home/HiveControl/upgrade/HiveControl/www/public_html"
 DBRepo="/home/HiveControl/upgrade/data"
 
+
+DestWWWRepo="/home/HiveControl/www/public_html"
+DestDB="/home/HiveControl/data/hive-data.db"
 
 # Get the latest code from github into a temporary repository
 echo "Getting Latest Code"
@@ -53,33 +40,49 @@ echo "Getting Latest Code"
 #Remove the offending file, since we don't want to upgrade these 
 rm -rf $WWWTempRepo/include/db-connect.php
 rm -rf $DBRepo/hive-data.db
-rm -rf $WWWTempRepo/data/*
-
+rm -rf $WWWTempRepo/data/* 
 	echo "....... Storing it in /home/HiveControl/upgrade"
 echo "============================================="
 
 
 #Upgrade www
 echo "Upgrading WWW pages"
-#Update Includes, but not dbconnect.db
+cp -R $WWWTempRepo/pages/* $DestWWWRepo/pages/
+cp -R $WWWTempRepo/includes/* $DestWWWRepo/includes/
 
-cp $WWWTempRepo 
 
-your code here
 
 echo "============================================="
 
 #Upgrade our code
-echo "Doing Next Thing"
-
-your code here
-
+echo "Upgrading our shell scripts"
+#cp -R /home/HiveControl/scripts/
 echo "============================================="
 
 #Upgrade our DB
-echo "Doing Next Thing"
+#Get DBVersion
+#Get the latest upgrade script
+DB_ver=$(cat /home/HiveControl/data/DBVERSION)
+DBPatches="/home/HiveControl/patches/database"
+	#Get the version available
+	DB_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/data/DBVERSION)
 
-your code here
+	if [[ $( echo "$DB_ver < $DB_latest_ver" | bc) -eq 1 ]]; then
+		echo "Upgrading DBs"
+		if [[ $DB_ver -eq "1" ]]; then
+			#Upgarding to version 2
+			echo "Applying DB Ver1 Upgrades"
+			sudo sqlite $DestDB < $DBPatches/DB_PATCH_6 
+			#Set DB Ver to the next
+			$DB_ver="2"		
+		fi
+		#if [[ $DB_ver -eq "2" ]]; then
+			#Upgarding to version 2
+		#	echo "Applying DB Ver2 Upgrades"
+						
+		#fi
+	fi
+	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
 
 echo "============================================="
 
