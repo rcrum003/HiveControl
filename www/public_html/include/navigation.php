@@ -35,7 +35,7 @@ if ($orient == "wide") {
 echo '
             <ul class="nav navbar-top-links navbar-right">
                          <li>
-                    <a href="index.php"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                    <a href="/pages/index.php"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                 </li>
                     
                 <li class="dropdown">
