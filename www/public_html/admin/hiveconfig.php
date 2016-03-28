@@ -97,7 +97,7 @@ function test_input_allow_slash($data) {
     <div id="wrapper">
 
         <!-- Navigation -->
-       <?PHP include "/include/navigation.php" ?>
+       <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
         <!-- /Navigation -->
 
         
