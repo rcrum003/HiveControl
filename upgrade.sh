@@ -12,34 +12,32 @@ Upgrade_ver="2"
 
 
 #Back everything up, just in case (mainly the database)
-echo "============================================="
 echo "Backing up Database to hive-data.bckup"
-sudo cp /home/HiveControl/data/hive-data.db /home/HiveControl/data/hive-data.bckup
+cp /home/HiveControl/data/hive-data.db /home/HiveControl/data/hive-data.bckup
 echo "============================================="
 
-#Set some variables
-WWWTempRepo="/home/HiveControl/upgrade/HiveControl/www/public_html"
-DBRepo="/home/HiveControl/upgrade/data"
 
-
-DestWWWRepo="/home/HiveControl/www/public_html"
-DestDB="/home/HiveControl/data/hive-data.db"
 
 # Get the latest code from github into a temporary repository
 echo "Getting Latest Code"
 #Remove any remnants of past code upgrades
-	sudo rm -rf /home/HiveControl/upgrade
+	rm -rf /home/HiveControl/upgrade
 #Make us a fresh directory
-	sudo mkdir /home/HiveControl/upgrade
+	mkdir /home/HiveControl/upgrade
 #Start in our directory
-	sudo cd /home/HiveControl/upgrade
+	cd /home/HiveControl/upgrade
 #Get the code
 	sudo git clone https://github.com/rcrum003/HiveControl
+
+
+#Set some variables
+WWWTempRepo="/home/HiveControl/upgrade/HiveControl/www/public_html"
+DestWWWRepo="/home/HiveControl/www/public_html"
+DestDB="/home/HiveControl/data/hive-data.db"
 
 #Remove some initial installation files from repository for upgrade
 #Remove the offending file, since we don't want to upgrade these 
 rm -rf $WWWTempRepo/include/db-connect.php
-rm -rf $DBRepo/hive-data.db
 rm -rf $WWWTempRepo/data/* 
 	echo "....... Storing it in /home/HiveControl/upgrade"
 echo "============================================="
@@ -48,8 +46,7 @@ echo "============================================="
 #Upgrade www
 echo "Upgrading WWW pages"
 cp -R $WWWTempRepo/pages/* $DestWWWRepo/pages/
-cp -R $WWWTempRepo/includes/* $DestWWWRepo/includes/
-
+cp -R $WWWTempRepo/include/* $DestWWWRepo/include/
 
 
 echo "============================================="
@@ -57,6 +54,7 @@ echo "============================================="
 #Upgrade our code
 echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
+echo "..... ok, not yet, but future code"
 echo "============================================="
 
 #Upgrade our DB

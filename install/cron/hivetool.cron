@@ -1,5 +1,5 @@
 #Check Sensors every 5 Minutes
-#*/5 * * * * /home/HiveControl/scripts/system/currconditions.sh > /dev/null 2>&1
+*/5 * * * * /home/HiveControl/scripts/system/currconditions.sh > /dev/null 2>&1
 
 #Upload data once every 30 minutes to yardcontroller - disabled by default
 #*/32 * * * * /home/HiveControl/scripts/data/synchive.sh > /dev/null 2>&1
@@ -7,6 +7,8 @@
 #Take a Pic
 #*/5 * * * * /home/HiveControl/scripts/image/takepic.sh > /dev/null 2>&1
 
-#Script to check wifi
-*/20 * * * *  /usr/bin/sudo -H /usr/local/bin/checkwifi.sh >> /dev/null 2>&1
+#Get GDD Data Daily
+00 12 * * * /home/HiveControl/scripts/weather/gdd/get_daily_insect_gdd.sh > /dev/null 2>&1
 
+#Check for HiveControl Updates
+05 12 * * * /home/HiveControl/scripts/system/checkupgrades.sh > /dev/null 2>&1
