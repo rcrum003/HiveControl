@@ -17,13 +17,13 @@
 		"temp_f":"0",
 		"relative_humidity":"0",
 		"dewpoint_f":"0",
-          "rawweight":"122.43",
-		"weight_lbs":"91.21"
+          "rawweight":"0",
+		"weight_lbs":"0"
 		},
 		"weather": {
-		"a_temp_f":"50.2",
-		"a_relative_humidity":"55",
-		"a_dewpoint_f":"34.00"
+		"a_temp_f":"0",
+		"a_relative_humidity":"0",
+		"a_dewpoint_f":"0"
 }
 }
 }]
