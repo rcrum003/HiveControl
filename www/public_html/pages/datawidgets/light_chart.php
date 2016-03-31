@@ -137,7 +137,7 @@ $(function () {
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
             color: '"; echo "$color_solarradiation"; echo "',
-            visible: true
+            visible: "; echo "$trend_solarradiation"; echo "
         },
         {
             type: 'line',
@@ -145,7 +145,7 @@ $(function () {
             yAxis: 1,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
             color: '"; echo "$color_lux"; echo "',
-            visible: true
+            visible: "; echo "$trend_lux"; echo "
         }
         ]
     });

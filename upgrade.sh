@@ -70,17 +70,19 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 	if [[ $( echo "$DB_ver < $DB_latest_ver" | bc) -eq 1 ]]; then
 		echo "Upgrading DBs"
 		if [[ $DB_ver -eq "0" ]]; then
-			#Upgarding to version 2
+			#Upgarding to version 1
 			echo "Applying DB Ver1 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_6 
 			#Set DB Ver to the next
 			let DB_ver="1"		
 		fi
-		#if [[ $DB_ver -eq "2" ]]; then
+		if [[ $DB_ver -eq "1" ]]; then
 			#Upgarding to version 2
-		#	echo "Applying DB Ver2 Upgrades"
-						
-		#fi
+			echo "Applying DB Ver2 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_7 
+			#Set DB Ver to the next
+			let DB_ver="2"
+		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
 	fi

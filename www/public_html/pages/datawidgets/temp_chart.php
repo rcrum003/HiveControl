@@ -156,14 +156,15 @@ $(function () {
             name: 'Hive Temp (°F)',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
-            color: '"; echo "$color_hivetemp"; echo "'
+            color: '"; echo "$color_hivetemp"; echo "',
+            visible: "; echo "$trend_hivetemp"; echo "
         },
         {
             type: 'line',
             name: 'Outside Temp (°F)',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
-            visible: true,
+            visible: "; echo "$trend_outtemp"; echo ",
             color: '"; echo "$color_outtemp"; echo "'
         },
         {
@@ -172,7 +173,7 @@ $(function () {
             yAxis: 1,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
             color: '"; echo "$color_hivehum"; echo "',
-            visible: false
+            visible: "; echo "$trend_hivehum"; echo "
         },
         {
             type: 'line',
@@ -180,7 +181,7 @@ $(function () {
             yAxis: 1,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
             color: '"; echo "$color_outhum"; echo "',
-            visible: false
+            visible: "; echo "$trend_outhum"; echo "
         },
         {
             type: 'column',
@@ -188,7 +189,7 @@ $(function () {
             name: 'Rain',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
             color: '"; echo "$color_rain"; echo "',
-            visible: true
+            visible: "; echo "$trend_rain"; echo "
         }
         ]
         });

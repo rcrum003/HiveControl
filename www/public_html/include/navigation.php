@@ -75,7 +75,10 @@ echo '
                                     <a href="/admin/instrumentconfig.php">Instruments</a>
                                 </li>
                                 <li>
-                                    <a href="/admin/hivebodyconfig.php">Hive Body</a>
+                                    <a href="/admin/hivebodyconfig.php">Hive Components</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
                     </ul>
                     <!-- /.dropdown-user -->
