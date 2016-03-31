@@ -174,7 +174,11 @@ if($v->validate()) {
       for ($i=0; $i < count($err); $i++){
         echo $err[$i][0]."<br>";
       }
-          echo  '</div>';  
+          echo  '</div>';
+              // Refresh the fields in the form
+    $sth = $conn->prepare("SELECT * FROM hiveconfig");
+    $sth->execute();
+    $result = $sth->fetch(PDO::FETCH_ASSOC);    
 }
 
                

@@ -145,6 +145,10 @@ if($v->validate()) {
         echo $err[$i][0]."<br>";
       }
           echo  '</div>';  
+              // Refresh the fields in the form
+    $sth = $conn->prepare("SELECT * FROM hiveconfig");
+    $sth->execute();
+    $result = $sth->fetch(PDO::FETCH_ASSOC);  
 }
                
     }
