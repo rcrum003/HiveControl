@@ -15,7 +15,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 $v = new Valitron\Validator($_POST);
 $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
+$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd'], 7);
+$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd'], 7);
 
+$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd'], 2);
+$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd'], ['on', '']);
 
 }
 //Check input for badness
