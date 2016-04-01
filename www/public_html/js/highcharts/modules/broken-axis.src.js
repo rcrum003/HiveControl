@@ -1,16 +1,19 @@
 /**
- * Highcharts JS v4.1.10 (2015-12-07)
+ * Highcharts JS v4.2.3 (2016-02-08)
  * Highcharts Broken Axis module
  * 
  * License: www.highcharts.com/license
  */
 
 (function (factory) {
+	/*= if (!build.assembly) { =*/
 	if (typeof module === 'object' && module.exports) {
 		module.exports = factory;
-	} else {
-		factory(Highcharts);
+		return;
 	}
+	/*= } =*/
+	factory(Highcharts);
+	
 }(function (H) {
 
 	'use strict';
@@ -106,7 +109,7 @@
 
 			var axis = this;
 			
-			axis.doPostTranslate = true;
+			axis.isBroken = true;
 
 			this.val2lin = function (val) {
 				var nval = val,
@@ -311,7 +314,7 @@
 					if ((threshold < brk.from && y > brk.to) || (threshold > brk.from && y < brk.from)) { 
 						eventName = 'pointBreak';
 					} else if ((threshold < brk.from && y > brk.from && y < brk.to) || (threshold > brk.from && y > brk.to && y < brk.from)) { // point falls inside the break
-						eventName = 'pointInBreak'; // docs
+						eventName = 'pointInBreak';
 					} 
 					if (eventName) {
 						fireEvent(axis, eventName, { point: point, brk: brk });

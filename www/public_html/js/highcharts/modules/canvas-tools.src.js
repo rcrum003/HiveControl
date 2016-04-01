@@ -2908,16 +2908,17 @@ if (CanvasRenderingContext2D) {
 		});
 	}
 }/**
- * @license Highcharts JS v4.1.10 (2015-12-07)
+ * @license Highcharts JS v4.2.3 (2016-02-08)
  * CanVGRenderer Extension module
  *
- * (c) 2011-2012 Torstein Honsi, Erik Olsson
+ * (c) 2011-2016 Torstein Honsi, Erik Olsson
  *
  * License: www.highcharts.com/license
  */
 
 (function (Highcharts) {
 	var UNDEFINED,
+		win = Highcharts.win,
 		DIV = 'div',
 		ABSOLUTE = 'absolute',
 		RELATIVE = 'relative',
@@ -3108,7 +3109,7 @@ if (CanvasRenderingContext2D) {
 		 */
 		draw: function () {
 			var renderer = this;
-			window.canvg(renderer.canvas, renderer.hiddenSvg.innerHTML);
+			win.canvg(renderer.canvas, renderer.hiddenSvg.innerHTML);
 		}
 	});
 }(Highcharts));

@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v4.1.10 (2015-12-07)
+ * @license Highcharts JS v4.2.3 (2016-02-08)
  * Client side exporting module
  *
  * (c) 2015 Torstein Honsi / Oystein Moseng
@@ -16,8 +16,29 @@
 	}
 }(function (Highcharts) {
 
+	var win = Highcharts.win,
+		nav = win.navigator,
+		doc = win.document;
+
 	// Dummy object so we can reuse our canvas-tools.js without errors
 	Highcharts.CanVGRenderer = {};
+
+
+	/**
+	 * Downloads a script and executes a callback when done.
+	 * @param {String} scriptLocation
+	 * @param {Function} callback
+	 */
+	function getScript(scriptLocation, callback) {
+		var head = doc.getElementsByTagName('head')[0],
+			script = doc.createElement('script');
+
+		script.type = 'text/javascript';
+		script.src = scriptLocation;
+		script.onload = callback;
+
+		head.appendChild(script);
+	}
 
 	/**
 	 * Add a new method to the Chart object to perform a local download
@@ -25,10 +46,10 @@
 	Highcharts.Chart.prototype.exportChartLocal = function (exportingOptions, chartOptions) {
 		var chart = this,
 			options = Highcharts.merge(chart.options.exporting, exportingOptions),
-			webKit = navigator.userAgent.indexOf('WebKit') > -1 && navigator.userAgent.indexOf('Chrome') < 0, // Webkit and not chrome
+			webKit = nav.userAgent.indexOf('WebKit') > -1 && nav.userAgent.indexOf('Chrome') < 0, // Webkit and not chrome
 			scale = options.scale || 2,
 			chartCopyContainer,
-			domurl = window.URL || window.webkitURL || window,
+			domurl = win.URL || win.webkitURL || win,
 			images,
 			imagesEmbedded = 0,
 			el,
@@ -36,53 +57,73 @@
 			l,
 			fallbackToExportServer = function () {
 				if (options.fallbackToExportServer === false) {
-					throw 'Fallback to export server disabled';
+					if (options.error) {
+						options.error();
+					} else {
+						throw 'Fallback to export server disabled';
+					}
+				} else {
+					chart.exportChart(options);
 				}
-				chart.exportChart(options);
 			},
 			// Get data:URL from image URL
 			// Pass in callbacks to handle results. finallyCallback is always called at the end of the process. Supplying this callback is optional.
 			// All callbacks receive two arguments: imageURL, and callbackArgs. callbackArgs is used only by callbacks and can contain whatever.
 			imageToDataUrl = function (imageURL, callbackArgs, successCallback, taintedCallback, noCanvasSupportCallback, failedLoadCallback, finallyCallback) {
-				var img = new Image();
-				if (!webKit) {
-					img.crossOrigin = 'Anonymous'; // For some reason Safari chokes on this attribute
-				}
-				img.onload = function () {
-					var canvas = document.createElement('canvas'),
-						ctx = canvas.getContext && canvas.getContext('2d'),
-						dataURL;
-
-					if (!ctx) {
-						noCanvasSupportCallback(imageURL, callbackArgs);
-					} else {
-						canvas.height = img.height * scale;
-						canvas.width = img.width * scale;
-						ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-						// Now we try to get the contents of the canvas.
+				var img = new win.Image(),
+					taintedHandler,
+					loadHandler = function () {
+						var canvas = doc.createElement('canvas'),
+							ctx = canvas.getContext && canvas.getContext('2d'),
+							dataURL;
 						try {
-							dataURL = canvas.toDataURL();
-							successCallback(dataURL, callbackArgs);
-						} catch (e) {
-							// Failed - either tainted canvas or something else went horribly wrong
-							if (e.name === 'SecurityError' || e.name === 'SECURITY_ERR' || e.message === 'SecurityError') {
-								taintedCallback(imageURL, callbackArgs);
+							if (!ctx) {
+								noCanvasSupportCallback(imageURL, callbackArgs);
 							} else {
-								throw e;
+								canvas.height = img.height * scale;
+								canvas.width = img.width * scale;
+								ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+								// Now we try to get the contents of the canvas.
+								try {
+									dataURL = canvas.toDataURL();
+									successCallback(dataURL, callbackArgs);
+								} catch (e) {
+									// Failed - either tainted canvas or something else went horribly wrong
+									if (e.name === 'SecurityError' || e.name === 'SECURITY_ERR' || e.message === 'SecurityError') {
+										taintedHandler(imageURL, callbackArgs);
+									} else {
+										throw e;
+									}
+								}
+							}
+						} finally {
+							if (finallyCallback) {
+								finallyCallback(imageURL, callbackArgs);
 							}
 						}
-					}
-					if (finallyCallback) {
-						finallyCallback(imageURL, callbackArgs);
-					}
+					},
+					// Image load failed (e.g. invalid URL)
+					errorHandler = function () {
+						failedLoadCallback(imageURL, callbackArgs);
+						if (finallyCallback) {
+							finallyCallback(imageURL, callbackArgs);
+						}
+					};
+				
+				// This is called on load if the image drawing to canvas failed with a security error.
+				// We retry the drawing with crossOrigin set to Anonymous.
+				taintedHandler = function () {
+					img = new win.Image();
+					taintedHandler = taintedCallback;
+					img.crossOrigin = 'Anonymous'; // Must be set prior to loading image source
+					img.onload = loadHandler;
+					img.onerror = errorHandler;
+					img.src = imageURL;
 				};
-				img.onerror = function () {
-					failedLoadCallback(imageURL, callbackArgs);
-					if (finallyCallback) {
-						finallyCallback(imageURL, callbackArgs);
-					}
-				};
+
+				img.onload = loadHandler;
+				img.onerror = errorHandler;
 				img.src = imageURL;
 			},
 			// Get blob URL from SVG code. Falls back to normal data URI.
@@ -90,8 +131,8 @@
 				try {
 					// Safari requires data URI since it doesn't allow navigation to blob URLs
 					// Firefox has an issue with Blobs and internal references, leading to gradients not working using Blobs (#4550)
-					if (!webKit && navigator.userAgent.toLowerCase().indexOf('firefox') < 0) {
-						return domurl.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset-utf-16' }));
+					if (!webKit && nav.userAgent.toLowerCase().indexOf('firefox') < 0) {
+						return domurl.createObjectURL(new win.Blob([svg], { type: 'image/svg+xml;charset-utf-16' }));
 					}
 				} catch (e) {
 					// Ignore
@@ -100,13 +141,13 @@
 			},
 			// Download contents by dataURL/blob
 			download = function (dataURL, extension) {
-				var a = document.createElement('a'),
+				var a = doc.createElement('a'),
 					filename = (options.filename || 'chart') + '.' + extension,
 					windowRef;
 
 				// IE specific blob implementation
-				if (navigator.msSaveOrOpenBlob) {
-					navigator.msSaveOrOpenBlob(dataURL, filename);
+				if (nav.msSaveOrOpenBlob) {
+					nav.msSaveOrOpenBlob(dataURL, filename);
 					return;
 				}
 
@@ -115,19 +156,19 @@
 					a.href = dataURL;
 					a.download = filename; // HTML5 download attribute
 					a.target = '_blank';
-					document.body.appendChild(a);
+					doc.body.appendChild(a);
 					a.click();
-					document.body.removeChild(a);
+					doc.body.removeChild(a);
 				} else {
 					// No download attr, just opening data URI
 					try {
-						windowRef = window.open(dataURL, 'chart');
+						windowRef = win.open(dataURL, 'chart');
 						if (windowRef === undefined || windowRef === null) {
-							throw 1;
+							throw 'Failed to open window';
 						}
 					} catch (e) {
 						// window.open failed, trying location.href
-						window.location.href = dataURL;
+						win.location.href = dataURL;
 					}
 				}
 			},
@@ -141,7 +182,7 @@
 				if (options && options.type === 'image/svg+xml') {
 					// SVG download. In this case, we want to use Microsoft specific Blob if available
 					try {
-						if (navigator.msSaveOrOpenBlob) {
+						if (nav.msSaveOrOpenBlob) {
 							blob = new MSBlobBuilder();
 							blob.append(svg);
 							svgurl = blob.getBlob('image/svg+xml');
@@ -167,14 +208,14 @@
 					}, function () {
 						// Failed due to tainted canvas
 						// Create new and untainted canvas
-						var canvas = document.createElement('canvas'),
+						var canvas = doc.createElement('canvas'),
 							ctx = canvas.getContext('2d'),
 							imageWidth = svg.match(/^<svg[^>]*width\s*=\s*\"?(\d+)\"?[^>]*>/)[1] * scale,
 							imageHeight = svg.match(/^<svg[^>]*height\s*=\s*\"?(\d+)\"?[^>]*>/)[1] * scale,
 							downloadWithCanVG = function () {
 								ctx.drawSvg(svg, 0, 0, imageWidth, imageHeight);
 								try {
-									download(navigator.msSaveOrOpenBlob ? canvas.msToBlob() : canvas.toDataURL('image/png'), 'png');
+									download(nav.msSaveOrOpenBlob ? canvas.msToBlob() : canvas.toDataURL('image/png'), 'png');
 								} catch (e) {
 									fallbackToExportServer();
 								}
@@ -182,13 +223,13 @@
 
 						canvas.width = imageWidth;
 						canvas.height = imageHeight;
-						if (window.canvg) {
+						if (win.canvg) {
 							// Use preloaded canvg
 							downloadWithCanVG();
 						} else {
 							// Must load canVG first
 							chart.showLoading();
-							Highcharts.getScript(Highcharts.getOptions().global.canvasToolsURL, function () {
+							getScript(Highcharts.getOptions().global.canvasToolsURL, function () {
 								chart.hideLoading();
 								downloadWithCanVG();
 							});

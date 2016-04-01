@@ -1,8 +1,8 @@
 /**
- * @license Highcharts JS v4.1.10 (2015-12-07)
+ * @license Highcharts JS v4.2.3 (2016-02-08)
  * Exporting module
  *
- * (c) 2010-2014 Torstein Honsi
+ * (c) 2010-2016 Torstein Honsi
  *
  * License: www.highcharts.com/license
  */
@@ -17,7 +17,9 @@
 }(function (Highcharts) {
 
 // create shortcuts
-var Chart = Highcharts.Chart,
+var win = Highcharts.win,
+	doc = win.document,
+	Chart = Highcharts.Chart,
 	addEvent = Highcharts.addEvent,
 	removeEvent = Highcharts.removeEvent,
 	fireEvent = Highcharts.fireEvent,
@@ -30,8 +32,6 @@ var Chart = Highcharts.Chart,
 	splat = Highcharts.splat,
 	math = Math,
 	mathMax = math.max,
-	doc = document,
-	win = window,
 	isTouchDevice = Highcharts.isTouchDevice,
 	M = 'M',
 	L = 'L',
@@ -306,7 +306,7 @@ extend(Chart.prototype, {
 		// prepare for replicating the chart
 		options.series = [];
 		each(chart.series, function (serie) {
-			seriesOptions = merge(serie.options, {
+			seriesOptions = merge(serie.userOptions, { // #4912
 				animation: false, // turn off animation
 				enableMouseTracking: false,
 				showCheckbox: false,
@@ -539,9 +539,9 @@ extend(Chart.prototype, {
 
 
 			// Hide it on clicking or touching outside the menu (#2258, #2335, #2407)
-			addEvent(document, 'mouseup', docMouseUpHandler);
+			addEvent(doc, 'mouseup', docMouseUpHandler);
 			addEvent(chart, 'destroy', function () {
-				removeEvent(document, 'mouseup', docMouseUpHandler);
+				removeEvent(doc, 'mouseup', docMouseUpHandler);
 			});
 
 
@@ -678,7 +678,8 @@ extend(Chart.prototype, {
 		button = renderer.button(btnOptions.text, 0, 0, callback, attr, hover, select)
 			.attr({
 				title: chart.options.lang[btnOptions._titleKey],
-				'stroke-linecap': 'round'
+				'stroke-linecap': 'round',
+				zIndex: 3 // #4955
 			});
 		button.menuClassName = options.menuClassName || PREFIX + 'menu-' + chart.btnCount++;
 

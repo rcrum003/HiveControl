@@ -1,8 +1,8 @@
 /**
- * @license Highcharts JS v4.1.10 (2015-12-07)
+ * @license Highcharts JS v4.2.3 (2016-02-08)
  * Data module
  *
- * (c) 2012-2014 Torstein Honsi
+ * (c) 2012-2016 Torstein Honsi
  *
  * License: www.highcharts.com/license
  */
@@ -17,7 +17,9 @@
 }(function (Highcharts) {
 	
 	// Utilities
-	var each = Highcharts.each,
+	var win = Highcharts.win,
+		doc = win.document,
+		each = Highcharts.each,
 		pick = Highcharts.pick,
 		inArray = Highcharts.inArray,
 		splat = Highcharts.splat,
@@ -240,7 +242,7 @@
 			if (table) {
 				
 				if (typeof table === 'string') {
-					table = document.getElementById(table);
+					table = doc.getElementById(table);
 				}
 				
 				each(table.getElementsByTagName('tr'), function (tr, rowNo) {
