@@ -58,7 +58,7 @@ echo '
                 </li>
             
                  <li>
-                    <a href="environment.php"><i class="fa fa-table fa-fw"></i>Weather</a>
+                    <a href="/pages/environment.php"><i class="fa fa-table fa-fw"></i>Weather</a>
                 </li>
                     <li>
                             <a href="video.php"><i class="fa fa-video-camera fa-fw"></i>Camera</a>
