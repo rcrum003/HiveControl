@@ -10,7 +10,7 @@
 
 switch ($period) {
     case "day":
-        $sqlperiod = "-1 days";
+        $sqlperiod = "-24 hours";
         break;
     case "week":
         $sqlperiod = "-7 days";
