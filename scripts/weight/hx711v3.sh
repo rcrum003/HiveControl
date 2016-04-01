@@ -3,7 +3,7 @@
 # read the scale
 # 
 #
-# v4 patch 
+# v3 patch 
 # Changed Count to RAW for better readability
 # Added a check to make sure RAW is a number to assist setups that don't always return a number
 # In this case, every couple of times, we were getting "No data to consider"
@@ -11,10 +11,10 @@
 
 source /home/HiveControl/scripts/hiveconfig.inc
 
-HX711_ZERO="$HIVE_WEIGHT_INTERCEPT"
-HX711_CALI="$HIVE_WEIGHT_SLOPE"
-#HX711_ZERO=".5"
-#HX711_CALI=".00098409"
+HX711_ZERO=$HIVE_WEIGHT_INTERCEPT
+HX711_CALI=$HIVE_WEIGHT_SLOPE
+#HX711_ZERO=37800
+#HX711_CALI=9928.50
 #
 # read the scale
 DATA_GOOD=0
@@ -28,9 +28,8 @@ RAW=`/usr/bin/timeout 5 /usr/bin/sudo /usr/local/bin/hx711 $HX711_ZERO`
 if [[ $RAW =~ ^-?[0-9]+$ ]] 
 then	
 	#echo "Passed Test"
-	WEIGHT1=`echo "($RAW*$HX711_CALI+$HX711_ZERO)" | bc`
-	WEIGHT=`echo "scale=2; ($WEIGHT1/1)" | bc`        
-if [ $WEIGHT ]
+	WEIGHT=`echo "scale=2; ($RAW/$HX711_CALI)" | bc`
+        if [ $WEIGHT ]
         then
          DATA_GOOD=1
         fi
