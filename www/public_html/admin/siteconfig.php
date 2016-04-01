@@ -294,7 +294,7 @@ if($v->validate()) {
                                         </tr>
                                     </tbody>
                                 </table>
-                                        <td>Configure your preferred site detail type. Compact removes the stats bars from the dashboard. </td>
+                                        <td>Configure your preferred trend colors and weather to show them on the main dashboard. </td>
                                        </tr>
 
                                      </tr>
