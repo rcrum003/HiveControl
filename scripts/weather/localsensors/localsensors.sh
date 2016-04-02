@@ -1,6 +1,6 @@
 
 #!/bin/bash
-# Version 1
+# Version 1.1
 # Script to output localized DHT22 and RainSensor that matches WUNDERGROUND file format
 #
 # 
@@ -32,10 +32,10 @@ fi
 
 # ------ GET Rain Data ------
 
-$raininhourly=0
-$rainmetrichour=0
-$rainindaily=0
-$rainmetricdaily=0
+raininhourly=0
+rainmetrichour=0
+rainindaily=0
+rainmetricdaily=0
 # ------ END GET Rain Data ------
 
 #============================================
@@ -79,7 +79,7 @@ echo "		\"windchill_c\":\"NA\","
 echo "		\"solarradiation\":\"--\","
 echo "		\"UV\":\"0\","
 echo "		\"precip_1hr_in\":\"$raininhourly\","
-echo "		\"precip_1hr_metric\":\"$$rainmetrichour\","
+echo "		\"precip_1hr_metric\":\"$rainmetrichour\","
 echo "		\"precip_today_string\":\"NA\","
 echo "		\"precip_today_in\":\"$rainindaily\","
 echo "		\"precip_today_metric\":\"$rainmetricdaily\""

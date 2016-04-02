@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="5"
+Upgrade_ver="6"
 
 #set -x
 
@@ -35,6 +35,8 @@ echo "Getting Latest Code"
 WWWTempRepo="/home/HiveControl/upgrade/HiveControl/www/public_html"
 DestWWWRepo="/home/HiveControl/www/public_html"
 DestDB="/home/HiveControl/data/hive-data.db"
+scriptsource="/home/HiveControl/upgrade/HiveControl/scripts"
+scriptDest="/home/HiveControl/scripts/"
 
 #Remove some initial installation files from repository for upgrade
 #Remove the offending file, since we don't want to upgrade these 
@@ -50,13 +52,16 @@ cp -R $WWWTempRepo/pages/* $DestWWWRepo/pages/
 cp -R $WWWTempRepo/admin/* $DestWWWRepo/admin/
 cp -R $WWWTempRepo/include/* $DestWWWRepo/include/
 cp -R $WWWTempRepo/errors/* $DestWWWRepo/errors/
-
 echo "============================================="
 
 #Upgrade our code
+
 echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
-echo "..... ok, not yet, but future code"
+cp -R $scriptsource/* $scriptDest/*
+cd $scriptDest
+find . -name '*.sh' -exec chmod u+x -v {} +
+
 echo "============================================="
 
 #Upgrade our DB

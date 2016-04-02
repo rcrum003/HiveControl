@@ -1,5 +1,7 @@
 #usage loglocal "$DATE" PROGRAM TYPE "Message"
 # Example - loglocal "$DATE" SYNCHIVE ERROR "No Connection"
+# include in script file
+# source /home/HiveControl/scripts/data/logger.inc
 
 function loglocal {
 
