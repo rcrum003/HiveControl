@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="6"
+Upgrade_ver="7"
 
 #set -x
 
@@ -58,6 +58,7 @@ echo "============================================="
 
 echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
+rm -rf $scriptsource/hiveconfig.inc
 cp -R $scriptsource/* $scriptDest/*
 cd $scriptDest
 find . -name '*.sh' -exec chmod u+x -v {} +
