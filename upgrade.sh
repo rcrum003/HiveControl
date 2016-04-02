@@ -13,6 +13,8 @@ Upgrade_ver="9"
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
+DATE=$(TZ=":$TIMEZONE" date '+%F %T')
+
 #Check to see if we are latest version
 Installed_Ver=$(cat /home/HiveControl/VERSION)
 Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)

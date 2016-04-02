@@ -1,11 +1,14 @@
 #!/bin/bash
 # Check for upgrades
 # Only running once a day, when we load GDD
+# v2
 
 #Check our upgrade script
 #Get the current version
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
+
+DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 Upgrade_ver=$(cat /home/HiveControl/upgrade.sh | grep "Upgrade_ver" |awk -F\" '{print $2}')
 	#Get the version available
