@@ -80,6 +80,9 @@ echo '
                                 <li>
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
+                                <li>
+                                    <a href="/admin/system.php">System Logs</a>
+                                </li>
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
@@ -128,13 +131,19 @@ if ($orient == "normal") {
                             <a href="#"><i class="fa fa-gear fa-fw"></i>Settings<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="/pages/admin/hiveconfig.php">Basic Config</a>
+                                    <a href="/admin/hiveconfig.php">Basic Config</a>
                                 </li>
                                 <li>
-                                    <a href="/pages/admin/instrumentconfig.php">Instruments</a>
+                                    <a href="/admin/instrumentconfig.php">Instruments</a>
                                 </li>
                                 <li>
-                                    <a href="/pages/admin/hivebodyconfig.php">Hive Body</a>
+                                    <a href="/admin/hivebodyconfig.php">Hive Body</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/siteconfig.php">Site Preferences</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/system.php">System Logs</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

@@ -30,8 +30,8 @@ switch ($period) {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
-$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight), 1) as hiveweight, MAX(hiveweight) as maxhiveweight, MIN(hiveweight) as minhiveweight, ROUND(AVG(hiverawweight), 1) as hiverawweight, MAX(hiverawweight) as maxhiverawweight, MIN(hiverawweight) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY date 
-ASC LIMIT 1) as startweight, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight), 1) as hiveweight, MAX(hiveweight) as maxhiveweight, MIN(hiveweight) as minhiveweight, ROUND(AVG(hiverawweight), 1) as hiverawweight, MAX(hiverawweight) as maxhiverawweight, MIN(hiverawweight) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date 
+ASC LIMIT 1) as startweight, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 

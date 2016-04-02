@@ -8,9 +8,20 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="8"
+Upgrade_ver="9"
 
-#set -x
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
+
+#Check to see if we are latest version
+Installed_Ver=$(cat /home/HiveControl/VERSION)
+Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
+
+if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
+		echo "Nothing to do, you are at the latest version"
+		loglocal "$DATE" UPGRADE WARNING "Upgrade attempted, but nothing to upgrade. Installed is latest"
+		exit
+fi
 
 #Back everything up, just in case (mainly the database)
 echo "Backing up Database to hive-data.bckup"
@@ -36,7 +47,7 @@ WWWTempRepo="/home/HiveControl/upgrade/HiveControl/www/public_html"
 DestWWWRepo="/home/HiveControl/www/public_html"
 DestDB="/home/HiveControl/data/hive-data.db"
 scriptsource="/home/HiveControl/upgrade/HiveControl/scripts"
-scriptDest="/home/HiveControl/scripts/"
+scriptDest="/home/HiveControl/scripts"
 
 #Remove some initial installation files from repository for upgrade
 #Remove the offending file, since we don't want to upgrade these 
@@ -48,10 +59,10 @@ echo "============================================="
 
 #Upgrade www
 echo "Upgrading WWW pages"
-cp -R $WWWTempRepo/pages/* $DestWWWRepo/pages/
-cp -R $WWWTempRepo/admin/* $DestWWWRepo/admin/
-cp -R $WWWTempRepo/include/* $DestWWWRepo/include/
-cp -R $WWWTempRepo/errors/* $DestWWWRepo/errors/
+cp -Rp $WWWTempRepo/pages/* $DestWWWRepo/pages/
+cp -Rp $WWWTempRepo/admin/* $DestWWWRepo/admin/
+cp -Rp $WWWTempRepo/include/* $DestWWWRepo/include/
+cp -Rp $WWWTempRepo/errors/* $DestWWWRepo/errors/
 echo "============================================="
 
 #Upgrade our code
@@ -59,10 +70,8 @@ echo "============================================="
 echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
 rm -rf $scriptsource/hiveconfig.inc
-read -p "Press [Enter] key to continue..."
-cp -Ru $scriptsource/* $scriptDest/*
-cd $scriptDest
-find . -name '*.sh' -exec chmod u+x -v {} +
+cp -Rup $scriptsource/* $scriptDest/*
+find . -name '$scriptDest/*.sh' -exec chmod u+x {} +
 
 echo "============================================="
 
@@ -98,6 +107,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 echo "============================================="
 
 #Cleanup and set the flag in the DB
+loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
 
 #Move the VERSION
 cp /home/HiveControl/upgrade/HiveControl/VERSION /home/HiveControl/
