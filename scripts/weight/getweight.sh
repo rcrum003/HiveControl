@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 0.2
+# version 0.3
 # reads the Phidget Bridge board or other scale boards and scales the output
 # The code below that checks for difference is just to catch when the numbers go horribly wrong, usually
 # because of a sensor error. If it goes that wrong, we want the code to try again until the code is more reasonable
@@ -9,6 +9,8 @@
 WEIGHTRUNDIR=/home/HiveControl/scripts/weight
 # Get some variables from our central file
 source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
+
 
 #echo "Got my source"
 COUNTER=0
@@ -44,12 +46,13 @@ CHANGE=$(echo "scale=2; $DIFF/$OLDWEIGHT" |bc)
 ALLOWDIFF="-.25"
 
 if [[ $( echo "$CHANGE < $ALLOWDIFF" |bc) -eq 1 ]]; then 
-        echo "$DATE - WEIGHT - ERROR: PERCENTAGE OF CHANGE EXCEEDS $ALLOWDIFF" >> $LOG 
+		loglocal "$DATE" WEIGHT WARNING "PERCENTAGE OF CHANGE EXCEEDS $ALLOWDIFF"
+        
 	sleep 30s
 	let SUBCOUNTER=SUBCOUNTER+1
 	#echo SUB is $SUBCOUNTER
 	if [[  $SUBCOUNTER -gt "5" ]]; then
-	echo "$DATE - WEIGHT - ERROR: Exceeded Retries to get a good weight" >> $LOG
+		loglocal "$DATE" WEIGHT ERROR "Exceeded Retries to get a good weight"
 	RAWWEIGHT="$OLDWEIGHT"
 	let COUNTER=COUNTER+1			
 	fi

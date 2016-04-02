@@ -38,12 +38,13 @@ if [[ $ERROR -ne "1"  ]]; then
 		sqlite3 $LOCALDATABASE "UPDATE hivedata SET SYNC=0 WHERE SYNC=1;"
 		# Clean up Remote
 		$MYSQL -e "UPDATE hivedata SET recentlyupdated=0 WHERE recentlyupdated=1 AND hiveid=$HIVEID;"
-		printf "$DATE -SYNCHIVE-SUCCESS-Successfully Synced $LOCALCOUNT Records \n" >> $LOG
+		#printf "$DATE -SYNCHIVE-SUCCESS-Successfully Synced $LOCALCOUNT Records \n" >> $LOG
 		loglocal "$DATE" SYNCHIVE SUCCESS "Synced $LOCALCOUNT Records"
 	else
-		printf "$DATE -SYNCHIVE-ERROR-Bad record count LOCAL=$LOCALCOUNT, REMOTE=$REMOTECOUNT \n" >> $LOG
+		#printf "$DATE -SYNCHIVE-ERROR-Bad record count LOCAL=$LOCALCOUNT, REMOTE=$REMOTECOUNT \n" >> $LOG
+		loglocal "$DATE" SYNCHIVE ERROR "Bad record count LOCAL=$LOCALCOUNT, REMOTE=$REMOTECOUNT"
 	fi
 else
-        printf "$DATE -SYNCHIVE-ERROR-No connection to DB\n" >> $LOG
+        #printf "$DATE -SYNCHIVE-ERROR-No connection to DB\n" >> $LOG
 	loglocal "$DATE" SYNCHIVE ERROR "No Connection"
 fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to get variales from db to use in our scripts
-# Version 2
+# Version 3
 
 source /home/HiveControl/scripts/data/logger.inc
 
