@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="9"
+Upgrade_ver="10"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
