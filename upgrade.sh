@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="10"
+Upgrade_ver="12"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -72,8 +72,9 @@ echo "============================================="
 echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
 rm -rf $scriptsource/hiveconfig.inc
-cp -Rup $scriptsource/* $scriptDest/*
-find . -name '$scriptDest/*.sh' -exec chmod u+x {} +
+cp -Rup $scriptsource/* $scriptDest/
+cd $scriptDest
+find . -name '*.sh' -exec chmod u+x {} +
 
 echo "============================================="
 
