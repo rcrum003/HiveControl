@@ -2,6 +2,8 @@
 # Script to get variales from db to use in our scripts
 # Version 2
 
+source /home/HiveControl/scripts/data/logger.inc
+
 #Set some default variables
 LOCALDATABASE=/home/HiveControl/data/hive-data.db
 CONFIGOUT="/home/HiveControl/scripts/hiveconfig.inc"
@@ -19,6 +21,7 @@ if [ $DBVERSION -eq $FILEVERSION ]; then
 	exit 1
 fi
 if [ $FILEVERSION -gt $DBVERSION ]; then
+	loglocal "$DATE" CONFIG ERROR "File Version is higher than DB Version - Did you edit manually"
 	echo "ERROR: File Version is higher than DB Version - Did you edit manually?"
 	exit 1
 fi
@@ -29,7 +32,7 @@ sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveeq
 
 cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT 
 
-echo "$DATE-HIVECONFIG-SUCCESS-Updated Config to Version $DBVERSION" >> $LOG
+loglocal "$DATE" CONFIG SUCCESS "Updated Config to Version $DBVERSION"
 
 
 

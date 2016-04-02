@@ -36,13 +36,14 @@ done
 
 if [[ $COUNTER -gt 11 ]]
 then
-  echo "$DATE2 ERROR reading $DEVICE" >> $LOG
+  loglocal "$DATE2" LIGHT ERROR "Error Reading $DEVICE"
+
 fi
 
 if test $COUNTER -gt 2
 then
   echo "$DATE WARNING reading TSL2591: retried $COUNTER" >> $LOG
-  loglocal "$DATE2" TSL2591 WARNING "Failed reading TSL2591 - Retried $COUNTER times"
+  loglocal "$DATE2" LIGHT WARNING "Failed reading TSL2591 - Retried $COUNTER times"
 fi
 
 echo $LUX

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 1.2
+# Version 1.3
 
 #set -x #echo on
 # Get Variables from central file
@@ -187,15 +187,15 @@ WEBFILE=$PUBLIC_HTML_DIR/data/current.json
 echo "[{" > $WEBFILE
 echo "\"current_conditions\": {" >> $WEBFILE
 echo "		\"observation_location\": {" >> $WEBFILE
-echo "		\"full\":\"Beeyard, Fairfield, CT\"," >> $WEBFILE
+echo "		\"full\":\"$HIVENAME, $CITY, $STATE\"," >> $WEBFILE
 echo "		\"yardname\":\"Beeyard\"," >> $WEBFILE
-echo "		\"city\":\"Fairfield\"," >> $WEBFILE
-echo "		\"state\":\"Connecticut\"," >> $WEBFILE
-echo "		\"country\":\"US\"," >> $WEBFILE
-echo "		\"country_iso3166\":\"US\"," >> $WEBFILE
-echo "		\"latitude\":\"41.142033\"," >> $WEBFILE
-echo "		\"longitude\":\"-73.241989\"," >> $WEBFILE
-echo "		\"elevation\":\"11 ft\"" >> $WEBFILE
+echo "		\"city\":\"$CITY\"," >> $WEBFILE
+echo "		\"state\":\"$STATE\"," >> $WEBFILE
+echo "		\"country\":\"$COUNTRY\"," >> $WEBFILE
+echo "		\"country_iso3166\":\"$COUNTRY\"," >> $WEBFILE
+echo "		\"latitude\":\"$LATITUDE\"," >> $WEBFILE
+echo "		\"longitude\":\"$LONGITUDE\"," >> $WEBFILE
+echo "		\"elevation\":\"NA\"" >> $WEBFILE
 echo "		}," >> $WEBFILE
 echo "		\"hive\": {" >> $WEBFILE
 echo "		\"id\":\"$HIVENAME\"," >> $WEBFILE

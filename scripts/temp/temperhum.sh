@@ -44,13 +44,13 @@ done
 if [[ $COUNTER -gt 11 ]]
 then
   #echo "$DATE2-TEMPER-ERROR-Error Reading $HIVEDEVICE" >> $LOG
-  loglocal "$DATE2" TEMPER ERROR "Error Reading $HIVEDEVICE"
+  loglocal "$DATE2" TEMP ERROR "Temperhum Error Reading $HIVEDEVICE"
 fi
 
 if test $COUNTER -gt 5
 then
   #echo "$DATE2-TEMPER-WARNING-Failed reading $HIVEDEVICE: retried $COUNTER times" >> $LOG
-  loglocal "$DATE2" TEMPER WARNING "Failed reading $HIVEDEVICE: Retried $COUNTER times"
+  loglocal "$DATE2" TEMP WARNING "Temperhum Failed reading $HIVEDEVICE: Retried $COUNTER times"
 fi
 
 echo $TEMPF $HUMIDITY $DEW $TEMPC

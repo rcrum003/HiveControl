@@ -10,8 +10,10 @@
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-echo "Using an TS2561 - Not supported" >> $LOG
-echo $0
+loglocal "$DATE" LIGHT ERROR "TSL2561 Not Supported"
+
+#echo "Using an TS2561 - Not supported" >> $LOG
+echo 0
 
 
 

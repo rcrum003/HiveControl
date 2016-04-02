@@ -1,3 +1,5 @@
+#usage loglocal "$DATE" PROGRAM TYPE "Message"
+# Example - loglocal "$DATE" SYNCHIVE ERROR "No Connection"
 
 function loglocal {
 

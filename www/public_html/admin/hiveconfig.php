@@ -33,11 +33,12 @@ $regex1 = "/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/";
 
 $v = new Valitron\Validator($_POST);
 $v->rule('required', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR'], 1)->message('{field} is required');
-$v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
+$v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER', 'WXTEMPTYPE']);
 $v->rule('integer', ['YARDID', 'BEEKEEPERID'],  1)->message('{field} can only be an integer');
 $v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
 $v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
 $v->rule('lengthmax', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR', 'LATITUDE', 'LONGITUDE'], 40);
+$v->rule('lengthmax', ['WX_TEMP_GPIO'], 2);
 $v->rule('regex', ['CITY', 'STATE', 'COUNTRY'], $regex1);
 $v->rule('numeric', ['BEEKEEPERID', 'YARDID', 'GDD_BASE_TEMP']);
 
@@ -150,11 +151,14 @@ if($v->validate()) {
     $STATUS = test_input($_POST["STATUS"]);
     $COMPUTER = test_input($_POST["COMPUTER"]);
     $START_DATE = test_input($_POST["START_DATE"]);
+    $WXTEMPTYPE = test_input($_POST["WXTEMPTYPE"]);
+    $WX_TEMPER_DEVICE = test_input_allow_slash($_POST["WX_TEMPER_DEVICE"]);
+    $WX_TEMP_GPIO = test_input($_POST["WX_TEMP_GPIO"]);
 
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=? WHERE id=1");
+    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO));
     sleep(3);
 
     // Refresh the fields in the form
@@ -788,6 +792,7 @@ if($v->validate()) {
                             <option value="yard" <?php if ($result['WEATHER_LEVEL'] == "yard") {echo "selected='selected'";} ?>>Yard Controller</option>
                             <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
                             <option value="localws" <?php if ($result['WEATHER_LEVEL'] == "localws") {echo "selected='selected'";} ?>>Local Weather Station</option>
+                            <option value="localsensors" <?php if ($result['WEATHER_LEVEL'] == "localsensors") {echo "selected='selected'";} ?>>Local Hive Sensors</option>
                             </select></td>
                             <td>
 
@@ -808,13 +813,28 @@ if($v->validate()) {
                                     
                                 if ($result['WEATHER_LEVEL'] == "localws") {
                                     echo 'Using WS1400.sh for local WX Station';}
-                                    //echo '<input type="radio" name="" value="localws" checked> LOCALWS';}
+                                    
+                               if ($result['WEATHER_LEVEL'] == "localsensors") {
+                                    //echo 'Using Locally Connected Sensores for local WX Station';
+                                    echo '<select name="WXTEMPTYPE">
+                                    <option value="temperhum"'; if ($result['WXTEMPTYPE'] == "temperhum") {echo "selected='selected'";} echo '>Temperhum</option>
+                                    <option value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "selected='selected'";} echo '>DHT21</option>
+                                    <option value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "selected='selected'";} echo '>DHT22</option>';
+                                    echo '</select><BR>';
+                                    if ($result['WXTEMPTYPE'] == "temperhum") {
+                                        echo 'Device <input type="text" name="WX_TEMPER_DEVICE" value="'; echo $result['WX_TEMPER_DEVICE']; echo '""></td>';
 
+                                    }
+                                    if ($result['WXTEMPTYPE'] == "dht21" || $result['WXTEMPTYPE'] == "dht22") {
+                                 echo 'GPIO <input type="text" name="WX_TEMP_GPIO" value="'; echo $result['WX_TEMP_GPIO']; echo '"></td>';
+                                    }
+                                }
+            
                             ?></td>
                             <td>Specify where you want to get your ambient weather data from.</td>
                         </tr>
 
-                        <?PHP if ($result['WEATHER_LEVEL'] == "localws") {
+                        <?PHP if ($result['WEATHER_LEVEL'] == "localws" || $result['WEATHER_LEVEL'] == "localsensors" ) {
                             echo '
                             <tr class="odd gradeX">
                             <td>Weather Forecast Source</td>

@@ -18,6 +18,8 @@
 #set -x
 
 source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
+
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 DATASOURCE="$HOMEDIR/data/hive-data.db"
 
