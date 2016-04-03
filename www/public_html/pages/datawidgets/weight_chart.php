@@ -132,8 +132,7 @@ $(function () {
         series: [{
             type: 'line',
             name: 'Hive Weight Net (lbs)',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "],
-            dashStyle: 'longdash', 
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
             color: '"; echo "$color_netweight"; echo "'
         },
         {
@@ -141,7 +140,6 @@ $(function () {
            name: 'Hive Weight Gross (lbs)',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
            color: '"; echo "$color_grossweight"; echo "',
-           dashStyle: 'longdash',
            visible: true
         },
         {
