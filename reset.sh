@@ -14,7 +14,10 @@ function erasedata {
 sqlite3 $HOMEDIR/data/hive-data.db "DELETE from allhivedata;"
 sqlite3 $HOMEDIR/data/hive-data.db "DELETE from hivedata;"
 sqlite3 $HOMEDIR/data/hive-data.db "DELETE from weather;"
+sqlite3 $HOMEDIR/data/hive-data.db "DELETE from logs;"
+
 loglocal "$DATE" RESET SUCCESS "Hive Data was reset"
+echo "DONE: Deleted all data"
 }
 
 
@@ -24,7 +27,7 @@ echo "WARNING: This will delete all hive readings"
 echo "Are you sure you want to continue?"
 select yn in "Yes" "No"; do
     case $yn in
-        Yes ) erasedata;;
+        Yes ) erasedata; break;;
         No ) exit;;
     esac
 done
