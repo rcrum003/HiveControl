@@ -10,28 +10,16 @@ Weight, Temperature, Webcam, Weather, GDD, LUX
 
 [Supported Sensors](https://github.com/rcrum003/HiveControl/wiki/Sensor-Support)
 
-## Installation Instructions
+## Installation
 To install, download and run [install.sh](https://raw.githubusercontent.com/rcrum003/HiveControl/master/install.sh) as root from your Raspberry PI.
 Easiest way is to run this command from your command line:
-curl https://raw.githubusercontent.com/rcrum003/HiveControl/master/install.sh -o install.sh
-sudo ./install.sh
 
------------------------
-Weight Logging
------------------------
-Weight logging modules currently supports HX711 (included with Hivetool Developer Kit) or the Phidget 1046 module.
+      curl https://raw.githubusercontent.com/rcrum003/HiveControl/master/install.sh -o install.sh
+      sudo ./install.sh
 
-Installing:
-1. You will need to calibrate your scale (ie, zero it out)
-2. See the /scripts/weight/ directory for how we do this.
+## Upgrading/Updating
+To upgrade or update to the latest version, after you have installed, run:
+
+      sudo /home/HiveControl/upgrade.sh
 
 
-------------------------
-Temperature
-------------------------
-Temperature logging currently supports the TemperHUM sensors.
-
-
--------------------------
-Weather
--------------------------
