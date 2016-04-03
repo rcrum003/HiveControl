@@ -112,7 +112,6 @@ sudo apt-get install mysql-client -y
 
 # Copy Apache Configuration for LocalHost
 sudo cp /etc/apache2/sites-available/000-default.conf /home/HiveControl/install/apache/default.bckup
-read -p "Updating default Apache config - backup in Install/apache directory - Press Any Key to Continue..."
 sudo cp /home/HiveControl/install/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 sudo apachectl restart
 # Setup Database to be able to be written to by Apache
@@ -135,7 +134,7 @@ htpasswd -c .htpasswd admin
 sudo service apache2 restart
 
 #Upgrade DB
-cd /home/HiveControl/patches/Database
+cd /home/HiveControl/patches/database
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_1
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_2
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_3
@@ -143,6 +142,10 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_4
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_5
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_6
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_7
+
+#Set Shells to be executable
+cd /home/HiveControl/
+sudo find . -name '*.sh' -exec chmod u+x {} +
 
 
 echo "========================================================"
@@ -162,8 +165,6 @@ fi
 if [[ $IPCount -eq "2" ]]; then
 	echo "Please go to http://$IP/pages/admin/hiveconfig.php to setup basic options"
 fi
-echo "Then run - enablecron.sh from this directory"
-
 
 #Setup Cron when we are ready to go
 sudo crontab -l > /home/HiveControl/install/cron/cron.orig
