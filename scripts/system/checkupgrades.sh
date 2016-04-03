@@ -43,3 +43,7 @@ if [[  $(echo "$Installed_Ver > $Latest_Ver" | bc) -eq 1 ]]; then
 fi
 echo "We have some upgrading to do!"
 sqlite3 $Db "UPDATE hiveconfig SET upgrade_available=\"yes\" WHERE id=1"
+
+
+
+

@@ -134,7 +134,8 @@ $result = $sth->fetchall(PDO::FETCH_ASSOC);
         <script>
     $(document).ready(function() {
         $('#dataTables-example').DataTable({
-                responsive: true
+                responsive: true,
+                 "order": [[ 0, "desc" ]]
         });
     });
     </script>
