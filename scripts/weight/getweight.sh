@@ -43,7 +43,7 @@ if [ $RAW_MINTEST -eq 0 ] && [ $RAW_MAXTEST -eq 0 ]; then
 
 else
 	#Something bad happened, set values to zero and exit
-        loglocal "$DATE" WEIGHT ERROR "Raw weight exceeded 1500 or was less than 0, setting value to 0"	
+        loglocal "$DATE" WEIGHT ERROR "Raw weight was $RAWWEIGHT which exceeded 1500 or was less than 0, setting value to 0"	
          RAW2="0"
          HIVEWEIGHT="0"
 fi
