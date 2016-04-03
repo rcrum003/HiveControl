@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 0.4
+# version 0.5
 # reads the Phidget Bridge board or other scale boards and scales the output
 # Updated to remove the percentage check, since that seems to cause a lot of bad values
 # Now we just check for expected weights within range between 0 and 1500 lbs.
@@ -27,7 +27,7 @@ fi
 	RAW_MINTEST=$(echo "$RAWWEIGHT < 0" | bc)
     RAW_MAXTEST=$(echo "$RAWWEIGHT > 1500" | bc)
 
-if [[ $RAW_MINTEST -eq 0 ] && [ $RAW_MAXTEST -eq 0 ]]; then
+if [ $RAW_MINTEST -eq 0 ] && [ $RAW_MAXTEST -eq 0 ]; then
          
 	# Success - Let's get the other data
 	#================
