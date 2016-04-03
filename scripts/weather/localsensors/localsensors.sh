@@ -31,7 +31,6 @@ fi
 # ------END GET TEMP/Humidity ------
 
 # ------ GET Rain Data ------
-
 raininhourly=0
 rainmetrichour=0
 rainindaily=0
@@ -121,8 +120,8 @@ echo "
 		<windchill_c>NA</windchill_c>
 	        <solarradiation>--</solarradiation>
 		<UV>0</UV>
-		<precip_1hr_in>${raininhourly}</precip_1hr_in>
-		<precip_1hr_metric>$rainmetrichourly</precip_1hr_metric>
+		<precip_1hr_in>$raininhourly</precip_1hr_in>
+		<precip_1hr_metric>$rainmetrichour</precip_1hr_metric>
 		<precip_today_string>NA</precip_today_string>
 		<precip_today_in>$rainindaily</precip_today_in>
 		<precip_today_metric>$rainmetricdaily</precip_today_metric>
