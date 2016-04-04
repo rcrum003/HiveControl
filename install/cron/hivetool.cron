@@ -12,3 +12,4 @@
 
 #Check for HiveControl Updates
 05 12 * * * /home/HiveControl/scripts/system/checkupgrades.sh > /dev/null 2>&1
+

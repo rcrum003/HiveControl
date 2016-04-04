@@ -59,19 +59,21 @@ echo "Installing Python - 2.7"
 cd /home
 sudo git clone https://github.com/rcrum003/HiveControl 
 
-
-echo "Installing wiringPI"
-cd /home/HiveControl/software/wiringPI/
-sudo ./build
+#echo "Installing wiringPI"
+#cd /home/HiveControl/software/wiringPI/
+#sudo ./build
 
 echo "Copying Binaries"
 sudo cp /home/HiveControl/software/binaries/* /usr/local/bin/
 
-
 echo "Installing hidapi - for Temp Sensor"
+#Get prerequite
+sudo apt-get install dh-autoreconf
 # Make hidapi software
-sudo cd /home/HiveControl/software/
+cd /home/HiveControl/software/
 sudo git clone https://github.com/rcrum003/hidapi
+
+#git clone git://github.com/signal11/hidapi.git
 cd /home/HiveControl/software/hidapi
 sudo ./bootstrap
 sudo ./configure
