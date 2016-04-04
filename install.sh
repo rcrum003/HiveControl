@@ -35,6 +35,9 @@ sudo apt-get update
 
 # Install files needed specifically for HiveControl2
 
+echo "========================================================================"
+echo "Installing dependencies"
+echo "========================================================================"
 echo "Installing BC - for math and stuff"
 sudo apt-get install bc -y
 
@@ -48,13 +51,15 @@ echo "Installing hidapi required software"
 sudo apt-get install libudev-dev -y
 sudo apt-get install libusb-1.0-0-dev -y
 sudo apt-get install libfox-1.6-dev -y
-sudo apt-get install autotools-dev autoconf automake libtool -y
+sudo apt-get install autotools-dev autoconf automake libtool dh-autoreconf -y
+sudo apt-get install libusb-dev -y
 
-
-echo "Installing Python - 2.7"
+#echo "Installing Python - 2.7"
 #sudo apt-get install python -y
 
-
+echo "========================================================================"
+echo "Getting HiveControl Code"
+echo "========================================================================"
 #Get the software from GIT
 cd /home
 sudo git clone https://github.com/rcrum003/HiveControl 
@@ -63,45 +68,12 @@ sudo git clone https://github.com/rcrum003/HiveControl
 #cd /home/HiveControl/software/wiringPI/
 #sudo ./build
 
-echo "Copying Binaries"
-sudo cp /home/HiveControl/software/binaries/* /usr/local/bin/
 
-echo "Installing hidapi - for Temp Sensor"
-#Get prerequite
-sudo apt-get install dh-autoreconf
-# Make hidapi software
-cd /home/HiveControl/software/
-sudo git clone https://github.com/rcrum003/hidapi
 
-#git clone git://github.com/signal11/hidapi.git
-cd /home/HiveControl/software/hidapi
-sudo ./bootstrap
-sudo ./configure
-sudo make
-sudo make install
 
-#Make Tempered software
-cd /home/HiveControl/software/
-sudo git clone https://github.com/rcrum003/TEMPered-v6-2015
-cd TEMPered-v6-2015
-sudo cmake .
-sudo make all
-sudo make all install
-sudo cp utils/tempered /usr/local/bin/
-
-# Make Phidget software
-echo "Installing Phidget software "
-sudo apt-get install libusb-dev -y
-cd /home/HiveControl/software/Phidget
-tar -xzvf libphidget.tar.gz
-cd /home/HiveControl/software/libphidget-2.1.8.20150410
-sudo ./configure; make; make install
-
-cd ../
-sudo unzip PhidgetsPython.zip
-cd PhidgetsPython
-sudo python setup.py install
-
+echo "========================================================================"
+echo "Installing Web Server Software"
+echo "========================================================================"
 
 #Install webserver 
 echo "Installing Apache/PHP"
@@ -135,6 +107,10 @@ htpasswd -c .htpasswd admin
 
 sudo service apache2 restart
 
+echo "========================================================================"
+echo "Setting up Database"
+echo "========================================================================"
+
 #Upgrade DB
 cd /home/HiveControl/patches/database
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_1
@@ -148,6 +124,44 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_7
 #Set Shells to be executable
 cd /home/HiveControl/
 sudo find . -name '*.sh' -exec chmod u+x {} +
+
+echo "Copying Binaries"
+sudo cp /home/HiveControl/software/binaries/* /usr/local/bin/
+
+echo "========================================================================"
+echo "Compiling Code for sensors"
+echo "========================================================================"
+echo "Installing hidapi - for Temp Sensor"
+#Get prerequite
+# Make hidapi software
+cd /home/HiveControl/software/
+sudo git clone https://github.com/rcrum003/hidapi
+
+#git clone git://github.com/signal11/hidapi.git
+cd /home/HiveControl/software/hidapi
+sudo ./bootstrap
+sudo ./configure; make; make install
+
+#Make Tempered software
+cd /home/HiveControl/software/
+sudo git clone https://github.com/rcrum003/TEMPered-v6-2015
+cd TEMPered-v6-2015
+sudo cmake .
+sudo make all
+sudo make all install
+sudo cp utils/tempered /usr/local/bin/
+
+# Make Phidget software
+echo "Installing Phidget software "
+cd /home/HiveControl/software/Phidget
+tar -xzvf libphidget.tar.gz
+cd /home/HiveControl/software/libphidget-2.1.8.20150410
+sudo ./configure; make; make install
+
+cd ../
+sudo unzip PhidgetsPython.zip
+cd PhidgetsPython
+sudo python setup.py install
 
 
 echo "========================================================"
