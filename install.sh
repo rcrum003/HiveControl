@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v7 - for HiveControl
+# v9 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -128,6 +128,9 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_5
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_6
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_7
 
+#Upload default values
+sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
+
 #Set Shells to be executable
 cd /home/HiveControl/
 sudo find . -name '*.sh' -exec chmod u+x {} +
@@ -147,7 +150,9 @@ sudo git clone https://github.com/rcrum003/hidapi
 #git clone git://github.com/signal11/hidapi.git
 cd /home/HiveControl/software/hidapi
 sudo ./bootstrap
-sudo ./configure; make; make install
+sudo ./configure 
+sudo make
+sudo make install
 
 #Make Tempered software
 cd /home/HiveControl/software/
@@ -162,8 +167,10 @@ sudo cp utils/tempered /usr/local/bin/
 echo "Installing Phidget software "
 cd /home/HiveControl/software/Phidgets
 tar -xzvf libphidget.tar.gz
-cd /home/HiveControl/software/libphidget-2.1.8.20150410
-sudo ./configure; make; make install
+cd /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410
+sudo ./configure 
+sudo make 
+sudo make install
 
 cd ../
 sudo unzip PhidgetsPython.zip
