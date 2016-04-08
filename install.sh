@@ -13,7 +13,8 @@ whoami=$(whoami)
 if [[ $whoami -ne "root" ]]; then
 	echo "You must be root to install this"
 	echo "run sudo bash, then rerun this script"
-
+	exit
+fi
 
 #resize the drive, since the initial write doesn't
 #Check the size of the disk
