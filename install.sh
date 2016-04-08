@@ -2,11 +2,17 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v5 - for HiveControl
+# v6 - for HiveControl
 # 
-# Must run under sudo
+# Must run under root
 # Usage: sudo ./install.sh
 # ==================================================
+
+#Sorry, need to run as root due to some compiling errors we get when we aren't root
+whoami=$(whoami)
+if [[ $whoami -ne "root" ]]; then
+	echo "You must be root to install this"
+	echo "run sudo bash, then rerun this script"
 
 
 #resize the drive, since the initial write doesn't
@@ -22,8 +28,8 @@ if [[ $HDsize -lt $HDNeed ]]; then
 	exit 
 fi
 # update this OS
-sudo apt-get upgrade
-sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get update -y
 
 
 # Install the basics
@@ -153,7 +159,7 @@ sudo cp utils/tempered /usr/local/bin/
 
 # Make Phidget software
 echo "Installing Phidget software "
-cd /home/HiveControl/software/Phidget
+cd /home/HiveControl/software/Phidgets
 tar -xzvf libphidget.tar.gz
 cd /home/HiveControl/software/libphidget-2.1.8.20150410
 sudo ./configure; make; make install
