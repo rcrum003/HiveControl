@@ -1,6 +1,6 @@
 
 #!/bin/bash
-# Version 3
+# Version 4
 # Script to output WS-1400-IP to a JSON and XML file that matches WUNDERGROUND file format
 #
 # Revision 3 - Had to make only one pull to the WS1400, as it seems to not like 3 hives all pulling 3 html requests at once.
@@ -21,7 +21,7 @@ curl -s $URL -o webpage.html
 # Get the data from the device
 eval $(cat webpage.html | egrep "(in|out)(Temp|Humi)" | cut -f 4,14 -d'"' --output-delimiter='=')
 eval $(cat webpage.html | egrep "(rainofhourly|uvi|AbsPress|RelPress|windir|avgwind|gustspeed|solarrad)" |cut -f 4,14 -d'"' --output-delimiter='=')
-eval $(cat webpage.html | egrep "(rainofdaily)" |cut -f 4,12 -d'"' --output-delimiter='=')
+eval $(cat webpage.html | egrep "(rainofdaily)" |head -n 1 |cut -f 4,12 -d'"' --output-delimiter='=')
 
 rm -rf webpage.html
 
