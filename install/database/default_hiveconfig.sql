@@ -1,11 +1,11 @@
 --
--- File generated with SQLiteStudio v3.0.7 on Fri Apr 8 14:41:16 2016
---
+-- Version 1
 -- Text encoding used: UTF-8
 --
 PRAGMA foreign_keys = off;
 BEGIN TRANSACTION;
 
+DROP TABLE IF EXISTS hiveconfig;
 -- Table: hiveconfig
 CREATE TABLE hiveconfig (
     HOMEDIR                              VARCHAR,
