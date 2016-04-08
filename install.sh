@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v9 - for HiveControl
+# v10 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -141,6 +141,22 @@ sudo cp /home/HiveControl/software/binaries/* /usr/local/bin/
 echo "========================================================================"
 echo "Compiling Code for sensors"
 echo "========================================================================"
+
+
+# Make Phidget software
+echo "Installing Phidget software "
+cd /home/HiveControl/software/Phidgets
+tar -xzvf libphidget.tar.gz
+cd /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410
+sudo ./configure 
+sudo make 
+sudo make install
+
+cd ../
+sudo unzip PhidgetsPython.zip
+cd PhidgetsPython
+sudo python setup.py install
+
 echo "Installing hidapi - for Temp Sensor"
 #Get prerequite
 # Make hidapi software
@@ -160,23 +176,8 @@ sudo git clone https://github.com/rcrum003/TEMPered-v6-2015
 cd TEMPered-v6-2015
 sudo cmake .
 sudo make all
-sudo make all install
 sudo cp utils/tempered /usr/local/bin/
-
-# Make Phidget software
-echo "Installing Phidget software "
-cd /home/HiveControl/software/Phidgets
-tar -xzvf libphidget.tar.gz
-cd /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410
-sudo ./configure 
-sudo make 
-sudo make install
-
-cd ../
-sudo unzip PhidgetsPython.zip
-cd PhidgetsPython
-sudo python setup.py install
-
+sudo cp utils/hid-query /usr/local/bin/
 
 echo "========================================================"
 echo "Completed setup"
