@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v6 - for HiveControl
+# v7 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
