@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v10 - for HiveControl
+# v11 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -178,6 +178,12 @@ sudo cmake .
 sudo make all
 sudo cp utils/tempered /usr/local/bin/
 sudo cp utils/hid-query /usr/local/bin/
+
+echo "Installing wiringPI for HX711 sensor"
+cd /home/HiveControl/software/wiringPI
+sudo ./build
+
+
 
 echo "========================================================"
 echo "Completed setup"
