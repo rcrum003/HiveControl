@@ -36,7 +36,6 @@ $SEASONGDD=$gddresult['seasongdd'];
 
 #Start table
 #Row
-echo '$AGE';
 echo '<button type="button" class="btn btn-';
 if ($AGE > "600" || $HIVETEMPF > "150" || $HIVETEMPF < "-50") {
 	echo "danger";

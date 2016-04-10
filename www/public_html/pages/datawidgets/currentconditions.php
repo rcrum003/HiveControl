@@ -1,23 +1,23 @@
 <?php
-// Gets data on current conditions from the JSON file
-// copy file content into a string var
-$someJSON = file_get_contents('../data/current.json');
-$someObject = json_decode($someJSON);
-// Set variable to use below
-$id = $someObject[0]->current_conditions->hive->id; // Access Object data
-$datetime = $someObject[0]->current_conditions->hive->observation_time;
-$hivetempf = $someObject[0]->current_conditions->hive->temp_f;
-$hivehumi = $someObject[0]->current_conditions->hive->relative_humidity;
-$hiveweight = $someObject[0]->current_conditions->hive->weight_lbs;
-$wxtempf = $someObject[0]->current_conditions->weather->a_temp_f;
-$wxhumi = $someObject[0]->current_conditions->weather->a_relative_humidity;
-$wxdewf = $someObject[0]->current_conditions->weather->a_dewpoint_f;
-$rawweight = $someObject[0]->current_conditions->hive->rawweight;
-$city = $someObject[0]->current_conditions->observation_location->city; // Access Object data
-$state = $someObject[0]->current_conditions->observation_location->state; // Access Object data
 
-$daygdd = file_get_contents('../data/todaygdd.txt');
-$seasongdd = file_get_contents('../data/seasongdd.txt');
+// Get Hive Data First
+$alldatasth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, solarradiation, lux, date AS datetime FROM allhivedata ORDER BY datetime(\"date\") DESC LIMIT 1");
+$alldatasth->execute();
+$alldata = $alldatasth->fetch(PDO::FETCH_ASSOC);
 
+
+$sth1 = $conn->prepare("SELECT seasongdd, daygdd FROM gdd ORDER BY datetime(\"calcdate\") DESC LIMIT 1;");
+$sth1->execute();
+$gdddata = $sth1->fetch(PDO::FETCH_ASSOC);
+
+$hivetempf = $alldata['hivetempf'];
+$hivehumi = $alldata['hiveHum'];
+$hiveweight = $alldata['hiveweight'];
+$wxtempf = $alldata['weather_tempf'];
+$wxhumi = $alldata['weather_humidity'];
+$rawweight = $alldata['hiverawweight'];
+$datetime = $alldata['datetime'];
+$daygdd = $gdddata['daygdd'];
+$seasongdd = $gdddata['seasongdd'];
 
 ?>

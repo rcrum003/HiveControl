@@ -5,7 +5,7 @@
 # Note: This is considered Insect GDD and not plant GDD (plant should be based on soil temp)
 # Once we get our soil temp sensors working, we will add another script
 # Author: Ryan Crum
-# Version: 1
+# Version: 1.1
 
 # Installation instructions:
 # You will have to prepopulate with the Populate_GDD.sh script, which will require a WeatherUnderground API key.
@@ -15,7 +15,6 @@
 # The DB only accepts one GDD row per date, no matter how many times you run the script.
 # This protects against run-away scripts, and ensures our Seasonal GDD stays accurate
 
-#set -x
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -69,6 +68,3 @@ elif [[ $dbempty > "0" ]]; then
 	# Insert Weather Data into local DB, date, daygdd, seasongdd
 	sqlite3 $DATASOURCE "insert into gdd (calcdate, gdddate,daygdd,seasongdd) values ('$DATE','$YESTERDAY',$GDD,$SEASONGDD2);"
 fi
-# Dump to a Webfile so we can see it on the dashboard
-echo "$GDD" > $PUBLIC_HTML_DIR/data/todaygdd.txt
-echo "$SEASONGDD2" > $PUBLIC_HTML_DIR/data/seasongdd.txt

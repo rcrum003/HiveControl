@@ -1,9 +1,8 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 1.3
+# Version 1.4
 
-#set -x #echo on
 # Get Variables from central file
 SHELL=/bin/bash
 
@@ -59,14 +58,6 @@ fi
 echo "--- TEMP DONE ---"
 
 # -------- END GET HIVE TEMP ----------
-
-# Insert into data store
-# We do this here, just in case our other scripts fail, we still have main data we want to keep
-#echo "Inserting into DB - Success" >> $LOG
-#Commented out to reduce file size of local DBs
-#sqlite3 $HOMEDIR/data/hive-data.db "insert into hivedata (hiveid,date,hivetempf,hivetempc,hiveHum,hiveweight,hiverawweight,yardid,sync,beekeeperid) \
-#values (\"$HIVEID\",\"$DATE\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"$HIVEWEIGHT\",\"$HIVERAWWEIGHT\",\"$YARDID\",1,\"$BEEKEEPERID\");"
-
 
 #---------- Get Ambient Weather--------
 # Variables come from variable.inc
@@ -162,59 +153,13 @@ fi
 		
 echo "--- LUX DONE --- "
 
-#echo "$YARDID,$WEATHER_STATIONID,'$OBSERVATIONDATETIME',$A_TEMP,$B_HUMIDITY,$A_DEW,'$A_TEMP_C','$A_WIND_MPH',$A_WIND_DIR','$wind_degrees','$wind_gust_mph','$wind_kph','$wind_gust_kph','$pressure_mb','$A_PRES_IN','$A_PRES_TREND','$weather_dewc','$solarradiation','$UV','$precip_1hr_in','$precip_1hr_metric','$precip_today_string','$precip_today_in','$precip_today_metric'"
-
-# Insert Weather Data into local DB
-# Commented out, all of this data is stored in the allhivedata row anyhow
-#sqlite3 $HOMEDIR/data/hive-data.db "insert into weather (yardid,weather_stationID,observationDateTime,weather_tempf,weather_humidity,weather_dewf,weather_tempc,wind_mph,wind_dir,wind_degrees,wind_gust_mph,wind_kph,wind_gust_kph,pressure_mb,pressure_in,pressure_trend,weather_dewc,solarradiation,UV,precip_1hr_in,precip_1hr_metric,precip_today_string,precip_today_in,precip_today_metric) values ($YARDID,$WEATHER_STATIONID,'$OBSERVATIONDATETIME',$A_TEMP,$B_HUMIDITY,$A_DEW,$A_TEMP_C,'$A_WIND_MPH','$A_WIND_DIR','$wind_degrees','$wind_gust_mph','$wind_kph','$wind_gust_kph','$pressure_mb','$A_PRES_IN','$A_PRES_TREND','$weather_dewc','$solarradiation','$UV','$precip_1hr_in','$precip_1hr_metric','$precip_today_string','$precip_today_in','$precip_today_metric');"
-
-
-#echo "$YARDID,$WEATHER_STATIONID,'$OBSERVATIONDATETIME',$A_TEMP,$B_HUMIDITY,$A_DEW"
 
 # ----------- END GET Ambient Weather ------------
-#Advanced Analytics support
-#echo "Storing Advanced Analytics Data"
+#echo "Storing Data in our database"
 sqlite3 $HOMEDIR/data/hive-data.db "insert into allhivedata (hiveid,date,hivetempf,hivetempc,hiveHum,hiveweight,hiverawweight,yardid,sync,beekeeperid,weather_stationID,observationDateTime,weather_tempf,weather_humidity,weather_dewf,weather_tempc,wind_mph,wind_dir,wind_degrees,wind_gust_mph,wind_kph,wind_gust_kph,pressure_mb,pressure_in,pressure_trend,weather_dewc,solarradiation,UV,precip_1hr_in,precip_1hr_metric,precip_today_string,precip_today_in,precip_today_metric,lux) \
 values (\"$HIVEID\",\"$DATE\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"$HIVEWEIGHT\",\"$HIVERAWWEIGHT\",\"$YARDID\",1,\"$BEEKEEPERID\", $WEATHER_STATIONID,'$OBSERVATIONDATETIME',$A_TEMP,$B_HUMIDITY,$A_DEW,$A_TEMP_C,'$A_WIND_MPH','$A_WIND_DIR','$wind_degrees','$wind_gust_mph','$wind_kph','$wind_gust_kph','$pressure_mb','$A_PRES_IN','$A_PRES_TREND','$weather_dewc','$solarradiation','$UV','$precip_1hr_in','$precip_1hr_metric','$precip_today_string','$precip_today_in','$precip_today_metric','$lux');"
 #echo "Success AAD"
 
-if [ $DISPLAY_TYPE =  local ]; then
-	# Being Lazy here, this will only be accurate if you are collecting both HiveTEMP and Weather at the hive level
-# Generate a JSON file for use in the dashboards
-
-WEBFILE=$PUBLIC_HTML_DIR/data/current.json
-
-echo "[{" > $WEBFILE
-echo "\"current_conditions\": {" >> $WEBFILE
-echo "		\"observation_location\": {" >> $WEBFILE
-echo "		\"full\":\"$HIVENAME, $CITY, $STATE\"," >> $WEBFILE
-echo "		\"yardname\":\"Beeyard\"," >> $WEBFILE
-echo "		\"city\":\"$CITY\"," >> $WEBFILE
-echo "		\"state\":\"$STATE\"," >> $WEBFILE
-echo "		\"country\":\"$COUNTRY\"," >> $WEBFILE
-echo "		\"country_iso3166\":\"$COUNTRY\"," >> $WEBFILE
-echo "		\"latitude\":\"$LATITUDE\"," >> $WEBFILE
-echo "		\"longitude\":\"$LONGITUDE\"," >> $WEBFILE
-echo "		\"elevation\":\"NA\"" >> $WEBFILE
-echo "		}," >> $WEBFILE
-echo "		\"hive\": {" >> $WEBFILE
-echo "		\"id\":\"$HIVENAME\"," >> $WEBFILE
-echo "		\"observation_time\":\"$DATE\"," >> $WEBFILE
-echo "		\"temp_f\":\"$HIVETEMPF\"," >> $WEBFILE
-echo "		\"relative_humidity\":\"$HIVEHUMIDITY\"," >> $WEBFILE
-echo "		\"dewpoint_f\":\"$HIVEDEW\"," >> $WEBFILE
-echo "          \"rawweight\":\"$HIVERAWWEIGHT\"," >> $WEBFILE
-echo "		\"weight_lbs\":\"$HIVEWEIGHT\"" >> $WEBFILE
-echo "		}," >> $WEBFILE
-echo "		\"weather\": {" >> $WEBFILE
-echo "		\"a_temp_f\":$A_TEMP," >> $WEBFILE
-echo "		\"a_relative_humidity\":\"$B_HUMIDITY\"," >> $WEBFILE
-echo "		\"a_dewpoint_f\":$A_DEW" >> $WEBFILE
-echo "}" >> $WEBFILE
-echo "}" >> $WEBFILE
-echo "}]" >> $WEBFILE
-
-fi
 
 #-------------------------------------
 # If sharing, create file and send to other people
