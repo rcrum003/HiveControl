@@ -3,7 +3,7 @@
 # Author: Ryan Crum
 # Date: 4-9-2016
 # Supporting Hivetool.org project
-# Version 2.1
+# Version 2.2
 # Had to rewrite this, the while loop was useless, and too many times when no value was returned
 
 source /home/HiveControl/scripts/hiveconfig.inc
@@ -31,6 +31,7 @@ DATE2=$2
          exit
         else
            loglocal "$DATE2" TEMP ERROR "Readings Exceeded Limits: TEMP=$TEMPF, HUMDITY=$HUMIDITY"
+           loglocal "$DATE2" TEMP ERROR "$TEMPerHUM"
           echo "0 0 0 0"
          exit
         fi
@@ -40,13 +41,12 @@ DATE2=$2
 DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
 TEMPerHUM=$(/usr/bin/timeout 5 /usr/local/bin/tempered -s F $HIVEDEVICE 2>&1)
 
-Could not open device:
-if [[ "TEMPerHUM" == *"Could not open device"* ]]
+if [[ "$TEMPerHUM" == *"Could not open device"* ]]
   then
   loglocal "$DATE2" TEMP WARNING "$HIVEDEVICE: Could not open device, trying again in 5 seconds"
   sleep 5
   TEMPerHUM=$(/usr/bin/timeout 5 /usr/local/bin/tempered -s F $HIVEDEVICE 2>&1)
-  if [[ "TEMPerHUM" == *"Could not open device"* ]]
+  if [[ "$TEMPerHUM" == *"Could not open device"* ]]
     then
   loglocal "$DATE2" TEMP ERROR "$HIVEDEVICE: Could not open device after waiting 5 seconds"
   echo "0 0 0 0"
