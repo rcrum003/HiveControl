@@ -47,12 +47,20 @@ if [[ $COUNTER -gt 11 ]]
 then
   #echo "$DATE2-DHT22-ERROR-Error Reading $HIVEDEVICE" >> $LOG
   loglocal "$DATE2" TEMP ERROR "DHT22 Error Reading GPIO $HIVE_TEMP_GPIO"
+         HUMIDITY="0"
+         TEMPF="0"
+         TEMPC="0"
+         dewpoint_f="0"
 fi
 
 if test $COUNTER -gt 5
 then
   #echo "$DATE2--WARNING-Failed reading GPIO:$HIVE_TEMP_GPIO: retried $COUNTER times" >> $LOG
   loglocal "$DATE2" TEMP WARNING "DHT22 Failed reading GPIO $HIVE_TEMP_GPIO: Retried $COUNTER times"
+        HUMIDITY="0"
+        TEMPF="0"
+        TEMPC="0"
+        dewpoint_f="0"
 fi
 
 echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC

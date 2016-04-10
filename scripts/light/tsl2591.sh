@@ -26,7 +26,7 @@ do
         then
          DATA_GOOD=1
         else
-         LUX=""
+         LUX="0"
         fi
       fi
       let "COUNTER += 1"
@@ -36,14 +36,14 @@ done
 
 if [[ $COUNTER -gt 11 ]]
 then
-  loglocal "$DATE2" LIGHT ERROR "Error Reading $DEVICE"
-
+  loglocal "$DATE2" LIGHT ERROR "Error Reading $DEVICE" 
+  LUX="0"
 fi
 
 if test $COUNTER -gt 2
 then
-  echo "$DATE WARNING reading TSL2591: retried $COUNTER" >> $LOG
   loglocal "$DATE2" LIGHT WARNING "Failed reading TSL2591 - Retried $COUNTER times"
+  LUX="0"
 fi
 
 echo $LUX
