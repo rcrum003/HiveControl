@@ -22,7 +22,6 @@ do
         TEMPC=$(echo $DHT22 | awk '{print $1}')
         #Convert C to F
         TEMPF=$(echo "scale=1; (($TEMPC*9)/5)+32" |bc )
-
         dewpoint_f=$(echo "scale=2; ($TEMPF - ( 9* (100 - $HUMIDITY)) /25)" |bc)
         dewpoint_c=$(echo "scale=1;(($dewpoint_f-32)*5)/9" | bc -l) 
         HUMIDITY_MINTEST=`echo "$HUMIDITY < 0" | bc`

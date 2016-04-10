@@ -1,21 +1,21 @@
+
 #!/bin/bash
 # read the TEMPerHUM
+# Author: Ryan Crum
+# Date: 4-9-2016
 # Supporting Hivetool.org project
-# Version 1.2
-# 
+# Version 2
+# Had to rewrite this, the while loop was useless, and too many times when no value was returned
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-#echo "DEVICE = $DEVICE"
 
-DATA_GOOD=0
-COUNTER=1
-while [ $COUNTER -lt 11 ] && [ $DATA_GOOD -eq 0 ]
-do
-      DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
-      TEMPerHUM=`/usr/bin/timeout 5 /usr/local/bin/tempered -s F $WX_TEMPER_DEVICE`
-      #echo -ne "$DATE2-TEMPER-DEBUG:  $COUNTER $? $TEMPerHUM \n" >> $LOG
+function return_value {
+#Returns proper values
+
+TEMPerHUM=$1
+DATE2=$2
       if [[ -n $TEMPerHUM ]]
       then
         HUMIDITY=`echo $TEMPerHUM | grep  -o "\-*[0-9]*\.[0-9]\%" | grep -o "\-*[0-9]*\.[0-9]"`
@@ -28,32 +28,61 @@ do
         TEMP_MAXTEST=`echo "$TEMPF > 150" | bc`
         if [ $HUMIDITY_MINTEST -eq 0 ] && [ $TEMP_MINTEST -ne 0 ] && [ $HUMIDITY_MAXTEST -eq 0 ] && [ $TEMP_MAXTEST -eq 0 ]
         then
-         DATA_GOOD=1
+         echo $TEMPF $HUMIDITY $DEW $TEMPC
+         exit
         else
+           loglocal "$DATE2" WXTEMP ERROR "Readings Exceeded Limits: TEMP=$TEMPF, HUMDITY=$HUMIDITY"
+         HUMIDITY="0"
+         TEMPF="0"
+         TEMPC="0"
+         DEW="0"
+          echo $TEMPF $HUMIDITY $DEW $TEMPC
+         exit
+        fi
+      fi
+}
+
+DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
+TEMPerHUM=$(/usr/bin/timeout 5 /usr/local/bin/tempered -s F $WX_TEMPER_DEVICE 2>&1)
+
+      if [[ "$TEMPerHUM" == *"device not found"* ]]
+        then
+         devicesavail=$(/usr/local/bin/hid-query -e |grep -v "interface 0" |awk '{print $1}')
+          #My temperhum has a bad habit of changing hidraw1 for some reason
+          #if we only have one device, then we'll try to read that one as well
+          devicecount=$(/usr/local/bin/hid-query -e | grep -v "interface 0" | wc | awk '{print $1}')
+          if [[ $devicecount -eq "1" ]] 
+            then
+            TEMPerHUM=$(/usr/bin/timeout 5 /usr/local/bin/tempered -s F $devicesavail 2>&1)
+            loglocal "$DATE2" WXTEMP WARNING "$WX_TEMPER_DEVICE not found, we used $devicesavail instead"
+            return_value "$TEMPerHUM" "$DATE2"
+            exit
+          fi
+          if [[ $devicesavail == $WX_TEMPER_DEVICE ]] 
+           then
+            loglocal "$DATE2" WXTEMP ERROR "$WX_TEMPER_DEVICE not found, driver error of unknown kind, since you have the device configured properly"
+           else 
+            loglocal "$DATE2" WXTEMP ERROR "$WX_TEMPER_DEVICE not found, looks like your device is $devicesavail"
+           fi 
          HUMIDITY="0"
          TEMPF="0"
          TEMPC="0"
          dewpoint_f="0"
+         echo $TEMPF $HUMIDITY $DEW $TEMPC
+         exit
         fi
+      if [[ $TEMPerHUM == *"devices were found"* ]]
+        then
+          loglocal "$DATE2" WXTEMP ERROR "No Devices Found - Check to see if plugged in. Run hid-query -e"
+         HUMIDITY="0"
+         TEMPF="0"
+         TEMPC="0"
+         dewpoint_f="0"
+         echo $TEMPF $HUMIDITY $DEW $TEMPC
+         exit
       fi
-      let "COUNTER += 1"
-      sleep $COUNTER
-done
-#echo $COUNTER $TEMP $HUMIDITY
 
-if [[ $COUNTER -gt 11 ]]
-then
-  #echo "$DATE2-TEMPER-ERROR-Error Reading $HIVEDEVICE" >> $LOG
-  loglocal "$DATE2" TEMPER ERROR "Error Reading $HIVEDEVICE"
-fi
-
-if test $COUNTER -gt 5
-then
-  #echo "$DATE2-TEMPER-WARNING-Failed reading $HIVEDEVICE: retried $COUNTER times" >> $LOG
-  loglocal "$DATE2" TEMPER WARNING "Failed reading $HIVEDEVICE: Retried $COUNTER times"
-fi
-
-echo $TEMPF $HUMIDITY $DEW $TEMPC
-
+# If you made it through all that, then let's send out value to an output function defined at the top
+return_value "$TEMPerHUM" "$DATE2"
 
 

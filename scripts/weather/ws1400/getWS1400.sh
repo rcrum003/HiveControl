@@ -8,7 +8,6 @@
 #
 #Set some variables
 # Url of your WS-1400
-#set -x #echo on
 URL="http://ws1400ip/livedata.htm"
 # Record the date we pulled it - ignore what time the receiver says so we stay in sync with the local computer time
 source /home/HiveControl/scripts/hiveconfig.inc
@@ -86,7 +85,7 @@ if [[ -z "${outTemp}" ]]; then
 	# so we exit
 	exit
 else
-	loglocal "$DATE" WEATHER SUCCESS "We are good"
+	#loglocal "$DATE" WEATHER SUCCESS "We are good"
 fi
 	
 # Return a JSON file to mimic WUNderground file format

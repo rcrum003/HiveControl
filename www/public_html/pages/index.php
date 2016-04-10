@@ -39,7 +39,7 @@ if(isset($_GET["period"])) {
 
 
     <!-- Header and Navigation -->
-       <?PHP include "../include/navigation.php" ?>
+         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
     <!-- /Navigation -->
 
 

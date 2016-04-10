@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v11 - for HiveControl
+# v12 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -110,9 +110,11 @@ curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/loca
 echo "Please set an admin password for http://127.0.0.1/admin/ access:"
 cd /home/HiveControl/www/
 htpasswd -c .htpasswd admin
-
-
 sudo service apache2 restart
+
+#Set your timezone
+dpkg-reconfigure tzdata
+
 
 echo "========================================================================"
 echo "Setting up Database"
