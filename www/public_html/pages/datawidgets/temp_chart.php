@@ -91,8 +91,7 @@ $(function () {
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
-            },
-            max: 80
+            }
         },
         { // Humidity yAxis
             gridLineWidth: 0,
