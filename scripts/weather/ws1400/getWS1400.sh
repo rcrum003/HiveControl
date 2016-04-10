@@ -84,8 +84,6 @@ if [[ -z "${outTemp}" ]]; then
 	#Since we didn't get a proper file, we should assume the whole thing is borked
 	# so we exit
 	exit
-else
-	#loglocal "$DATE" WEATHER SUCCESS "We are good"
 fi
 	
 # Return a JSON file to mimic WUNderground file format
