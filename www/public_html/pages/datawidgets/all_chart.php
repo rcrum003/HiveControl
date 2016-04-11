@@ -218,7 +218,7 @@ $(function () {
             type: 'line',
             name: 'Hive Temp (°F)',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".ceil($r['hivetempf'])."]".", ";} echo "],
             color: '"; echo "$color_hivetemp"; echo "',
             visible: "; echo "$trend_hivetemp"; echo "
         },
@@ -226,7 +226,7 @@ $(function () {
             type: 'line',
             name: 'Outside Temp (°F)',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".ceil($r['weather_tempf'])."]".", ";} echo "],
             visible: "; echo "$trend_outtemp"; echo ",
             color: '"; echo "$color_outtemp"; echo "'
         },
@@ -234,7 +234,7 @@ $(function () {
             type: 'line',
             name: 'Hive Humidty (%)',
             yAxis: 3,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".ceil($r['hiveHum'])."]".", ";} echo "],
             color: '"; echo "$color_hivehum"; echo "',
             visible: "; echo "$trend_hivehum"; echo "
         },
@@ -242,7 +242,7 @@ $(function () {
             type: 'line',
             name: 'Outside Humidty (%)',
             yAxis: 3,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".ceil($r['weather_humidity'])."]".", ";} echo "],
             color: '"; echo "$color_outhum"; echo "',
             visible: "; echo "$trend_outhum"; echo "
         },
@@ -258,7 +258,7 @@ $(function () {
             type: 'line',
             yAxis: 2,
             name: 'Hive Weight Net (lbs)',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".ceil($r['hiveweight'])."]".", ";} echo "], 
             color: '"; echo "$color_netweight"; echo "',
             visible: "; echo "$trend_netweight"; echo "
         },
@@ -266,7 +266,7 @@ $(function () {
            type: 'line',
            yAxis: 2,
            name: 'Hive Weight Gross (lbs)',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
+           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".ceil($r['hiverawweight'])."]".", ";} echo "],
            color: '"; echo "$color_grossweight"; echo "',
            visible: "; echo "$trend_grossweight"; echo "
         },

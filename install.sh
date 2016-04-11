@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v12 - for HiveControl
+# v13 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -129,6 +129,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_4
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_5
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_6
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_7
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_8
 
 #Upload default values
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
@@ -196,13 +197,13 @@ if [[ $IPCount -gt "2" ]]; then
 	echo "Multiple IPs Exist, getting addresses for both eth0 and wlan0"
 	IPeth0=$(ifconfig eth0 |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |grep -v "127.0.0.1")
 	IPwlan0=$(ifconfig wlan0 |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |grep -v "127.0.0.1")
-	echo "Please go to http://$IPeth0/pages/admin/hiveconfig.php or http://$IPwlan0/pages/admin/hiveconfig.php to setup basic options"
+	echo "Please go to http://$IPeth0/admin/hiveconfig.php or http://$IPwlan0/admin/hiveconfig.php to setup basic options"
 fi
 if [[ $IPCount -lt "2" ]]; then
-	echo "Please go to http://127.0.0.1/pages/admin/hiveconfig.php to setup basic options"
+	echo "Please go to http://127.0.0.1/admin/hiveconfig.php to setup basic options"
 fi
 if [[ $IPCount -eq "2" ]]; then
-	echo "Please go to http://$IP/pages/admin/hiveconfig.php to setup basic options"
+	echo "Please go to http://$IP/admin/hiveconfig.php to setup basic options"
 fi
 
 #Setup Cron when we are ready to go
