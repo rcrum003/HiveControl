@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v13 - for HiveControl
+# v15 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -130,6 +130,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_5
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_6
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_7
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_8
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_8
 
 #Upload default values
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
@@ -168,6 +169,13 @@ sudo git clone https://github.com/rcrum003/hidapi
 
 #git clone git://github.com/signal11/hidapi.git
 cd /home/HiveControl/software/hidapi
+sudo ./bootstrap
+sudo ./configure 
+sudo make
+sudo make install
+# Run it again, because if we run just once, it doesn't work
+# Weirdest thing ever, don't have time to figure it out
+# But this works #MessageMeIfYouDo
 sudo ./bootstrap
 sudo ./configure 
 sudo make

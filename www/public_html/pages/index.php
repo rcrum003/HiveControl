@@ -47,7 +47,6 @@ if(isset($_GET["period"])) {
     <div id="wrapper">
 <?php include "datawidgets/currentconditions.php"; ?>
         
-
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Dashboard </h1>
@@ -65,8 +64,8 @@ if(isset($_GET["period"])) {
                                     <img src="../images/temp.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h3"><?php echo $hivetempf; ?> F</div>
-                                    <div>Hive Temp</div>
+                                    <div class="h3"><?php echo "$hivetempf"." F / "."$wxtempf"; ?> F</div>
+                                    <div>Hive / Ambient</div>
                                 </div>
                             </div>
                         </div>
@@ -87,8 +86,12 @@ if(isset($_GET["period"])) {
                                      <img src="/images/scalesm.png">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h3"><?php echo $hiveweight; ?> lbs</div>
-                                    <div>Weight</div>
+                                    <div class="h3">
+                                    <?php echo "$hiveweight"." lbs / "."$changeweight";
+
+
+                                    ?></div>
+                                    <div>Weight / Trend </div>
                                 </div>
                             </div>
                         </div>

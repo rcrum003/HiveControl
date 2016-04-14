@@ -42,6 +42,10 @@ $SITE_TYPE = $result3['SITE_TYPE'];
     <!-- Custom CSS -->
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     
+    <script>
+    function confirm()
+    { alert("Warning!"); // this is the message in ""}
+    </script>
 
     <!-- Custom Fonts -->
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
