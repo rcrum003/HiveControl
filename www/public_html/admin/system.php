@@ -31,8 +31,8 @@ if(isset($_GET["command"])) {
 
 switch ($command) {
     case "clearlogs":
-        #$sth = $conn->prepare("DELETE from logs");
-        #$sth->execute();
+        $sth = $conn->prepare("DELETE from logs");
+        $sth->execute();
         $now = date('Y-m-d H:i:s');
         $user_ip = getUserIP();
         loglocal($now, "WEBADMIN", "INFO", "Logs cleared by Admin from source IP $user_ip");
