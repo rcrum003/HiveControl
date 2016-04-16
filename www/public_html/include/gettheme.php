@@ -50,6 +50,9 @@ echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";
     if ($result2['trend_rain'] == "on") {$trend_rain = "true";} else { $trend_rain = "false"; }
 	if ($result2['trend_gdd'] == "on") {$trend_gdd = "true";} else { $trend_gdd = "false"; }
 
+    $chart_rounding = $result2['chart_rounding'];
+    $chart_smoothing = $result2['chart_smoothing'];
+
 
 ?>
 

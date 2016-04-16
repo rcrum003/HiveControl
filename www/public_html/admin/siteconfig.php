@@ -19,7 +19,7 @@ $v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'colo
 $v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd'], 7);
 
 $v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd'], 2);
-$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd'], ['on', '']);
+$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing'], ['on', '']);
 
 }
 //Check input for badness
@@ -88,6 +88,8 @@ if($v->validate()) {
     $trend_rain = test_input($_POST["trend_rain"]);
     $trend_gdd = test_input($_POST["trend_gdd"]);
 
+    $chart_rounding = test_input($_POST["chart_rounding"]);
+    $chart_smoothing = test_input($_POST["chart_smoothing"]);
 
 
   // Get current version    
@@ -98,8 +100,8 @@ if($v->validate()) {
    // $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=? WHERE id=1");
-    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd));
+    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=? WHERE id=1");
+    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing));
     sleep(1);
 
 
@@ -139,18 +141,16 @@ if($v->validate()) {
                         <div class="panel-body">
                             <div class="dataTable_wrapper">
                                 <table class="table table-striped table-bordered table-hover" id="dataTables-example">
-                                    <thead>
-                                        <tr>
+                                    <thead> 
                                             <th>Setting</th>
                                             <th>Value</th>
                                             <th>Description</th>
                                         </tr>
                                     </thead>
-                                    
                                     <tbody>
                                        <tr class="odd gradeX">
-                                        <td>Chart Theme</td>
-                                        <td><select name="www_chart_theme">
+                                        <td style="width:200px">Chart Theme</td>
+                                        <td style="width:300px"><select name="www_chart_theme">
                                         <option value="" <?php if ($result['www_chart_theme'] == "") {echo "selected='selected'";} ?>>Default</option>
                                         <option value="dark-blue" <?php if ($result['www_chart_theme'] == "dark-blue") {echo "selected='selected'";} ?>>Dark Blue</option>
                                         <option value="dark-unica" <?php if ($result['www_chart_theme'] == "dark-unica") {echo "selected='selected'";} ?>>Dark Unica</option>
@@ -162,6 +162,20 @@ if($v->validate()) {
                                         </select>
                                         </td>
                                         <td>Configure your preferred theme for the highcharts used throughout the site. </td>
+                                    <tr class="odd gradeX">
+                                        <td>Chart - Round</td>
+                                        <td><input type="checkbox" name="chart_rounding" value="on" <?php if ($result['chart_rounding'] == "on") {echo "checked='checked'";} ?> > </td>
+                                        </td>
+                                        <td>Controls if the main chart (on the dashboard) uses rounded numbers. Often our sensors can vary quite a bit within the .00, but it doesn't really show true change as it's just sensor noise. This will round it on the main chart. The detail charts will still show the exact values </td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Chart - Smoothing</td>
+                    
+                                        <td><input type="checkbox" name="chart_smoothing" value="on" <?php if ($result['chart_smoothing'] == "on") {echo "checked='checked'";} ?> > </td>
+                                        
+                                        </td>
+                                        <td>Sometimes our sensors error out past our routines, which causes zero values. This can cause our charts to looked skewed. This option removes any record that has a zero value - note: this filters the whole row at the momement, so any invalid value will remove all values. This option only applies to the main chart. </td>
+                                    </tr>
                                         
                                        </tr>
                                     <tr class="odd gradeX">

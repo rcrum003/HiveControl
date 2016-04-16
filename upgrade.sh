@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="15"
+Upgrade_ver="16"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -115,6 +115,13 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_9 
 			#Set DB Ver to the next
 			let DB_ver="4"
+		fi
+		if [[ $DB_ver -eq "4" ]]; then
+			#Upgarding to version 2
+			echo "Applying DB Ver5 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_10 
+			#Set DB Ver to the next
+			let DB_ver="5"
 		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
