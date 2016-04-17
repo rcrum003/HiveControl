@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="17"
+Upgrade_ver="18"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -73,6 +73,10 @@ echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
 rm -rf $scriptsource/hiveconfig.inc
 cp -Rup $scriptsource/* $scriptDest/
+legacyweight=$(cat /home/HiveControl/scripts/weight/legacyweight)
+if [[ legacyweight -eq "yes" ]]; then
+	cp -Rup /home/HiveControl/scripts/weight/hx711v3.sh /home/HiveControl/scripts/weight/hx711.sh
+fi
 cd $scriptDest
 find . -name '*.sh' -exec chmod u+x {} +
 
@@ -122,6 +126,13 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_10 
 			#Set DB Ver to the next
 			let DB_ver="5"
+		fi
+		if [[ $DB_ver -eq "5" ]]; then
+			#Upgarding to version 2
+			echo "Applying DB Ver6 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_11 
+			#Set DB Ver to the next
+			let DB_ver="6"
 		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
