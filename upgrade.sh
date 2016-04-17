@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="16"
+Upgrade_ver="17"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -132,7 +132,7 @@ echo "============================================="
 
 #Cleanup and set the flag in the DB
 loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
-sqlite3 $DestDb "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
+sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
 
 #Move the VERSION
 cp /home/HiveControl/upgrade/HiveControl/VERSION /home/HiveControl/

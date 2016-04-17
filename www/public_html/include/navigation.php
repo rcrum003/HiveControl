@@ -102,8 +102,11 @@ echo '
                         <li>
                             <a href="/pages/light.php?chart=line&period=week">Light</a>
                         </li>
-                            <li>
+                        <li>
                             <a href="/pages/gdd.php?chart=line&period=week">GDD</a>
+                        </li>
+                        <li>
+                            <a href="/pages/beecount.php?chart=line&period=week">Bee Counts</a>
                         </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -170,6 +173,9 @@ if ($orient == "normal") {
                                 </li>
                                 <li>
                                     <a href="/pages/gdd.php?chart=line&period=week">GDD</a>
+                                </li>
+                                <li>
+                                     <a href="/pages/beecount.php?chart=line&period=week">Bee Counts</a>
                                 </li>
                                 
                             </ul>

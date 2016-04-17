@@ -15,11 +15,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 $v = new Valitron\Validator($_POST);
 $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
-$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd'], 7);
-$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd'], 7);
-
-$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd'], 2);
-$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing'], ['on', '']);
+$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out'], 7);
+$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out'], 7);
+$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out'], 2);
+$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out'], ['on', '']);
 
 }
 //Check input for badness
@@ -76,6 +75,8 @@ if($v->validate()) {
     $color_solarradiation = test_input($_POST["color_solarradiation"]);
     $color_rain = test_input($_POST["color_rain"]);
     $color_gdd = test_input($_POST["color_gdd"]);
+    $color_beecount_in = test_input($_POST["color_beecount_in"]);
+    $color_beecount_out = test_input($_POST["color_beecount_out"]);
 
     $trend_hivetemp = test_input($_POST["trend_hivetemp"]);
     $trend_hivehum = test_input($_POST["trend_hivehum"]);
@@ -87,6 +88,8 @@ if($v->validate()) {
     $trend_solarradiation = test_input($_POST["trend_solarradiation"]);
     $trend_rain = test_input($_POST["trend_rain"]);
     $trend_gdd = test_input($_POST["trend_gdd"]);
+    $trend_beecount_in = test_input($_POST["trend_beecount_in"]);
+    $trend_beecount_out = test_input($_POST["trend_beecount_out"]);
 
     $chart_rounding = test_input($_POST["chart_rounding"]);
     $chart_smoothing = test_input($_POST["chart_smoothing"]);
@@ -100,8 +103,8 @@ if($v->validate()) {
    // $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=? WHERE id=1");
-    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing));
+    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=? WHERE id=1");
+    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out));
     sleep(1);
 
 
@@ -267,6 +270,20 @@ if($v->validate()) {
                                             <td>Growing Degree Days </td> 
                                             <td><input type="checkbox" name="trend_gdd" value="on" <?php if ($result['trend_gdd'] == "on") {echo "checked='checked'";} ?> > </td>
                                             <td><input type='color' name='color_gdd' value="<?php echo $result['color_gdd']; ?>" /> </td>
+                                        </td>
+                                        </tr>
+
+                                        <tr class="odd gradeX">
+                                            <td>Hive Activity In </td> 
+                                            <td><input type="checkbox" name="trend_beecount_in" value="on" <?php if ($result['trend_beecount_in'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' name='color_beecount_in' value="<?php echo $result['color_beecount_in']; ?>" /> </td>
+                                        </td>
+                                        </tr>
+
+                                        <tr class="odd gradeX">
+                                            <td>Hive Activity Out </td> 
+                                            <td><input type="checkbox" name="trend_beecount_out" value="on" <?php if ($result['trend_beecount_out'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' name='color_beecount_out' value="<?php echo $result['color_beecount_out']; ?>" /> </td>
                                         </td>
                                         </tr>
                                     </tbody>

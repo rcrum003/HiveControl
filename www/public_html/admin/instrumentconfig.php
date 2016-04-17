@@ -17,10 +17,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $v = new Valitron\Validator($_POST);
 $v->rule('required', ['ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_LUX'], 1)->message('{field} is required');
-$v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK'], ['no', 'yes']);
+$v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER'], ['no', 'yes']);
 $v->rule('integer', ['HIVE_TEMP_GPIO'], 1)->message('{field} must be a integer');
 $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT'], 1)->message('{field} must be numeric');
-$v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE'], 1)->message('{field} must be alphaNum only');
+$v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE'], 1)->message('{field} must be alphaNum only');
 
 
 }
@@ -64,7 +64,7 @@ if($v->validate()) {
 // Make sure no bad stuff got through our filters
 // Probably not needed, but doesn't hurt
 
-    $ENABLE_HIVE_CAMERA = test_input($_POST["ENABLE_HIVE_CAMERA"]);
+    
     $ENABLE_HIVE_WEIGHT_CHK = test_input($_POST["ENABLE_HIVE_WEIGHT_CHK"]);
     $ENABLE_HIVE_TEMP_CHK = test_input($_POST["ENABLE_HIVE_TEMP_CHK"]);    
     $SCALETYPE = test_input($_POST["SCALETYPE"]);
@@ -76,6 +76,11 @@ if($v->validate()) {
     $HIVE_WEIGHT_SLOPE = test_input($_POST["HIVE_WEIGHT_SLOPE"]);
     $HIVE_WEIGHT_INTERCEPT = test_input($_POST["HIVE_WEIGHT_INTERCEPT"]);
 
+    $ENABLE_HIVE_CAMERA = test_input($_POST["ENABLE_HIVE_CAMERA"]);
+    $ENABLE_BEECOUNTER= test_input($_POST["ENABLE_BEECOUNTER"]);
+    $CAMERATYPE = test_input($_POST["CAMERATYPE"]);
+    $COUNTERTYPE = test_input($_POST["COUNTERTYPE"]);
+
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
     $ver->execute();
@@ -84,8 +89,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE));
     sleep(1);
 
 
@@ -223,6 +228,27 @@ if($v->validate()) {
                                             </td>
                                             <td></td>
                                         </tr>
+
+                                        <tr class="odd gradeX">
+                                            <td>
+                                                <a href="#" title="Bee Counter" data-toggle="popover" data-placement="bottom" data-content="Enable Bee Counters and specify the type of Bee Counter you are using"><p class="fa fa-question-circle fa-fw"></P></a>
+                                                Bee Counter</td>
+                                            <td>
+                                            <select name="ENABLE_BEECOUNTER">
+                                            <option value="yes" <?php if ($result['ENABLE_BEECOUNTER'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
+                                            <option value="no" <?php if ($result['ENABLE_BEECOUNTER'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
+                                            </select></td>
+
+                                            <td>
+                                            <?php if ($result['ENABLE_BEECOUNTER'] == "yes") {
+                                                echo '
+                                                <input type="radio" name="COUNTERTYPE" value="PICAMERA"'; if ($result['COUNTERTYPE'] == "PICAMERA") {echo "checked";} echo '> PI Camera
+                                                <br><input type="radio" name="COUNTERTYPE" value="GATES"'; if ($result['COUNTERTYPE'] == "GATES") {echo "checked";} echo '> Gates';}
+                                            ?>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+
                                         <tr class="odd gradeX">
                                             <td>
                                                 <a href="#" title="Camera Type" data-toggle="popover" data-placement="bottom" data-content="Specify the type of camera you are using"><p class="fa fa-question-circle fa-fw"></P></a>
@@ -241,19 +267,7 @@ if($v->validate()) {
                                             }
                                             ?>
                                             </td>
-                                            <td>
-                                                <?PHP
-                                                if ($result['ENABLE_HIVE_CAMERA'] == "yes") {
-                                                echo '
-                                                <a href="#" title="Camera Mode" data-toggle="popover" data-placement="bottom" data-content="Specify what operation mode you want to run. In Counter mode, it operates as an In/Out counter. In Webcam, it streams a live picture to the dashboard"><p class="fa fa-question-circle fa-fw"></P></a>Camera Mode
-                                                <select name="CAMERAMODE">
-                                                <option value="COUNTER"'; if ($result['CAMERAMODE'] == "COUNTER") {echo "selected='selected'";} echo '>Bee Counter</option>
-                                                <option value="WEBCAM"'; if ($result['CAMERAMODE'] == "WEBCAM") {echo "selected='selected'";} echo '>Webcam</option>
-                                            </select>';
-                                            }
-                                                ?>
-
-                                            </td>
+                                            <td></td>
                                         </tr>
         
     
