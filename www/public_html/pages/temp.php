@@ -109,7 +109,7 @@ if(isset($_GET["chart"])) {
 
                                     <tbody>
                                         <tr>
-                                            <td>Avg Temp (°F)</td>
+                                            <td>Avg Temp (<?PHP if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} ?>)</td>
                                             <td><?PHP echo "$avghivetempf  / $avgweather_tempf"; ?></td>
                                          
                                             
@@ -120,11 +120,11 @@ if(isset($_GET["chart"])) {
                                            
                                         </tr>
                                         <tr>
-                                            <td>High (°F)</td>
+                                            <td>High (<?PHP if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} ?>)</td>
                                             <td><?PHP echo "$maxhivetempf  / $maxweathertempf "; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Low (°F)</td>
+                                            <td>Low (<?PHP if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} ?>)</td>
                                             <td><?PHP echo "$minhivetempf  / $minweathertempf "; ?></td>
                                         </tr>
                                     </tbody>

@@ -17,8 +17,8 @@ $v = new Valitron\Validator($_POST);
 $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
 $v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out'], 7);
 $v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out'], 7);
-$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out'], 2);
-$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out'], ['on', '']);
+$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC'], 2);
+$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC'], ['on', '']);
 
 }
 //Check input for badness
@@ -94,6 +94,8 @@ if($v->validate()) {
     $chart_rounding = test_input($_POST["chart_rounding"]);
     $chart_smoothing = test_input($_POST["chart_smoothing"]);
 
+    $SHOW_METRIC = test_input($_POST["SHOW_METRIC"]);
+
 
   // Get current version    
   //  $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -103,8 +105,8 @@ if($v->validate()) {
    // $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=? WHERE id=1");
-    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out));
+    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=? WHERE id=1");
+    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC));
     sleep(1);
 
 
@@ -179,6 +181,16 @@ if($v->validate()) {
                                         </td>
                                         <td>Sometimes our sensors error out past our routines, which causes zero values. This can cause our charts to looked skewed. This option removes any record that has a zero value - note: this filters the whole row at the momement, so any invalid value will remove all values. This option only applies to the main chart. </td>
                                     </tr>
+
+                                     <tr class="odd gradeX">
+                                        <td>Measurement Display</td>
+                                        <td><select name="SHOW_METRIC">
+                                        <option value="" <?php if ($result['SHOW_METRIC'] == "") {echo "selected='selected'";} ?>>Imperial</option>
+                                        <option value="on" <?php if ($result['SHOW_METRIC'] == "on") {echo "selected='selected'";} ?>>Metric</option>
+                                        </select>
+                                        </td>
+                                        <td>Configure your preferred measurement types. Useful for our international folks. </td>
+                                       </tr>
                                         
                                        </tr>
                                     <tr class="odd gradeX">

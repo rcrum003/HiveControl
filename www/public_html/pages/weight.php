@@ -97,7 +97,7 @@ if(isset($_GET["chart"])) {
                 <div class="col-lg-3">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Stats - ( Raw / All )
+                            Stats - ( Net / Gross )
                         </div>
                                                 <div class="panel-body">
                             <div class="table-responsive">
@@ -107,27 +107,27 @@ if(isset($_GET["chart"])) {
 
                                     <tbody>
                                         <tr>
-                                            <td>Avg Weight (lbs)</td>
+                                            <td>Avg Weight (<?PHP if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} ?>)</td>
                                             <td><?PHP echo "$avghiveweight  / $avghiverawweight"; ?></td>
                                          
                                             
                                         </tr>
                                         <tr>
-                                            <td>Start/End Weight</td>
+                                            <td>Start/End Weight (<?PHP if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} ?>)</td>
                                             <td><?PHP echo "$startweight  / $endweight"; ?></td>
                                            
                                         </tr>
                                           <tr>
-                                            <td>Weight Gain/Loss</td>
+                                            <td>Weight Gain/Loss (<?PHP if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} ?>)</td>
                                             <td><?PHP echo "$diffweight"; ?></td>
                                            
                                         </tr>
                                         <tr>
-                                            <td>Max Weight (lbs)</td>
+                                            <td>Max Weight (<?PHP if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} ?>)</td>
                                             <td><?PHP echo "$maxhiveweight  / $maxhiverawweight "; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Min Weight (lbs)</td>
+                                            <td>Min Weight (<?PHP if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} ?>)</td>
                                             <td><?PHP echo "$minhiveweight  / $minhiverawweight "; ?></td>
                                         </tr>
                                     </tbody>

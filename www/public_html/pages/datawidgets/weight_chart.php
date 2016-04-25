@@ -36,7 +36,17 @@ if ($chart == 'line') {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
+
+if ( $SHOW_METRIC == "on" ) {
+
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+} else {
 $sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+}
+
+
+
+
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -77,7 +87,7 @@ $(function () {
            
         yAxis: [{ // Primary yAxis
             labels: {
-                format: '{value} lbs',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo "',
                 style: {
                     color: '"; echo "$color_netweight"; echo "'
                 }
@@ -99,7 +109,7 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} in',
+                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -131,13 +141,13 @@ $(function () {
         },
         series: [{
             type: 'line',
-            name: 'Hive Weight Net (lbs)',
+            name: 'Hive Weight Net ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
             color: '"; echo "$color_netweight"; echo "'
         },
         {
            type: 'line',
-           name: 'Hive Weight Gross (lbs)',
+           name: 'Hive Weight Gross ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
            color: '"; echo "$color_grossweight"; echo "',
            visible: true
@@ -145,7 +155,7 @@ $(function () {
         {
             type: 'column',
             yAxis: 1,
-            name: 'Rain',
+            name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: true

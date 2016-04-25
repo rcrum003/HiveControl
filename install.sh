@@ -133,6 +133,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_8
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_9
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_10
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_11
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_12
 
 #Upload default values
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
@@ -224,7 +225,7 @@ sudo crontab /home/HiveControl/install/cron/cron.new
 
 #If using the Adafruit DHT22
 #sudo apt-get install build-essential python-dev
-
+#sudo python setup.py install
 
 #Remove DHCP stuff, since it gets in the way of finding our machine
 #apt-get remove isc-dhcp-client

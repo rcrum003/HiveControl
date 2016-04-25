@@ -18,7 +18,7 @@ $(function () {
             min: 0,
             max: 200,
             title: {
-                text: 'Total Weight (lbs)'
+                text: 'Total Weight (<?PHP if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} ?>)'
             },
             stackLabels: {
                 enabled: true,
@@ -36,7 +36,7 @@ $(function () {
                 dataLabels: {
                     enabled: true,
                     color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
-                    formatter: function() {return this.series.name + ': ' + this.y + ' lbs'},
+                    formatter: function() {return this.series.name + ': ' + this.y + ' <?PHP if ( $SHOW_METRIC == "on" ) { echo "kgs";} else {echo "lbs";} ?>'},
                     inside: true,
                     style: {
                         textShadow: '0 0 3px black'

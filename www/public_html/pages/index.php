@@ -64,8 +64,8 @@ if(isset($_GET["period"])) {
                                     <img src="../images/temp.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h3"><?php echo "$hivetempf"." F / "."$wxtempf"; ?> F</div>
-                                    <div>Hive / Ambient</div>
+                                    <div class="h4"><?php echo "$hivetempf "; if ($SHOW_METRIC == "on") { echo " C"; $i = "C"; } else {echo "F"; $i = "F";} echo " / "."$wxtempf"." $i"; ?> </div>
+                                    <div>Temp - Hive / Ambient</div>
                                 </div>
                             </div>
                         </div>
@@ -86,11 +86,8 @@ if(isset($_GET["period"])) {
                                      <img src="/images/scalesm.png">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h3">
-                                    <?php echo "$hiveweight"." lbs / "."$changeweight";
-
-
-                                    ?></div>
+            
+                                    <div class="h4"><?php echo "$hiveweight "; if ($SHOW_METRIC == "on") { echo " kg"; $i = "kg"; } else {echo "lb"; $i = "lb";} echo " / "."$changeweight"." $i"; ?> </div>
                                     <div>Weight / Trend </div>
                                 </div>
                             </div>
@@ -112,8 +109,8 @@ if(isset($_GET["period"])) {
                                      <img src="../images/humsm.png">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h3"><?php echo $hivehumi; ?>%</div>
-                                    <div>Humidity</div>
+                                    <div class="h4"><?php echo "$hivehumi"." / "."$wxhumi"; ?>%</div>
+                                    <div>Humidity - Hive / Ambient</div>
                                 </div>
                             </div>
                         </div>
@@ -134,8 +131,8 @@ if(isset($_GET["period"])) {
                                     <img src="../images/treesm.png">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h3"><?PHP echo "$daygdd / $seasongdd"; ?></div>
-                                    <div>Growing Degrees</div>
+                                    <div class="h4"><?PHP echo "$daygdd / $seasongdd"; ?></div>
+                                    <div>GDD - Day/Season</div>
                                 </div>
                             </div>
                         </div>
@@ -256,9 +253,10 @@ if(isset($_GET["period"])) {
 
   <?php 
 
-  include "datawidgets/weightguage-hc.php"; 
   
   include "datawidgets/all_chart.php"; 
+
+  include "datawidgets/weightguage-hc.php"; 
 
   ?> 
   

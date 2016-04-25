@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="18"
+Upgrade_ver="20"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -75,7 +75,7 @@ rm -rf $scriptsource/hiveconfig.inc
 cp -Rup $scriptsource/* $scriptDest/
 legacyweight=$(cat /home/HiveControl/scripts/weight/legacyweight)
 if [[ legacyweight -eq "yes" ]]; then
-	cp -Rup /home/HiveControl/scripts/weight/hx711v3.sh /home/HiveControl/scripts/weight/hx711.sh
+	cp  /home/HiveControl/scripts/weight/hx711v3.sh /home/HiveControl/scripts/weight/hx711.sh
 fi
 cd $scriptDest
 find . -name '*.sh' -exec chmod u+x {} +
@@ -128,11 +128,22 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			let DB_ver="5"
 		fi
 		if [[ $DB_ver -eq "5" ]]; then
-			#Upgarding to version 2
+			#Upgarding to next version 
 			echo "Applying DB Ver6 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_11 
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_11
+			sqlite3 hive-data.db "UPDATE allhivedata SET IN_COUNT=0 WHERE OUT_COUNT is null"
+			sqlite3 hive-data.db "UPDATE allhivedata SET OUT_COUNT=0 WHERE OUT_COUNT is null" 
 			#Set DB Ver to the next
 			let DB_ver="6"
+		fi
+		if [[ $DB_ver -eq "6" ]]; then
+			#Upgarding to next version 
+			echo "Applying DB Ver7 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_12
+			sqlite3 hive-data.db "UPDATE allhivedata SET IN_COUNT=0 WHERE OUT_COUNT is null"
+			sqlite3 hive-data.db "UPDATE allhivedata SET OUT_COUNT=0 WHERE OUT_COUNT is null" 
+			#Set DB Ver to the next
+			let DB_ver="7"
 		fi
 	else
 		echo "Skipping DB, no new database upgrades available"

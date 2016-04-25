@@ -56,6 +56,7 @@ echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";
 
     $chart_rounding = $result2['chart_rounding'];
     $chart_smoothing = $result2['chart_smoothing'];
+    
 
 
 ?>

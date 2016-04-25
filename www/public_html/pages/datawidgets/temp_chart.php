@@ -33,7 +33,13 @@ if ($chart == 'line') {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
+
+if ( $SHOW_METRIC == "on" ) {
+$sth = $conn->prepare("SELECT hivetempc AS hivetempf, hiveHum, weather_tempc as weather_tempf, weather_humidity, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+} else {
 $sth = $conn->prepare("SELECT hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+}
+
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -81,7 +87,7 @@ $(function () {
            
     yAxis: [{ // Temp yAxis
             labels: {
-                format: '{value}°F',
+                format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
@@ -120,7 +126,7 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} in',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -152,7 +158,7 @@ $(function () {
         },
         series: [{
             type: 'line',
-            name: 'Hive Temp (°F)',
+            name: 'Hive Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetempf']."]".", ";} echo "],
             color: '"; echo "$color_hivetemp"; echo "',
@@ -160,7 +166,7 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'Outside Temp (°F)',
+            name: 'Outside Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
             visible: "; echo "$trend_outtemp"; echo ",
@@ -185,7 +191,7 @@ $(function () {
         {
             type: 'column',
             yAxis: 2,
-            name: 'Rain',
+            name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: "; echo "$trend_rain"; echo "

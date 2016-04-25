@@ -3,13 +3,14 @@
 <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 #Get Site Orient and Options
-$sth3 = $conn->prepare("SELECT SITE_ORIENT,HIVENAME,SITE_TYPE FROM hiveconfig");
+$sth3 = $conn->prepare("SELECT SITE_ORIENT,HIVENAME,SITE_TYPE,SHOW_METRIC FROM hiveconfig");
 $sth3->execute();
 $result3 = $sth3->fetch(PDO::FETCH_ASSOC);
 
 $orient = $result3['SITE_ORIENT'];
 $id = $result3['HIVENAME'];
 $SITE_TYPE = $result3['SITE_TYPE'];
+$SHOW_METRIC = $result3['SHOW_METRIC'];
 
 # =====================================================================
 # Set the header
@@ -116,7 +117,7 @@ echo '
                     <a href="/pages/environment.php"><i class="fa fa-table fa-fw"></i>Weather</a>
                 </li>
                     <li>
-                            <a href="video.php"><i class="fa fa-video-camera fa-fw"></i>Camera</a>
+                            <a href="/pages/video.php"><i class="fa fa-video-camera fa-fw"></i>Camera</a>
                         </li>
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -183,7 +184,7 @@ if ($orient == "normal") {
                             <a href="/pages/environment.php"><i class="fa fa-table fa-fw"></i> Weather</a>
                         </li>
                         <li>
-                            <a href="video.php"><i class="fa fa-video-camera fa-fw"></i> Live WebCam</a>
+                            <a href="/pages/video.php"><i class="fa fa-video-camera fa-fw"></i> Live WebCam</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-gear fa-fw"></i>Settings<span class="fa arrow"></span></a>

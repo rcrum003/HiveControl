@@ -31,7 +31,13 @@ switch ($period) {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
+
+if ( $SHOW_METRIC == "on" ) {
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, hivetempc AS hivetempf, hiveHum, weather_tempc as weather_tempf, weather_humidity, precip_1hr_metric as precip_1hr_in, solarradiation, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+} else {
 $sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, solarradiation, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+}
+
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -76,7 +82,7 @@ $(function () {
            
     yAxis: [{ // Temp yAxis
             labels: {
-                format: '{value}°F',
+                format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
@@ -98,7 +104,7 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} in',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -115,7 +121,7 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} lbs',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo "',
                 style: {
                     color: '"; echo "$color_netweight"; echo "'
                 }
@@ -216,7 +222,7 @@ $(function () {
         },
         series: [{
             type: 'line',
-            name: 'Hive Temp (°F)',
+            name: 'Hive Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hivetempf']);else echo $r['hivetempf']; echo "]".", ";} echo "],
             color: '"; echo "$color_hivetemp"; echo "',
@@ -224,7 +230,7 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'Outside Temp (°F)',
+            name: 'Outside Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['weather_tempf']);else echo $r['weather_tempf']; echo "]".", ";} echo "],
             visible: "; echo "$trend_outtemp"; echo ",
@@ -249,7 +255,7 @@ $(function () {
         {
             type: 'column',
             yAxis: 1,
-            name: 'Rain',
+            name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: "; echo "$trend_rain"; echo "
@@ -257,7 +263,7 @@ $(function () {
         {
             type: 'line',
             yAxis: 2,
-            name: 'Hive Weight Net (lbs)',
+            name: 'Hive Weight Net ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hiveweight']);else echo $r['hiveweight']; echo "]".", ";} echo "],
             color: '"; echo "$color_netweight"; echo "',
             visible: "; echo "$trend_netweight"; echo "
@@ -265,7 +271,7 @@ $(function () {
         {
            type: 'line',
            yAxis: 2,
-           name: 'Hive Weight Gross (lbs)',
+           name: 'Hive Weight Gross ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hiverawweight']);else echo $r['hiverawweight']; echo "]".", ";} echo "],
            color: '"; echo "$color_grossweight"; echo "',
            visible: "; echo "$trend_grossweight"; echo "
