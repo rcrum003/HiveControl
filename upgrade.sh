@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="20"
+Upgrade_ver="21"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -131,6 +131,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			#Upgarding to next version 
 			echo "Applying DB Ver6 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_11
+			sleep 5
 			sqlite3 hive-data.db "UPDATE allhivedata SET IN_COUNT=0 WHERE OUT_COUNT is null"
 			sqlite3 hive-data.db "UPDATE allhivedata SET OUT_COUNT=0 WHERE OUT_COUNT is null" 
 			#Set DB Ver to the next
@@ -139,6 +140,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		if [[ $DB_ver -eq "6" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver7 Upgrades"
+			sleep 5
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_12
 			sqlite3 hive-data.db "UPDATE allhivedata SET IN_COUNT=0 WHERE OUT_COUNT is null"
 			sqlite3 hive-data.db "UPDATE allhivedata SET OUT_COUNT=0 WHERE OUT_COUNT is null" 
@@ -155,6 +157,7 @@ echo "============================================="
 #Cleanup and set the flag in the DB
 loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
 sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
+sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver WHERE id=1"
 
 #Move the VERSION
 cp /home/HiveControl/upgrade/HiveControl/VERSION /home/HiveControl/

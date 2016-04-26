@@ -153,6 +153,12 @@ if($v->validate()) {
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    <tr class="odd gradeX">
+                                    <td style="width:200px">HiveControl Version</td>
+                                    <td style="width:300px"><?PHP echo $result['HCVersion']; ?></td>
+                                    <td> </td>
+                                    </tr>
+
                                        <tr class="odd gradeX">
                                         <td style="width:200px">Chart Theme</td>
                                         <td style="width:300px"><select name="www_chart_theme">
@@ -167,6 +173,7 @@ if($v->validate()) {
                                         </select>
                                         </td>
                                         <td>Configure your preferred theme for the highcharts used throughout the site. </td>
+                                        </tr>
                                     <tr class="odd gradeX">
                                         <td>Chart - Round</td>
                                         <td><input type="checkbox" name="chart_rounding" value="on" <?php if ($result['chart_rounding'] == "on") {echo "checked='checked'";} ?> > </td>
