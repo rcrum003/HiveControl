@@ -1,7 +1,7 @@
 #!/bin/bash
 # Check for upgrades
 # Only running once a day, when we load GDD
-# v3
+# v4
 
 #Check our upgrade script
 #Get the current version
@@ -38,10 +38,10 @@ fi
 if [[  $(echo "$Installed_Ver > $Latest_Ver" | bc) -eq 1 ]]; then
 		loglocal "$DATE" UPGRADE WARNING "Upgrading disabled, You are running newer version than we have"
 		echo "Hey, you are running a newer version that we have in the repository! - Exiting"
-		sqlite3 $Db "UPDATE hiveconfig SET upgrade_available=\"no\"" WHERE id=1"
+		sqlite3 $Db "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
 		exit
 fi
-echo "We have some upgrading to do!"
+echo "We have some upgrading to do"
 sqlite3 $Db "UPDATE hiveconfig SET upgrade_available='$Latest_Ver' WHERE id=1"
 
 
