@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script to get variales from db to use in our scripts
-# Version 3
+# Script to get variables from db to use in our scripts
+# Version 3.1
 
 source /home/HiveControl/scripts/data/logger.inc
 
@@ -13,7 +13,7 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 # Check to see if the version has changed, if not , stop running
 
-FILEVERSION=`cat $CONFIGOUT |grep -i version |awk -F\" '{print $2}'`
+FILEVERSION=`cat $CONFIGOUT |grep VERSION |awk -F\" '{print $2}'`
 DBVERSION=`sqlite3 $LOCALDATABASE "select version from hiveconfig;"`
 
 if [ $DBVERSION -eq $FILEVERSION ]; then
