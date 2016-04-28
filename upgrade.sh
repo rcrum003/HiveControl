@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="24"
+Upgrade_ver="25"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -35,13 +35,13 @@ echo "============================================="
 # Get the latest code from github into a temporary repository
 echo "Getting Latest Code"
 #Remove any remnants of past code upgrades
-	#rm -rf /home/HiveControl/upgrade
+	rm -rf /home/HiveControl/upgrade
 #Make us a fresh directory
-	#mkdir /home/HiveControl/upgrade
+	mkdir /home/HiveControl/upgrade
 #Start in our directory
-	#cd /home/HiveControl/upgrade
+	cd /home/HiveControl/upgrade
 #Get the code
-	#git clone https://github.com/rcrum003/HiveControl &> /dev/null
+	git clone https://github.com/rcrum003/HiveControl &> /dev/null
 
 
 #Set some variables
