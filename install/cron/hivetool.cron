@@ -11,5 +11,10 @@
 00 12 * * * /home/HiveControl/scripts/weather/gdd/get_daily_insect_gdd.sh > /dev/null 2>&1
 
 #Check for HiveControl Updates
-05 12 * * * /home/HiveControl/scripts/system/checkupgrades.sh > /dev/null 2>&1
+*/32 * * * * /home/HiveControl/scripts/system/checkupgrades.sh > /dev/null 2>&1
 
+#Get Pollen Count Daily
+00 12 * * * /home/HiveControl/scripts/weather/pollen/getpollen.sh > /dev/null 2>&1
+
+#Check Message queue once a minute
+*/1 * * * * /home/HiveControl/scripts/system/msgqueue.sh > /dev/null 2>&1

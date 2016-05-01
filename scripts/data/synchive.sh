@@ -12,7 +12,7 @@ echo "$DATE"
 # Query the database and pull the fields that need to be sync'd
 #=========================================
 # Export out to a file
-sqlite3 $LOCALDATABASE "select hiveid,date,hivetempf,hivetempc,hiveHum,hiveweight,yardid,sync,beekeeperid from hivedata WHERE SYNC=1;" > $RUNDIR/syncme.sql
+sqlite3 $LOCALDATABASE "select hiveid,date,hivetempf,hivetempc,hiveHum,hiveweight,yardid,sync,beekeeperid from allhivedata WHERE SYNC=1;" > $RUNDIR/syncme.sql
 LOCALCOUNT=`wc $RUNDIR/syncme.sql |awk '{print $1}'`
 
 #=========================================

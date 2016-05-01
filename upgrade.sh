@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="25"
+Upgrade_ver="27"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -152,12 +152,38 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			#Set DB Ver to the next
 			let DB_ver="7"
 		fi
+		if [[ $DB_ver -eq "7" ]]; then
+			#Upgarding to next version 
+			echo "Applying DB Ver8 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_13
+			#Set DB Ver to the next
+			#Upgrade Cron for Message Queue and Pollen Counter
+			#Get Crontab as it is
+			sudo crontab -l > /home/HiveControl/install/cron/cron1.orig 
+			#Echo our new content into a new crontab file with the old
+			sudo cat /home/HiveControl/upgrade/patches/cron/CRON_PATCH_1 >> /home/HiveControl/install/cron/cron1.orig
+			sudo crontab /home/HiveControl/install/cron/cron1.orig
+			let DB_ver="8"
+		fi
+				if [[ $DB_ver -eq "8" ]]; then
+			#Upgarding to next version 
+			echo "Applying DB Ver9 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_14
+			#Set DB Ver to the next
+			let DB_ver="9"
+		fi
+
+
 	else
 		echo "Skipping DB, no new database upgrades available"
 	fi
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
 
 echo "============================================="
+
+
+
+
 
 #Cleanup and set the flag in the DB
 loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"

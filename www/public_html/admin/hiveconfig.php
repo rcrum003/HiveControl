@@ -21,9 +21,6 @@ if (strtotime($result['GDD_START_DATE']) > strtotime('-1 year')) {
 
 }
 
-
-
-
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -37,10 +34,10 @@ $v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STAT
 $v->rule('integer', ['YARDID', 'BEEKEEPERID'],  1)->message('{field} can only be an integer');
 $v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
 $v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
-$v->rule('lengthmax', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR', 'LATITUDE', 'LONGITUDE'], 40);
+$v->rule('lengthmax', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR', 'LATITUDE', 'LONGITUDE', 'ZIP'], 40);
 $v->rule('lengthmax', ['WX_TEMP_GPIO'], 2);
 $v->rule('regex', ['CITY', 'STATE', 'COUNTRY'], $regex1);
-$v->rule('numeric', ['BEEKEEPERID', 'YARDID', 'GDD_BASE_TEMP']);
+$v->rule('numeric', ['BEEKEEPERID', 'YARDID', 'GDD_BASE_TEMP', 'ZIP']);
 
 
 }
@@ -122,11 +119,11 @@ if($v->validate()) {
     $WXTEMPTYPE = test_input($_POST["WXTEMPTYPE"]);
     $WX_TEMPER_DEVICE = test_input_allow_slash($_POST["WX_TEMPER_DEVICE"]);
     $WX_TEMP_GPIO = test_input($_POST["WX_TEMP_GPIO"]);
-
+    $ZIP = test_input($_POST["ZIP"]);
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,ZIP=? WHERE id=1");
+    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$ZIP));
     sleep(3);
 
     // Refresh the fields in the form
@@ -209,6 +206,11 @@ if($v->validate()) {
                                             <td>State</td>
                                             <td><input type="text" name="STATE" value="<?PHP echo $result['STATE'];?>"></td>
                                             <td>State where this hive is located.</td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>Postal Code / ZIP</td>
+                                            <td><input type="text" name="ZIP" value="<?PHP echo $result['ZIP'];?>"></td>
+                                            <td>Postal Code/ZIP where this hive is located, used only for Ambient Pollen Counts - Omit if you don't want to collect</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Country</td>

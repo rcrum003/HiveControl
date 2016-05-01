@@ -1,39 +1,66 @@
 # getpollen.sh
-#/bin/bash
+#!/bin/bash
 # Script to get pollen level to support hivetool.net
 # Ryan Crum
-# May 15, 2015
+# May 1, 2016
 
 # Only run once per day at noon. The service we call changes at a time unknown after 4pm to show the next day and not the current day
 
-
 #Parameters
 SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/hivetool/weather
+PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather
+
+source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/logger.inc
+
+DATE=$(TZ=":$TIMEZONE" date '+%F')
+DATASOURCE="$HOMEDIR/data/hive-data.db"
 
 ZIP="06824"
-HOST=`hostname`
-DATE=`date -R`
 
-#Data Fetchers
+#Check to see if our variables are set
+if [ -z "${ZIP+xxx}" ]; then 
+	echo "VAR is not set at all"
+	exit
+elif [ -z "$ZIP" ] && [ "${ZIP+xxx}" = "xxx" ]; then 
+	echo VAR is set but empty;
+	exit 
+fi
 
+
+#Data Fetchers[
 # Pollen Data
-# Only place that is publishing a pollen count SVC/API as of May 15, 2015
-GETPollen=`/usr/bin/curl http://www.claritin.com/weatherpollenservice/weatherpollenservice.svc/getforecast/$ZIP`
+# Only place that is publishing a pollen count SVC/API as of May 1, 2016
+#GETPollen=`/usr/bin/curl http://www.claritin.com/weatherpollenservice/weatherpollenservice.svc/getforecast/$ZIP`
+GETPollen=$(curl -s 'https://www.claritin.com/webservice/allergyforecast.php?zip='$ZIP'&_=' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36'  -H 'Referer: https://www.claritin.com/allergy-forecast/')
 
-# Data Parsers
-#Pollen
-POLLEN=`echo $GETPollen | ./JSON.sh -b |awk -F"\"" '{print $18}' |cut -c 3-14 |awk -F "," '{print $1}'`
-POLLENTYPE=`echo $GETPollen | ./JSON.sh -b |awk -F"\"" '{print $21}' | rev | cut -c 3- | rev`
+#CleanData
+# first, strip [
+CLEAN=${GETPollen//\"[/}
+# then strip ]
+CLEAN=${CLEAN//]\"/}
+# Remove \
+CLEAN=${CLEAN//\\/}
 
-#echo POLLEN = $POLLEN
-#echo TYPE = $POLLENTYPE
-#echo -----------------------
+#Stupid Claritin people have a UTF8 code stuck here.
+#$ is needed for MAC
+#POLLEN=$(echo $CLEAN | sed $'s/\xEF\xBB\xBF//')
+POLLEN=$(echo $CLEAN | sed 's/\xEF\xBB\xBF//')
+echo $POLLEN > foo.json
+
+# Data Parsing
+POL_LEVEL=$(echo $POLLEN | ./JSON.sh -b |grep 'pollenForecast\",\"forecast\",0]' |awk '{print $2}')
+POL_TYPES=$(echo $POLLEN | ./JSON.sh -b |grep pollenForecast |grep pp |awk -F\" '{print $6}')
 
 # Troubleshooting
 
 # Data Printers
-echo $HOST, $DATE, $POLLEN, $POLLENTYPE >> pollen.log
+echo \"$DATE\", \"$POL_LEVEL\", \"$POL_TYPES\" 
 
 # Data Inserter into Databases
+sqlite3 $DATASOURCE "insert into pollen (date,pollenlevel,pollentypes) values (\"$DATE\",\"$POL_LEVEL\",\"$POL_TYPES\");"
+
+
+
+
 
