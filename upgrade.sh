@@ -165,7 +165,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sudo crontab /home/HiveControl/install/cron/cron1.orig
 			let DB_ver="8"
 		fi
-				if [[ $DB_ver -eq "8" ]]; then
+			if [[ $DB_ver -eq "8" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver9 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_14
