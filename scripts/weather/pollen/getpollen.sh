@@ -16,8 +16,6 @@ source /home/HiveControl/scripts/data/logger.inc
 DATE=$(TZ=":$TIMEZONE" date '+%F')
 DATASOURCE="$HOMEDIR/data/hive-data.db"
 
-ZIP="06824"
-
 #Check to see if our variables are set
 if [ -z "${ZIP+xxx}" ]; then 
 	echo "VAR is not set at all"
@@ -26,7 +24,6 @@ elif [ -z "$ZIP" ] && [ "${ZIP+xxx}" = "xxx" ]; then
 	echo VAR is set but empty;
 	exit 
 fi
-
 
 #Data Fetchers[
 # Pollen Data
@@ -42,9 +39,7 @@ CLEAN=${CLEAN//]\"/}
 # Remove \
 CLEAN=${CLEAN//\\/}
 
-#Stupid Claritin people have a UTF8 code stuck here.
-#$ is needed for MAC
-#POLLEN=$(echo $CLEAN | sed $'s/\xEF\xBB\xBF//')
+#Stupid Claritin people have a UTF8 code stuck here, this cleans it up
 POLLEN=$(echo $CLEAN | sed 's/\xEF\xBB\xBF//')
 echo $POLLEN > foo.json
 
@@ -54,7 +49,7 @@ POL_TYPES=$(echo $POLLEN | ./JSON.sh -b |grep pollenForecast |grep pp |awk -F\" 
 
 # Troubleshooting
 
-# Data Printers
+# Data Printers, only useful if you run to see if its working
 echo \"$DATE\", \"$POL_LEVEL\", \"$POL_TYPES\" 
 
 # Data Inserter into Databases

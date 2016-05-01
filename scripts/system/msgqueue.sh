@@ -14,29 +14,40 @@
 
 #Get some common variables
 
+
+
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 DB=$HOMEDIR/data/hive-data.db
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-#First get the command
-cmd=$(sqlite3 $DB "SELECT message from msgqueue WHERE status='new' LIMIT 1")
-read -p "Press [Enter] key to start backup..."
 
-#Next sanitize for any stupid characters
+#sqlite3 $DB "insert into msgqueue (date,message,status) values (\"$DATE\",\"upgrade\",\"new\");"
+
+
+#First get the command
+cmd=$(sqlite3 $DB "SELECT message from msgqueue WHERE status='new' LIMIT 1";)
+cmdid=$(sqlite3 $DB "SELECT id from msgqueue WHERE status='new' LIMIT 1";)
+
+#Next sanitize for any stupid , should happen at the website, but you never know.
 cmd=${cmd//[^a-zA-Z0-9_]/}
 
-echo "Cleaned Command is $cmd"
 #Run through our case switch
-
 case "$cmd" in
         upgrade)
             loglocal "$DATE" MSGQUEUE SUCCESS "Message Queue received upgrade command"
+            #Set status to processing
+            sqlite3 $DB "UPDATE msgqueue SET status='processing' WHERE id=$cmdid;"
             cd $HOMEDIR
-            #./upgrade.sh 2>$1
-            #Empty the Queue
-            echo "" > $HOMEDIR/www/.msgqueue
+            result=$(/home/HiveControl/upgrade.sh | tail -1)
+            #result=$(/home/HiveControl/scripts/system/foo.sh | tail -1)
+            #Check to see if we ran
+            if [[ "$result" == "success" ]]; then
+            	sqlite3 $DB "UPDATE msgqueue SET response='$result', status='complete' WHERE id=$cmdid;"
+            else
+            	sqlite3 $DB "UPDATE msgqueue SET response='$result', status='error' WHERE id=$cmdid;"
+            fi
             ;;
         cleardata)
             loglocal "$DATE" MSGQUEUE SUCCESS "Message Queue received cleardata command"
@@ -46,8 +57,7 @@ case "$cmd" in
             ;;
         *)
 		#Not a valid command, so clear the queue
-		loglocal "$DATE" MSGQUEUE ERROR "Message Queue received an invalid command"
-		echo "" > $HOMEDIR/www/.msgqueue
+		#loglocal "$DATE" MSGQUEUE ERROR "Message Queue received an invalid command"
             exit 1
 esac
 

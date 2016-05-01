@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="27"
+Upgrade_ver="29"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -22,6 +22,7 @@ Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/mast
 if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
 		echo "Nothing to do, you are at the latest version"
 		loglocal "$DATE" UPGRADE WARNING "Upgrade attempted, but nothing to upgrade. Installed is latest"
+		echo "Error: Nothing to Upgrade"
 		exit
 fi
 
@@ -161,7 +162,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			#Get Crontab as it is
 			sudo crontab -l > /home/HiveControl/install/cron/cron1.orig 
 			#Echo our new content into a new crontab file with the old
-			sudo cat /home/HiveControl/upgrade/patches/cron/CRON_PATCH_1 >> /home/HiveControl/install/cron/cron1.orig
+			sudo cat /home/HiveControl/upgrade/HiveControl/patches/cron/CRON_PATCH_1 >> /home/HiveControl/install/cron/cron1.orig
 			sudo crontab /home/HiveControl/install/cron/cron1.orig
 			let DB_ver="8"
 		fi
@@ -180,11 +181,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
 
 echo "============================================="
-
-
-
-
-
+echo "success"
 #Cleanup and set the flag in the DB
 loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
 sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
