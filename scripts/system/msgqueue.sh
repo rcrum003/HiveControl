@@ -14,15 +14,11 @@
 
 #Get some common variables
 
-
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 DB=$HOMEDIR/data/hive-data.db
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
-
-
-#sqlite3 $DB "insert into msgqueue (date,message,status) values (\"$DATE\",\"upgrade\",\"new\");"
 
 
 #First get the command
@@ -42,8 +38,7 @@ case "$cmd" in
             saveresult=$(/home/HiveControl/upgrade.sh)
             TEMPSAVE="/home/HiveControl/scripts/system/tempsave"
             echo $saveresult > $TEMPSAVE
-            result=$(cat $TEMPSAVE |tail -1)
-            rm -rf $TEMPSAVE
+            result=$(cat $TEMPSAVE |tail -c 8)
             #result=$(/home/HiveControl/scripts/system/foo.sh | tail -1)
             #Check to see if we ran
             if [[ "$result" == "success" ]]; then
