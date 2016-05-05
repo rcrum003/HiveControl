@@ -94,10 +94,8 @@ $today_pop = $parsed_json->{'forecast'}->{'simpleforecast'}->{'forecastday'}[0]-
                             Live Stream 
                         </div>
                         <div class="panel-body">
-                            <img src="http://<?PHP echo $_SERVER['HTTP_HOST'];?>:8080/cam_pic_new.php" />
+                            <img src="/pages/videostream.pphp" />
                             <P>
-                            <a href="http://<?PHP echo $_SERVER['HTTP_HOST'];?>:8080/"><button type="button" class="btn btn btn-primary align-right">Edit Camera</button></a>
-                        
                         </div>
                     </div>
                 </div>
