@@ -30,7 +30,7 @@ if [[ $NEW_IN_COUNT < "0" ]]; then
 	#if so, restart the lastcount
 	loglocal "$DATE" BEECOUNT ERROR "IN Count was less than zero"
 	NEW_IN_COUNT=0
-elif [[ $NEW_OUT_COUNT < "0"]]; then
+elif [[ $NEW_OUT_COUNT < "0" ]]; then
 	loglocal "$DATE" BEECOUNT ERROR "OUT Count was less than zero"
 	NEW_OUT_COUNT=0
 fi
