@@ -39,6 +39,7 @@ if(isset($_GET["id"])) {
             $status = $result['status'];
             $message = $result['message'];
             $msg_result = $result['response'];
+            unset($sth);
             
         	if ( $status == "new" ) {
         		echo "Waiting on Message Queue Engine to start $message job # ".$id." (could be up to one minute)...";

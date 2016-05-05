@@ -45,8 +45,10 @@ function loglocal($date, $program, $type, $message) {
 # 4 - Message (Optional)
 
         include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+       
         $sth99 = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
         $sth99->execute();
+       unset($sth99); 
 }
 
 function getlog($conn, $program, $type)
@@ -56,7 +58,8 @@ function getlog($conn, $program, $type)
     $sth1 = $conn->prepare("SELECT * FROM logs ORDER by date DESC LIMIT 1000");
     $sth1->execute();
     $result = $sth1->fetchall(PDO::FETCH_ASSOC);
-    
+    unset($sth1); 
+
     echo '<table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
     <thead>
             <tr>
@@ -108,6 +111,7 @@ if(isset($_GET["command"])) {
                 $sth2->execute();
                 $result = $sth2->fetch(PDO::FETCH_ASSOC);
                 $status = $result['status'];
+                unset($sth2);
                 $upgrade_response = $result['response'];
                 
 
@@ -127,10 +131,11 @@ if(isset($_GET["command"])) {
                     $sth3 = $conn->prepare("SELECT HCVersion,upgrade_available FROM hiveconfig");
                     $sth3->execute();
                     $result = $sth3->fetch(PDO::FETCH_ASSOC);
+                    unset($sth3);
                     $upgrade_available = $result['upgrade_available'];
                     $HCVersion = $result['HCVersion'];
                 
-            if ( $upgrade_available == "no") {
+                if ( $upgrade_available == "no") {
                     # display code
                     #echo "No upgrade available fool";
                     loglocal($now, "UPGRADE", "INFO", "Upgrade Attempted, but you are running the most current version");
@@ -141,12 +146,14 @@ if(isset($_GET["command"])) {
                 $date = date('Y-m-d H:i:s');
                 $sth4 = $conn->prepare("insert into msgqueue (date,message,status) values (\"$date\",\"$message\",\"$status\")");
                 $sth4->execute();
+                unset($sth4);
                 $now = date('Y-m-d H:i:s');
 
                 #Get the Message ID to pass to our refresh script
                 $sth5 = $conn->prepare("SELECT * FROM msgqueue WHERE message='upgrade' ORDER BY id DESC LIMIT 1");
                 $sth5->execute();
                 $result = $sth5->fetch(PDO::FETCH_ASSOC);
+                unset($sth5);
                 $msgid = $result['id'];
                 break;
             
@@ -180,6 +187,7 @@ if(isset($_GET["command"])) {
                     # Confirmed we want to delete
                     $sth13 = $conn->prepare("DELETE from logs");
                     $sth13->execute();
+                    
                     $user_ip = getUserIP();
                     loglocal($now, "LOGS", "INFO", "Logs cleared by Admin from source IP $user_ip");
                     break;
@@ -195,6 +203,7 @@ if(isset($_GET["command"])) {
                     $sth14 = $conn->prepare("DELETE from allhivedata WHERE $table='0'");
                     $sth14->execute();
                     $user_ip = getUserIP();
+                    
                     loglocal($now, "REMOVEZERO", "INFO", "Successfully removed zero data for $table by Admin from source IP $user_ip");
                     break;
                     }
