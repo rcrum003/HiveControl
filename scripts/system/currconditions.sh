@@ -64,7 +64,7 @@ echo "--- TEMP DONE ---"
 
 if [[ $ENABLE_BEECOUNTER = "yes" ]]; then
 	echo "----- Getting Bee Counts ----"
-	INOUT=$($HOMEDIR/scripts/beecounter/countbees.sh)
+	INOUT=$($HOMEDIR/scripts/beecount/countbees.sh)
 	#INOUT=$($HOMEDIR/scripts/beecounter/countbees.sh)
 	IN_COUNT=$(echo $INOUT | awk -F, '{print $1}')
 	OUT_COUNT=$(echo $INOUT | awk -F, '{print $2}')
