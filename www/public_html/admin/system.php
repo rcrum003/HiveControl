@@ -132,7 +132,7 @@ if(isset($_GET["command"])) {
                 
             if ( $upgrade_available == "no") {
                     # display code
-                    echo "No upgrade available fool";
+                    #echo "No upgrade available fool";
                     loglocal($now, "UPGRADE", "INFO", "Upgrade Attempted, but you are running the most current version");
                     break;
                 }
@@ -185,6 +185,7 @@ if(isset($_GET["command"])) {
                     break;
                 }
                 break;
+
             case "removezero":
 
                 if ( $confirm == "yes" ) {
