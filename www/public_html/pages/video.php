@@ -94,7 +94,7 @@ $today_pop = $parsed_json->{'forecast'}->{'simpleforecast'}->{'forecastday'}[0]-
                             Live Stream 
                         </div>
                         <div class="panel-body">
-                            <img src="/pages/videostream.pphp" />
+                            <img src="/pages/videostream.php" />
                             <P>
                         </div>
                     </div>
