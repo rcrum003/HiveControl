@@ -205,11 +205,7 @@ INSERT INTO hiveconfig (
                            trend_beecount_in,
                            trend_beecount_out,
                            SHOW_METRIC,
-                           ZIP,
-                           color_wind,
-                           color_pressure,
-                           trend_wind,
-                           trend_pressure
+                           ZIP
                        )
                        SELECT HOMEDIR,
                               YARDID,
@@ -308,11 +304,7 @@ INSERT INTO hiveconfig (
                               trend_beecount_in,
                               trend_beecount_out,
                               SHOW_METRIC,
-                              ZIP,
-                              color_wind,
-                              color_pressure,
-                              trend_wind,
-                              trend_pressure
+                              ZIP
                          FROM sqlitestudio_temp_table;
 
 DROP TABLE sqlitestudio_temp_table;
