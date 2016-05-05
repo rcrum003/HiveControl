@@ -1,0 +1,53 @@
+<html>
+<head>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+
+</head>
+<body>
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+
+<script type="text/javascript">
+$(function () {
+    // Notice that the dataset has missing data
+    $.getJSON('/pages/datawidgets/getdata.php?type=hivetempf&period=all&chart=highlow&callback=?', function (data) {
+
+        $('#container').highcharts('StockChart', {
+
+            chart: {
+                type: 'arearange'
+            },
+
+            rangeSelector: {
+                selected: 2
+            },
+
+            title: {
+                text: 'Hive temperature variation by day'
+            },
+
+            tooltip: {
+                valueSuffix: '°F'
+            },
+
+            series: [{
+                name: 'Temperatures',
+                data: data
+            }]
+
+        });
+    });
+
+});
+
+
+
+</script>
+
+</body>
+</html>
