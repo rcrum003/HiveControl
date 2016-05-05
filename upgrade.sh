@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="31"
+Upgrade_ver="32"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -153,6 +153,8 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			#Echo our new content into a new crontab file with the old
 			sudo cat /home/HiveControl/upgrade/HiveControl/patches/cron/CRON_PATCH_1 >> /home/HiveControl/install/cron/cron1.orig
 			sudo crontab /home/HiveControl/install/cron/cron1.orig
+			#Copy new images related to this feature set
+			sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/* /home/HiveControl/www/public_html/images/
 			let DB_ver="8"
 		fi
 			if [[ $DB_ver -eq "8" ]]; then
@@ -164,7 +166,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		fi
 			if [[ $DB_ver -eq "9" ]]; then
 			#Upgarding to next version 
-			echo "Applying DB Ver9 Upgrades"
+			echo "Applying DB Ver10 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_15
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_16
 			#Set DB Ver to the next
