@@ -8,10 +8,12 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
+
+Upgrade_ver="35"
+
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-Upgrade_ver="34"
 
 #Check to see if the update.sh is at the latest version available
 	Upgrade_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh |grep "Upgrade_ver" |awk -F\" '{print $2}')
