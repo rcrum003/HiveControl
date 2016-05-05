@@ -9,19 +9,18 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="36"
+Upgrade_ver="37"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
 
 #Check to see if the update.sh is at the latest version available
-	Upgrade_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh |grep "Upgrade_ver" |awk -F\" '{print $2}')
-	if [[ $( echo "$Upgrade_ver < $Upgrade_latest_ver" | bc) -eq 1 ]]; then
-			echo "Found a new version of upgrade.sh, downloading.., if running from command line, rerun upgrade.sh now"
-			curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh -o /home/HiveControl/upgrade.sh
-			loglocal "$DATE" UPGRADE SUCCESS "Downloaded upgrade.sh to version - $Upgrade_latest_ver"
-		exit
+checkupgrade=$(/home/HiveControl/scripts/system/checkupgrades.sh |head -1)
+	if [[ $checkupgrade = "NEWUPGRADE" ]]; then
+					echo "running new upgrade file"
+					exec /home/HiveControl/upgrade.sh
+					exit
 	fi
 
 
