@@ -33,9 +33,9 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 // Get Hive Data First
 
 if ( $SHOW_METRIC == "on" ) {
-$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, hivetempc AS hivetempf, hiveHum, weather_tempc as weather_tempf, weather_humidity, precip_1hr_metric as precip_1hr_in, solarradiation, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, hivetempc AS hivetempf, hiveHum, weather_tempc as weather_tempf, weather_humidity, precip_1hr_metric as precip_1hr_in, solarradiation, lux, in_count, out_count, wind_kph as wind, pressure_mb as pressure, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
 } else {
-$sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, solarradiation, lux, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, solarradiation, lux, in_count, out_count, wind_mph as wind, pressure_in as pressure, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
 }
 
 $sth->execute();
@@ -44,6 +44,11 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 $sth1 = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now','$sqlperiod', 'localtime')");
 $sth1->execute();
 $result1 = $sth1->fetchAll(PDO::FETCH_ASSOC);
+
+
+$sth3 = $conn->prepare("SELECT pollenlevel, strftime('%s', date)*1000 AS datetime FROM pollen WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth3->execute();
+$result3 = $sth3->fetchAll(PDO::FETCH_ASSOC);
 
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
@@ -81,22 +86,24 @@ $(function () {
             },
            
     yAxis: [{ // Temp yAxis
+            gridLineWidth: 1,
             labels: {
                 format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
+
             },
+            showEmpty: false,
             title: {
                 text: 'Temperature',
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
             }
-            
 
         }, { // Rain yAxis
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             title: {
                 text: 'Rain',
                 style: {
@@ -109,11 +116,12 @@ $(function () {
                     color: '"; echo "$color_rain"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: true
 
         },
         { // Weight yAxis
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             title: {
                 text: 'Weight',
                 style: {
@@ -126,11 +134,12 @@ $(function () {
                     color: '"; echo "$color_netweight"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: false
 
         },
         { // Humidity yAxis
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             title: {
                 text: 'Humidity',
                 style: {
@@ -143,11 +152,12 @@ $(function () {
                     color: '"; echo "$color_hivehum"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: true
 
         },
         { // Solarradiation yAxis
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             title: {
                 text: 'Solar',
                 style: {
@@ -160,11 +170,12 @@ $(function () {
                     color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: true
 
         },
         { // Lux yAxis
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             title: {
                 text: 'Lux',
                 style: {
@@ -177,11 +188,12 @@ $(function () {
                     color: '"; echo "$color_lux"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: true
 
         },
         { // GDD yAxis
-            gridLineWidth: 0,
+            gridLineWidth: 1,
             title: {
                 text: 'GDD',
                 style: {
@@ -194,6 +206,79 @@ $(function () {
                     color: '"; echo "$color_gdd"; echo "'
                 }
             },
+            showEmpty: false,
+            opposite: false
+
+        },
+         { // Flight yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Flights Out',
+                style: {
+                    color: '"; echo "$color_becount_out"; echo "'
+                }
+            },
+            labels: {
+                format: '{value}',
+                style: {
+                    color: '"; echo "$color_beecount_out"; echo "'
+                }
+            },
+            showEmpty: false,
+            opposite: false
+
+        },
+        { // Wind yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Wind',
+                style: {
+                    color: '"; echo "$color_wind"; echo "'
+                }
+            },
+            labels: {
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "kph";} else {echo "mph";} echo "',
+                style: {
+                    color: '"; echo "$color_wind"; echo "'
+                }
+            },
+            showEmpty: false,
+            opposite: false
+
+        },
+        { // Pressure yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Pressure',
+                style: {
+                    color: '"; echo "$color_pressure"; echo "'
+                }
+            },
+            labels: {
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mb";} else {echo "in";} echo "',
+                style: {
+                    color: '"; echo "$color_pressure"; echo "'
+                }
+            },
+            showEmpty: false,
+            opposite: false
+
+        },
+        { // Pollen yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Pollen',
+                style: {
+                    color: '"; echo "$color_pollen"; echo "'
+                }
+            },
+            labels: {
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mb";} else {echo "in";} echo "',
+                style: {
+                    color: '"; echo "$color_pollen"; echo "'
+                }
+            },
+            showEmpty: false,
             opposite: false
 
         }
@@ -299,9 +384,53 @@ $(function () {
             data: ["; foreach($result1 as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
             color: '"; echo "$color_gdd"; echo "',
             visible: "; echo "$trend_gdd"; echo "
+        },
+        {
+            type: 'line',
+            name: 'Flight Activity',
+            yAxis: 7,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['OUT_COUNT']."]".", ";} echo "],
+            color: '"; echo "$color_beecount_out"; echo "',
+            visible: "; echo "$trend_beecount_out"; echo "
+        },        
+        {
+            type: 'line',
+            name: 'Wind',
+            yAxis: 8,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
+            color: '"; echo "$color_wind"; echo "',
+            visible: "; echo "$trend_wind"; echo "
+        },
+        {
+            type: 'line',
+            name: 'Pressure',
+            yAxis: 9,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['pressure']."]".", ";} echo "],
+            color: '"; echo "$color_pressure"; echo "',
+            visible: "; echo "$trend_pressure"; echo "
+        },
+        {
+            type: 'line',
+            name: 'Pollen',
+            yAxis: 10,
+            data: ["; foreach($result3 as $r){echo "[".$r['datetime'].", ".$r['pollenlevel']."]".", ";} echo "],
+            color: '"; echo "$color_pollen"; echo "',
+            visible: "; echo "$trend_pollen"; echo "
         }
         ]
     });
+
+     $(\"#b\").click(function(){
+            chart.yAxis[0].update({
+                labels: {
+                    enabled: false
+                },
+                title: {
+                    text: null
+                }
+            });
+        });
+
         Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
             text: 'Enlarge Chart',
             onclick: function () {
@@ -309,6 +438,8 @@ $(function () {
                 return false;
             }
         });
+
+       
 
 });
 </script>";

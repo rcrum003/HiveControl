@@ -203,7 +203,14 @@ if($v->validate()) {
                                                          <input type="text" name="HIVE_WEIGHT_INTERCEPT" value="'; echo $result['HIVE_WEIGHT_INTERCEPT']; echo '"">';
 
                                                     echo '<br><a href="#" title="Specify Cali/Slope" data-toggle="popover" data-placement="bottom" data-content="Specify the Calibration or Slope value - see hivetool.org for instructions"><p class="fa fa-question-circle fa-fw"></P></a>Calibration/Slope:
-                                                         <input type="text" name="HIVE_WEIGHT_SLOPE" value="'; echo $result['HIVE_WEIGHT_SLOPE']; echo '"">';
+                                                         <input type="text" name="HIVE_WEIGHT_SLOPE" value="'; echo $result['HIVE_WEIGHT_SLOPE']; echo '""><br>';
+                                                         $checkscale = $result['SCALETYPE'];
+                                                         if ($checkscale == "hx711") {
+                                                        echo '<a href="/admin/hx_wiz.php"><button class="btn btn-success" type="button">Calibration Wizard </button></a>';
+
+                                                         } elseif ( $checkscale == "phidget1046") {
+                                                             #echo '<a href="/admin/hx_wiz.php"><button class="btn btn-success" type="button">Calibration Wizard </button></a>';
+                                                         }
                                             }?>
 
                                             </td>

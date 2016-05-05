@@ -39,6 +39,11 @@ echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";
     $color_gdd = $result2['color_gdd'];
     $color_beecount_in = $result2['color_beecount_in'];
     $color_beecount_out = $result2['color_beecount_out'];
+    
+    $color_wind = $result2['color_wind'];
+    $color_pressure = $result2['color_pressure'];
+    $color_pollen = $result2['color_pollen'];
+
 
     
     if ($result2['trend_hivetemp'] == "on") {$trend_hivetemp = "true";} else { $trend_hivetemp = "false"; }
@@ -53,6 +58,10 @@ echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";
 	if ($result2['trend_gdd'] == "on") {$trend_gdd = "true";} else { $trend_gdd = "false"; }
     if ($result2['trend_beecount_in'] == "on") {$trend_beecount_in = "true";} else { $trend_beecount_in = "false"; }
     if ($result2['trend_beecount_out'] == "on") {$trend_beecount_out = "true";} else { $trend_beecount_out = "false"; }
+
+    if ($result2['trend_wind'] == "on") {$trend_wind = "true";} else { $trend_wind = "false"; }
+    if ($result2['trend_pressure'] == "on") {$trend_pressure = "true";} else { $trend_pressure = "false"; }
+    if ($result2['trend_pollen'] == "on") {$trend_pollen = "true";} else { $trend_pollen = "false"; }
 
     $chart_rounding = $result2['chart_rounding'];
     $chart_smoothing = $result2['chart_smoothing'];

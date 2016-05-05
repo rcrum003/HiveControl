@@ -17,12 +17,6 @@ $SHOW_METRIC = $result3['SHOW_METRIC'];
 # =====================================================================
  echo ' 
     <head>
-    <style>
-    input {
-        max-width: 100%;
-    } 
-    </style>
-
    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,11 +37,6 @@ $SHOW_METRIC = $result3['SHOW_METRIC'];
     <!-- Custom CSS -->
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     
-    <script>
-    function confirm()
-    { alert("Warning!"); // this is the message in ""}
-    </script>
-
     <!-- Custom Fonts -->
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
@@ -59,7 +48,9 @@ $SHOW_METRIC = $result3['SHOW_METRIC'];
     <![endif]-->
 
 </head>
-<body>';
+<body>
+<div id="wrapper">
+';
 
 
 #=====================
@@ -107,7 +98,7 @@ echo '
                             <a href="/pages/gdd.php?chart=line&period=week">GDD</a>
                         </li>
                         <li>
-                            <a href="/pages/beecount.php?chart=line&period=week">Bee Counts</a>
+                            <a href="/pages/beecount.php?chart=line&period=week">Flights</a>
                         </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -137,7 +128,10 @@ echo '
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
                                 <li>
-                                    <a href="/admin/system.php">System Logs</a>
+                                    <a href="/admin/logs.php">Logs</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/system.php">System Commands</a>
                                 </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -176,7 +170,7 @@ if ($orient == "normal") {
                                     <a href="/pages/gdd.php?chart=line&period=week">GDD</a>
                                 </li>
                                 <li>
-                                     <a href="/pages/beecount.php?chart=line&period=week">Bee Counts</a>
+                                     <a href="/pages/beecount.php?chart=line&period=week">flights</a>
                                 </li>
                                 
                             </ul>
@@ -202,7 +196,10 @@ if ($orient == "normal") {
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
                                 <li>
-                                    <a href="/admin/system.php">System Logs</a>
+                                    <a href="/admin/logs.php">Logs</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/system.php">System Commands</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

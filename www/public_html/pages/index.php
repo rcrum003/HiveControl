@@ -106,7 +106,7 @@ if(isset($_GET["period"])) {
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                     <img src="../images/humsm.png">
+                                     <img src="../images/hum.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="h4"><?php echo "$hivehumi"." / "."$wxhumi"; ?>%</div>
@@ -128,7 +128,7 @@ if(isset($_GET["period"])) {
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                    <img src="../images/treesm.png">
+                                    <img src="../images/treesm.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="h4"><?PHP echo "$daygdd / $seasongdd"; ?></div>
@@ -260,8 +260,6 @@ if(isset($_GET["period"])) {
 
   ?> 
   
-
-
 
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>

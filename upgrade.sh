@@ -8,7 +8,7 @@
 # If new code is available, trigger an alert in the UI. Clicking gives instructions on how to upgrade.
 
 #Get the latest upgrade script
-Upgrade_ver="29"
+Upgrade_ver="31"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -74,17 +74,6 @@ echo "Upgrading our shell scripts"
 #cp -R /home/HiveControl/scripts/
 rm -rf $scriptsource/hiveconfig.inc
 cp -Rp $scriptsource/* $scriptDest/
-
-# Used just to check if we had a legacy HX711 in place. If so, we leave the code
-if [[ ! -f "/home/HiveControl/scripts/weight/legacyweight" ]]; then 
-	legacyweight="no"
-else
-	legacyweight=$(cat /home/HiveControl/scripts/weight/legacyweight)
-fi
-
-if [[ $legacyweight == "yes" ]]; then
-	cp  /home/HiveControl/scripts/weight/hx711v3.sh /home/HiveControl/scripts/weight/hx711.sh
-fi
 cd $scriptDest
 find . -name '*.sh' -exec chmod u+x {} +
 
@@ -172,6 +161,14 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_14
 			#Set DB Ver to the next
 			let DB_ver="9"
+		fi
+			if [[ $DB_ver -eq "9" ]]; then
+			#Upgarding to next version 
+			echo "Applying DB Ver9 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_15
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_16
+			#Set DB Ver to the next
+			let DB_ver="10"
 		fi
 
 

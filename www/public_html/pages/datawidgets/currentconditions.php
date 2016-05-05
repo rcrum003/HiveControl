@@ -61,20 +61,63 @@ else {
 	$seasongdd = $gdddata['seasongdd'];
 }
 
-
 #Get some trends
-$trendsth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, solarradiation, lux, date AS datetime FROM allhivedata ORDER BY datetime(\"date\") DESC LIMIT 288;");
+
+#WHERE date > "2016-04-09 15:55" AND date < "2016-04-09 16:00:";
+
+#Get Current Date
+# Parse to get the actual date
+
+#$now = date('Y-m-d H:i');
+#$minute = date('i');
+#$startdate = strtotime("-1440 minutes");
+
+ $shortName = exec('date +%Z');
+ $longName = timezone_name_from_abbr($shortName);
+ date_default_timezone_set($longName);
+
+ switch ($period) {
+    case "day":
+    	$s = strtotime("-1440 minutes");
+		$startdate = date("Y-m-d H:i", $s);
+        break;
+    case "week":
+        $s = strtotime("-10080 minutes");
+		$startdate = date("Y-m-d H:i", $s);
+        break;
+    case "month":
+        $s = strtotime("-43200 minutes");
+        $startdate = date("Y-m-d H:i", $s);
+		break;
+    case "year":
+        $s = strtotime("-525600 minutes");
+        $startdate = date("Y-m-d H:i", $s);
+		break;
+    case "all":
+        $sqlperiod =  "-20 years";
+        break;
+    } 
+
+#WHERE date > datetime('now','$sqlperiod', 'localtime')");
+
+$trendsth = $conn->prepare("SELECT hiveweight, hiverawweight, date AS datetime FROM allhivedata WHERE date > '$startdate' ORDER BY date LIMIT 1;");
 $trendsth->execute();
 $trenddata = $trendsth->fetch(PDO::FETCH_ASSOC);
 
-$pasthivetempf = ceil($trenddata['hivetempf']);
-$pasthivehumi = ceil($trenddata['hiveHum']);
-$pasthiveweight = ceil($trenddata['hiveweight']);
-$pastwxtempf = ceil($trenddata['weather_tempf']);
-$pastwxhumi = ceil($trenddata['weather_humidity']);
-$pastrawweight = ceil($trenddata['hiverawweight']);
+$pasthiveweight = $trenddata['hiveweight'];
+#$pastrawweight = $trenddata['hiverawweight'];
 
-$changeweight = ($pasthiveweight - $hiveweight);  
+if (empty($pasthiveweight)) {
+	
+	$changeweight = "NA";
+} 
+else {
+	$changeweight = round(($hiveweight - $pasthiveweight), 2); 
+}
+
+#echo "<br>starting weight = $pasthiveweight";
+
+ 
 
 
 ?>

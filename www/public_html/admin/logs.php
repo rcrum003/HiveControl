@@ -22,25 +22,70 @@ if(isset($_GET["command"])) {
         // Default to nothing if no command is set or empty
         $command = "";
         } else {
-            // Not empty, so let's check it's input and run switch
             $command = test_input($_GET["command"]);
-        switch ($command) {
-            case "upgrade":
-                $message = "upgrade";
-                $status = "new";    
-                break;
-            case "cleardata":
-                $message = "cleardata";
-                $status = "new";    
-                break;
         }
-            #Write message to the queue
-            // Insert message into DB
-                $date = date('Y-m-d H:i:s');
-                $sth = $conn->prepare("insert into msgqueue (date,message,status) values (\"$date\",\"$message\",\"$status\")");
-                $sth->execute();
-        }
-    } 
+    } else {
+    $command = "";
+}
+
+
+switch ($command) {
+    case "clearlogs":
+        $sth = $conn->prepare("DELETE from logs");
+        $sth->execute();
+        #Get system time
+            $shortName = exec('date +%Z');
+            $longName = timezone_name_from_abbr($shortName);
+            date_default_timezone_set($longName);
+            $now = date('Y-m-d H:i:s');    
+        $user_ip = getUserIP();
+        loglocal($now, "WEBADMIN", "INFO", "Logs cleared by Admin from source IP $user_ip");
+        break;
+    }
+
+
+function loglocal($date, $program, $type, $message) {
+  #Stores log entries locally
+# This script takes 4 inputs and puts them into the DB
+# 1 - Date - 
+# 2 - Program
+# 3 - Type (Error, Success, Warning)
+# 4 - Message (Optional)
+
+        include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+        $sth = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
+        $sth->execute();
+}
+
+function getUserIP()
+{
+    $client  = @$_SERVER['HTTP_CLIENT_IP'];
+    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+    $remote  = $_SERVER['REMOTE_ADDR'];
+
+    if(filter_var($client, FILTER_VALIDATE_IP))
+    {
+        $ip = $client;
+    }
+    elseif(filter_var($forward, FILTER_VALIDATE_IP))
+    {
+        $ip = $forward;
+    }
+    else
+    {
+        $ip = $remote;
+    }
+
+    return $ip;
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+$sth = $conn->prepare("SELECT * FROM logs ORDER by date DESC LIMIT 1000");
+$sth->execute();
+$result = $sth->fetchall(PDO::FETCH_ASSOC);
+
+}
+
 
 ?>
 <!DOCTYPE html>
@@ -54,7 +99,7 @@ if(isset($_GET["command"])) {
     <div id="wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">System Updates</h1>
+                    <h1 class="page-header">System Logs</h1>
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
@@ -66,7 +111,28 @@ if(isset($_GET["command"])) {
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="dataTable_wrapper">
-                                
+                            <a href="/admin/logs.php?command=clearlogs"><button type="button" class="btn btn btn-primary">Clear Logs</button></a>
+                                <table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
+
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Program</th>
+                                            <th>Type</th>
+                                            <th>Message</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?PHP foreach($result as $r){
+                                        echo '<tr><td>'.$r['date'].'</td>';
+                                        echo '<td>'.$r['program'].'</td>';
+                                        echo '<td>'.$r['type'].'</td>';
+                                        echo '<td>'.$r['message'].'</td></tr>';
+                                    }
+                                    ?>
+                                    </tbody>
+                                </table>
+
 
                             </div>
                             <!-- /.table-responsive -->

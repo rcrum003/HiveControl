@@ -15,7 +15,6 @@
 #Get some common variables
 
 
-
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 DB=$HOMEDIR/data/hive-data.db
@@ -40,13 +39,17 @@ case "$cmd" in
             #Set status to processing
             sqlite3 $DB "UPDATE msgqueue SET status='processing' WHERE id=$cmdid;"
             cd $HOMEDIR
-            result=$(/home/HiveControl/upgrade.sh | tail -1)
+            saveresult=$(/home/HiveControl/upgrade.sh)
+            TEMPSAVE="/home/HiveControl/scripts/system/tempsave"
+            echo $saveresult > $TEMPSAVE
+            result=$(cat $TEMPSAVE |tail -1)
+            rm -rf $TEMPSAVE
             #result=$(/home/HiveControl/scripts/system/foo.sh | tail -1)
             #Check to see if we ran
             if [[ "$result" == "success" ]]; then
-            	sqlite3 $DB "UPDATE msgqueue SET response='$result', status='complete' WHERE id=$cmdid;"
+            	sqlite3 $DB "UPDATE msgqueue SET response='Successfully Updated HiveControl', status='complete' WHERE id=$cmdid;"
             else
-            	sqlite3 $DB "UPDATE msgqueue SET response='$result', status='error' WHERE id=$cmdid;"
+            	sqlite3 $DB "UPDATE msgqueue SET response='$saveresult', status='error' WHERE id=$cmdid;"
             fi
             ;;
         cleardata)

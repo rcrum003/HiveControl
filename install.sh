@@ -134,6 +134,10 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_9
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_10
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_11
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_12
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_13
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_14
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_15
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_16
 
 #Upload default values
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
