@@ -1,31 +1,36 @@
 #!/bin/bash
-# version 0.6
-# reads the Phidget Bridge board or other scale boards and scales the output
+# version 0.8
+# reads the Weight boards or other scale boards and scales the output
 # Updated to remove the percentage check, since that seems to cause a lot of bad values
 # Now we just check for expected weights within range between 0 and 1500 lbs.
+# Added logic to check to see if we have set our intercepts.
 
 WEIGHTRUNDIR=/home/HiveControl/scripts/weight
 # Get some variables from our central file
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-##### NEED TO FIX THIS ONE TO CHECK FOR A ZERO INTERCEPT
-
-
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-if [[ -z "$HIVE_WEIGHT_INTERCEPT" ]] || ; then
-	echo "Weight Intercept Not Set"
+if [[ -z "$HIVE_WEIGHT_INTERCEPT" ]] ; then
+	#echo "Weight Intercept Not Set"
 	loglocal "$DATE" WEIGHT ERROR "Please set Weight Zero Value in the Instruments page"
 	HIVE_WEIGHT_INTERCEPT=1	
 fi
-if [[ -z $HIVE_WEIGHT_SLOPE ]]; then
+if [[ -z $HIVE_WEIGHT_SLOPE ]] || [[ $HIVE_WEIGHT_INTERCEPT = "0" ]]; then
+	#echo "Weight Slope Not Set"
 	loglocal "$DATE" WEIGHT ERROR "Please set Weight Slope in the Instruments page"
 	HIVE_WEIGHT_SLOPE=1
 fi
 
+
 if [ "$SCALETYPE" = "hx711" ]; then
-	RAWWEIGHT=`$WEIGHTRUNDIR/hx711.sh`
+	#echo "getting scale values"
+	HX711_ZERO="$HIVE_WEIGHT_INTERCEPT"	
+	HX711_CALI="$HIVE_WEIGHT_SLOPE"
+	#echo "Passing Zero = $HX711_ZERO, CALI = $HX711_CALI"
+	RAWWEIGHT=$($WEIGHTRUNDIR/hx711.sh $HX711_ZERO $HX711_CALI)
+	#echo "Got RAWWEIGHT as $RAWWEIGHT"
 elif [ "$SCALETYPE" = "phidget1046" ]; then
         RAWWEIGHT=`$WEIGHTRUNDIR/phidget1046.sh`
 elif [ "$SCALETYPE" = "cpw200plus" ]; then
@@ -36,16 +41,12 @@ else
 	exit
 fi
 
-if [[ -z $RAW ]]; then
-	#statements
-fi
 # Test our values for expected range
-ec
+
 	RAW_MINTEST=$(echo "$RAWWEIGHT < 0" | bc)
     RAW_MAXTEST=$(echo "$RAWWEIGHT > 1500" | bc)
 
-if [ $RAW_MINTEST -eq 0 ] && [ $RAW_MAXTEST -eq 0 ]; then
-         
+if [[ $RAW_MINTEST == "0" ]] && [[ $RAW_MAXTEST == "0" ]]; then 
 	# Success - Let's get the other data
 	#================
 	# Calc Hive Weight - Equipment Weight
@@ -56,7 +57,6 @@ if [ $RAW_MINTEST -eq 0 ] && [ $RAW_MAXTEST -eq 0 ]; then
 	COMBINEDWEIGHT=`echo "$BASEWEIGHT + $BODYWEIGHT + $MISCWEIGHT" |bc`
 	HIVEWEIGHT=`echo "$RAWWEIGHT - $COMBINEDWEIGHT" |bc`
 	RAW2=$(echo "scale=2; ($RAWWEIGHT/1)" |bc)
-	echo "We did this"
 else
 	#Something bad happened, set values to zero and exit
         loglocal "$DATE" WEIGHT ERROR "Raw weight was $RAWWEIGHT which exceeded 1500 or was less than 0, setting value to 0"	
@@ -65,9 +65,10 @@ else
 fi
 
 if [[ -z "$RAW2" ]] || [[ -z "$HIVEWEIGHT" ]];  then
-	 loglocal "$DATE" WEIGHT ERROR "Unknown Error"	
-	 echo "unknown error"
+	 loglocal "$DATE" WEIGHT ERROR "Unknown Error, raw2 was $RAW2 and hiveweight was $HIVEWEIGHT"	
+	 #echo "unknown error, raw2 was $RAW2 and hiveweight was $HIVEWEIGHT"
 	echo "0 0"
+	exit
 else
 echo "$RAW2 $HIVEWEIGHT"
 fi
