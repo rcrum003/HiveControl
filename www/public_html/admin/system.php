@@ -45,17 +45,17 @@ function loglocal($date, $program, $type, $message) {
 # 4 - Message (Optional)
 
         include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
-        $sth = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
-        $sth->execute();
+        $sth99 = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
+        $sth99->execute();
 }
 
 function getlog($conn, $program, $type)
 {
     # Pulls latest log file
 
-    $sth = $conn->prepare("SELECT * FROM logs ORDER by date DESC LIMIT 1000");
-    $sth->execute();
-    $result = $sth->fetchall(PDO::FETCH_ASSOC);
+    $sth1 = $conn->prepare("SELECT * FROM logs ORDER by date DESC LIMIT 1000");
+    $sth1->execute();
+    $result = $sth1->fetchall(PDO::FETCH_ASSOC);
     
     echo '<table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
     <thead>
@@ -104,9 +104,9 @@ if(isset($_GET["command"])) {
                 #Check to see is a messgae for upgrade already exists
                 #New, processing, complete, error are the expected statuses
                 
-                $sth = $conn->prepare("SELECT * FROM msgqueue WHERE message='upgrade' ORDER BY id DESC LIMIT 1");
-                $sth->execute();
-                $result = $sth->fetch(PDO::FETCH_ASSOC);
+                $sth2 = $conn->prepare("SELECT * FROM msgqueue WHERE message='upgrade' ORDER BY id DESC LIMIT 1");
+                $sth2->execute();
+                $result = $sth2->fetch(PDO::FETCH_ASSOC);
                 $status = $result['status'];
                 $upgrade_response = $result['response'];
                 
@@ -124,9 +124,9 @@ if(isset($_GET["command"])) {
                     $error = $upgrade_response;
                 }
                 # Check to see if an uprade is available, if not, silently fail
-                    $sth = $conn->prepare("SELECT HCVersion,upgrade_available FROM hiveconfig");
-                    $sth->execute();
-                    $result = $sth->fetch(PDO::FETCH_ASSOC);
+                    $sth3 = $conn->prepare("SELECT HCVersion,upgrade_available FROM hiveconfig");
+                    $sth3->execute();
+                    $result = $sth3->fetch(PDO::FETCH_ASSOC);
                     $upgrade_available = $result['upgrade_available'];
                     $HCVersion = $result['HCVersion'];
                 
@@ -139,14 +139,14 @@ if(isset($_GET["command"])) {
                 $message = "upgrade";
                 $status = "new";
                 $date = date('Y-m-d H:i:s');
-                $sth2 = $conn->prepare("insert into msgqueue (date,message,status) values (\"$date\",\"$message\",\"$status\")");
-                $sth2->execute();
+                $sth4 = $conn->prepare("insert into msgqueue (date,message,status) values (\"$date\",\"$message\",\"$status\")");
+                $sth4->execute();
                 $now = date('Y-m-d H:i:s');
 
                 #Get the Message ID to pass to our refresh script
-                $sth = $conn->prepare("SELECT * FROM msgqueue WHERE message='upgrade' ORDER BY id DESC LIMIT 1");
-                $sth->execute();
-                $result = $sth->fetch(PDO::FETCH_ASSOC);
+                $sth5 = $conn->prepare("SELECT * FROM msgqueue WHERE message='upgrade' ORDER BY id DESC LIMIT 1");
+                $sth5->execute();
+                $result = $sth5->fetch(PDO::FETCH_ASSOC);
                 $msgid = $result['id'];
                 break;
             
@@ -154,20 +154,20 @@ if(isset($_GET["command"])) {
 
                 if ($confirm == "yes") {
                     # well, you confirmed it, deleting all the data
-                    $sth = $conn->prepare("DELETE from allhivedata");
-                    $sth->execute();
-                    $sth = $conn->prepare("DELETE from hivedata");
-                    $sth->execute();
-                    $sth = $conn->prepare("DELETE from weather");
-                    $sth->execute();
-                    $sth = $conn->prepare("DELETE from gdd");
-                    $sth->execute();
-                    $sth = $conn->prepare("DELETE from logs");
-                    $sth->execute();
-                    $sth = $conn->prepare("DELETE from msgqueue");
-                    $sth->execute();
-                    $sth = $conn->prepare("DELETE from pollen");
-                    $sth->execute();
+                    $sth6 = $conn->prepare("DELETE from allhivedata");
+                    $sth6->execute();
+                    $sth7 = $conn->prepare("DELETE from hivedata");
+                    $sth7->execute();
+                    $sth8 = $conn->prepare("DELETE from weather");
+                    $sth8->execute();
+                    $sth9 = $conn->prepare("DELETE from gdd");
+                    $sth9->execute();
+                    $sth10 = $conn->prepare("DELETE from logs");
+                    $sth10->execute();
+                    $sth11 = $conn->prepare("DELETE from msgqueue");
+                    $sth11->execute();
+                    $sth12 = $conn->prepare("DELETE from pollen");
+                    $sth12->execute();
                     $user_ip = getUserIP();
                     loglocal($now, "RESET", "INFO", "All Data Erased by Admin from source IP $user_ip");
                 }
@@ -178,8 +178,8 @@ if(isset($_GET["command"])) {
 
                 if ( $confirm == "yes" ) {
                     # Confirmed we want to delete
-                    $sth = $conn->prepare("DELETE from logs");
-                    $sth->execute();
+                    $sth13 = $conn->prepare("DELETE from logs");
+                    $sth13->execute();
                     $user_ip = getUserIP();
                     loglocal($now, "LOGS", "INFO", "Logs cleared by Admin from source IP $user_ip");
                     break;
@@ -192,8 +192,8 @@ if(isset($_GET["command"])) {
                     # Confirmed we want to remove zeros
                     if ( isset($table)) {
                         # need to tell us what table you want remove the zeros for
-                    $sth = $conn->prepare("DELETE from allhivedata WHERE $table='0'");
-                    $sth->execute();
+                    $sth14 = $conn->prepare("DELETE from allhivedata WHERE $table='0'");
+                    $sth14->execute();
                     $user_ip = getUserIP();
                     loglocal($now, "REMOVEZERO", "INFO", "Successfully removed zero data for $table by Admin from source IP $user_ip");
                     break;
