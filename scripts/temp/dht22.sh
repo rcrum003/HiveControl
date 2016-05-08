@@ -1,6 +1,6 @@
 #!/bin/bash
 # read the DHT22
-# Version 1
+# Version 1.2
 # Supporting the Hivetool project
 # gets and returns data like the temperhum
 
@@ -28,7 +28,7 @@ do
         TEMP_MINTEST=`echo "$TEMPF > -50" | bc`
         HUMIDITY_MAXTEST=`echo "$HUMIDITY > 100" | bc`
         TEMP_MAXTEST=`echo "$TEMPF > 150" | bc`
-        if [ $HUMIDITY_MINTEST -eq 0 ] && [ $TEMP_MINTEST -ne 0 ] && [ $HUMIDITY_MAXTEST -eq 0 ] && [ $TEMP_MAXTEST -eq 0 ]
+        if [ $HUMIDITY_MINTEST == "0" ] && [ $TEMP_MINTEST != "0" ] && [ $HUMIDITY_MAXTEST == "0" ] && [ $TEMP_MAXTEST == "0" ]
         then
          DATA_GOOD=1
         else

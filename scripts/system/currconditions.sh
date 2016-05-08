@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 1.5
+# Version 1.6
 
 # Get Variables from central file
 SHELL=/bin/bash
@@ -14,6 +14,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveCont
 HOST=`hostname`
 #Load the results of the script above
 source /home/HiveControl/scripts/hiveconfig.inc
+source /home/HiveControl/scripts/data/check.inc
+
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 # ------ GET HIVE WEIGHT ----
@@ -138,6 +140,13 @@ precip_today_in=`/bin/echo $GETNOW | JSON.sh -b |grep precip_today_in |awk -F"\"
 precip_today_metric=`/bin/echo $GETNOW | JSON.sh -b |grep precip_today_metric |awk -F"\"" '{print $6}'`
 solarradiation=`/bin/echo $GETNOW | JSON.sh -b |grep solarradiation |awk -F"\"" '{print $6}'`
 lux="0"
+
+#Check for non zero values
+check pressure_mb
+check pressure_in
+check UV
+check solarradiation
+
 
 #Check to see if solarradiation is not set from the weather stations
 if [[ $solarradiation = "--" ]]; then

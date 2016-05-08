@@ -215,7 +215,7 @@ $(function () {
             title: {
                 text: 'Flights Out',
                 style: {
-                    color: '"; echo "$color_becount_out"; echo "'
+                    color: '"; echo "$color_beecount_out"; echo "'
                 }
             },
             labels: {

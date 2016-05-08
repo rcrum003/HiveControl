@@ -1,0 +1,14 @@
+Release Notes:
+
+--------------------
+1.58 Release Notes
+--------------------
+1. Added index.html to /admin page.
+2. Fixed All_charts flight color misspelling of variable.
+3. Finished Weight Calibration Wizard feature for HX711 (the majority of our users)
+4. Fixed a bug in DHT22.sh
+5. Fixed getpollen script to use pollen.com, instead of Claritin
+6. Fixed issue with Install script, it wasn't inserting the default values after install, causing improper startup.
+7. Added "date/time to currentconditions.php so we know how current the data is (even though we have the option to show red, when the data is older than 5 minutes)."
+8. Added 5 minute refresh of index.php, so we can watch our charts all day long!
+9. Added check.inc function to check if we get an invalid figure for an expected value. Mainly for when the weather script returns pressure of ----

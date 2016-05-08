@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="40"
+Upgrade_ver="41"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -183,8 +183,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			#Set DB Ver to the next
 			let DB_ver="10"
 		fi
-
-
+			if [[ $DB_ver -eq -10 ]]; then
+			echo "Ok, so not a DB upgrade, but only needs to be once and this was the best place for it"
+			sudo echo "www-data ALL=(ALL) NOPASSWD: /usr/local/bin/hx711" >> /etc/sudoers
+			let DB_ver="11"
+		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
 	fi

@@ -127,20 +127,6 @@ if(isset($_GET["command"])) {
                     $msgid = $result['id'];
                     $error = $upgrade_response;
                 }
-                # Check to see if an uprade is available, if not, silently fail
-                    $sth3 = $conn->prepare("SELECT HCVersion,upgrade_available FROM hiveconfig");
-                    $sth3->execute();
-                    $result = $sth3->fetch(PDO::FETCH_ASSOC);
-                    unset($sth3);
-                    $upgrade_available = $result['upgrade_available'];
-                    $HCVersion = $result['HCVersion'];
-                
-                if ( $upgrade_available == "no") {
-                    # display code
-                    #echo "No upgrade available fool";
-                    loglocal($now, "UPGRADE", "INFO", "Upgrade Attempted, but you are running the most current version");
-                    break;
-                }
                 $message = "upgrade";
                 $status = "new";
                 $date = date('Y-m-d H:i:s');

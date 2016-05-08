@@ -9,6 +9,10 @@ $sth1 = $conn->prepare("SELECT seasongdd, daygdd FROM gdd ORDER BY datetime(\"ca
 $sth1->execute();
 $gdddata = $sth1->fetch(PDO::FETCH_ASSOC);
 
+#$getdate = $alldata['datetime'];
+#echo $getdate;
+$recorddate = date("(M d, H:i)", strtotime($alldata['datetime']));
+#$recorddate = date("Y-m-d H:i", );
 
 if ($chart_rounding == "on") {
 	if ($SHOW_METRIC == "on") {

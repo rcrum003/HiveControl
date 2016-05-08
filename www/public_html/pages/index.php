@@ -31,7 +31,13 @@ if(isset($_GET["period"])) {
     $period = "day";
 }
 
+#Refresh our index.php page every 5 minutes so we get the latest data and can follow along during the day.
+$page = $_SERVER['PHP_SELF'];
+$sec = "300";
+header("Refresh: $sec; url=$page");
+
 ?>
+
 
 
 <!DOCTYPE html>
@@ -49,7 +55,7 @@ if(isset($_GET["period"])) {
         
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Dashboard </h1>
+                    <h1 class="page-header">Dashboard - <?PHP echo "$recorddate"; ?></h1>
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
