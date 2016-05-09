@@ -1,4 +1,12 @@
 Release Notes:
+--------------------
+1.59 Release Notes
+--------------------
+
+1. Disallow negative numbers in the check function in the main shell scripts. This protects if a instrument gives us a negative value.
+2. Added check for negative in IN_COUNT/OUT_COUNT for future support of beecounter code.
+3. Actually commited the check.inc file.
+
 
 --------------------
 1.58 Release Notes
