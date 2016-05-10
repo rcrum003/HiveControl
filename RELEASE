@@ -1,5 +1,11 @@
 Release Notes:
 --------------------
+1.61 Release Notes
+--------------------
+1. Fixed unexpected error
+
+
+--------------------
 1.60 Release Notes
 --------------------
 1. Fixed a rare condition in that if you entered a decimal without a leading 0, HX711 would error out. We now check for that.

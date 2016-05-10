@@ -170,10 +170,8 @@ if [ $ENABLE_LUX = "yes" ]; then
 			echo "getting solarradiation from weatherstation"
 			lux="0"
 		fi
-elif [ $ENABLE_LUX = "no" ]; then
-	#echo "Not getting LUX - set to no"
 fi
-checl LUX
+check LUX
 		
 echo "--- LUX DONE --- "
 
