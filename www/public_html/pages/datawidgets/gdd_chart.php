@@ -35,10 +35,15 @@ if ($chart == 'line') {
  
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-// Get Hive Data First
+// Get GDD Data First
 $sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now','$sqlperiod', 'localtime')");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+// Get Pollen Data
+$sth3 = $conn->prepare("SELECT pollenlevel, strftime('%s', date)*1000 AS datetime FROM pollen WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth3->execute();
+$result3 = $sth3->fetchAll(PDO::FETCH_ASSOC);
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
@@ -89,6 +94,24 @@ $(function () {
             },
             opposite: false
 
+        },
+        { // Pollen yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Pollen',
+                style: {
+                    color: '"; echo "$color_pollen"; echo "'
+                }
+            },
+            labels: {
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mb";} else {echo "in";} echo "',
+                style: {
+                    color: '"; echo "$color_pollen"; echo "'
+                }
+            },
+            showEmpty: false,
+            opposite: false
+
         }
         ],
         plotOptions: {
@@ -115,12 +138,20 @@ $(function () {
         },
         series: [
         {
-            type: 'line',
+            type: 'area',
             name: 'GDD',
             yAxis: 0,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
             color: '"; echo "$color_gdd"; echo "',
             visible: true
+        },
+         {
+            type: 'area',
+            name: 'Pollen',
+            yAxis: 1,
+            data: ["; foreach($result3 as $r){echo "[".$r['datetime'].", ".$r['pollenlevel']."]".", ";} echo "],
+            color: '"; echo "$color_pollen"; echo "',
+            visible: "; echo "$trend_pollen"; echo "
         }
         ]
     });

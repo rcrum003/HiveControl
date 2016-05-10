@@ -39,13 +39,12 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 if ( $SHOW_METRIC == "on" ) {
 
-$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
 } else {
-$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+
+//Show normal
+$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
 }
-
-
-
 
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -116,6 +115,24 @@ $(function () {
             },
             opposite: true
 
+        }, 
+         { // Wind yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Wind',
+                style: {
+                    color: '"; echo "$color_wind"; echo "'
+                }
+            },
+            labels: {
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "kph";} else {echo "mph";} echo "',
+                style: {
+                    color: '"; echo "$color_wind"; echo "'
+                }
+            },
+            showEmpty: false,
+            opposite: false
+
         }],
         plotOptions: {
             line: {
@@ -153,11 +170,19 @@ $(function () {
            visible: true
         },
         {
-            type: 'column',
+            type: 'area',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
             color: '"; echo "$color_rain"; echo "',
+            visible: true
+        }, 
+        {
+            type: 'line',
+            name: 'Wind',
+            yAxis: 2,
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
+            color: '"; echo "$color_wind"; echo "',
             visible: true
         }
         ]

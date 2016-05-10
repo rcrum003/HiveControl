@@ -1,5 +1,21 @@
 Release Notes:
 --------------------
+1.60 Release Notes
+--------------------
+1. Fixed a rare condition in that if you entered a decimal without a leading 0, HX711 would error out. We now check for that.
+2. Added duplicate checking to database to disallow two hiveconfig rows with an ID of zero, just an added error check.
+3. Added XRDP support during the install (you have to specify it though with -x if you want it) - Added for the folks who don't know how to enable it on their own.
+4. Added TouchScreen Support for those that run the GUI Desktop, and can't install matchbox by themselves, use -k when installing to enable - example ./install.sh -k
+5. Added the ability to "save on click" for all the forms, eliminating the save button. Fixes the problem of having to hit save to get the second set of options.
+6. Changed Rain Trend to a Area Chart, instead of a bar.
+7. Add rain to hive activity detail chart
+8. Changed GDD Chart to be Area in Detail views
+9. Added Pollen values to the GDD Detail chart
+10. Fixed Current Conditions Metric Trend Calc error
+11. Added field validation to hivebodyconfig.php
+
+
+--------------------
 1.59 Release Notes
 --------------------
 

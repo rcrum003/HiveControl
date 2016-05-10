@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 
 $v = new Valitron\Validator($_POST);
-$v->rule('in', ['ENABLE_HIVE_WEIGHT'], ['no', 'yes']);
+$v->rule('numeric', ['HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT','HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT','HIVE_FEEDER_WEIGHT','HIVE_TOP_INNER_COVER_WEIGHT','HIVE_TOP_TELE_COVER_WEIGHT','HIVE_TOP_MIGRATORY_COVER_WEIGHT','HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT','HIVE_BODY_DEEP_FOUNDATION_WEIGHT','HIVE_BODY_SHAL_FOUNDATION_WEIGHT','HIVE_TOP_WEIGHT','HIVE_COMPUTER_WEIGHT','HIVE_MISC_WEIGHT', 'NUM_HIVE_BASE_SOLID_BOTTOM_BOARD','NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD','NUM_HIVE_FEEDER','NUM_HIVE_TOP_INNER_COVER','NUM_HIVE_TOP_TELE_COVER','NUM_HIVE_TOP_MIGRATORY_COVER','NUM_HIVE_BODY_MEDIUM_FOUNDATION','NUM_HIVE_BODY_DEEP_FOUNDATION','NUM_HIVE_BODY_SHAL_FOUNDATION'], 1)->message('{field} must be numeric');
 
 }
 //Check input for badness
@@ -113,22 +113,22 @@ $NUM_HIVE_BODY_SHAL_FOUNDATION= test_input($_POST["NUM_HIVE_BODY_SHAL_FOUNDATION
     $result = $sth2->fetch(PDO::FETCH_ASSOC);
     
     // Tell user it saved
-    echo '<div class="alert alert-success alert-dismissable">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-    echo 'Successfully Saved';
-    echo '</div>';
+    //echo '<div class="alert alert-success alert-dismissable">
+      //                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+    //echo 'Successfully Saved';
+    //echo '</div>';
 } else {
     // Errors
-     echo '<div class="alert alert-danger">';
+     echo '<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
       $err=array_values($v->errors());
       for ($i=0; $i < count($err); $i++){
         echo $err[$i][0]."<br>";
       }
           echo  '</div>';  
               // Refresh the fields in the form
-    $sth = $conn->prepare("SELECT * FROM hiveconfig");
-    $sth->execute();
-    $result = $sth->fetch(PDO::FETCH_ASSOC);  
+    $sth2 = $conn->prepare("SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id");
+    $sth2->execute();
+    $result = $sth2->fetch(PDO::FETCH_ASSOC); 
 }
                
     }
@@ -155,69 +155,65 @@ $NUM_HIVE_BODY_SHAL_FOUNDATION= test_input($_POST["NUM_HIVE_BODY_SHAL_FOUNDATION
                                     <tbody>
                                         <tr class="odd gradeX">
                                             <td>Hive Top Weight</td>
-                                            <td><input type="text" name="HIVE_TOP_WEIGHT" value="<?PHP echo $result['HIVE_TOP_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_TOP_WEIGHT" value="<?PHP echo $result['HIVE_TOP_WEIGHT']; ?>"></td>
                                             <td></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Telescoping Cover<br><img src="/images/hive/telecover.png" width="175" height="65"></td>
-                                            <td><input type="text" name="HIVE_TOP_TELE_COVER_WEIGHT" value="<?PHP echo $result['HIVE_TOP_TELE_COVER_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_TOP_TELE_COVER" value="<?PHP echo $result['NUM_HIVE_TOP_TELE_COVER']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_TOP_TELE_COVER_WEIGHT" value="<?PHP echo $result['HIVE_TOP_TELE_COVER_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_TOP_TELE_COVER" value="<?PHP echo $result['NUM_HIVE_TOP_TELE_COVER']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Migratory Cover<br><img src="/images/hive/migratorytop.png"></td>
-                                            <td><input type="text" name="HIVE_TOP_MIGRATORY_COVER_WEIGHT" value="<?PHP echo $result['HIVE_TOP_MIGRATORY_COVER_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_TOP_MIGRATORY_COVER" value="<?PHP echo $result['NUM_HIVE_TOP_MIGRATORY_COVER']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_TOP_MIGRATORY_COVER_WEIGHT" value="<?PHP echo $result['HIVE_TOP_MIGRATORY_COVER_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_TOP_MIGRATORY_COVER" value="<?PHP echo $result['NUM_HIVE_TOP_MIGRATORY_COVER']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Inner Cover<br><img src="/images/hive/innercover.png" width="175" height="124"></td>
-                                            <td><input type="text" name="HIVE_TOP_INNER_COVER_WEIGHT" value="<?PHP echo $result['HIVE_TOP_INNER_COVER_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_TOP_INNER_COVER" value="<?PHP echo $result['NUM_HIVE_TOP_INNER_COVER']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_TOP_INNER_COVER_WEIGHT" value="<?PHP echo $result['HIVE_TOP_INNER_COVER_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_TOP_INNER_COVER" value="<?PHP echo $result['NUM_HIVE_TOP_INNER_COVER']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Hive Feeder<br><img src="/images/hive/feeder.png" width="175" height="124"></td>
-                                            <td><input type="text" name="HIVE_FEEDER_WEIGHT" value="<?PHP echo $result['HIVE_FEEDER_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_FEEDER" value="<?PHP echo $result['NUM_HIVE_FEEDER']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_FEEDER_WEIGHT" value="<?PHP echo $result['HIVE_FEEDER_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_FEEDER" value="<?PHP echo $result['NUM_HIVE_FEEDER']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Shallow - w/Frames<br><img src="/images/hive/shallow.png"></td>
-                                            <td><input type="text" name="HIVE_BODY_SHAL_FOUNDATION_WEIGHT" value="<?PHP echo $result['HIVE_BODY_SHAL_FOUNDATION_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_BODY_SHAL_FOUNDATION" value="<?PHP echo $result['NUM_HIVE_BODY_SHAL_FOUNDATION']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_BODY_SHAL_FOUNDATION_WEIGHT" value="<?PHP echo $result['HIVE_BODY_SHAL_FOUNDATION_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_BODY_SHAL_FOUNDATION" value="<?PHP echo $result['NUM_HIVE_BODY_SHAL_FOUNDATION']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Medium - w/Frames<br><img src="/images/hive/medium-w-frames.png"></td>
-                                            <td><input type="text" name="HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT" value="<?PHP echo $result['HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_BODY_MEDIUM_FOUNDATION" value="<?PHP echo $result['NUM_HIVE_BODY_MEDIUM_FOUNDATION']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT" value="<?PHP echo $result['HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_BODY_MEDIUM_FOUNDATION" value="<?PHP echo $result['NUM_HIVE_BODY_MEDIUM_FOUNDATION']; ?>"></td>
                                         </tr>
                                        
                                         <tr class="odd gradeX">
                                             <td>Deep - w/Frames<br><img src="/images/hive/deep.png"></td>
-                                            <td><input type="text" name="HIVE_BODY_DEEP_FOUNDATION_WEIGHT" value="<?PHP echo $result['HIVE_BODY_DEEP_FOUNDATION_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_BODY_DEEP_FOUNDATION" value="<?PHP echo $result['NUM_HIVE_BODY_DEEP_FOUNDATION']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_BODY_DEEP_FOUNDATION_WEIGHT" value="<?PHP echo $result['HIVE_BODY_DEEP_FOUNDATION_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_BODY_DEEP_FOUNDATION" value="<?PHP echo $result['NUM_HIVE_BODY_DEEP_FOUNDATION']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Solid Bottom Board<br><img src="/images/hive/solidbottomboard.png"></td>
-                                            <td><input type="text" name="HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT" value="<?PHP echo $result['HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_BASE_SOLID_BOTTOM_BOARD" value="<?PHP echo $result['NUM_HIVE_BASE_SOLID_BOTTOM_BOARD']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT" value="<?PHP echo $result['HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_BASE_SOLID_BOTTOM_BOARD" value="<?PHP echo $result['NUM_HIVE_BASE_SOLID_BOTTOM_BOARD']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Screened Bottom Board<br><img src="/images/hive/screenedbottomboard2.png"></td>
-                                            <td><input type="text" name="HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT" value="<?PHP echo $result['HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT']; ?>"></td>
-                                            <td><input type="text" name="NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD" value="<?PHP echo $result['NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT" value="<?PHP echo $result['HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD" value="<?PHP echo $result['NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD']; ?>"></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Computer Weight</td>
-                                            <td><input type="text" name="HIVE_COMPUTER_WEIGHT" value="<?PHP echo $result['HIVE_COMPUTER_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_COMPUTER_WEIGHT" value="<?PHP echo $result['HIVE_COMPUTER_WEIGHT']; ?>"></td>
                                             <td></td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Misc Weight</td>
-                                            <td><input type="text" name="HIVE_MISC_WEIGHT" value="<?PHP echo $result['HIVE_MISC_WEIGHT']; ?>"></td>
+                                            <td><input type="text" onchange="this.form.submit()" name="HIVE_MISC_WEIGHT" value="<?PHP echo $result['HIVE_MISC_WEIGHT']; ?>"></td>
                                             <td></td>
                                         </tr>
-                                        <tr class="odd gradeX">
-                                        <td><button type="submit" class="btn btn-success">Save </button></td>
-                                       </tr>
-                                        
                                     </tbody>
                                 </table>
 

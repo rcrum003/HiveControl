@@ -2,7 +2,7 @@
 #
 # read the scale
 # 
-# v7 patch 
+# v8 patch 
 # Changed Count to RAW for better readability
 # Added a check to make sure RAW is a number to assist setups that don't always return a number
 # In this case, every couple of times, we were getting "No data to consider"
@@ -18,20 +18,25 @@
 
 HX711_ZERO=$1
 HX711_CALI=$2
+RUNMETHOD=$3
 
-#-----------------------------
-#Get Variables from input
-#----------------------------
-#Shows Help if nothing is selected
 function show_help {
-	echo "--------------------"
-	echo "HX711 Help"
-	echo "--------------------"
-	echo " Usage: ./hx711.sh ZERO CALI"
-	echo " Example: ./hx711.sh 4331 7332"
-	echo ""
+		echo "--------------------"
+		echo "HX711 Help"
+		echo "--------------------"
+		echo " Usage: ./hx711.sh ZERO CALI"
+		echo " Example: ./hx711.sh 4331 7332"
+		echo ""
 
 }
+
+
+if [[ -z "$RUNMETHOD" ]]; then
+	#echo "you are running from the command line"
+	#-----------------------------
+	#Get Variables from input
+	#----------------------------
+	#Shows Help if nothing is selected
 
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
@@ -45,12 +50,12 @@ if [[ -z "$HX711_ZERO" ]] || [[ -z "$HX711_CALI" ]];  then
 	 show_help
 	exit 1
 fi
-re='^-?[0-9]+([.][0-9]+)?$'
-if ! [[ $HX711_ZERO =~ $re ]] || ! [[ $HX711_CALI =~ $re ]]  ; then
+re1='^-?[0-9]+([.][0-9]+)?$'
+if ! [[ $HX711_ZERO =~ $re1 ]] || ! [[ $HX711_CALI =~ $re1 ]]  ; then
 	show_help
    exit 1
 fi
-
+fi
 #
 # read the scale
 DATA_GOOD=0
@@ -76,7 +81,7 @@ done
 
 if [ $COUNTER -gt 10 ]
 then
-  echo "$DATE ERROR reading Scale $DEVICE"
+  #echo "$DATE ERROR reading Scale $DEVICE"
   SCALE=-555
 fi
 #if test $COUNTER -gt 2

@@ -32,8 +32,15 @@ if ($chart == 'line') {
  
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
+if ( $SHOW_METRIC == "on" ) {
+
 // Get Hive Data First
-$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+} else {
+//Show normal
+$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+}
+
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -85,6 +92,23 @@ $(function () {
                     color: '"; echo "$color_beecount_in"; echo "'
                 }
             }
+        }, { // Rain yAxis
+            gridLineWidth: 1,
+            title: {
+                text: 'Rain',
+                style: {
+                    color: '"; echo "$color_rain"; echo "'
+                }
+            },
+            labels: {
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                style: {
+                    color: '"; echo "$color_rain"; echo "'
+                }
+            },
+            showEmpty: false,
+            opposite: true
+
         }],
         plotOptions: {
             line: {
@@ -123,6 +147,14 @@ $(function () {
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['OUT_COUNT']."]".", ";} echo "],
             visible: "; echo "$trend_beecount_out"; echo ",
             color: '"; echo "$color_beecount_out"; echo "'
+        },
+        {
+            type: 'area',
+            yAxis: 1,
+            name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            color: '"; echo "$color_rain"; echo "',
+            visible: "; echo "$trend_rain"; echo "
         }
         ]
         });

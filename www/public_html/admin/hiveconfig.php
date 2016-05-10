@@ -132,19 +132,19 @@ if($v->validate()) {
     $result = $sth->fetch(PDO::FETCH_ASSOC);
     
     // Tell user it saved
-    echo '<div class="alert alert-success alert-dismissable">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-    echo 'Successfully Saved';
-    echo '</div>';
+    //echo '<div class="alert alert-success alert-dismissable">
+      //                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+    //echo 'Successfully Saved';
+    //echo '</div>';
 } else {
     // Errors
-     echo '<div class="alert alert-danger">';
+     echo '<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
       $err=array_values($v->errors());
       for ($i=0; $i < count($err); $i++){
         echo $err[$i][0]."<br>";
       }
           echo  '</div>';
-              // Refresh the fields in the form
+    // Refresh the fields in the form
     $sth = $conn->prepare("SELECT * FROM hiveconfig");
     $sth->execute();
     $result = $sth->fetch(PDO::FETCH_ASSOC);    
@@ -154,7 +154,7 @@ if($v->validate()) {
     }
 
     if ($GDDSTATUS == "invalid") {
-        echo '<div class="alert alert-danger">GDD Start Date is greater than 1 year. Please update!</div>';
+        echo '<div class="alert alert-danger alert-dismissable">GDD Start Date is greater than 1 year. Please update!</div>';
         
     }
         ?>
@@ -179,62 +179,62 @@ if($v->validate()) {
                                     <tbody>
                                         <tr class="odd gradeX">
                                             <td>Hive Name</td>
-                                            <td><input type="text" name="HIVENAME" value="<?PHP echo $result['HIVENAME'];?>"></td>  
+                                            <td><input type="text" name="HIVENAME" value="<?PHP echo $result['HIVENAME'];?>" onchange="this.form.submit()"></td>  
                                             <td>Name identifier for this hive.</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Hive ID</td>
-                                            <td><input type="text" name="HIVEID" value="<?PHP echo $result['HIVEID'];?>"></td>
+                                            <td><input type="text" name="HIVEID" value="<?PHP echo $result['HIVEID'];?>" onchange="this.form.submit()"></td>
                                             <td>Unique identifier for this hive. See documentation to get your unique key</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Beekeeper ID</td>
-                                            <td><input type="text" name="BEEKEEPERID" value="<?PHP echo $result['BEEKEEPERID'];?>"></td>
+                                            <td><input type="text" name="BEEKEEPERID" value="<?PHP echo $result['BEEKEEPERID'];?>" onchange="this.form.submit()"></td>
                                             <td>Unique BeeKeeperID to identify you when sharing data. If you are not sharing, then just set to 0</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Yard ID</td>
-                                            <td><input type="text" name="YARDID" value="<?PHP echo $result['YARDID'];?>"></td>
+                                            <td><input type="text" name="YARDID" value="<?PHP echo $result['YARDID'];?>" onchange="this.form.submit()"></td>
                                             <td>Unique ID of the Apirary Yard this hive is located in. Used in conjunction with Apirary Controller or HiveTool.org to organize multiple hives.</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>City</td>
-                                            <td><input type="text" name="CITY" value="<?PHP echo $result['CITY'];?>"></td>
+                                            <td><input type="text" name="CITY" value="<?PHP echo $result['CITY'];?>" onchange="this.form.submit()"></td>
                                             <td>Closest city to this hive, to pull weather data from. Also, displays next to hive on hivetool.org</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>State</td>
-                                            <td><input type="text" name="STATE" value="<?PHP echo $result['STATE'];?>"></td>
+                                            <td><input type="text" name="STATE" value="<?PHP echo $result['STATE'];?>" onchange="this.form.submit()"></td>
                                             <td>State where this hive is located.</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Postal Code / ZIP</td>
-                                            <td><input type="text" name="ZIP" value="<?PHP echo $result['ZIP'];?>"></td>
+                                            <td><input type="text" name="ZIP" value="<?PHP echo $result['ZIP'];?>" onchange="this.form.submit()"></td>
                                             <td>Postal Code/ZIP where this hive is located, used only for Ambient Pollen Counts - Omit if you don't want to collect</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Country</td>
-                                            <td><input type="text" name="COUNTRY" value="<?PHP echo $result['COUNTRY'];?>"></td>
+                                            <td><input type="text" name="COUNTRY" value="<?PHP echo $result['COUNTRY'];?>" onchange="this.form.submit()"></td>
                                             <td>Country where this hive is located</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Latitude</td>
-                                            <td><input type="text" name="LATITUDE" value="<?PHP echo $result['LATITUDE'];?>"></td>
+                                            <td><input type="text" name="LATITUDE" value="<?PHP echo $result['LATITUDE'];?>" onchange="this.form.submit()"></td>
                                             <td>Latitude of Hive</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Longitude</td>
-                                            <td><input type="text" name="LONGITUDE" value="<?PHP echo $result['LONGITUDE'];?>"></td>
+                                            <td><input type="text" name="LONGITUDE" value="<?PHP echo $result['LONGITUDE'];?>" onchange="this.form.submit()"></td>
                                             <td>Longitude of Hive</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Home Directory</td>
-                                            <td><input type="text" name="HOMEDIR" value="<?PHP echo $result['HOMEDIR'];?>"></td>
+                                            <td><input type="text" name="HOMEDIR" value="<?PHP echo $result['HOMEDIR'];?>" onchange="this.form.submit()"></td>
                                             <td>Where all the scripts are installed, exclude trailing /</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Time Zone</td>
-                                            <td><select name="TIMEZONE">
+                                            <td><select name="TIMEZONE" onchange="this.form.submit()">
 <option value="Africa/Abidjan" <?php if ($result['TIMEZONE'] == "Africa/Abidjan") {echo "selected='selected'";} ?>>Africa/Abidjan</option>
 <option value="Africa/Accra" <?php if ($result['TIMEZONE'] == "Africa/Accra") {echo "selected='selected'";} ?>>Africa/Accra</option>
 <option value="Africa/Addis_Ababa" <?php if ($result['TIMEZONE'] == "Africa/Addis_Ababa") {echo "selected='selected'";} ?>>Africa/Addis_Ababa</option>
@@ -658,19 +658,19 @@ if($v->validate()) {
                                         </tr>
                                        <tr class="odd gradeX">
                                         <td>GDD Base Temp</td>
-                                        <td><input type="text" name="GDD_BASE_TEMP" value="<?PHP echo $result['GDD_BASE_TEMP'];?>"></td> 
+                                        <td><input type="text" name="GDD_BASE_TEMP" value="<?PHP echo $result['GDD_BASE_TEMP'];?>" onchange="this.form.submit()"></td> 
                                         <td>Base Temperature to start calculating GDD at. - Recommend 50</td>
                                        </tr> 
                                     </tr>
                                        <tr class="odd gradeX">
                                         <td>GDD Start Date</td>
-                                        <td><input type="text" name="GDD_START_DATE" value="<?PHP echo $result['GDD_START_DATE'];?>"></td> 
+                                        <td><input type="text" name="GDD_START_DATE" value="<?PHP echo $result['GDD_START_DATE'];?>" onchange="this.form.submit()"></td> 
                                         <td>Beginning date to start calculating GDD each year. - year, month, day (format 20150301) - Recommend the last freezing day. Most people recommend March 1, and most GDD plant values are based on a 3/1 start date. </td>
                                        </tr>
 
                                        <tr class="odd gradeX">
                                         <td>NASA HoneyBee Net ID</td>
-                                        <td><input type="text" name="NASA_HONEYBEE_NET_ID" value="<?PHP echo $result['NASA_HONEYBEE_NET_ID'];?>"></td> 
+                                        <td><input type="text" name="NASA_HONEYBEE_NET_ID" value="<?PHP echo $result['NASA_HONEYBEE_NET_ID'];?>" onchange="this.form.submit()"></td> 
                                         <td>ID provided by NASA, if sharing data with NASA </td>
                               </tr>
                                    <! ***************************************************** -->
@@ -678,7 +678,7 @@ if($v->validate()) {
                                    <tr class="odd gradeX">
                                         <td>Power Source</td>
                                         <td><select name="POWER">
-                                        <option value="AC" <?php if ($result['POWER'] == "AC") {echo "selected='selected'";} ?>>AC</option>
+                                        <option value="AC" <?php if ($result['POWER'] == "AC") {echo "selected='selected'";} ?> onchange="this.form.submit()">AC</option>
                                         <option value="solar" <?php if ($result['POWER'] == "solar") {echo "selected='selected'";} ?>>Solar</option> 
                                         </select>
                                         </td>
@@ -691,8 +691,8 @@ if($v->validate()) {
                                    <tr class="odd gradeX">
                                         <td>Internet</td>
                                         <td><select name="INTERNET">
-                                        <option value="wi-fi" <?php if ($result['INTERNET'] == "wi-fi") {echo "selected='selected'";} ?>>Wi-Fi</option>
-                                        <option value="ethernet" <?php if ($result['INTERNET'] == "ethernet") {echo "selected='selected'";} ?>>Ethernet</option> 
+                                        <option value="wi-fi" <?php if ($result['INTERNET'] == "wi-fi") {echo "selected='selected'";} ?> onchange="this.form.submit()">Wi-Fi</option>
+                                        <option value="ethernet" <?php if ($result['INTERNET'] == "ethernet") {echo "selected='selected'";} ?> onchange="this.form.submit()">Ethernet</option> 
                                         </select>
                                         </td>
                                         <td>Specify if your hive is using Wi-Fi or Ethernet</td>
@@ -703,7 +703,7 @@ if($v->validate()) {
 
                                    <tr class="odd gradeX">
                                         <td>Status</td>
-                                        <td><select name="STATUS">
+                                        <td><select name="STATUS" onchange="this.form.submit()">
                                         <option value="testing" <?php if ($result['STATUS'] == "testing") {echo "selected='selected'";} ?>>Testing</option>
                                         <option value="online" <?php if ($result['STATUS'] == "online") {echo "selected='selected'";} ?>>Online</option> 
                                         <option value="offline" <?php if ($result['STATUS'] == "offline") {echo "selected='selected'";} ?>>Offline</option>
@@ -716,7 +716,7 @@ if($v->validate()) {
 
                                    <tr class="odd gradeX">
                                         <td>Computer</td>
-                                        <td><select name="COMPUTER">
+                                        <td><select name="COMPUTER" onchange="this.form.submit()">
                                         <option value="pi" <?php if ($result['COMPUTER'] == "pi") {echo "selected='selected'";} ?>>PI</option>
                                         <option value="arduino" <?php if ($result['COMPUTER'] == "arduino") {echo "selected='selected'";} ?>>Arduino</option>
                                         <option value="x86" <?php if ($result['COMPUTER'] == "x86") {echo "selected='selected'";} ?>>Other x86</option>  
@@ -730,13 +730,9 @@ if($v->validate()) {
                                    </tr>
                                        <tr class="odd gradeX">
                                         <td>Start Date</td>
-                                        <td><input type="text" name="START_DATE" value="<?PHP echo $result['START_DATE'];?>"></td> 
+                                        <td><input type="text" name="START_DATE" value="<?PHP echo $result['START_DATE'];?>" onchange="this.form.submit()"></td> 
                                         <td>Date you put this hive into Online status for Hivetool.org. </td>
                                   
-    
-                                       <tr class="odd gradeX">
-                                        <td><button type="submit" class="btn btn-success">Save </button></td>
-                                       </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -758,7 +754,7 @@ if($v->validate()) {
                         <tr class="odd gradeX">
                             <td>Weather Source</td>
                             <td>
-                            <select name="WEATHER_LEVEL">
+                            <select name="WEATHER_LEVEL" onchange="this.form.submit()">
                             <option value="yard" <?php if ($result['WEATHER_LEVEL'] == "yard") {echo "selected='selected'";} ?>>Yard Controller</option>
                             <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
                             <option value="localws" <?php if ($result['WEATHER_LEVEL'] == "localws") {echo "selected='selected'";} ?>>Local Weather Station</option>
@@ -772,8 +768,8 @@ if($v->validate()) {
                                     // KEY
                                     // WXSTATION
 
-                                    echo 'API KEY <input type="text" name="KEY" value="'; echo $result['KEY']; echo '"><BR>';
-                                    echo 'STATION ID <input type="text" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">';    
+                                    echo 'API KEY <input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
+                                    echo 'STATION ID <input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
  
                                 }
                                 else {
@@ -786,17 +782,17 @@ if($v->validate()) {
                                     
                                if ($result['WEATHER_LEVEL'] == "localsensors") {
                                     //echo 'Using Locally Connected Sensores for local WX Station';
-                                    echo '<select name="WXTEMPTYPE">
+                                    echo '<select name="WXTEMPTYPE" onchange="this.form.submit()">
                                     <option value="temperhum"'; if ($result['WXTEMPTYPE'] == "temperhum") {echo "selected='selected'";} echo '>Temperhum</option>
                                     <option value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "selected='selected'";} echo '>DHT21</option>
                                     <option value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "selected='selected'";} echo '>DHT22</option>';
                                     echo '</select><BR>';
                                     if ($result['WXTEMPTYPE'] == "temperhum") {
-                                        echo 'Device <input type="text" name="WX_TEMPER_DEVICE" value="'; echo $result['WX_TEMPER_DEVICE']; echo '""></td>';
+                                        echo 'Device <input type="text" name="WX_TEMPER_DEVICE" onchange="this.form.submit()" value="'; echo $result['WX_TEMPER_DEVICE']; echo '""></td>';
 
                                     }
                                     if ($result['WXTEMPTYPE'] == "dht21" || $result['WXTEMPTYPE'] == "dht22") {
-                                 echo 'GPIO <input type="text" name="WX_TEMP_GPIO" value="'; echo $result['WX_TEMP_GPIO']; echo '"></td>';
+                                 echo 'GPIO <input type="text" name="WX_TEMP_GPIO" onchange="this.form.submit()" value="'; echo $result['WX_TEMP_GPIO']; echo '"></td>';
                                     }
                                 }
             
@@ -810,21 +806,21 @@ if($v->validate()) {
                             <td>Weather Forecast Source</td>
                             <td>
 
-                            <select name="WEATHER_DETAIL">
+                            <select name="WEATHER_DETAIL" onchange="this.form.submit()">
                             <option value="station"'; if ($result['WEATHER_DETAIL'] == "station") {echo "selected='selected'";} echo '>WX Station</option>
                             <option value="city"'; if ($result['WEATHER_DETAIL'] == "city") {echo "selected='selected'";} echo '>City</option>
                             </select></td>
                             <td>
-                                API KEY <input type="text" name="KEY" value="'; echo $result['KEY']; echo '"><BR>';
+                                API KEY <input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
                                 if ($result['WEATHER_DETAIL'] == "station") {
-                                echo 'STATION ID <input type="text" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">'; }   
+                                echo 'STATION ID <input type="text" onchange="this.form.submit()" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">'; }   
                             echo '</td>
                             <td>Specify where you want to get your weather forecast data from, since the local weather source used for ambient does not forecast. Get an API Key from <a href="http://www.wunderground.com/weather/api/">WXUnderground</a></td>
                         </tr>'; } ?>
 
                          <tr class="odd gradeX">
                             <td>Share Data with Hivetool.org</td>
-                            <td><select name="SHARE_HIVETOOL">
+                            <td><select name="SHARE_HIVETOOL" onchange="this.form.submit()">
                             <option value="yes" <?php if ($result['SHARE_HIVETOOL'] == "yes") {echo "selected='selected'";} ?>>Yes</option>
                             <option value="no" <?php if ($result['SHARE_HIVETOOL'] == "no") {echo "selected='selected'";} ?>>No</option>
                             </td>
@@ -832,9 +828,9 @@ if($v->validate()) {
                                  <?php if ($result['SHARE_HIVETOOL'] == "yes") {
                             
 
-                                    echo 'Username <input type="text" name="HT_USERNAME" value="'; echo $result['HT_USERNAME']; echo '"><BR>';
-                                    echo 'Password <input type="password" name="HT_PASSWORD" value="'; echo $result['HT_PASSWORD']; echo '"><BR>';    
-                                    echo 'URL <BR><input type="text" name="HT_URL" value="'; echo $result['HT_URL']; echo '"><BR>';    
+                                    echo 'Username <input type="text" name="HT_USERNAME" onchange="this.form.submit()" value="'; echo $result['HT_USERNAME']; echo '"><BR>';
+                                    echo 'Password <input type="password" name="HT_PASSWORD" onchange="this.form.submit()" value="'; echo $result['HT_PASSWORD']; echo '"><BR>';    
+                                    echo 'URL <BR><input type="text" name="HT_URL" onchange="this.form.submit()" value="'; echo $result['HT_URL']; echo '"><BR>';    
                                 }
                                 else {
                                     echo '<input type="hidden" name="HT_USERNAME" value="'; echo $result['HT_USERNAME']; echo '"><BR>';
@@ -847,9 +843,6 @@ if($v->validate()) {
                             <td>Specify if you want to share data with Hivetool.org.<BR> (Please do, it helps our researchers out)</td>
                         </tr>
 
-                        <tr class="odd gradeX">
-                                        <td><button type="submit" class="btn btn-success">Save </button></td>
-                                       </tr>
                     </tbody>
                 </table>
         </div></div>    

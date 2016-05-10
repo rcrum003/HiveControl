@@ -125,13 +125,13 @@ if($v->validate()) {
     $result = $sth->fetch(PDO::FETCH_ASSOC);
     
     // Tell user it saved
-    echo '<div class="alert alert-success alert-dismissable">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-    echo 'Successfully Saved';
-    echo '</div>';
+    #echo '<div class="alert alert-success alert-dismissable">
+     #                           <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+    #echo 'Successfully Saved';
+    #echo '</div>';
 } else {
     // Errors
-     echo '<div class="alert alert-danger">';
+     echo '<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
       $err=array_values($v->errors());
       for ($i=0; $i < count($err); $i++){
         echo $err[$i][0]."<br>";
@@ -169,7 +169,7 @@ if($v->validate()) {
 
                                        <tr class="odd gradeX">
                                         <td style="width:200px">Chart Theme</td>
-                                        <td style="width:300px"><select name="www_chart_theme">
+                                        <td style="width:300px"><select onchange="this.form.submit()" name="www_chart_theme">
                                         <option value="" <?php if ($result['www_chart_theme'] == "") {echo "selected='selected'";} ?>>Default</option>
                                         <option value="dark-blue" <?php if ($result['www_chart_theme'] == "dark-blue") {echo "selected='selected'";} ?>>Dark Blue</option>
                                         <option value="dark-unica" <?php if ($result['www_chart_theme'] == "dark-unica") {echo "selected='selected'";} ?>>Dark Unica</option>
@@ -184,14 +184,14 @@ if($v->validate()) {
                                         </tr>
                                     <tr class="odd gradeX">
                                         <td>Chart - Round</td>
-                                        <td><input type="checkbox" name="chart_rounding" value="on" <?php if ($result['chart_rounding'] == "on") {echo "checked='checked'";} ?> > </td>
+                                        <td><input type="checkbox" onchange="this.form.submit()" name="chart_rounding" value="on" <?php if ($result['chart_rounding'] == "on") {echo "checked='checked'";} ?> > </td>
                                         </td>
                                         <td>Controls if the main chart (on the dashboard) uses rounded numbers. Often our sensors can vary quite a bit within the .00, but it doesn't really show true change as it's just sensor noise. This will round it on the main chart. The detail charts will still show the exact values </td>
                                     </tr>
                                     <tr class="odd gradeX">
                                         <td>Chart - Smoothing</td>
                     
-                                        <td><input type="checkbox" name="chart_smoothing" value="on" <?php if ($result['chart_smoothing'] == "on") {echo "checked='checked'";} ?> > </td>
+                                        <td><input type="checkbox" onchange="this.form.submit()" name="chart_smoothing" value="on" <?php if ($result['chart_smoothing'] == "on") {echo "checked='checked'";} ?> > </td>
                                         
                                         </td>
                                         <td>Sometimes our sensors error out past our routines, which causes zero values. This can cause our charts to looked skewed. This option removes any record that has a zero value - note: this filters the whole row at the momement, so any invalid value will remove all values. This option only applies to the main chart. </td>
@@ -199,7 +199,7 @@ if($v->validate()) {
 
                                      <tr class="odd gradeX">
                                         <td>Measurement Display</td>
-                                        <td><select name="SHOW_METRIC">
+                                        <td><select onchange="this.form.submit()" name="SHOW_METRIC">
                                         <option value="" <?php if ($result['SHOW_METRIC'] == "") {echo "selected='selected'";} ?>>Imperial</option>
                                         <option value="on" <?php if ($result['SHOW_METRIC'] == "on") {echo "selected='selected'";} ?>>Metric</option>
                                         </select>
@@ -210,7 +210,7 @@ if($v->validate()) {
                                        </tr>
                                     <tr class="odd gradeX">
                                         <td>Site Layout</td>
-                                        <td><select name="SITE_ORIENT">
+                                        <td><select onchange="this.form.submit()" name="SITE_ORIENT">
                                         <option value="normal" <?php if ($result['SITE_ORIENT'] == "") {echo "selected='selected'";} ?>>Default</option>
                                         <option value="wide" <?php if ($result['SITE_ORIENT'] == "wide") {echo "selected='selected'";} ?>>Wide</option>
                                         </select>
@@ -219,7 +219,7 @@ if($v->validate()) {
                                        </tr>
                                     <tr class="odd gradeX">
                                         <td>Site Type</td>
-                                        <td><select name="SITE_TYPE">
+                                        <td><select onchange="this.form.submit()" name="SITE_TYPE">
                                         <option value="normal" <?php if ($result['SITE_TYPE'] == "") {echo "selected='selected'";} ?>>Default</option>
                                         <option value="compact" <?php if ($result['SITE_TYPE'] == "compact") {echo "selected='selected'";} ?>>Compact</option>
                                         </select>
@@ -241,94 +241,94 @@ if($v->validate()) {
                                     <tbody>
                                     <tr class="odd gradeX">
                                             <td>Hive Temp </td> 
-                                            <td><input type="checkbox" name="trend_hivetemp" value="on" <?php if ($result['trend_hivetemp'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_hivetemp' value="<?php echo $result['color_hivetemp']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_hivetemp" value="on" <?php if ($result['trend_hivetemp'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_hivetemp' value="<?php echo $result['color_hivetemp']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Hive Humidity </td> 
-                                            <td><input type="checkbox" name="trend_hivehum" value="on" <?php if ($result['trend_hivehum'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_hivehum' value="<?php echo $result['color_hivehum']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_hivehum" value="on" <?php if ($result['trend_hivehum'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_hivehum' value="<?php echo $result['color_hivehum']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Outside Temp </td> 
-                                            <td><input type="checkbox" name="trend_outtemp" value="on" <?php if ($result['trend_outtemp'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_outtemp' value="<?php echo $result['color_outtemp']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_outtemp" value="on" <?php if ($result['trend_outtemp'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_outtemp' value="<?php echo $result['color_outtemp']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Outside Humidity </td> 
-                                            <td><input type="checkbox" name="trend_outhum" value="on" <?php if ($result['trend_outhum'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_outhum' value="<?php echo $result['color_outhum']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_outhum" value="on" <?php if ($result['trend_outhum'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_outhum' value="<?php echo $result['color_outhum']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Gross Weight </td> 
-                                            <td><input type="checkbox" name="trend_grossweight" value="on" <?php if ($result['trend_grossweight'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_grossweight' value="<?php echo $result['color_grossweight']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_grossweight" value="on" <?php if ($result['trend_grossweight'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_grossweight' value="<?php echo $result['color_grossweight']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Net Weight </td> 
-                                            <td><input type="checkbox" name="trend_netweight" value="on" <?php if ($result['trend_netweight'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_netweight' value="<?php echo $result['color_netweight']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_netweight" value="on" <?php if ($result['trend_netweight'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_netweight' value="<?php echo $result['color_netweight']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Lux </td> 
-                                            <td><input type="checkbox" name="trend_lux" value="on" <?php if ($result['trend_lux'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_lux' value="<?php echo $result['color_lux']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_lux" value="on" <?php if ($result['trend_lux'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_lux' value="<?php echo $result['color_lux']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Solar Radiation </td> 
-                                            <td><input type="checkbox" name="trend_solarradiation" value="on" <?php if ($result['trend_solarradiation'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_solarradiation' value="<?php echo $result['color_solarradiation']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_solarradiation" value="on" <?php if ($result['trend_solarradiation'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_solarradiation' value="<?php echo $result['color_solarradiation']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Rain </td> 
-                                            <td><input type="checkbox" name="trend_rain" value="on" <?php if ($result['trend_rain'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_rain' value="<?php echo $result['color_rain']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_rain" value="on" <?php if ($result['trend_rain'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_rain' value="<?php echo $result['color_rain']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Growing Degree Days </td> 
-                                            <td><input type="checkbox" name="trend_gdd" value="on" <?php if ($result['trend_gdd'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_gdd' value="<?php echo $result['color_gdd']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_gdd" value="on" <?php if ($result['trend_gdd'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_gdd' value="<?php echo $result['color_gdd']; ?>" /> </td>
                                         </td>
                                         </tr>
 
                                         <tr class="odd gradeX">
                                             <td>Hive Activity In </td> 
-                                            <td><input type="checkbox" name="trend_beecount_in" value="on" <?php if ($result['trend_beecount_in'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_beecount_in' value="<?php echo $result['color_beecount_in']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_beecount_in" value="on" <?php if ($result['trend_beecount_in'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_beecount_in' value="<?php echo $result['color_beecount_in']; ?>" /> </td>
                                         </td>
                                         </tr>
 
                                         <tr class="odd gradeX">
                                             <td>Hive Activity Out </td> 
-                                            <td><input type="checkbox" name="trend_beecount_out" value="on" <?php if ($result['trend_beecount_out'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_beecount_out' value="<?php echo $result['color_beecount_out']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_beecount_out" value="on" <?php if ($result['trend_beecount_out'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_beecount_out' value="<?php echo $result['color_beecount_out']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Wind </td> 
-                                            <td><input type="checkbox" name="trend_wind" value="on" <?php if ($result['trend_wind'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_wind' value="<?php echo $result['color_wind']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_wind" value="on" <?php if ($result['trend_wind'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_wind' value="<?php echo $result['color_wind']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Pressure </td> 
-                                            <td><input type="checkbox" name="trend_pressure" value="on" <?php if ($result['trend_pressure'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_pressure' value="<?php echo $result['color_pressure']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pressure" value="on" <?php if ($result['trend_pressure'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pressure' value="<?php echo $result['color_pressure']; ?>" /> </td>
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Pollen </td> 
-                                            <td><input type="checkbox" name="trend_pollen" value="on" <?php if ($result['trend_pollen'] == "on") {echo "checked='checked'";} ?> > </td>
-                                            <td><input type='color' name='color_pollen' value="<?php echo $result['color_pollen']; ?>" /> </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pollen" value="on" <?php if ($result['trend_pollen'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pollen' value="<?php echo $result['color_pollen']; ?>" /> </td>
                                         </td>
                                         </tr>
                                     </tbody>
@@ -338,12 +338,6 @@ if($v->validate()) {
 
                                      </tr>
 
-                                     
-    
-                                        <tr class="odd gradeX">
-                                        <td><button type="submit" class="btn btn-success">Save </button></td>
-                                       </tr>
-                                
                                     </tbody>
                                 </table>
 

@@ -1,11 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+   <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Application to manage hive management tasks, and to report on various instruments.">
+    <meta name="author" content="Ryan Crum">
 
+    <title>Scale Calibration Wizard</title>
 
+    <!-- Bootstrap Core CSS -->
+    <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- MetisMenu CSS -->
+    <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
 
+    <!-- Custom CSS -->
+    <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+    
+    <!-- Custom Fonts -->
+    <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesnt work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+            <div class="row">
+                <div class="col-lg-12">
+                        <div class="panel-body">
+                            
 
 <?PHP
-#Notes on how to create a Weight Calibrate Wizard
+#Weight Calibrate Wizard
 
 
 //Check input for badness
@@ -22,8 +54,6 @@ $zero = test_input($_POST["zero"]);
 $testweight = test_input($_POST["testweight"]);
 $testweight_val = test_input($_POST["testweight_val"]);
 $calibration = test_input($_POST["calibration"]);
-
-
 
 #Zero = 71,992
 #After 5lbs = 108579
@@ -48,7 +78,7 @@ switch ($step) {
 		echo "Place Known Weight Value, (lbs please) on scale now<br>";
 
 		echo 'How much weight did you put on? <input type="text" name="testweight" value=""><br>
-		<a href="/admin/instrumentconfig.php"><button type="button" class="btn btn-danger">Cancel </button></a><button type="submit" class="btn btn-success">Next </button></form>';
+		<button type="submit" class="btn btn-success">Next </button></form>';
 		break;
 
 	case '2':
@@ -58,7 +88,7 @@ switch ($step) {
     		if (empty($zero) || empty($testweight)) {
         	// Default to nothing if no command is set or empty
         		echo "No values set - try wizard again<br>";
-        		echo '<a href="/admin/instrumentconfig.php"><button type="button" class="btn btn-danger">Close </button></a>';
+        		#echo '<a href="#" onclick="return self.close()"><button type="button" class="btn btn-danger">Close </button></a>';
 				echo '<a href="/admin/hx_wiz.php"><button type="submit" class="btn btn-success">Restart Wizard </button></a></form>';
         		exit;
         	} else {
@@ -69,15 +99,26 @@ switch ($step) {
 				echo '<input type="hidden" name="step" value="3">';
 				#Get value of known weight
 				#$testweight_val = "300";
-				echo "Zero Value = $zero <br>";
+				echo '
+				<table width="200">
+                <tr class="odd gradeX">';
+				echo "<td>Zero Value</td><td>$zero</td></tr>";
 				$testweight_val = shell_exec("/usr/bin/timeout 5 /usr/bin/sudo /usr/local/bin/hx711 $zero | tail -1");
-				echo "Known Weight = $testweight <br>";
-				echo "Value for Known Weight (we removed zero already) = $testweight_val<br>";
-				echo "Solving for calibration value <BR>";
+				echo "<tr><td>Known Weight</td><td>$testweight</td></tr>";
+				echo "<tr><td>Value for Known Weight (we removed zero already):</td><td>$testweight_val</td></tr>";
+				echo "<tr><td>Solving for calibration value</td><td></td></tr>";
 				$calibration = $testweight_val/$testweight;
-				echo "Calibration Should be $calibration <br>";
+				echo "<tr><td>Calibration Should be:</td><td><td>$calibration</td></tr>";
+
+				#Get weight 
+				#$RAW/CALI
+				$hiveweight = ($testweight_val/$calibration);
+
+				echo "<tr><td>Reading the scale with the recommended zero and calibration would give us a weight of:</td><td> $hiveweight</td></tr>";
+				echo "<tr><td>NOTE: scale values will vary up to .5 lb per the specifications of the load cells (more or less depending on your equipment.</td></tr></table>";
+
 				echo '<input type="hidden" name="calibration" value="'.$calibration.'">';
-				echo '<a href="/admin/instrumentconfig.php"><button type="button" class="btn btn-danger">Cancel </button></a>';
+				#echo '<a href="#" onclick="return self.close()"><button type="button" class="btn btn-danger">Cancel </button></a>';
 				echo '<button type="submit" class="btn btn-success">Save to DB </button></form>';
 				break;
 			}
@@ -99,7 +140,7 @@ switch ($step) {
     	sleep(1);
 
     	echo "<h1>Completed Wizard</h1><br>";
-    	echo '<a href="/admin/instrumentconfig.php"><button class="btn btn-success">Close </button></a>';
+    	#echo '<a href="#" onclick="return self.close()"><button class="btn btn-success">Close </button></a>';
 
 		break;
 	case '4':
@@ -110,14 +151,33 @@ switch ($step) {
 		echo '<form method="POST" action="'; echo htmlspecialchars($_SERVER["PHP_SELF"]); echo'">';
 		echo "Remove all weight from the scale. <br> Scale computer should be turned on for about 2 hrs before next step.<BR>";
 		echo '<input type="hidden" name="step" value="1">';
+		#echo '<a href="#" onclick="return self.close()"><button type="button" class="btn btn-danger">Cancel </button></a>';
 		echo '<button type="submit" class="btn btn-success">Next </button>';
 		break;
 }
 
 ?>
+    			</div>
+    		</div>
+    	</div>
 
 
 
+ 	<!-- jQuery -->
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
+    
+    <!-- Custom Theme JavaScript -->
+    <script src="../dist/js/sb-admin-2.js"></script>
+
+ 
+</body>
+</html>
 
 
 

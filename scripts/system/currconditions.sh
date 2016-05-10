@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 1.6
+# Version 1.7
 
 # Get Variables from central file
 SHELL=/bin/bash
@@ -26,6 +26,9 @@ if [ $ENABLE_HIVE_WEIGHT_CHK = "yes" ]; then
 	HIVEWEIGHTSRC=`$HOMEDIR/scripts/weight/getweight.sh`
 	HIVEWEIGHT=$(echo $HIVEWEIGHTSRC |awk '{print $2}')
 	HIVERAWWEIGHT=$(echo $HIVEWEIGHTSRC |awk '{print $1}')
+	check HIVEWEIGHTSRC
+	check HIVEWEIGHT
+	check HIVERAWWEIGHT
 fi
 if [ $ENABLE_HIVE_WEIGHT_CHK = "no" ]; then
 	HIVEWEIGHT=0
@@ -71,6 +74,8 @@ if [[ $ENABLE_BEECOUNTER = "yes" ]]; then
 	IN_COUNT=$(echo $INOUT | awk -F, '{print $1}')
 	OUT_COUNT=$(echo $INOUT | awk -F, '{print $2}')
 	echo "----- BEECOUNT Done -------"
+	check IN_COUNT
+	check OUT_COUNT
 else
 	IN_COUNT=0
 	OUT_COUNT=0
@@ -148,12 +153,6 @@ check UV
 check solarradiation
 
 
-#Check to see if solarradiation is not set from the weather stations
-if [[ $solarradiation = "--" ]]; then
-	echo "Solarradiation did not give us a value, so setting to zero"
-	solarradiation="0"
-fi
-
 # ------ GET LUX -----------
 # Two ways to get Light Levels
 # From a local sensor on the hive, OR
@@ -172,8 +171,9 @@ if [ $ENABLE_LUX = "yes" ]; then
 			lux="0"
 		fi
 elif [ $ENABLE_LUX = "no" ]; then
-	echo "Not getting LUX - set to no"
+	#echo "Not getting LUX - set to no"
 fi
+checl LUX
 		
 echo "--- LUX DONE --- "
 
@@ -220,7 +220,7 @@ echo "Sending to Hivetool"
 #====================
 # Try to send to hivetool
 #====================
-/usr/bin/curl --silent --retry 5 -k -u $HT_USERNAME:$HT_PASSWORD -X POST --data-binary @$SAVEFILE https://hivetool.org/private/log_hive.pl  -H 'Accept: application/xml' -H 'Content-Type: application/xml' 1>$HOMEDIR/logs/hivetool-error.log
+/usr/bin/curl --silent --retry 5 -k -u $HT_USERNAME:$HT_PASSWORD -X POST --data-binary @$SAVEFILE https://hivetool.org/private/log_hive.pl  -H 'Accept: application/xml' -H 'Content-Type: application/xml'
 	
 
 fi

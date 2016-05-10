@@ -338,7 +338,7 @@ $(function () {
             visible: "; echo "$trend_outhum"; echo "
         },
         {
-            type: 'column',
+            type: 'area',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],

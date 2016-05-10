@@ -101,13 +101,13 @@ if($v->validate()) {
     $result = $sth->fetch(PDO::FETCH_ASSOC);
     
     // Tell user it saved
-    echo '<div class="alert alert-success alert-dismissable">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-    echo 'Successfully Saved';
-    echo '</div>';
+    #echo '<div class="alert alert-success alert-dismissable">
+     #                           <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+    #echo 'Successfully Saved';
+    #echo '</div>';
 } else {
     // Errors
-     echo '<div class="alert alert-danger">';
+     echo '<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
       $err=array_values($v->errors());
       for ($i=0; $i < count($err); $i++){
         echo $err[$i][0]."<br>";
@@ -146,16 +146,16 @@ if($v->validate()) {
                                                  Temp/Hum Sensors</td>
                         
                                             <td>
-                                            <select name="ENABLE_HIVE_TEMP_CHK">
+                                            <select name="ENABLE_HIVE_TEMP_CHK" onchange="this.form.submit()">
                                             <option value="yes" <?php if ($result['ENABLE_HIVE_TEMP_CHK'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                                             <option value="no" <?php if ($result['ENABLE_HIVE_TEMP_CHK'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
                                             </select></td>
                                             <td>
                                             <?php if ($result['ENABLE_HIVE_TEMP_CHK'] == "yes") {
                                                 echo '
-                                                <input type="radio" name="TEMPTYPE" value="temperhum"'; if ($result['TEMPTYPE'] == "temperhum") {echo "checked";} echo '> TemperHum
-                                                <br><input type="radio" name="TEMPTYPE" value="dht22"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22 
-                                                <br><input type="radio" name="TEMPTYPE" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21';
+                                                <input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="temperhum"'; if ($result['TEMPTYPE'] == "temperhum") {echo "checked";} echo '> TemperHum
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22 
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21';
                                             }
                                             ?></td>
                                             <td>
@@ -163,15 +163,15 @@ if($v->validate()) {
                                                     if ($result['TEMPTYPE'] == "temperhum") {
                                                         echo '<br><a href="#" title="Specify Device" data-toggle="popover" data-placement="bottom" data-content="Specify the device you want to use (usually /dev/hidraw1, if you only have one device. Use
                                                         temperhum -e from the console to see choices)"><p class="fa fa-question-circle fa-fw"></P></a>Device:
-                                                         <input type="text" name="HIVEDEVICE" value="'; echo $result['HIVEDEVICE']; echo '"">';
+                                                         <input type="text" name="HIVEDEVICE" onchange="this.form.submit()" value="'; echo $result['HIVEDEVICE']; echo '"">';
                                                     }
                                                     if ($result['TEMPTYPE'] == "dht22") {
                                                         echo '<br><a href="#" title="Specify GPIO" data-toggle="popover" data-placement="bottom" data-content="Specify the GPIO you want to use to connect to this sensor"><p class="fa fa-question-circle fa-fw"></P></a>GPIO:
-                                                         <input type="text" name="HIVE_TEMP_GPIO" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
+                                                         <input type="text" name="HIVE_TEMP_GPIO" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
                                                     }
                                                     if ($result['TEMPTYPE'] == "dht21") {
                                                         echo '<br><a href="#" title="Specify GPIO" data-toggle="popover" data-placement="bottom" data-content="Specify the GPIO you want to use to connect to this sensor"><p class="fa fa-question-circle fa-fw"></P></a>GPIO:
-                                                         <input type="text" name="HIVE_TEMP_GPIO" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
+                                                         <input type="text" name="HIVE_TEMP_GPIO" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
                                                     }
                                             }?>
                                             </td>
@@ -181,17 +181,17 @@ if($v->validate()) {
                                             <a href="#" title="Weight Scale" data-toggle="popover" data-placement="bottom" data-content="Enable/Disable Weight Checking, then specify which board you have installed"><p class="fa fa-question-circle fa-fw"></P></a>
                                                  Weight Scale</td>
                                             <td>
-                                            <select name="ENABLE_HIVE_WEIGHT_CHK">
+                                            <select name="ENABLE_HIVE_WEIGHT_CHK" onchange="this.form.submit()">
                                             <option value="yes" <?php if ($result['ENABLE_HIVE_WEIGHT_CHK'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                                             <option value="no" <?php if ($result['ENABLE_HIVE_WEIGHT_CHK'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
                                             </select></td>
                                             <td>
                                             <?php if ($result['ENABLE_HIVE_WEIGHT_CHK'] == "yes") {
                                                 echo '
-                                                <input type="radio" name="SCALETYPE" value="phidget1046"'; if ($result['SCALETYPE'] == "phidget1046") {echo "checked";} echo '> Phidget 1046
-                                                <br><input type="radio" name="SCALETYPE" value="hx711"'; if ($result['SCALETYPE'] == "hx711") {echo "checked";} echo '> HX711
-                                                <br><input type="radio" name="SCALETYPE" value="cpw200plus"'; if ($result['SCALETYPE'] == "cpw200plus") {echo "checked";} echo '> CPW 200 Plus
-                                                <br><input type="radio" name="SCALETYPE" value="None"'; if ($result['SCALETYPE'] == "None") {echo 'checked';} echo '> None';
+                                                <input type="radio" name="SCALETYPE" onchange="this.form.submit()" value="phidget1046"'; if ($result['SCALETYPE'] == "phidget1046") {echo "checked";} echo '> Phidget 1046
+                                                <br><input type="radio" name="SCALETYPE" onchange="this.form.submit()" value="hx711"'; if ($result['SCALETYPE'] == "hx711") {echo "checked";} echo '> HX711
+                                                <br><input type="radio" name="SCALETYPE" onchange="this.form.submit()" value="cpw200plus"'; if ($result['SCALETYPE'] == "cpw200plus") {echo "checked";} echo '> CPW 200 Plus
+                                                <br><input type="radio" name="SCALETYPE" onchange="this.form.submit()" value="None"'; if ($result['SCALETYPE'] == "None") {echo 'checked';} echo '> None';
                                             }
                                             ?>
                                             </td>
@@ -200,14 +200,14 @@ if($v->validate()) {
                                                     
                                                     echo '<br><a href="#" title="Define Zero/Intercept" data-toggle="popover" data-placement="bottom" data-content="Specify the Zero or Intercept value - see hivetool.org for instructions
                                                         "><p class="fa fa-question-circle fa-fw"></P></a>Zero/Intercept:
-                                                         <input type="text" name="HIVE_WEIGHT_INTERCEPT" value="'; echo $result['HIVE_WEIGHT_INTERCEPT']; echo '"">';
+                                                         <input type="text" name="HIVE_WEIGHT_INTERCEPT" onchange="this.form.submit()" value="'; echo $result['HIVE_WEIGHT_INTERCEPT']; echo '"">';
 
                                                     echo '<br><a href="#" title="Specify Cali/Slope" data-toggle="popover" data-placement="bottom" data-content="Specify the Calibration or Slope value - see hivetool.org for instructions"><p class="fa fa-question-circle fa-fw"></P></a>Calibration/Slope:
-                                                         <input type="text" name="HIVE_WEIGHT_SLOPE" value="'; echo $result['HIVE_WEIGHT_SLOPE']; echo '""><br>';
+                                                         <input type="text" name="HIVE_WEIGHT_SLOPE" onchange="this.form.submit()" value="'; echo $result['HIVE_WEIGHT_SLOPE']; echo '""><br>';
                                                          $checkscale = $result['SCALETYPE'];
                                                          if ($checkscale == "hx711") {
-                                                        echo '<a href="/admin/hx_wiz.php"><button class="btn btn-success" type="button">Calibration Wizard </button></a>';
-
+                                                        #echo '<a href="#" onclick="centeredPopup(\'/admin/hx_wiz.php\',\'myWindow\',\'700\',\'300\',\'yes\'); return false"><button class="btn btn-success" type="button">Calibration Wizard </button></a>';
+                                                        echo '<button class="btn btn-primary" data-toggle="modal" type="button" data-target="#CalibModal">Calibrate</button>';
                                                          } elseif ( $checkscale == "phidget1046") {
                                                              #echo '<a href="/admin/hx_wiz.php"><button class="btn btn-success" type="button">Calibration Wizard </button></a>';
                                                          }
@@ -220,16 +220,16 @@ if($v->validate()) {
                                             <a href="#" title="Light Source" data-toggle="popover" data-placement="bottom" data-content="Enable/Disable local light meters, then specify which board you have installed"><p class="fa fa-question-circle fa-fw"></P></a>
                                                  Light Source</td>
                                             <td>
-                                            <select name="ENABLE_LUX">
+                                            <select name="ENABLE_LUX" onchange="this.form.submit()">
                                             <option value="yes" <?php if ($result['ENABLE_LUX'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                                             <option value="no" <?php if ($result['ENABLE_LUX'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
                                             </select></td>
                                             <td>
                                             <?php if ($result['ENABLE_LUX'] == "yes") {
                                                 echo '
-                                                <input type="radio" name="LUX_SOURCE" value="tsl2591"'; if ($result['LUX_SOURCE'] == "tsl2591") {echo "checked";} echo '> TSL 2591
-                                                <br><input type="radio" name="LUX_SOURCE" value="tsl2561"'; if ($result['LUX_SOURCE'] == "tsl2561") {echo "checked";} echo '> TSL 2561
-                                                <br><input type="radio" name="LUX_SOURCE" value="wx"'; if ($result['LUX_SOURCE'] == "wx") {echo "checked";} echo '> WX Station';
+                                                <input type="radio" name="LUX_SOURCE" onchange="this.form.submit()" value="tsl2591"'; if ($result['LUX_SOURCE'] == "tsl2591") {echo "checked";} echo '> TSL 2591
+                                                <br><input type="radio" name="LUX_SOURCE" onchange="this.form.submit()" value="tsl2561"'; if ($result['LUX_SOURCE'] == "tsl2561") {echo "checked";} echo '> TSL 2561
+                                                <br><input type="radio" name="LUX_SOURCE" onchange="this.form.submit()" value="wx"'; if ($result['LUX_SOURCE'] == "wx") {echo "checked";} echo '> WX Station';
                                             }
                                             ?>
                                             </td>
@@ -241,7 +241,7 @@ if($v->validate()) {
                                                 <a href="#" title="Bee Counter" data-toggle="popover" data-placement="bottom" data-content="Enable Bee Counters and specify the type of Bee Counter you are using"><p class="fa fa-question-circle fa-fw"></P></a>
                                                 Bee Counter</td>
                                             <td>
-                                            <select name="ENABLE_BEECOUNTER">
+                                            <select name="ENABLE_BEECOUNTER" onchange="this.form.submit()">
                                             <option value="yes" <?php if ($result['ENABLE_BEECOUNTER'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                                             <option value="no" <?php if ($result['ENABLE_BEECOUNTER'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
                                             </select></td>
@@ -249,8 +249,8 @@ if($v->validate()) {
                                             <td>
                                             <?php if ($result['ENABLE_BEECOUNTER'] == "yes") {
                                                 echo '
-                                                <input type="radio" name="COUNTERTYPE" value="PICAMERA"'; if ($result['COUNTERTYPE'] == "PICAMERA") {echo "checked";} echo '> PI Camera
-                                                <br><input type="radio" name="COUNTERTYPE" value="GATES"'; if ($result['COUNTERTYPE'] == "GATES") {echo "checked";} echo '> Gates';}
+                                                <input type="radio" name="COUNTERTYPE" onchange="this.form.submit()" value="PICAMERA"'; if ($result['COUNTERTYPE'] == "PICAMERA") {echo "checked";} echo '> PI Camera
+                                                <br><input type="radio" name="COUNTERTYPE" onchange="this.form.submit()" value="GATES"'; if ($result['COUNTERTYPE'] == "GATES") {echo "checked";} echo '> Gates';}
                                             ?>
                                             </td>
                                             <td></td>
@@ -261,7 +261,7 @@ if($v->validate()) {
                                                 <a href="#" title="Camera Type" data-toggle="popover" data-placement="bottom" data-content="Specify the type of camera you are using"><p class="fa fa-question-circle fa-fw"></P></a>
                                                 Camera</td>
                                             <td>
-                                            <select name="ENABLE_HIVE_CAMERA">
+                                            <select name="ENABLE_HIVE_CAMERA" onchange="this.form.submit()">
                                             <option value="yes" <?php if ($result['ENABLE_HIVE_CAMERA'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                                             <option value="no" <?php if ($result['ENABLE_HIVE_CAMERA'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
                                             </select></td>
@@ -269,18 +269,13 @@ if($v->validate()) {
                                             <td>
                                             <?php if ($result['ENABLE_HIVE_CAMERA'] == "yes") {
                                                 echo '
-                                                <input type="radio" name="CAMERATYPE" value="PI"'; if ($result['CAMERATYPE'] == "PI") {echo "checked";} echo '> PI Camera
-                                                <br><input type="radio" name="CAMERATYPE" value="USB"'; if ($result['CAMERATYPE'] == "USB") {echo "checked";} echo '> USB Type';
+                                                <input type="radio" name="CAMERATYPE" onchange="this.form.submit()" value="PI"'; if ($result['CAMERATYPE'] == "PI") {echo "checked";} echo '> PI Camera
+                                                <br><input type="radio" name="CAMERATYPE" onchange="this.form.submit()" value="USB"'; if ($result['CAMERATYPE'] == "USB") {echo "checked";} echo '> USB Type';
                                             }
                                             ?>
                                             </td>
                                             <td></td>
                                         </tr>
-        
-    
-                                        <tr class="odd gradeX">
-                                        <td><button type="submit" class="btn btn-success">Save </button></td>
-                                       </tr>
                                 
                                     </tbody>
                                 </table>
@@ -295,7 +290,6 @@ if($v->validate()) {
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
-
                         </div>
                         <!-- /.panel-footer -->
                     </div>
@@ -304,12 +298,33 @@ if($v->validate()) {
                 <!-- /.col-lg-4 -->
             </div>
             <!-- /.row -->
+
+<div class="modal fade" id="CalibModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                            <h4 class="modal-title" id="myModalLabel">Scale Calibration Wizard</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <iframe src="/admin/hx_wiz.php" width="100%" height="100%" frameborder="0" allowtransparency="true"></iframe>  
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close Wizard</button>
+                                        </div>
+                                    </div>
+                                    <!-- /.modal-content -->
+                                </div>
+                                <!-- /.modal-dialog -->
+                </div>
+                            <!-- /.modal -->
         </div>
         <!-- /#page-wrapper -->
 
     </div>
     <!-- /#wrapper -->
 
+                
     <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -318,13 +333,16 @@ if($v->validate()) {
 
     <!-- Metis Menu Plugin JavaScript -->
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
-
-<script>
-$(document).ready(function(){
+    
+    <!-- Full Screen Popups -->
+    <script src="/js/popup.js"></script>  
+    
+    <script>
+    $(document).ready(function(){
     $('[data-toggle="popover"]').popover(); 
-});
-</script>
-
+    });
+    </script>
+    
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
 

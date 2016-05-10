@@ -2,11 +2,55 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v16 - for HiveControl
+# v18 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
 # ==================================================
+
+
+
+function show_help {
+	echo "--------------------"
+	echo "HiveControl Installation Help"
+	echo "--------------------"
+	echo " -b  Beecounter Webcam Setup (Warning: Can take up to 8 hrs to run)"
+	echo " -x  Install XRDP for you Windows Users"
+	echo " -k  Touch Screen Keyboard Install"
+	echo " -h or -?  This help message"
+	echo " -d  Turn on Debugging"
+	echo ""
+
+}
+
+
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+
+while getopts "h?bdxk" opt; do
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  BEECOUNTER="true"
+        ;;    
+    d)  DEBUG="true"
+	    ;;
+	x) XRDP="true"
+	    ;;   
+	k) KEYBOARD="true"
+	    ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+if [[ $DEBUG = true ]]; then
+    set -x
+fi
 
 #Sorry, need to run as root due to some compiling errors we get when we aren't root
 whoami=$(whoami)
@@ -138,6 +182,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_13
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_14
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_15
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_16
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_17
 
 #Upload default values
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
@@ -201,6 +246,50 @@ echo "Installing wiringPI for HX711 sensor"
 cd /home/HiveControl/software/wiringPI
 sudo ./build
 
+function installBeeCount() {
+    /home/HiveControl/software/beecamcounter/setupbeecounter.sh
+}	
+
+
+if [[ $BEECOUNTER = "true" ]]; then
+	installBeeCount
+else
+	echo "-----------------------------------------------"
+	echo "Finished main install of HiveControl"
+	echo "-----------------------------------------------"
+	echo "Do you want to install the software required for the Bee Counter via Raspberry PI CAM?"
+	echo "WARNING: This could take between 6-8 hrs due to having compile some code!"
+		select yn in "Yes" "No"; do
+		    case $yn in
+		        Yes ) installBeeCount; break;;
+		        No ) exit;;
+		    esac
+		done
+fi
+
+
+#Install xmlstarlet
+sudo apt-get install xmlstarlet -y
+
+if [[ $XRDP = "true" ]]; then
+	echo "------------------------"
+	echo "Installing XRDP"
+	echo "------------------------"
+	#Used for folks who like to RDP to the server (aka the Nate Feature)
+	sudo apt-get install xrdp -y
+fi
+
+if [[ $KEYBOARD = "true" ]]; then
+	#Adds touch screen keyboard
+echo "Installing Touch Screen Keyboard Support"
+sudo apt-get install matchbox-keyboard
+write in the file
+echo "#!/bin/bash" > /home/pi/Desktop/keyboard.sh
+echo "matchbox-keyboard &" >> /home/pi/Desktop/keyboard.sh
+chmod +x /home/pi/Desktop/keyboard.sh
+
+fi
+
 
 
 echo "========================================================"
@@ -233,6 +322,7 @@ sudo crontab /home/HiveControl/install/cron/cron.new
 
 #Remove DHCP stuff, since it gets in the way of finding our machine
 #apt-get remove isc-dhcp-client
+
 
 
 echo "Done Executing Install Script"

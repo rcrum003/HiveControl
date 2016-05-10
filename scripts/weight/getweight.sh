@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 0.8
+# version 0.9
 # reads the Weight boards or other scale boards and scales the output
 # Updated to remove the percentage check, since that seems to cause a lot of bad values
 # Now we just check for expected weights within range between 0 and 1500 lbs.
@@ -9,8 +9,14 @@ WEIGHTRUNDIR=/home/HiveControl/scripts/weight
 # Get some variables from our central file
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
+source /home/HiveControl/scripts/data/check.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
+
+#Check to make sure we are correct numbers.
+check_allow_neg HIVE_WEIGHT_INTERCEPT
+check_allow_neg HIVE_WEIGHT_SLOPE
+
 
 if [[ -z "$HIVE_WEIGHT_INTERCEPT" ]] ; then
 	#echo "Weight Intercept Not Set"
@@ -19,17 +25,16 @@ if [[ -z "$HIVE_WEIGHT_INTERCEPT" ]] ; then
 fi
 if [[ -z $HIVE_WEIGHT_SLOPE ]] || [[ $HIVE_WEIGHT_INTERCEPT = "0" ]]; then
 	#echo "Weight Slope Not Set"
-	loglocal "$DATE" WEIGHT ERROR "Please set Weight Slope in the Instruments page"
+	loglocal "$DATE" WEIGHT ERROR "Please set or correct Weight Slope in the Instruments page"
 	HIVE_WEIGHT_SLOPE=1
 fi
-
 
 if [ "$SCALETYPE" = "hx711" ]; then
 	#echo "getting scale values"
 	HX711_ZERO="$HIVE_WEIGHT_INTERCEPT"	
 	HX711_CALI="$HIVE_WEIGHT_SLOPE"
 	#echo "Passing Zero = $HX711_ZERO, CALI = $HX711_CALI"
-	RAWWEIGHT=$($WEIGHTRUNDIR/hx711.sh $HX711_ZERO $HX711_CALI)
+	RAWWEIGHT=$($WEIGHTRUNDIR/hx711.sh $HX711_ZERO $HX711_CALI SH)
 	#echo "Got RAWWEIGHT as $RAWWEIGHT"
 elif [ "$SCALETYPE" = "phidget1046" ]; then
         RAWWEIGHT=`$WEIGHTRUNDIR/phidget1046.sh`

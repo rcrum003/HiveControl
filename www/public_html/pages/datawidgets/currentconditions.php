@@ -111,6 +111,10 @@ $trenddata = $trendsth->fetch(PDO::FETCH_ASSOC);
 $pasthiveweight = $trenddata['hiveweight'];
 #$pastrawweight = $trenddata['hiverawweight'];
 
+if ($SHOW_METRIC == "on") {
+$pasthiveweight = round(($pasthiveweight * 0.453592),2);
+}
+
 if (empty($pasthiveweight)) {
 	
 	$changeweight = "NA";

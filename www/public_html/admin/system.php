@@ -173,7 +173,7 @@ if(isset($_GET["command"])) {
                     # Confirmed we want to delete
                     $sth13 = $conn->prepare("DELETE from logs");
                     $sth13->execute();
-                    
+                    unset($sth13);
                     $user_ip = getUserIP();
                     loglocal($now, "LOGS", "INFO", "Logs cleared by Admin from source IP $user_ip");
                     break;
