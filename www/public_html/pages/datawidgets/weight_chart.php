@@ -183,7 +183,7 @@ $(function () {
             yAxis: 2,
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
             color: '"; echo "$color_wind"; echo "',
-            visible: true
+            visible: "; echo "$trend_wind"; echo "
         }
         ]
     });
