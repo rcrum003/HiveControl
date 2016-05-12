@@ -31,12 +31,12 @@ sudo apt-get install python2.7-dev python3-dev -y
 #Let's get OpenCV
 mkdir /opt/OpenCV
 cd /opt/OpenCV
-wget -O opencv.zip https://github.com/Itseez/opencv/archive/3.1.0.zip
+wget -O opencv.zip https://github.com/rcrum003/opencv/archive/3.1.0.zip
 unzip opencv.zip
 rm -rf opencv.zip
 
 #Let's get contrib as well, to get some algorithms that aren't included in the base
-wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip
+wget -O opencv_contrib.zip https://github.com/rcrum003/opencv_contrib/archive/3.1.0.zip
 unzip opencv_contrib.zip
 rm -rf opencv_contrib.zip
 
