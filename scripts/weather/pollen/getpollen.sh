@@ -1,4 +1,3 @@
-# getpollen.sh
 #!/bin/bash
 # Script to get pollen level to support hivetool.net
 # This script uses pollen.com
