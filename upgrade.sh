@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="42"
+Upgrade_ver="43"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -197,6 +197,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		echo "Skipping DB, no new database upgrades available"
 	fi
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
+
+if [[ $Installed_Ver < "1.62" ]]; then
+	#Only run this if we haven't got the latest code
+	sudo mv /home/HiveControl/upgrade/HiveControl/software/beecamcounter /home/HiveControl/software 
+fi
 
 echo "============================================="
 echo "success"

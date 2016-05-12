@@ -5,6 +5,11 @@ This is a supporting application to the Hivetool.org software.
 
 [![Gitter](https://badges.gitter.im/rcrum003/HiveControl.svg)](https://gitter.im/rcrum003/HiveControl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
+## Now includes beecounter code
+Only use these instructions if you have version 1.61 and below.
+Follow the install instructions if you are setting up from scratch.
+[Beecounter Setup](https://github.com/rcrum003/HiveControl/wiki/BeeCounter-Setup)
+
 ## Current version supports:
 Weight, Temperature, Webcam, Weather, GDD, LUX
 
