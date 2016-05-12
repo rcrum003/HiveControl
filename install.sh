@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v19 - for HiveControl
+# v20 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -60,6 +60,13 @@ if [[ $whoami -ne "root" ]]; then
 	exit
 fi
 
+function do_wiggle {
+#Expands file system
+sudo git clone https://github.com/rcrum003/rpi-wiggle
+cd rpi-wiggle
+sudo ./rpi-wiggle
+}
+
 #resize the drive, since the initial write doesn't
 #Check the size of the disk
 # If not big enough, then say you need to run rasp-
@@ -68,8 +75,14 @@ HDsize=$(df |grep /dev/root |awk '{print $4}')
 HDNeed="500000"
 if [[ $HDsize -lt $HDNeed ]]; then
 	echo "We need at least 500 MB to install all the needed software."
-	echo "Please run raspi-config to expand your disk"
-	echo "or free up enough space"
+	echo "Please free up more space"
+	echo "or do you want me to expand your drive? Note: Run install again after reboot"
+	select yn in "Yes" "No"; do
+		    case $yn in
+		        Yes ) do_wiggle; break;;
+		        No ) exit;;
+		    esac
+		done
 	exit 
 fi
 # update this OS
@@ -247,7 +260,42 @@ cd /home/HiveControl/software/wiringPI
 sudo ./build
 
 function installBeeCount() {
+   #Enable the camera and turn off the LED
+
+		if grep "start_x=1" /boot/config.txt
+		then
+		        echo "Start_x already set"
+		else
+		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
+		        #reboot
+		fi
+
+		if grep "disable_camera_led=1" /boot/config.txt
+		then
+		        echo "LED Disable already set"
+		else
+		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
+		        echo "disable_camera_led=1" >> /boot/config.txt
+		        #reboot
+		        gpu_mem=128
+		fi
+
+		if grep "gpu_mem=128" /boot/config.txt
+		then
+				sed -i "s/gpu_mem=128/gpu_mem=256/g" /boot/config.txt
+		        echo "Setting GPU to 256m"
+		elif grep "gpu_mem=256" /boot/config.txt
+			then
+				echo "gpu_mem already set to 256"
+		else        
+		        echo "gpu_mem=256" >> /boot/config.txt
+		        #reboot
+		fi
+		exit
+
+	#Install the software
     /home/HiveControl/software/beecamcounter/setupbeecounter.sh
+
 }	
 
 
@@ -326,6 +374,13 @@ sudo crontab /home/HiveControl/install/cron/cron.new
 
 
 echo "Done Executing Install Script"
+echo "A REBOOT IS REQUIRED NOW!"
+echo "Press ENTER to reboot : \c"
+read aok
+echo "REBOOTING...."
+/bin/sync
+/sbin/reboot
+
 
 
 
