@@ -1,15 +1,15 @@
 #!/bin/sh
-# /etc/init.d/livestream.sh
+# /etc/init.d/beecounter
 ### BEGIN INIT INFO
-# Provides:          livestream.sh
+# Provides:          beecounter.sh
 # Required-Start:    $network
 # Required-Stop:     $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: mjpg_streamer for webcam
-# Description:       Streams /dev/video0 to http://IP/?action=stream
+# Short-Description: beecounter for HiveControl
+# Description:       Counts objects going by the camera in each direction
 ### END INIT INFO
-#/mjpg_streamer -i "input_file.so -f /home/HiveControl/www/public_html/video/out -n frame.jpg" -o "output_http.so -w /home/HiveControl/www/public_html/video"
+
 f_message(){
         echo "[+] $1"
 }
@@ -17,32 +17,32 @@ f_message(){
 # Carry out specific functions when asked to by the system
 case "$1" in
         start)
-                f_message "Starting mjpg_streamer"
-                /usr/local/bin/mjpg_streamer -b -i "input_file.so -f /home/HiveControl/www/public_html/video/out -n frame.jpg" -o "output_http.so -w /home/HiveControl/www/public_html/video"
+                f_message "Starting beecounter"
+                /usr/bin/python /home/HiveControl/scripts/beecount/beecounter_svc.py &
                 sleep 2
-                f_message "mjpg_streamer started"
+                f_message "beecounter started"
                 ;;
         stop)
-                f_message "Stopping mjpg_streamer…"
-                killall mjpg_streamer
-                f_message "mjpg_streamer stopped"
+                f_message "Stopping beecounter…"
+                killall beecounter
+                f_message "beecounter stopped"
                 ;;
         restart)
-                f_message "Restarting daemon: mjpg_streamer"
-                killall mjpg_streamer
-                /usr/local/bin/mjpg_streamer -b -i "input_file.so -f /home/HiveControl/www/public_html/video/out -n frame.jpg" -o "output_http.so -w /home/HiveControl/www/public_html/video"
+                f_message "Restarting daemon: beecounter"
+                killall beecounter
+                /usr/bin/python /home/HiveControl/scripts/beecount/beecounter_svc.py &
                 sleep 2
-                f_message "Restarted daemon: mjpg_streamer"
+                f_message "Restarted daemon: beecounter"
                 ;;
         status)
-                pid=`ps -A | grep mjpg_streamer | grep -v "grep" | grep -v mjpg_streamer. | awk ‘{print $1}’ | head -n 1`
+                pid=`ps -A | grep beecounter | grep -v "grep" | grep -v beecounter. | awk ‘{print $1}’ | head -n 1`
                 if [ -n "$pid" ];
                 then
-                        f_message "mjpg_streamer is running with pid ${pid}"
-                        f_message "mjpg_streamer was started with the following command line"
+                        f_message "beecounter is running with pid ${pid}"
+                        f_message "beecounter was started with the following command line"
                         cat /proc/${pid}/cmdline ; echo ""
                 else
-                        f_message "Could not find mjpg_streamer running"
+                        f_message "Could not find beecounter running"
                 fi
                 ;;
         *)

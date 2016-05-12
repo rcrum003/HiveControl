@@ -3,15 +3,11 @@
 # Only install if you are going to use the beecounter
 # If you aren't, then you'll save a ton of space
 
-foo = "yes"
-
-if [[ $foo = "yes" ]]; then
-	#statements
 
 #Get Dependencies
 # Don't run if part of install.sh script as it just ran
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get update -y
+sudo apt-get upgrade -y
 
 #Make sure we have core developer tools
 sudo apt-get install build-essential git cmake pkg-config -y
@@ -50,35 +46,6 @@ cd /opt/pip
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python get-pip.py
 
-#Install VirtualEnv, to enable a virtual environment. This helps protect against dependency conflicts in the future
-# Just good practice..
-
-##sudo pip install virtualenv virtualenvwrapper
-##sudo rm -rf ~/.cache/pip
-# virtualenv and virtualenvwrapper - Set environment variables
-##cp ~/.profile ~/.oldprofile
-##echo 'export WORKON_HOME=$HOME/.virtualenvs' >>~/.profile
-##echo 'source /usr/local/bin/virtualenvwrapper.sh' >>~/.profile
-##source ~/.profile
-
-
-## Everything below is to setup your directory:
-
-#Makes a new Virtual Environment for CV - we are instead going to make one for beecounter
-#mkvirtualenv cv
-# This makes a Python 2.7 environment
-# for python3 - do 'mkvirtualenv beecounter -p python3'
-################
-#mkvirtualenv beecounter
-#Sets up /root/.virtualenvs/beecounter/bin/python
-
-# in the future, if you want to use this environment when you run python from command line, you'll have to run
-#source ~/.profile
-#workon beecounter
-
-#Let's install OpenCV into our custom environment
-####workon beecounter
-
 #Install Numpy - this will take 15minutes
 pip install numpy
 
@@ -104,22 +71,35 @@ sudo ldconfig
 
 #Install PICamera
 sudo apt-get install python-picamera -y
-fi
 
 #------------------------------------
 # Get mjpg_streamer code
-
+echo "-------------------------------------"
+echo "Installing mjpg-streamer code"
+echo "-------------------------------------"
+cd /opt
+sudo git clone https://github.com/rcrum003/mjpg-streamer
 # Compile it
-
+cd /opt/mjpg-streamer/mjpg-streamer-experimental
+sudo make
 # Install it
+sudo make install
+#Setup mjpg-streamer to start when the machine boots
+sudo cp /home/HiveControl/install/init.d/livestream /etc/init.d/
 
 #Setup service
-#sudo cp /home/HiveControl/install/init.d/beecounter /etc/init.d/beecounter
+sudo cp /home/HiveControl/install/init.d/beecounter /etc/init.d/
+
 #Set permissions
-#chmod +x /home/HiveControl/scripts/beecount/beecounter_svc.py
+chmod +x /home/HiveControl/scripts/beecount/beecounter_svc.py
+mkdir /home/HiveControl/www/public_html/video/out
+
+# Reload init.d to get the new services
+systemctl daemon-reload
 
 echo "Starting BeeCounter Service.........."
-#service beecounter start
+service beecounter start
+service livestream start
 
 echo "**************************************************"
 echo "BeeCamCounter Installation Completed"

@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v18 - for HiveControl
+# v19 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -282,8 +282,8 @@ fi
 if [[ $KEYBOARD = "true" ]]; then
 	#Adds touch screen keyboard
 echo "Installing Touch Screen Keyboard Support"
-sudo apt-get install matchbox-keyboard
-write in the file
+sudo apt-get install matchbox-keyboard -y
+#write in the file
 echo "#!/bin/bash" > /home/pi/Desktop/keyboard.sh
 echo "matchbox-keyboard &" >> /home/pi/Desktop/keyboard.sh
 chmod +x /home/pi/Desktop/keyboard.sh

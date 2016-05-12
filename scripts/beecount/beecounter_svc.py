@@ -19,6 +19,8 @@ previous motion
 # LICENSE: LGPL
 
 """
+import os
+os.chdir('/home/HiveControl/scripts/beecount/')
 
 import picamera
 import numpy as np
@@ -290,7 +292,7 @@ try :
             hive.draw(frame)
             #print "frame : %d /  IN : %d /  OUT : %d"%(frameid, hive.IN, hive.OUT)
             cv2.imwrite("/home/HiveControl/www/public_html/video/out/frame.jpg", frame)
-            fout = open('myfile','w')
+            fout = open('runningcount','w')
             fout.write("%d,%d"%(hive.IN, hive.OUT)) # python will convert \n to os.linesep
             fout.close() # you can omit in most cases as the destructor will call it
                     
@@ -315,5 +317,5 @@ finally :
     camera.close()
     cv2.destroyAllWindows()
 
-print "IN : ", hive.IN
-print "OUT: ", hive.OUT
+#print "IN : ", hive.IN
+#print "OUT: ", hive.OUT

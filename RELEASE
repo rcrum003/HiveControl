@@ -1,8 +1,16 @@
 Release Notes:
+
+--------------------
+1.62 Release Notes
+--------------------
+1. Implemented first version of Beecounter code, it's a large install.
+	Going forward, it'll be an option included in the install.sh script
+	The upgrade.sh won't install it automatically, you'll have to follow the instructions to get it setup.
+
 --------------------
 1.61 Release Notes
 --------------------
-1. Fixed unexpected error
+1. Fixed unexpected error in currconditions.sh
 
 
 --------------------
