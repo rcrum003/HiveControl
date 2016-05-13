@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v28 - for HiveControl
+# v29 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -287,7 +287,8 @@ echo "Installing wiringPI for HX711 sensor"
 cd /home/HiveControl/software/wiringPI
 sudo ./build
 
-
+#Allow www-data to run hx711
+sudo echo "www-data ALL=(ALL) NOPASSWD: /usr/local/bin/hx711" >> /etc/sudoers
 
 #Install xmlstarlet
 sudo apt-get install xmlstarlet -y
