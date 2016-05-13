@@ -23,79 +23,6 @@ function show_help {
 
 }
 
-function rpi-wiggle {
-###################################################################
-DISK_SIZE="$(($(sudo blockdev --getsz /dev/mmcblk0)/2048/925))"
-PART_START="$(sudo parted /dev/mmcblk0 -ms unit s p |grep "^2" |cut -f2 -d:)"
-[ "$PART_START" ] || exit 1
-PART_END="$(((DISK_SIZE*925*2048-1)-1536))"
-###################################################################
-# Display some Stuff...
-###################################################################
-echo ======================================================
-echo Current Disk Info
-fdisk -l /dev/mmcblk0
-echo
-echo ======================================================
-echo
-echo Calculated Info:
-echo " Disk Size  = $DISK_SIZE gb"
-echo " Part Start = $PART_START"
-echo " Part End   = $PART_END"
-echo
-echo "Making changes using fdisk..."
-printf "d\n2\nn\np\n2\n$PART_START\n$PART_END\np\nw\n" | fdisk /dev/mmcblk0
-echo
-echo Setting up init.d resize2fs_once script
-
-cat <<\EOF > /etc/init.d/resize2fs_once &&
-#!/bin/sh
-### BEGIN INIT INFO
-# Provides: resize2fs_once
-# Required-Start:
-# Required-Stop:
-# Default-Start: 2 3 4 5
-# Default-Stop: 0 1 6
-# Short-Description: Run resize2fs_once on boot
-# Description:
-### END INIT INFO
-. /lib/lsb/init-functions
-case "$1" in
-  start)
-    log_daemon_msg "Starting resize2fs_once, THIS WILL TAKE A FEW MINUTES " && 
-    
-    # Do our stuff....   
-    resize2fs /dev/mmcblk0p2 &&
-    
-    # Okay, not lets remove this script
-    rm /etc/init.d/resize2fs_once &&
-    update-rc.d resize2fs_once remove &&
-    log_end_msg $?
-    ;;
-  *)
-    echo "Usage: $0 start" >&2
-    exit 3
-    ;;
-esac
-EOF
-  chmod +x /etc/init.d/resize2fs_once &&
-  update-rc.d resize2fs_once defaults &&
-
-echo
-echo #####################################################################
-echo System is now ready to resize your system.  A REBOOT IS REQUIRED NOW!
-echo "Press ENTER to reboot : \c"
-read aok
-echo REBOOTING....
-/bin/sync
-/sbin/reboot
-
-###################################################################
-# END OF SCRIPT
-###################################################################
-
-}
-
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
@@ -141,15 +68,8 @@ HDsize=$(df |grep /dev/root |awk '{print $4}')
 HDNeed="500000"
 if [[ $HDsize -lt $HDNeed ]]; then
 	echo "We need at least 500 MB to install all the needed software."
-	echo "Please free up more space"
-	echo "or do you want me to expand your drive? Note: Run install again after reboot"
-	select yn in "Yes" "No"; do
-		    case $yn in
-		        Yes ) rpi-wiggle; break;;
-		        No ) exit;;
-		    esac
-		done
-	exit 
+	echo "Please free up more space or run raspi-config to expand your file system"
+	exit
 fi
 # update this OS
 sudo apt-get upgrade -y
