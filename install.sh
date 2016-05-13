@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v24 - for HiveControl
+# v25 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -55,7 +55,6 @@ function installBeeCount() {
 		        echo "gpu_mem=256" >> /boot/config.txt
 		        #reboot
 		fi
-		exit
 
 	#Install the software
     /home/HiveControl/software/beecamcounter/setupbeecounter.sh
