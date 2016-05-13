@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v22 - for HiveControl
+# v23 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -131,10 +131,6 @@ if [[ $whoami -ne "root" ]]; then
 	echo "run sudo bash, then rerun this script"
 	exit
 fi
-
-echo "Install git, because it's useful"
-sudo apt-get install git -y
-
 
 
 #resize the drive, since the initial write doesn't
