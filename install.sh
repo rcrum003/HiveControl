@@ -60,7 +60,7 @@ function installBeeCount() {
 		fi
 
 	#Install the software
-    #/home/HiveControl/software/beecamcounter/setupbeecounter.sh
+    /home/HiveControl/software/beecamcounter/setupbeecounter.sh
     return
 
 }	
