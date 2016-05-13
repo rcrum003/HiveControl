@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v23 - for HiveControl
+# v24 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -23,6 +23,44 @@ function show_help {
 
 }
 
+function installBeeCount() {
+   #Enable the camera and turn off the LED
+
+		if grep "start_x=1" /boot/config.txt
+		then
+		        echo "Start_x already set"
+		else
+		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
+		        #reboot
+		fi
+
+		if grep "disable_camera_led=1" /boot/config.txt
+		then
+		        echo "LED Disable already set"
+		else
+		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
+		        echo "disable_camera_led=1" >> /boot/config.txt
+		        #reboot
+		        gpu_mem=128
+		fi
+
+		if grep "gpu_mem=128" /boot/config.txt
+		then
+				sed -i "s/gpu_mem=128/gpu_mem=256/g" /boot/config.txt
+		        echo "Setting GPU to 256m"
+		elif grep "gpu_mem=256" /boot/config.txt
+			then
+				echo "gpu_mem already set to 256"
+		else        
+		        echo "gpu_mem=256" >> /boot/config.txt
+		        #reboot
+		fi
+		exit
+
+	#Install the software
+    /home/HiveControl/software/beecamcounter/setupbeecounter.sh
+
+}	
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
@@ -245,45 +283,6 @@ echo "Installing wiringPI for HX711 sensor"
 cd /home/HiveControl/software/wiringPI
 sudo ./build
 
-function installBeeCount() {
-   #Enable the camera and turn off the LED
-
-		if grep "start_x=1" /boot/config.txt
-		then
-		        echo "Start_x already set"
-		else
-		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
-		        #reboot
-		fi
-
-		if grep "disable_camera_led=1" /boot/config.txt
-		then
-		        echo "LED Disable already set"
-		else
-		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
-		        echo "disable_camera_led=1" >> /boot/config.txt
-		        #reboot
-		        gpu_mem=128
-		fi
-
-		if grep "gpu_mem=128" /boot/config.txt
-		then
-				sed -i "s/gpu_mem=128/gpu_mem=256/g" /boot/config.txt
-		        echo "Setting GPU to 256m"
-		elif grep "gpu_mem=256" /boot/config.txt
-			then
-				echo "gpu_mem already set to 256"
-		else        
-		        echo "gpu_mem=256" >> /boot/config.txt
-		        #reboot
-		fi
-		exit
-
-	#Install the software
-    /home/HiveControl/software/beecamcounter/setupbeecounter.sh
-
-}	
-
 
 if [[ $BEECOUNTER = "true" ]]; then
 	installBeeCount
@@ -305,7 +304,7 @@ fi
 #Install xmlstarlet
 sudo apt-get install xmlstarlet -y
 
-if [[ $XRDP = "true" ]]; then
+if [[ $XRDP == "true" ]]; then
 	echo "------------------------"
 	echo "Installing XRDP"
 	echo "------------------------"
