@@ -4,6 +4,10 @@
 # If you aren't, then you'll save a ton of space
 
 
+if [[ $foo = "true" ]]; then
+	#statements
+
+
 #Get Dependencies
 # Don't run if part of install.sh script as it just ran
 sudo apt-get update -y
@@ -87,12 +91,13 @@ sudo make install
 #Setup mjpg-streamer to start when the machine boots
 sudo cp /home/HiveControl/install/init.d/livestream /etc/init.d/
 
+#Set permissions
+sudo chmod +x /home/HiveControl/scripts/beecount/beecounter_svc.py
+sudo mkdir /home/HiveControl/www/public_html/video/out
+
 #Setup service
 sudo cp /home/HiveControl/install/init.d/beecounter /etc/init.d/
-
-#Set permissions
-chmod +x /home/HiveControl/scripts/beecount/beecounter_svc.py
-mkdir /home/HiveControl/www/public_html/video/out
+sudo chmod +x /etc/init.d/beecounter
 
 # Reload init.d to get the new services
 systemctl daemon-reload
@@ -105,6 +110,7 @@ update-rc.d livestream defaults
 echo "Starting BeeCounter Service.........."
 service beecounter start
 service livestream start
+fi
 
 echo "**************************************************"
 echo "BeeCamCounter Installation Completed"
