@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v27 - for HiveControl
+# v28 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -113,8 +113,9 @@ if [[ $HDsize -lt $HDNeed ]]; then
 	exit
 fi
 # update this OS
-sudo apt-get upgrade -y
 sudo apt-get update -y
+sudo apt-get upgrade -y
+
 
 
 # Install the basics
