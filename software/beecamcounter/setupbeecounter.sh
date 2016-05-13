@@ -97,6 +97,11 @@ mkdir /home/HiveControl/www/public_html/video/out
 # Reload init.d to get the new services
 systemctl daemon-reload
 
+#Set to start on boot
+update-rc.d beecounter defaults
+update-rc.d livestream defaults
+
+
 echo "Starting BeeCounter Service.........."
 service beecounter start
 service livestream start
