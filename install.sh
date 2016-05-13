@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v25 - for HiveControl
+# v27 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -29,16 +29,19 @@ function installBeeCount() {
 		if grep "start_x=1" /boot/config.txt
 		then
 		        echo "Start_x already set"
-		else
+		elif "start_x=0"
+			then
 		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
 		        #reboot
+		else 
+			 	echo "start_x=1" >> /boot/config.txt
 		fi
 
 		if grep "disable_camera_led=1" /boot/config.txt
 		then
 		        echo "LED Disable already set"
 		else
-		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
+		        sed -i "s/disable_camera_led=0/disable_camera_led=1/g" /boot/config.txt
 		        echo "disable_camera_led=1" >> /boot/config.txt
 		        #reboot
 		        gpu_mem=128
@@ -57,7 +60,8 @@ function installBeeCount() {
 		fi
 
 	#Install the software
-    /home/HiveControl/software/beecamcounter/setupbeecounter.sh
+    #/home/HiveControl/software/beecamcounter/setupbeecounter.sh
+    return
 
 }	
 # A POSIX variable
@@ -283,22 +287,6 @@ cd /home/HiveControl/software/wiringPI
 sudo ./build
 
 
-if [[ $BEECOUNTER = "true" ]]; then
-	installBeeCount
-else
-	echo "-----------------------------------------------"
-	echo "Finished main install of HiveControl"
-	echo "-----------------------------------------------"
-	echo "Do you want to install the software required for the Bee Counter via Raspberry PI CAM?"
-	echo "WARNING: This could take between 6-8 hrs due to having compile some code!"
-		select yn in "Yes" "No"; do
-		    case $yn in
-		        Yes ) installBeeCount; break;;
-		        No ) exit;;
-		    esac
-		done
-fi
-
 
 #Install xmlstarlet
 sudo apt-get install xmlstarlet -y
@@ -325,7 +313,7 @@ fi
 
 
 echo "========================================================"
-echo "Completed setup"
+echo "Completed Basic Setup of HiveControl"
 echo "========================================================"
 IP=$(ifconfig |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |grep -v "127.0.0.1")
 IPCount=$(ifconfig |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |wc -l)
@@ -355,9 +343,25 @@ sudo crontab /home/HiveControl/install/cron/cron.new
 #Remove DHCP stuff, since it gets in the way of finding our machine
 #apt-get remove isc-dhcp-client
 
+if [[ $BEECOUNTER = "true" ]]; then
+	installBeeCount
+else
+	echo "-----------------------------------------------"
+	echo "But wait, there is more....."
+	echo "-----------------------------------------------"
+	echo "Do you want to install the software required for the Bee Counter via Raspberry PI CAM?"
+	echo "WARNING: This could take between 6-8 hrs due to having to compile some code!"
+		select yn in "Yes" "No"; do
+		    case $yn in
+		        Yes ) installBeeCount; break;;
+		        No ) break;;
+		    esac
+		done
+fi
 
-
-echo "Done Executing Install Script"
+echo "========================================================"
+echo "Completed Setup of HiveControl"
+echo "========================================================"
 echo "A REBOOT IS REQUIRED NOW!"
 echo "Press ENTER to reboot : \c"
 read aok
