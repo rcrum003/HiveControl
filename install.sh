@@ -145,7 +145,7 @@ if [[ $HDsize -lt $HDNeed ]]; then
 	echo "or do you want me to expand your drive? Note: Run install again after reboot"
 	select yn in "Yes" "No"; do
 		    case $yn in
-		        Yes ) rpi_wiggle; break;;
+		        Yes ) rpi-wiggle; break;;
 		        No ) exit;;
 		    esac
 		done
