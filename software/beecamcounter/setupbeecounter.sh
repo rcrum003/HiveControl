@@ -4,9 +4,6 @@
 # If you aren't, then you'll save a ton of space
 
 
-if [[ $foo = "true" ]]; then
-	#statements
-
 
 #Get Dependencies
 # Don't run if part of install.sh script as it just ran
@@ -110,7 +107,7 @@ update-rc.d livestream defaults
 echo "Starting BeeCounter Service.........."
 service beecounter start
 service livestream start
-fi
+
 
 echo "**************************************************"
 echo "BeeCamCounter Installation Completed"
