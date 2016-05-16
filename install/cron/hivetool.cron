@@ -20,4 +20,4 @@
 */1 * * * * /home/HiveControl/scripts/system/msgqueue.sh > /dev/null 2>&1
 
 #Get System Status
-*/5 * * * * timeout -s KILL 1m /home/HiveControl/scripts/system/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt
+*/5 * * * * timeout -s KILL 1m /home/HiveControl/scripts/pimonitor/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt
