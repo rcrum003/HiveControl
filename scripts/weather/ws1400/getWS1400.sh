@@ -1,6 +1,6 @@
 
 #!/bin/bash
-# Version 4
+# Version 5
 # Script to output WS-1400-IP to a JSON and XML file that matches WUNDERGROUND file format
 #
 # Revision 3 - Had to make only one pull to the WS1400, as it seems to not like 3 hives all pulling 3 html requests at once.
@@ -8,10 +8,12 @@
 #
 #Set some variables
 # Url of your WS-1400
-URL="http://ws1400ip/livedata.htm"
+
 # Record the date we pulled it - ignore what time the receiver says so we stay in sync with the local computer time
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
+
+URL="http://$local_wx_url/livedata.htm"
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 

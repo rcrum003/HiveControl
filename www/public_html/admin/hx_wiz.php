@@ -82,7 +82,6 @@ switch ($step) {
 		break;
 
 	case '2':
-		# code...
 		if(isset($zero) || isset($testweight) ) {
     	// type exists
     		if (empty($zero) || empty($testweight)) {
@@ -100,7 +99,7 @@ switch ($step) {
 				#Get value of known weight
 				#$testweight_val = "300";
 				echo '
-				<table width="200">
+				<table width="100%">
                 <tr class="odd gradeX">';
 				echo "<td>Zero Value</td><td>$zero</td></tr>";
 				$testweight_val = shell_exec("/usr/bin/timeout 5 /usr/bin/sudo /usr/local/bin/hx711 $zero | tail -1");

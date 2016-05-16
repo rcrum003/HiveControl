@@ -3,13 +3,13 @@
 # This script uses pollen.com
 # Ryan Crum
 # May 1, 2016
-# v1.1
+# v1.2
 
 # Only run once per day at noon. The service we call changes at a time unknown after 4pm to show the next day and not the current day
 
 #Parameters
 SHELL=/bin/bash
-PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather
+PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather/pollen
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -30,10 +30,10 @@ fi
 GETPollen=$(curl -s 'https://www.pollen.com/api/forecast/current/pollen/'$ZIP'' -H 'DNT: 1'  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.86 Safari/537.36' -H 'Referer: https://www.pollen.com/forecast/current/pollen/')
 
 #Parse Data
-POL_LEVEL=$(echo $GETPollen | ./JSON.sh -b |grep \"periods\",1,\"Index\" |awk '{print $2}')
+POL_LEVEL=$(echo $GETPollen | $HOMEDIR/scripts/weather/pollen/JSON.sh -b |grep \"periods\",1,\"Index\" |awk '{print $2}')
 
 	#Pollen Type Parsing
-	POL_TYPE_SRC=$(echo $GETPollen | ./JSON.sh -b |grep \"periods\",1,\"Triggers\" |grep Name |awk '{print $2}')
+	POL_TYPE_SRC=$(echo $GETPollen | $HOMEDIR/scripts/weather/pollen/JSON.sh -b |grep \"periods\",1,\"Triggers\" |grep Name |awk '{print $2}')
 
 	#Strip "
 	POL_TYPE_SRC=${POL_TYPE_SRC//\"/}

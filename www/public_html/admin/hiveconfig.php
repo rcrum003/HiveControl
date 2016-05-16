@@ -29,13 +29,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $regex1 = "/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/";
 
 $v = new Valitron\Validator($_POST);
-$v->rule('required', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR'], 1)->message('{field} is required');
-$v->rule('slug', ['HIVENAME', 'NASA_HONEYBEE_NET_ID', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER', 'WXTEMPTYPE']);
+$v->rule('required', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY'], 1)->message('{field} is required');
+$v->rule('slug', ['HIVENAME', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
 $v->rule('integer', ['YARDID', 'BEEKEEPERID'],  1)->message('{field} can only be an integer');
 $v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
 $v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
-$v->rule('lengthmax', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'HOMEDIR', 'LATITUDE', 'LONGITUDE', 'ZIP'], 40);
-$v->rule('lengthmax', ['WX_TEMP_GPIO'], 2);
+$v->rule('lengthmax', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'LATITUDE', 'LONGITUDE', 'ZIP'], 40);
+
 $v->rule('regex', ['CITY', 'STATE', 'COUNTRY'], $regex1);
 $v->rule('numeric', ['BEEKEEPERID', 'YARDID', 'GDD_BASE_TEMP', 'ZIP']);
 
@@ -98,32 +98,26 @@ if($v->validate()) {
     $country = test_input($_POST["COUNTRY"]);
     $latitude = test_input($_POST["LATITUDE"]);
     $longitude = test_input($_POST["LONGITUDE"]);
-    $homedir = test_input_allow_slash($_POST["HOMEDIR"]);
+    #$homedir = test_input_allow_slash($_POST["HOMEDIR"]);
     $timezone = test_input_allow_slash($_POST["TIMEZONE"]);
-    $weather_level = test_input($_POST["WEATHER_LEVEL"]);
-    $weather_detail = test_input($_POST["WEATHER_DETAIL"]);
     $share_hivetool = test_input($_POST["SHARE_HIVETOOL"]);
     $HT_USERNAME = test_input($_POST["HT_USERNAME"]);
     $HT_PASSWORD = test_input($_POST["HT_PASSWORD"]);
     $HT_URL = test_input($_POST["HT_URL"]);
     $GDD_BASE_TEMP = test_input($_POST["GDD_BASE_TEMP"]);
     $GDD_START_DATE = test_input_allow_slash($_POST["GDD_START_DATE"]);
-    $key = test_input($_POST["KEY"]);
-    $wxstation = test_input($_POST["WXSTATION"]);
-    $NASA_HONEYBEE_NET_ID = test_input($_POST["NASA_HONEYBEE_NET_ID"]);
+    #$NASA_HONEYBEE_NET_ID = test_input($_POST["NASA_HONEYBEE_NET_ID"]);
     $POWER = test_input($_POST["POWER"]);
     $INTERNET = test_input($_POST["INTERNET"]);
     $STATUS = test_input($_POST["STATUS"]);
     $COMPUTER = test_input($_POST["COMPUTER"]);
     $START_DATE = test_input($_POST["START_DATE"]);
-    $WXTEMPTYPE = test_input($_POST["WXTEMPTYPE"]);
-    $WX_TEMPER_DEVICE = test_input_allow_slash($_POST["WX_TEMPER_DEVICE"]);
-    $WX_TEMP_GPIO = test_input($_POST["WX_TEMP_GPIO"]);
+    
     $ZIP = test_input($_POST["ZIP"]);
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,homedir=?,version=?,timezone=?,weather_level=?,key=?,wxstation=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,weather_detail=?,NASA_HONEYBEE_NET_ID=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,ZIP=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$homedir,$version,$timezone,$weather_level,$key,$wxstation,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$weather_detail,$NASA_HONEYBEE_NET_ID,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$ZIP));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,version=?,timezone=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,ZIP=? WHERE id=1");
+    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$version,$timezone,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$ZIP));
     sleep(3);
 
     // Refresh the fields in the form
@@ -226,11 +220,6 @@ if($v->validate()) {
                                             <td>Longitude</td>
                                             <td><input type="text" name="LONGITUDE" value="<?PHP echo $result['LONGITUDE'];?>" onchange="this.form.submit()"></td>
                                             <td>Longitude of Hive</td>
-                                        </tr>
-                                        <tr class="odd gradeX">
-                                            <td>Home Directory</td>
-                                            <td><input type="text" name="HOMEDIR" value="<?PHP echo $result['HOMEDIR'];?>" onchange="this.form.submit()"></td>
-                                            <td>Where all the scripts are installed, exclude trailing /</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Time Zone</td>
@@ -668,11 +657,6 @@ if($v->validate()) {
                                         <td>Beginning date to start calculating GDD each year. - year, month, day (format 20150301) - Recommend the last freezing day. Most people recommend March 1, and most GDD plant values are based on a 3/1 start date. </td>
                                        </tr>
 
-                                       <tr class="odd gradeX">
-                                        <td>NASA HoneyBee Net ID</td>
-                                        <td><input type="text" name="NASA_HONEYBEE_NET_ID" value="<?PHP echo $result['NASA_HONEYBEE_NET_ID'];?>" onchange="this.form.submit()"></td> 
-                                        <td>ID provided by NASA, if sharing data with NASA </td>
-                              </tr>
                                    <! ***************************************************** -->
 
                                    <tr class="odd gradeX">
@@ -751,73 +735,7 @@ if($v->validate()) {
                     </thead>
                     <tbody>
                        
-                        <tr class="odd gradeX">
-                            <td>Weather Source</td>
-                            <td>
-                            <select name="WEATHER_LEVEL" onchange="this.form.submit()">
-                            <option value="yard" <?php if ($result['WEATHER_LEVEL'] == "yard") {echo "selected='selected'";} ?>>Yard Controller</option>
-                            <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
-                            <option value="localws" <?php if ($result['WEATHER_LEVEL'] == "localws") {echo "selected='selected'";} ?>>Local Weather Station</option>
-                            <option value="localsensors" <?php if ($result['WEATHER_LEVEL'] == "localsensors") {echo "selected='selected'";} ?>>Local Hive Sensors</option>
-                            </select></td>
-                            <td>
-
-                                <?php if ($result['WEATHER_LEVEL'] == "hive") {
-                                    // WX Underground settings
-                                    //WEATHER_DETAIL - PWS, CITY
-                                    // KEY
-                                    // WXSTATION
-
-                                    echo 'API KEY <input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
-                                    echo 'STATION ID <input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
- 
-                                }
-                                else {
-                                    //echo '<input type="hidden" name="KEY" value="'; echo $result['KEY']; echo '">';
-                                    //echo '<input type="hidden" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">';    
-                                }
-                                    
-                                if ($result['WEATHER_LEVEL'] == "localws") {
-                                    echo 'Using WS1400.sh for local WX Station';}
-                                    
-                               if ($result['WEATHER_LEVEL'] == "localsensors") {
-                                    //echo 'Using Locally Connected Sensores for local WX Station';
-                                    echo '<select name="WXTEMPTYPE" onchange="this.form.submit()">
-                                    <option value="temperhum"'; if ($result['WXTEMPTYPE'] == "temperhum") {echo "selected='selected'";} echo '>Temperhum</option>
-                                    <option value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "selected='selected'";} echo '>DHT21</option>
-                                    <option value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "selected='selected'";} echo '>DHT22</option>';
-                                    echo '</select><BR>';
-                                    if ($result['WXTEMPTYPE'] == "temperhum") {
-                                        echo 'Device <input type="text" name="WX_TEMPER_DEVICE" onchange="this.form.submit()" value="'; echo $result['WX_TEMPER_DEVICE']; echo '""></td>';
-
-                                    }
-                                    if ($result['WXTEMPTYPE'] == "dht21" || $result['WXTEMPTYPE'] == "dht22") {
-                                 echo 'GPIO <input type="text" name="WX_TEMP_GPIO" onchange="this.form.submit()" value="'; echo $result['WX_TEMP_GPIO']; echo '"></td>';
-                                    }
-                                }
-            
-                            ?></td>
-                            <td>Specify where you want to get your ambient weather data from.</td>
-                        </tr>
-
-                        <?PHP if ($result['WEATHER_LEVEL'] == "localws" || $result['WEATHER_LEVEL'] == "localsensors" ) {
-                            echo '
-                            <tr class="odd gradeX">
-                            <td>Weather Forecast Source</td>
-                            <td>
-
-                            <select name="WEATHER_DETAIL" onchange="this.form.submit()">
-                            <option value="station"'; if ($result['WEATHER_DETAIL'] == "station") {echo "selected='selected'";} echo '>WX Station</option>
-                            <option value="city"'; if ($result['WEATHER_DETAIL'] == "city") {echo "selected='selected'";} echo '>City</option>
-                            </select></td>
-                            <td>
-                                API KEY <input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
-                                if ($result['WEATHER_DETAIL'] == "station") {
-                                echo 'STATION ID <input type="text" onchange="this.form.submit()" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">'; }   
-                            echo '</td>
-                            <td>Specify where you want to get your weather forecast data from, since the local weather source used for ambient does not forecast. Get an API Key from <a href="http://www.wunderground.com/weather/api/">WXUnderground</a></td>
-                        </tr>'; } ?>
-
+                        
                          <tr class="odd gradeX">
                             <td>Share Data with Hivetool.org</td>
                             <td><select name="SHARE_HIVETOOL" onchange="this.form.submit()">

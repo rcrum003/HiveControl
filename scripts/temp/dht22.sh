@@ -16,8 +16,11 @@ do
       DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
       #S = Simple
       DHT22=$(nice --20 /usr/local/bin/Seeed_DHT22 $HIVE_TEMP_GPIO S)
-      if [[ -n $DHT22 ]]
-      then
+      if [[ $DHT22 = "Lock file is in use, exiting..." ]] 
+        then
+        loglocal "$DATE2" TEMP WARNING "DHT22 Lock File is in use, retrying"
+      elif [[ -n $DHT22 ]] 
+        then
         HUMIDITY=$(echo $DHT22 | awk '{print $2}')
         TEMPC=$(echo $DHT22 | awk '{print $1}')
         #Convert C to F
@@ -28,8 +31,8 @@ do
         TEMP_MINTEST=`echo "$TEMPF > -50" | bc`
         HUMIDITY_MAXTEST=`echo "$HUMIDITY > 100" | bc`
         TEMP_MAXTEST=`echo "$TEMPF > 150" | bc`
-        if [ $HUMIDITY_MINTEST == "0" ] && [ $TEMP_MINTEST != "0" ] && [ $HUMIDITY_MAXTEST == "0" ] && [ $TEMP_MAXTEST == "0" ]
-        then
+        if [ $HUMIDITY_MINTEST == "0" ] && [ $TEMP_MINTEST != "0" ] && [ $HUMIDITY_MAXTEST == "0" ] && [ $TEMP_MAXTEST == "0" ] 
+          then
          DATA_GOOD=1
         else
          HUMIDITY="0"
@@ -37,6 +40,8 @@ do
          TEMPC="0"
          dewpoint_f="0"
         fi
+      else
+        DATA_GOOD=0
       fi
       let "COUNTER += 1"
       sleep $COUNTER
@@ -56,7 +61,7 @@ fi
 if test $COUNTER -gt 5
 then
   #echo "$DATE2--WARNING-Failed reading GPIO:$HIVE_TEMP_GPIO: retried $COUNTER times" >> $LOG
-  loglocal "$DATE2" TEMP WARNING "DHT22 Failed reading GPIO $HIVE_TEMP_GPIO: Retried $COUNTER times"
+  loglocal "$DATE2" TEMP ERROR "INFO Failed reading GPIO $HIVE_TEMP_GPIO: Retried $COUNTER times"
         HUMIDITY="0"
         TEMPF="0"
         TEMPC="0"

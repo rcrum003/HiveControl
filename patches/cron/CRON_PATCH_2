@@ -1,0 +1,3 @@
+
+#Get System Status
+*/5 * * * * timeout -s KILL 1m /home/HiveControl/scripts/system/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt

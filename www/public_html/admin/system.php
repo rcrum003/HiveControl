@@ -247,6 +247,11 @@ if(isset($_GET["command"])) {
                                 <img src="../images/zerochart.png" width="75" height="75">
                                     <div class="text-center">Remove Zero</div>
                 </button>
+                <a href="/admin/system.php?command=server_status">
+                <button type="button" class="btn btn-outline btn-default btn-lg">
+                                <img src="../images/raspberry.png" width="75" height="75">
+                                    <div class="text-center">Server Status</div>
+                </a></button>
                 
             </div>
                                 
@@ -273,6 +278,11 @@ if(isset($_GET["command"])) {
                         if ($command == "upgrade") {
                             echo '<div id="myDiv"></script></div>';
                         }
+                        if ($command == "server_status") {
+                            echo '<pre>';
+                            require $_SERVER["DOCUMENT_ROOT"] . '/admin/server_status.txt';
+                            echo '</pre>';
+                                        }
                             ?>
                         
                         </div>

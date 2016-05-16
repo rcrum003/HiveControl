@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="46"
+Upgrade_ver="47"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -192,6 +192,17 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			echo "Applying DB Ver12 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_17
 			let DB_ver="12"
+		fi
+		if [[ $DB_ver -eq -12 ]]; then
+			echo "Applying DB Ver13 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_18 
+			sudo crontab -l > /home/HiveControl/install/cron/cron2.orig 
+			#Echo our new content into a new crontab file with the old
+			sudo cat /home/HiveControl/upgrade/HiveControl/patches/cron/CRON_PATCH_2 >> /home/HiveControl/install/cron/cron2.orig
+			sudo crontab /home/HiveControl/install/cron/cron2.orig
+			#Copy new images related to this feature set
+			sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/* /home/HiveControl/www/public_html/images/
+			let DB_ver="13"
 		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
