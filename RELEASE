@@ -1,6 +1,17 @@
 Release Notes:
 
 --------------------
+1.63 Release Notes
+--------------------
+1. Fixed erorr where daily pollen count wouldn't run from cron because of a relative path defined.
+2. Added a check for Locked file when running the DHT22 code
+3. Removed the option to change running directory. (not needed)
+4. Removed NASA ID, as that project seems dead.
+5. Moved Weeather Instrument config to the Instruments page (for Nate)
+6. Added option to specify IP address of your WS1400ip, if you are using (cuz Nate bought one)
+7. Added SystemStatus option, because people liked that feature on Hivetool v1 code.
+
+--------------------
 1.62 Release Notes
 --------------------
 1. Implemented first version of Beecounter code, it's a large install.
