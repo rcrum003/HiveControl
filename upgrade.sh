@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="51"
+Upgrade_ver="52"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -209,6 +209,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			echo "Applying DB Ver14 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_19 
 			sudo sqlite3 $DestDB "UPDATE hiveconfig SET RUN=\"yes\";"
+			sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/* /home/HiveControl/www/public_html/images/
 			let DB_ver="14"
 		fi
 	else
