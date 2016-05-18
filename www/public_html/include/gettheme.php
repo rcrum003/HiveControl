@@ -11,7 +11,10 @@ $result2 = $sth2->fetch(PDO::FETCH_ASSOC);
 
 $theme = $result2['www_chart_theme'];
 
-echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";
+if (!empty($theme)) {
+    #Theme is set, so set it
+echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";    
+}
 
 #Set default colors, since every chart pulls from this file
 

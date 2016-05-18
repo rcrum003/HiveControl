@@ -1,4 +1,15 @@
 Release Notes:
+--------------------
+1.64 Release Notes
+--------------------
+1. Fixed problem with ClearLogs in System Commands page (it wouldn't clear the logs)
+2. Added ceiling and floor to humidity charts.
+3. Fixed hidden error when default theme was set (no one noticed, but it was there)
+4. Fixed background highcharts error where it was complaining about the data not being in order. 
+5. Added an option to Pause Data Collection
+6. Moved Logs menu item to default system.php page, to consolidate.
+7. Fixed 401 error page not displaying
+
 
 --------------------
 1.63 Release Notes

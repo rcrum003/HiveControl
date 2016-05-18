@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 1.7
+# Version 1.8
 
 # Get Variables from central file
 SHELL=/bin/bash
@@ -15,8 +15,14 @@ HOST=`hostname`
 #Load the results of the script above
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/check.inc
+source /home/HiveControl/scripts/data/logger.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
+
+if [ $RUN = "no" ]; then
+	loglocal "$DATE" MAIN INFO "Execution of main script is disabled - renable in System Commands screen"
+	exit;
+fi
 
 # ------ GET HIVE WEIGHT ----
 echo "--- WEIGHT --- "

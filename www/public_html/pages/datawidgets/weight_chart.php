@@ -39,11 +39,11 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 if ( $SHOW_METRIC == "on" ) {
 
-$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
 } else {
 
 //Show normal
-$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
 }
 
 $sth->execute();
@@ -95,7 +95,9 @@ $(function () {
                 text: 'Weight',
                 style: {
                     color: '"; echo "$color_netweight"; echo "'
-                }
+                },
+            ceiling: 500,
+            floor: 0
             }
             
 
@@ -187,6 +189,17 @@ $(function () {
         }
         ]
     });
+
+    $(\"#b\").click(function(){
+            chart.yAxis[0].update({
+                labels: {
+                    enabled: false
+                },
+                title: {
+                    text: null
+                }
+            });
+        });
 
         Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
             text: 'Enlarge Chart',

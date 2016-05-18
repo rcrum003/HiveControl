@@ -35,10 +35,10 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 if ( $SHOW_METRIC == "on" ) {
 
 // Get Hive Data First
-$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
 } else {
 //Show normal
-$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
 }
 
 $sth->execute();

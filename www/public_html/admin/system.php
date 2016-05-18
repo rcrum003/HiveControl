@@ -51,7 +51,7 @@ function loglocal($date, $program, $type, $message) {
        unset($sth99); 
 }
 
-function getlog($conn, $program, $type)
+function getlog($conn)
 {
     # Pulls latest log file
 
@@ -90,16 +90,20 @@ date_default_timezone_set($longName);
 
 $now = date('Y-m-d H:i:s');
 
+#Check to see if our main script is set to run
+$sth15 = $conn->prepare("SELECT RUN FROM hiveconfig");
+$sth15->execute();
+$RUN = $sth15->fetchColumn();
+unset($sth15);
 
 #Check to see if the neccessary variables exist
 if(isset($_GET["command"])) {
-    // type exists
+    // command exists
     if (empty($_GET["command"])) {
         // Default to nothing if no command is set or empty
-        $command = "";
+        $command = "none";
         } else {
-            // Not empty, so let's check it's input and run switch
-            $command = test_input($_GET["command"]);
+            // Not empty, so let's run switch
 
         switch ($command) {
             case "upgrade":
@@ -196,9 +200,38 @@ if(isset($_GET["command"])) {
                     break;
                 }
                 break;
+
+            case "pause":
+                # pauses current conditions script
+                $ver = $conn->prepare("SELECT version FROM hiveconfig");
+                $ver->execute();
+                $ver = $ver->fetchColumn();
+                // Increment version
+                $version = ++$ver;
+                #$version = "10";
+                unset($ver);
+                if ( $RUN == "no") {
+                    #Set to yes
+                    $pause_type = "started";
+                    $pause_run = "yes";
+                }
+                if ( $RUN == "yes") {
+                    #set to no
+                    $pause_type = "paused";
+                    $pause_run = "no";
+                }
+                  $doit = $conn->prepare("UPDATE hiveconfig SET version=?,RUN=? WHERE id=1");
+                  $doit->execute(array($version,$pause_run));
+                  unset($doit);
+                  sleep(2);
+                  loglocal($now, "MAIN", "INFO", "Successfully $pause_type Data Collection by Admin from source IP $user_ip");
+                  header('Refresh: 1; url=/admin/system.php');
+                break;
         }
         }
-    } 
+    } else {
+        $command = "none";
+    }
 
 ?>
 <!DOCTYPE html>
@@ -229,13 +262,19 @@ if(isset($_GET["command"])) {
                                 <img src="../images/disk.png" width="75" height="75">
                                     <div class="text-center">Update Code</div>
                 </a></button>
-
-                <a href="/admin/system.php?command=clearlogs">
-                <button type="button" class="btn btn-outline btn-default btn-lg">
+                <?PHP if ($command == "clearlogs" || $command == "upgrade" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "server_status") {
+                    echo '<a href="/admin/system.php">
+                    <button type="button" class="btn btn-outline btn-default btn-lg">
+                                <img src="../images/delete.png" width="75" height="75">
+                                    <div class="text-center">Show Logs</div>
+                        </button></a>'; }
+                        else {
+                        echo '<button type="button" class="btn btn-outline btn-default btn-lg" data-toggle="modal" data-target="#ClearLogsModal">
                                 <img src="../images/delete.png" width="75" height="75">
                                     <div class="text-center">Clear Logs</div>
-                </a></button>
-
+                        </button>';
+                    }
+                ?>
                 
                 <button type="button" class="btn btn-outline btn-default btn-lg" data-toggle="modal" data-target="#ResetDataModal">
                                 <img src="../images/emptydb.png" width="75" height="75">
@@ -251,6 +290,21 @@ if(isset($_GET["command"])) {
                 <button type="button" class="btn btn-outline btn-default btn-lg">
                                 <img src="../images/raspberry.png" width="75" height="75">
                                     <div class="text-center">Server Status</div>
+                </a></button>
+                <a href="/admin/system.php?command=pause">
+                    <?PHP if($RUN == "yes") { 
+                        #we are running
+                        echo '<button type="button" class="btn btn-outline btn-default btn-lg">
+                        <img src="../images/pause.png" width="75" height="75">
+                        <div class="text-center">Pause</div>';
+                    }
+                        elseif($RUN=="no") {
+                            # we arent running..
+                            echo '<button type="button" class="btn btn-danger btn-lg">
+                            <img src="../images/play.png" width="75" height="75">
+                            <div class="text-center">Start</div>';
+                        } ?>
+
                 </a></button>
                 
             </div>
@@ -272,7 +326,7 @@ if(isset($_GET["command"])) {
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'; 
                             echo '<b>Upgrade Request '.$msgid.' Errored Out </b><br>'; echo $error; echo '</div>';
                             } 
-                        if ($command == "clearlogs" || $command == "cleardata" || $command == "removezero") {
+                        if ($command == "clearlogs" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "none") {
                             getlog($conn);
                         }
                         if ($command == "upgrade") {
@@ -332,6 +386,26 @@ if(isset($_GET["command"])) {
                                 <!-- /.modal-dialog -->
                 </div>
 
+                <div class="modal fade" id="ClearLogsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                            <h4 class="modal-title" id="myModalLabel">Please Confirm</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to clear the logs? 
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here</button>
+                                            <a href="/admin/system.php?command=clearlogs&confirm=yes"><button type="button" class="btn btn-danger">Yes, clear it all!</button></a>
+                                        </div>
+                                    </div>
+                                    <!-- /.modal-content -->
+                                </div>
+                                <!-- /.modal-dialog -->
+                </div>
+
                 <div class="modal fade" id="ZeroModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -383,6 +457,10 @@ if(isset($_GET["command"])) {
 
     <!-- Metis Menu Plugin JavaScript -->
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
+      <!-- DataTables JavaScript -->
+    <script src="../bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+    <script src="../bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>
+    <script src="../bower_components/datatables-responsive/js/dataTables.responsive.js"></script>
 
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
@@ -397,7 +475,14 @@ if(isset($_GET["command"])) {
     $("[data-toggle=popover]")
         .popover()
     </script>
-
+<script>
+    $(document).ready(function() {
+        $('#dataTables-example').DataTable({
+                responsive: true,
+                 "order": [[ 0, "desc" ]]
+        });
+    });
+    </script>
 
 <script>
  $(document).ready(function() {

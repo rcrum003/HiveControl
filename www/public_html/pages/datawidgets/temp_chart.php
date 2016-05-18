@@ -35,9 +35,9 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 // Get Hive Data First
 
 if ( $SHOW_METRIC == "on" ) {
-$sth = $conn->prepare("SELECT hivetempc AS hivetempf, hiveHum, weather_tempc as weather_tempf, weather_humidity, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT hivetempc AS hivetempf, hiveHum, weather_tempc as weather_tempf, weather_humidity, precip_1hr_metric as precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
 } else {
-$sth = $conn->prepare("SELECT hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT hivetempf, hiveHum, weather_tempf, weather_humidity, precip_1hr_in, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
 }
 
 $sth->execute();
@@ -101,6 +101,8 @@ $(function () {
         },
         { // Humidity yAxis
             gridLineWidth: 0,
+            ceiling: 100,
+            floor: 0,
             title: {
                 text: 'Humidity',
                 style: {
@@ -113,8 +115,7 @@ $(function () {
                     color: '"; echo "$color_hivehum"; echo "'
                 }
             },
-            opposite: false,
-            max: 100
+            opposite: false
 
         }, 
         { // Rain yAxis

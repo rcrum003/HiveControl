@@ -128,9 +128,6 @@ echo '
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
                                 <li>
-                                    <a href="/admin/logs.php">Logs</a>
-                                </li>
-                                <li>
                                     <a href="/admin/system.php">System Commands</a>
                                 </li>
                     </ul>
@@ -194,9 +191,6 @@ if ($orient == "normal") {
                                 </li>
                                 <li>
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
-                                </li>
-                                <li>
-                                    <a href="/admin/logs.php">Logs</a>
                                 </li>
                                 <li>
                                     <a href="/admin/system.php">System Commands</a>

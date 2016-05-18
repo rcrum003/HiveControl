@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="50"
+Upgrade_ver="51"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -203,6 +203,13 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			#Copy new images related to this feature set
 			sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/* /home/HiveControl/www/public_html/images/
 			let DB_ver="13"
+		fi
+
+		if [[ $DB_ver -eq "13" ]]; then
+			echo "Applying DB Ver14 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_19 
+			sudo sqlite3 $DestDB "UPDATE hiveconfig SET RUN=\"yes\";"
+			let DB_ver="14"
 		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
