@@ -12,6 +12,9 @@
 #echo "Second Period is "; 
 
 switch ($period) {
+    case "today":
+        $sqlperiod = "start of day";
+        break;
     case "day":
         $sqlperiod = "-1 days";
         break;

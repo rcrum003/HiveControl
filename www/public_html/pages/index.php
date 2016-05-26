@@ -23,12 +23,12 @@ if(isset($_GET["period"])) {
     // type exists
     if (empty($_GET["period"])) {
         // Default to Day if no period is set or empty
-        $period = "day";
+        $period = "today";
         } else {
             $period = test_input($_GET["period"]);
         }
     } else {
-    $period = "day";
+    $period = "today";
 }
 
 #Refresh our index.php page every 5 minutes so we get the latest data and can follow along during the day.
@@ -158,7 +158,8 @@ header("Refresh: $sec; url=$page");
                 <div class="col-lg-12">
         
         <!-- Button Bar -->
-            <a href="/pages/index.php?period=day"><button type="button" class="btn btn btn-<?PHP if ($period == "day"){echo "primary";} else {echo "default";}?>">Day</button></a>
+            <a href="/pages/index.php?period=today"><button type="button" class="btn btn btn-<?PHP if ($period == "today"){echo "primary";} else {echo "default";}?>">Today</button></a>
+            <a href="/pages/index.php?period=day"><button type="button" class="btn btn btn-<?PHP if ($period == "day"){echo "primary";} else {echo "default";}?>">24 hrs</button></a>
             <a href="/pages/index.php?period=week"><button type="button" class="btn btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
             <a href="/pages/index.php?period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
             <a href="/pages/index.php?period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>

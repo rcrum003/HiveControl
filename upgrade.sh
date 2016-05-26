@@ -219,8 +219,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 
 #Update install stuff
 sudo cp -Rp /home/HiveControl/upgrade/HiveControl/install/* /home/HiveControl/install/
+
 if [[ $Installed_Ver < "1.62" ]]; then
 	#Only run this if we haven't got the latest code
+	mkdir /home/HiveControl/install/init.d
+	sudo cp -Rp /home/HiveControl/upgrade/HiveControl/install/init.d/* /home/HiveControl/install/init.d/
 	sudo mkdir /home/HiveControl/software/beecamcounter
 	sudo cp -Rp /home/HiveControl/upgrade/HiveControl/software/beecamcounter/* /home/HiveControl/software/beecamcounter/ 
 fi

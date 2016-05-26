@@ -287,8 +287,11 @@ sudo make all
 sudo cp utils/tempered /usr/local/bin/
 sudo cp utils/hid-query /usr/local/bin/
 
+
 echo "Installing wiringPI for HX711 sensor"
-cd /home/HiveControl/software/wiringPI
+cd /home/HiveControl/software/
+sudo git clone git://git.drogon.net/wiringPI
+cd wiringPI
 sudo ./build
 
 #Allow www-data to run hx711

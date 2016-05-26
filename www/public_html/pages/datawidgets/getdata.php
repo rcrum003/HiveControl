@@ -78,6 +78,9 @@ if(isset($_GET["chart"])) {
 
 # Save Period to use in the query
 switch ($period) {
+    case "today":
+        $sqlperiod = "start of day";
+        break;
     case "hour":
         $sqlperiod = "-1 hours";
         break;

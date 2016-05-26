@@ -9,6 +9,9 @@
 # Specifically - Period and Chart
 
 switch ($period) {
+    case "today":
+        $sqlperiod = "start of day";
+        break;
     case "day":
         $sqlperiod = "-24 hours";
         break;

@@ -1,5 +1,17 @@
 Release Notes:
 --------------------
+1.66 Release Notes
+--------------------
+1. Added Today Option to all charts that show's all data since 12midnight local time.
+
+
+--------------------
+1.65 Release Notes
+--------------------
+1. Fixed Weather Pages to Show Metric (since we did it other places)
+
+
+--------------------
 1.64 Release Notes
 --------------------
 1. Fixed problem with ClearLogs in System Commands page (it wouldn't clear the logs)
