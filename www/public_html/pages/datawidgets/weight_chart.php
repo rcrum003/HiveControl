@@ -43,11 +43,11 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 if ( $SHOW_METRIC == "on" ) {
 
-$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 } else {
 
 //Show normal
-$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 }
 
 $sth->execute();
@@ -223,11 +223,11 @@ $(function () {
 
 if ( $SHOW_METRIC == "on" ) {
 
-$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, round((hiverawweight * 0.453592),2) as hiverawweight, precip_1hr_metric as precip_1hr_in, wind_kph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 } else {
 
 //Show normal
-$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph as wind, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 }
 
 $sth->execute();

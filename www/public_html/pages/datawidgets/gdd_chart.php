@@ -39,12 +39,12 @@ if ($chart == 'line') {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get GDD Data First
-$sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 // Get Pollen Data
-$sth3 = $conn->prepare("SELECT pollenlevel, strftime('%s', date)*1000 AS datetime FROM pollen WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER by datetime ASC");
+$sth3 = $conn->prepare("SELECT pollenlevel, strftime('%s', date)*1000 AS datetime FROM pollen WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 $sth3->execute();
 $result3 = $sth3->fetchAll(PDO::FETCH_ASSOC);
 

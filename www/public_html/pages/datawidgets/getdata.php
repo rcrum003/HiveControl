@@ -209,7 +209,7 @@ switch ($type) {
 
 switch ($chart) {
         case 'line':
-            $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, $type2 as value FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY datetime");
+            $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, $type2 as value FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY datetime");
             $sth->execute(); 
             $result = $sth->fetchAll(PDO::FETCH_ASSOC);
             header('Content-Type: text/javascript');
@@ -221,7 +221,7 @@ switch ($chart) {
             break;
         case 'highlow':
             # Shows HighLow for that day for a given data measurement
-            $sth = $conn->prepare("SELECT  MAX($type2) as max, MIN($type2) as min, strftime('%s',date)*1000 AS datetime, strftime('%Y-%m-%d', date) AS day FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') GROUP BY day");
+            $sth = $conn->prepare("SELECT  MAX($type2) as max, MIN($type2) as min, strftime('%s',date)*1000 AS datetime, strftime('%Y-%m-%d', date) AS day FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') GROUP BY day");
             $sth->execute(); 
             $result = $sth->fetchAll(PDO::FETCH_ASSOC);
             header('Content-Type: text/javascript');

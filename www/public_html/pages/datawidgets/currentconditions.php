@@ -102,7 +102,7 @@ else {
         break;
     } 
 
-#WHERE date > datetime('now','$sqlperiod', 'localtime')");
+#WHERE date > datetime('now', 'localtime', '$sqlperiod')");
 
 $trendsth = $conn->prepare("SELECT hiveweight, hiverawweight, date AS datetime FROM allhivedata WHERE date > '$startdate' ORDER BY date LIMIT 1;");
 $trendsth->execute();

@@ -33,7 +33,7 @@ switch ($period) {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
-$sth = $conn->prepare("SELECT ROUND(AVG(solarradiation), 1) as solarradiation, MAX(solarradiation) as maxsolarradiation, MIN(solarradiation) as minsolarradiation, ROUND(AVG(lux), 1) as lux, MAX(lux) as maxlux, MIN(lux) as minlux,  strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT ROUND(AVG(solarradiation), 1) as solarradiation, MAX(solarradiation) as maxsolarradiation, MIN(solarradiation) as minsolarradiation, ROUND(AVG(lux), 1) as lux, MAX(lux) as maxlux, MIN(lux) as minlux,  strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod')");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 

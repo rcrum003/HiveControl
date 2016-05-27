@@ -1,5 +1,11 @@
 Release Notes:
 --------------------
+1.67 Release Notes
+--------------------
+1. Fixed today option to show full day and use local timezone.
+
+
+--------------------
 1.66 Release Notes
 --------------------
 1. Added Today Option to all charts that show's all data since 12midnight local time.

@@ -33,7 +33,7 @@ switch ($period) {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
-$sth = $conn->prepare("SELECT sum(IN_COUNT) as total_in, sum(OUT_COUNT) as total_out, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT sum(IN_COUNT) as total_in, sum(OUT_COUNT) as total_out, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod')");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 

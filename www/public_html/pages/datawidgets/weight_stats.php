@@ -37,12 +37,12 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 if ( $SHOW_METRIC == "on" ) {
 
-$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight * 0.453592), 1) as hiveweight, ROUND(MAX(hiveweight * 0.453592), 2) as maxhiveweight, ROUND(MIN(hiveweight * 0.453592), 2) as minhiveweight, ROUND(AVG(hiverawweight * 0.453592), 1) as hiverawweight, ROUND(MAX(hiverawweight * 0.453592), 2) as maxhiverawweight, ROUND(MIN(hiverawweight * 0.453592), 2) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select ROUND((hiveweight * 0.453592), 2) as hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date 
-ASC LIMIT 1) as startweight, (select ROUND((hiveweight * 0.453592), 2) as hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight * 0.453592), 1) as hiveweight, ROUND(MAX(hiveweight * 0.453592), 2) as maxhiveweight, ROUND(MIN(hiveweight * 0.453592), 2) as minhiveweight, ROUND(AVG(hiverawweight * 0.453592), 1) as hiverawweight, ROUND(MAX(hiverawweight * 0.453592), 2) as maxhiverawweight, ROUND(MIN(hiverawweight * 0.453592), 2) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select ROUND((hiveweight * 0.453592), 2) as hiveweight from allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date 
+ASC LIMIT 1) as startweight, (select ROUND((hiveweight * 0.453592), 2) as hiveweight from allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod')");
 
 } else {
-$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight), 1) as hiveweight, MAX(hiveweight) as maxhiveweight, MIN(hiveweight) as minhiveweight, ROUND(AVG(hiverawweight), 1) as hiverawweight, MAX(hiverawweight) as maxhiverawweight, MIN(hiverawweight) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date 
-ASC LIMIT 1) as startweight, (select hiveweight from allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime')");
+$sth = $conn->prepare("SELECT ROUND(AVG(hiveweight), 1) as hiveweight, MAX(hiveweight) as maxhiveweight, MIN(hiveweight) as minhiveweight, ROUND(AVG(hiverawweight), 1) as hiverawweight, MAX(hiverawweight) as maxhiverawweight, MIN(hiverawweight) as minhiverawweight,  strftime('%s',date)*1000 AS datetime, (select hiveweight from allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date 
+ASC LIMIT 1) as startweight, (select hiveweight from allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date DESC LIMIT 1) as endweight FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod')");
 }
 
 

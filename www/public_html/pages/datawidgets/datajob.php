@@ -104,7 +104,7 @@ switch ($type) {
 		$sth->execute();
         break;
     case "temp_chart":
-        $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, hivetempf FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') GROUP BY datetime");
+        $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, hivetempf FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') GROUP BY datetime");
 		$sth->execute();
 		$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -113,12 +113,12 @@ switch ($type) {
 		} 
         break;
     case "temp_data":
-        $sth = $conn->prepare("SELECT hiveid, date, hivetempf, hiveHum, weather_tempf, weather_humidity FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date");
+        $sth = $conn->prepare("SELECT hiveid, date, hivetempf, hiveHum, weather_tempf, weather_humidity FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date");
 		$sth->execute();
         break;
 
     case "weight_chart":
-        $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, hiveweight, hiverawweight FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY datetime");
+        $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, hiveweight, hiverawweight FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY datetime");
 		$sth->execute();
 		$result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -127,15 +127,15 @@ switch ($type) {
 		} 
         break;
     case "weight_data":
-        $sth = $conn->prepare("SELECT hiveid, date, hiveweight, hiverawweight FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date");
+        $sth = $conn->prepare("SELECT hiveid, date, hiveweight, hiverawweight FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date");
 		$sth->execute();
         break;
     case "light_data":
-        $sth = $conn->prepare("SELECT hiveid, date, solarradiation, uv, lux FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY date");
+        $sth = $conn->prepare("SELECT hiveid, date, solarradiation, uv, lux FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY date");
         $sth->execute();
         break;
     case "light_chart":
-         $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, solarradiation, uv, lux FROM allhivedata WHERE date > datetime('now','$sqlperiod', 'localtime') ORDER BY datetime");
+         $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, solarradiation, uv, lux FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY datetime");
         $sth->execute();
         $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
