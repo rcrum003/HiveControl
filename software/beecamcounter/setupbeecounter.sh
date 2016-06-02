@@ -27,7 +27,7 @@ sudo apt-get install libgtk2.0-dev -y
 sudo apt-get install libatlas-base-dev gfortran -y
 
 #Python Header Files
-sudo apt-get install python2.7-dev python3-deqv -y
+sudo apt-get install python2.7-dev python3-dev -y
 
 #Let's get OpenCV
 mkdir /opt/OpenCV
@@ -72,8 +72,6 @@ sudo ldconfig
 
 #Install PICamera
 sudo apt-get install python-picamera -y
-
-sudo apt-get install python-opencv -y
 
 #------------------------------------
 # Get mjpg_streamer code

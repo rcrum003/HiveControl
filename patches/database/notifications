@@ -1,0 +1,9 @@
+CREATE TABLE notifications (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name,
+    measure,
+    threshold_type,
+    threshold_value,
+    time_period,
+    status
+);
