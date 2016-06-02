@@ -81,12 +81,11 @@ precip_1hr_metric="$(echo "scale=2; (${rainofhourly} / 0.039370)" |bc)"
 precip_today_metric="$(echo "scale=2; (${rainofdaily} / 0.039370)" |bc)"
 
 if [[ -z "${outTemp}" ]]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp" 
-	
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp"
 	#Since we didn't get a proper file, we should assume the whole thing is borked
-	# so we exit
 	exit
 fi
+
 	
 # Return a JSON file to mimic WUNderground file format
 echo "{"
