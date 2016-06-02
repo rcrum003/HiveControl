@@ -51,7 +51,7 @@ if [ $ENABLE_HIVE_TEMP_CHK = "yes" ]; then
 	if [ $TEMPTYPE = "temperhum" ]; then
 	GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh $HIVEDEVICE`
 	elif [[ $TEMPTYPE = "dht22" ]]; then
-	GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh $HIVE_TEMP_GPIO`
+	GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
 	elif [[ $TEMPTYPE = "dht21" ]]; then
 	GETTEMP=`$HOMEDIR/scripts/temp/dht21.sh`
 	fi
@@ -226,7 +226,7 @@ echo "Sending to Hivetool"
 #====================
 /usr/bin/curl --silent --retry 5 -k -u $HT_USERNAME:$HT_PASSWORD -X POST --data-binary @$SAVEFILE https://hivetool.org/private/log_hive.pl  -H 'Accept: application/xml' -H 'Content-Type: application/xml'
 	
-
 fi
+
 
 # End Sharing

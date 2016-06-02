@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v30 - for HiveControl
+# v32 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -156,13 +156,6 @@ echo "========================================================================"
 cd /home
 sudo git clone https://github.com/rcrum003/HiveControl 
 
-#echo "Installing wiringPI"
-#cd /home/HiveControl/software/wiringPI/
-#sudo ./build
-
-
-
-
 echo "========================================================================"
 echo "Installing Web Server Software"
 echo "========================================================================"
@@ -191,48 +184,16 @@ sudo chown -R www-data:www-data /home/HiveControl/www/public_html/
 curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 
 
-#Install .htpasswd
-echo "Please set an admin password for http://127.0.0.1/admin/ access:"
-cd /home/HiveControl/www/
-htpasswd -c .htpasswd admin
-sudo service apache2 restart
-
-#Set your timezone
-dpkg-reconfigure tzdata
-
-
 echo "========================================================================"
 echo "Setting up Database"
 echo "========================================================================"
 
 #Upgrade DB
-cd /home/HiveControl/patches/database
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_1
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_2
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_3
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_4
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_5
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_6
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_7
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_8
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_9
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_10
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_11
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_12
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_13
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_14
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_15
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_16
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_17
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_18
-sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_19
-sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET RUN=\"yes\";"
+#cd /home/HiveControl/patches/database
+#sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_1
 
 
-#Upload default values
-sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
-
-#Set Shells to be executable
+#Set shell scripts to be executable
 cd /home/HiveControl/
 sudo find . -name '*.sh' -exec chmod u+x {} +
 
@@ -244,6 +205,9 @@ echo "Compiling Code for sensors"
 echo "========================================================================"
 
 
+####################################################################################
+# Phidget
+####################################################################################
 # Make Phidget software
 echo "Installing Phidget software "
 cd /home/HiveControl/software/Phidgets
@@ -258,7 +222,10 @@ sudo unzip PhidgetsPython.zip
 cd PhidgetsPython
 sudo python setup.py install
 
-echo "Installing hidapi - for Temp Sensor"
+####################################################################################
+# Tempered Software
+####################################################################################
+echo "Installing hidapi - for Tempered Temp Sensor"
 #Get prerequite
 # Make hidapi software
 cd /home/HiveControl/software/
@@ -287,17 +254,58 @@ sudo make all
 sudo cp utils/tempered /usr/local/bin/
 sudo cp utils/hid-query /usr/local/bin/
 
+####################################################################################
+# GPIO Library
+####################################################################################
+#WiringPI giving us errors, switching to PIGPIO
+#echo "Installing wiringPI for HX711 sensor"
+#cd /home/HiveControl/software/
+#sudo git clone git://git.drogon.net/wiringPI
+#cd wiringPI
+#sudo ./build
 
-echo "Installing wiringPI for HX711 sensor"
-cd /home/HiveControl/software/
-sudo git clone git://git.drogon.net/wiringPI
-cd wiringPI
-sudo ./build
+echo "Installing PIGPIO library for DHT and HX711 Sensors"
+#Kill pigpiod just in case it is already running
+sudo killall pigpiod
+#Get code
+cd /home/HiveControl/software
+sudo wget https://github.com/joan2937/pigpio/archive/master.zip
+sudo unzip master.zip
+cd pigpio-master
+make -j4
+sudo make install
 
-#Allow www-data to run hx711
-sudo echo "www-data ALL=(ALL) NOPASSWD: /usr/local/bin/hx711" >> /etc/sudoers
+sudo apt-get install python-pigpio python3-pigpio -y
 
-#Install xmlstarlet
+#Allow www-data to run python and other commands
+sudo cat /etc/sudoers |grep -v www-data > /home/HiveControl/install/sudoers.org
+sudo cat /home/HiveControl/install/sudoers.d/hivecontrol.sudoers >> /home/HiveControl/install/sudoers.org
+CHECKSUDO=$(visudo -c -f /home/HiveControl/install/sudoers.org |grep sudoers.org |awk '{print $3}')
+
+if [[ $CHECKSUDO == "OK" ]]; then
+	#Copy over SUDOERs file
+	sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+else
+	echo "Something went wrong with our SUDOERS file, so I didn't change anything"
+fi
+####################################################################################
+# DHTXXD
+####################################################################################
+	#Installing DHTXX Code
+	echo "Installing DHT Code"
+	cd /home/HiveControl/software
+	sudo mkdir DHTXXD
+	cd DHTXXD
+	sudo wget http://abyz.co.uk/rpi/pigpio/code/DHTXXD.zip
+	unzip DHTXXD.zip
+	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
+	sudo cp DHTXXD /usr/local/bin/
+
+####################################################################################
+# XMLStarlet used to send data to current hivetool.org Perl script
+####################################################################################
+
+#Install xmlstarlet (only needed for hivetool)
 sudo apt-get install xmlstarlet -y
 
 if [[ $XRDP == "true" ]]; then
@@ -318,8 +326,6 @@ echo "matchbox-keyboard &" >> /home/pi/Desktop/keyboard.sh
 chmod +x /home/pi/Desktop/keyboard.sh
 
 fi
-
-
 
 echo "========================================================"
 echo "Completed Basic Setup of HiveControl"
@@ -345,9 +351,6 @@ sudo cp /home/HiveControl/install/cron/cron.orig /home/HiveControl/install/cron/
 sudo cat /home/HiveControl/install/cron/hivetool.cron >> /home/HiveControl/install/cron/cron.new
 sudo crontab /home/HiveControl/install/cron/cron.new
 
-#If using the Adafruit DHT22
-#sudo apt-get install build-essential python-dev
-#sudo python setup.py install
 
 #Remove DHCP stuff, since it gets in the way of finding our machine
 #apt-get remove isc-dhcp-client
@@ -367,6 +370,15 @@ else
 		    esac
 		done
 fi
+
+#Install .htpasswd
+echo "Please set an admin password for http://127.0.0.1/admin/ access:"
+cd /home/HiveControl/www/
+htpasswd -c .htpasswd admin
+sudo service apache2 restart
+
+#Set your timezone
+dpkg-reconfigure tzdata
 
 echo "========================================================"
 echo "Completed Setup of HiveControl"

@@ -1,0 +1,2 @@
+
+www-data ALL=NOPASSWD: /usr/local/bin/hx711, /usr/local/bin/2591, /usr/bin/nice, /home/hivetool/temperhum.sh, /usr/local/bin/Seeed_DHT22, /usr/local/bin/DHTXXD, /home/HiveControl/scripts/dht22.sh, /usr/bin/python, /usr/local/bin/tempered

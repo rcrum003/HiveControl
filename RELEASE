@@ -1,4 +1,15 @@
 Release Notes:
+
+
+--------------------
+1.68 Release Notes
+--------------------
+Major changes here. We were having stability problems with the wiringPI DHT code. We've switched to pigpio. 
+1. New pigpio DHT based code, seems more stable and reliable that lol_dht/wiringPI based code. It was also causing a conflict when we were running our beecounter service.
+2. New HX711 Python code, to leverage pigpio code base
+3. Fixed page refresh after running calibration wizard to show new value on intstrument page 
+
+
 --------------------
 1.67 Release Notes
 --------------------

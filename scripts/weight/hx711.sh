@@ -2,7 +2,7 @@
 #
 # read the scale
 # 
-# v8 patch 
+# v9 patch 
 # Changed Count to RAW for better readability
 # Added a check to make sure RAW is a number to assist setups that don't always return a number
 # In this case, every couple of times, we were getting "No data to consider"
@@ -10,6 +10,7 @@
 #
 # Realized that patch 4 wasn't the right formula.
 # This formula is now correct.
+# Now using Python Library that leverages PiGPIO.
 
 #Removed pulling new variables, as the main script does that for us
 #source /home/HiveControl/scripts/hiveconfig.inc
@@ -62,14 +63,14 @@ DATA_GOOD=0
 COUNTER=1
 while [ $COUNTER -lt 5 ] && [ $DATA_GOOD -eq 0 ]; do
 
-RAW=$(/usr/bin/timeout 5 /usr/bin/sudo /usr/local/bin/hx711 $HX711_ZERO 2>&1)
+RAW=$(/usr/bin/sudo /usr/bin/python /home/HiveControl/scripts/weight/HX711.py 2>&1)
 #echo "$RAW" >> successrate	
 
 # Check to see if Raw is a number, if not, don't do this
 if [[ $RAW =~ ^-?[0-9]+$ ]] 
 then	
 	#echo "Passed Test"
-	WEIGHT=$(echo "scale=2; ($RAW/$HX711_CALI)" | bc)
+	WEIGHT=$(echo "scale=2; ( ($RAW - $HX711_ZERO)/$HX711_CALI)" | bc)
         if [ $WEIGHT ]
         then
          DATA_GOOD=1

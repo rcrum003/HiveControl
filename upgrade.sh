@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="52"
+Upgrade_ver="53"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -226,6 +226,37 @@ if [[ $Installed_Ver < "1.62" ]]; then
 	sudo cp -Rp /home/HiveControl/upgrade/HiveControl/install/init.d/* /home/HiveControl/install/init.d/
 	sudo mkdir /home/HiveControl/software/beecamcounter
 	sudo cp -Rp /home/HiveControl/upgrade/HiveControl/software/beecamcounter/* /home/HiveControl/software/beecamcounter/ 
+fi
+if [[ $Installed_Ver -lt "1.68" ]]; then
+	#Only run this if we haven't got the latest code
+	#Install PIGPIO
+	####################################################################################
+	# GPIO Library
+	####################################################################################
+
+	echo "Installing PIGPIO library for DHT and HX711 Sensors"
+	#Kill pigpiod just in case it is already running
+	sudo killall pigpiod
+	#Get code
+	cd /home/HiveControl/software
+	sudo wget https://github.com/joan2937/pigpio/archive/master.zip
+	sudo unzip master.zip
+	cd pigpio-master
+	make -j4
+	sudo make install
+
+	sudo apt-get install python-pigpio python3-pigpio -y 
+	#Update SUDOERs
+	sudo cat /etc/sudoers |grep -v www-data > /home/HiveControl/install/sudoers.org
+	sudo cat /home/HiveControl/upgrade/install/sudoers.d/hivecontrol.sudoers >> /home/HiveControl/install/sudoers.org
+	CHECKSUDO=$(visudo -c -f /home/HiveControl/install/sudoers.org |grep sudoers.org |awk '{print $3}')
+
+	if [[ $CHECKSUDO == "OK" ]]; then
+		#Copy over SUDOERs file
+		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+	else
+		echo "Something went wrong with our SUDOERS file, so I didn't change anything"
+	fi
 fi
 
 echo "============================================="
