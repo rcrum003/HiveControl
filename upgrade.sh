@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="53"
+Upgrade_ver="54"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -220,14 +220,14 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 #Update install stuff
 sudo cp -Rp /home/HiveControl/upgrade/HiveControl/install/* /home/HiveControl/install/
 
-if [[ $Installed_Ver < "1.62" ]]; then
+if [[ "$Installed_Ver" < "1.62" ]]; then
 	#Only run this if we haven't got the latest code
 	mkdir /home/HiveControl/install/init.d
 	sudo cp -Rp /home/HiveControl/upgrade/HiveControl/install/init.d/* /home/HiveControl/install/init.d/
 	sudo mkdir /home/HiveControl/software/beecamcounter
 	sudo cp -Rp /home/HiveControl/upgrade/HiveControl/software/beecamcounter/* /home/HiveControl/software/beecamcounter/ 
 fi
-if [[ $Installed_Ver -lt "1.68" ]]; then
+if [[ "$Installed_Ver" < "1.68" ]]; then
 	#Only run this if we haven't got the latest code
 	#Install PIGPIO
 	####################################################################################
@@ -257,6 +257,15 @@ if [[ $Installed_Ver -lt "1.68" ]]; then
 	else
 		echo "Something went wrong with our SUDOERS file, so I didn't change anything"
 	fi
+
+	#Installing DHTXX Code
+	cd /home/HiveControl/software
+	sudo mkdir DHTXXD
+	cd DHTXXD
+	sudo wget http://abyz.co.uk/rpi/pigpio/code/DHTXXD.zip
+	unzip DHTXXD.zip
+	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
+	sudo cp DHTXXD /usr/local/bin/
 fi
 
 echo "============================================="
