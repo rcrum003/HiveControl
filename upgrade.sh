@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="54"
+Upgrade_ver="55"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -247,15 +247,16 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 
 	sudo apt-get install python-pigpio python3-pigpio -y 
 	#Update SUDOERs
-	sudo cat /etc/sudoers |grep -v www-data > /home/HiveControl/install/sudoers.org
-	sudo cat /home/HiveControl/upgrade/install/sudoers.d/hivecontrol.sudoers >> /home/HiveControl/install/sudoers.org
-	CHECKSUDO=$(visudo -c -f /home/HiveControl/install/sudoers.org |grep sudoers.org |awk '{print $3}')
+	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
+	CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
 
 	if [[ $CHECKSUDO == "OK" ]]; then
 		#Copy over SUDOERs file
-		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+		echo "SUCCESS"
 	else
 		echo "Something went wrong with our SUDOERS file, so I didn't change anything"
+		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
 	fi
 
 	#Installing DHTXX Code

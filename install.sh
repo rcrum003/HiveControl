@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v32 - for HiveControl
+# v34 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -278,16 +278,18 @@ sudo make install
 sudo apt-get install python-pigpio python3-pigpio -y
 
 #Allow www-data to run python and other commands
-sudo cat /etc/sudoers |grep -v www-data > /home/HiveControl/install/sudoers.org
-sudo cat /home/HiveControl/install/sudoers.d/hivecontrol.sudoers >> /home/HiveControl/install/sudoers.org
-CHECKSUDO=$(visudo -c -f /home/HiveControl/install/sudoers.org |grep sudoers.org |awk '{print $3}')
+	#Update SUDOERs
+	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
+	sudo cp /home/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
+	CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
 
-if [[ $CHECKSUDO == "OK" ]]; then
-	#Copy over SUDOERs file
-	sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
-else
-	echo "Something went wrong with our SUDOERS file, so I didn't change anything"
-fi
+	if [[ $CHECKSUDO == "OK" ]]; then
+		#Copy over SUDOERs file
+		echo "SUCCESS"
+	else
+		echo "Something went wrong with our SUDOERS file, so I didn't change anything"
+		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+	fi
 ####################################################################################
 # DHTXXD
 ####################################################################################
