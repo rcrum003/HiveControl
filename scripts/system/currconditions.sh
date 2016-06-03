@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 1.9
+# Version 2.0
 
 # Get Variables from central file
 SHELL=/bin/bash
@@ -130,6 +130,13 @@ weather_dewc=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_c |awk -F"\"" '{prin
 
 fi
 
+check wind_degrees
+check wind_gust_kph
+check wind_gust_mph
+check wind_kph
+check wind_mph
+check A_WIND_MPH
+
 #Parse the weather 
 # Data Parsers for all weather sources
 A_TEMP=`/bin/echo $GETNOW | JSON.sh -b |grep temp_f |awk '{print $2}'`
@@ -157,6 +164,7 @@ check pressure_mb
 check A_PRES_IN
 check UV
 check solarradiation
+
 
 # ------ GET LUX -----------
 # Two ways to get Light Levels
