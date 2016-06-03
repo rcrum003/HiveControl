@@ -423,7 +423,7 @@ if(isset($_GET["command"])) {
                                                 <tbody>
                                                     <tr>
                                                         <td><a href="/admin/system.php?command=removezero&confirm=yes&table=hivetempf">Hive Temp</a></td>
-                                                        <td><a href="/admin/system.php?command=cleardata&confirm=yes&table=hiveHum">Hive Humidity</a></td>
+                                                        <td><a href="/admin/system.php?command=removezero&confirm=yes&table=hiveHum">Hive Humidity</a></td>
                                                  
                                                     </tr>
                                                     <tr>
