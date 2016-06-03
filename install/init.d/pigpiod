@@ -1,0 +1,53 @@
+#!/bin/sh
+# /etc/init.d/pigpiod
+### BEGIN INIT INFO
+# Provides:          pigpiod
+# Required-Start:    $network
+# Required-Stop:     $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: PI GPIO Deamon
+# Description:       Provides service to talk to PI GPIO
+### END INIT INFO
+#
+f_message(){
+        echo "[+] $1"
+}
+ 
+# Carry out specific functions when asked to by the system
+case "$1" in
+        start)
+                f_message "Starting pigpiod"
+                /usr/local/bin/pigpiod 
+                sleep 2
+                f_message "pigpiod started"
+                ;;
+        stop)
+                f_message "Stopping pigpiod…"
+                killall pigpiod
+                f_message "pigpiod stopped"
+                ;;
+        restart)
+                f_message "Restarting daemon: pigpiod"
+                killall pigpiod
+                /usr/local/bin/pigpiod
+                sleep 2
+                f_message "Restarted daemon: pigpiod"
+                ;;
+        status)
+                pid=`ps -A | grep pigpiod | grep -v "grep" | grep -v pigpiod. | awk ‘{print $1}’ | head -n 1`
+                if [ -n "$pid" ];
+                then
+                        f_message "pigpiod is running with pid ${pid}"
+                        f_message "pigpiod was started with the following command line"
+                        cat /proc/${pid}/cmdline ; echo ""
+                else
+                        f_message "Could not find pigpiod running"
+                fi
+                ;;
+        *)
+                f_message "Usage: $0 {start|stop|status|restart}"
+                exit 1
+                ;;
+esac
+exit 0

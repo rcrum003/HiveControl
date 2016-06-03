@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="55"
+Upgrade_ver="56"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -267,6 +267,22 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 	unzip DHTXXD.zip
 	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
 	sudo cp DHTXXD /usr/local/bin/
+fi
+
+if [[ "$Installed_Ver" < "1.70" ]]; then
+	sudo cp /home/HiveControl/install/init.d/pigpiod /etc/init.d/
+	sudo chmod +x /etc/init.d/pigpiod
+
+	# Reload init.d to get the new services
+	systemctl daemon-reload
+
+	#Set to start on boot
+	update-rc.d beecounter defaults
+	update-rc.d livestream defaults
+
+
+	echo "Starting PiGPIOD Service.........."
+	service pigpiod start
 fi
 
 echo "============================================="
