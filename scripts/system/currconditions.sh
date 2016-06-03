@@ -166,7 +166,7 @@ check UV
 check solarradiation
 check precip_1hr_in
 check precip_1hr_metric
-solarradiation
+check solarradiation
 
 
 # ------ GET LUX -----------
