@@ -9,33 +9,58 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="56"
+function show_help {
+		echo "--------------------"
+		echo "devupgrade help"
+		echo "--------------------"
+		echo " Usage: ./devupgrade.sh branch"
+		echo " Example: ./devupgrade.sh develop"
+		echo ""
+		echo "WARNING: DO NOT RUN UNLESS YOU KNOW WHAT THIS SCRIPT DOES"
+		echo ""
+}
+
+branch=$1
+
+
+if [[ -z "$branch" ]]; then
+	#echo "you are running from the command line"
+	#-----------------------------
+	#Get Variables from input
+	#----------------------------
+	#Shows Help if nothing is selected
+
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+if [ $# -eq 0 ]; then
+    show_help
+    exit 1
+ fi
+fi
+
+echo "branch is $branch"
+
+
+Upgrade_ver="55"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
 
 #Check to see if the update.sh is at the latest version available
-checkupgrade=$(/home/HiveControl/scripts/system/checkupgrades.sh |head -1)
-	if [[ $checkupgrade = "NEWUPGRADE" ]]; then
-					echo "running new upgrade file"
-					exec /home/HiveControl/upgrade.sh
-					exit
-	fi
-
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 #Check to see if we are latest version
 Installed_Ver=$(cat /home/HiveControl/VERSION)
-Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
+#Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
 
-if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
-		echo "Nothing to do, you are at the latest version"
-		loglocal "$DATE" UPGRADE WARNING "Upgrade attempted, but nothing to upgrade. Installed is latest"
-		echo "Error: Nothing to Upgrade"
-		exit
-fi
+#if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
+#		echo "Nothing to do, you are at the latest version"
+#		loglocal "$DATE" UPGRADE WARNING "Upgrade attempted, but nothing to upgrade. Installed is latest"
+#		echo "Error: Nothing to Upgrade"
+#		exit
+#fi
 
 #Back everything up, just in case (mainly the database)
 echo "Backing up Database to hive-data.bckup"
@@ -43,18 +68,17 @@ cp /home/HiveControl/data/hive-data.db /home/HiveControl/data/hive-data.bckup
 echo "============================================="
 
 
-
 # Get the latest code from github into a temporary repository
-echo "Getting Latest Code"
+echo "Getting Branch $branch"
 #Remove any remnants of past code upgrades
-	rm -rf /home/HiveControl/upgrade
+	#rm -rf /home/HiveControl/upgrade
 #Make us a fresh directory
-	mkdir /home/HiveControl/upgrade
+	#mkdir /home/HiveControl/upgrade
 #Start in our directory
-	cd /home/HiveControl/upgrade
+	cd /home/HiveControl/upgrade/HiveControl
 #Get the code
-	git clone https://github.com/rcrum003/HiveControl &> /dev/null
-
+	git checkout $branch
+exit
 
 #Set some variables
 WWWTempRepo="/home/HiveControl/upgrade/HiveControl/www/public_html"
@@ -269,28 +293,12 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 	sudo cp DHTXXD /usr/local/bin/
 fi
 
-if [[ "$Installed_Ver" < "1.70" ]]; then
-	sudo cp /home/HiveControl/install/init.d/pigpiod /etc/init.d/
-	sudo chmod +x /etc/init.d/pigpiod
-
-	# Reload init.d to get the new services
-	systemctl daemon-reload
-
-	#Set to start on boot
-	update-rc.d beecounter defaults
-	update-rc.d livestream defaults
-
-
-	echo "Starting PiGPIOD Service.........."
-	service pigpiod start
-fi
-
 echo "============================================="
 echo "success"
 #Cleanup and set the flag in the DB
-loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
+loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $branch"
 sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
-sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver WHERE id=1"
+sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion='$branch' WHERE id=1"
 
 #Move the VERSION
 cp /home/HiveControl/upgrade/HiveControl/VERSION /home/HiveControl/

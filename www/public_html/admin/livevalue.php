@@ -84,7 +84,7 @@ require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 									# Hive Temp
 									########################################################
 									if ( $r['ENABLE_HIVE_TEMP_CHK'] == 'yes') {
-										echo '<tr class="odd gradeX"> <td>Hive Temp/Humidity'.r['TEMPTYPE'];
+										echo '<tr class="odd gradeX"> <td>Hive Temp/Humidity for <b>'.$r['TEMPTYPE'].'</b>';
 										switch ($r['TEMPTYPE']) {
 										    case "dht22":
 										        $hivetemp = shell_exec("/home/HiveControl/scripts/temp/dht22.sh");
@@ -104,19 +104,19 @@ require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
                                     ########################################################
 									# Hive Weight
 									########################################################
-									if ( $r['ENABLE_HIVE_TEMP_CHK'] == 'yes') {
-										echo '<tr class="odd gradeX"> <td>Hive Temp/Humidity ';
+									if ( $r['ENABLE_HIVE_WEIGHT_CHK'] == 'yes') {
+										echo '<tr class="odd gradeX"> <td>Weight for <b>'.$r['SCALETYPE'].' - ZERO='.$r['</b>';
 										switch ($r['TEMPTYPE']) {
-										    case "dht22":
-										        $hivetemp = shell_exec("/home/HiveControl/scripts/temp/dht22.sh");
+										    case "hx711":
+										        $weight = shell_exec("/home/HiveControl/scripts/temp/dht22.sh");
+										        echo '</td>';
+										        break;
+										    case "phidget1046":
+										        $weight = shell_exec("/home/HiveControl/scripts/weight/phidget1046.sh");
 										        echo ' (Status, Temp C, Humidity %)</td>';
 										        break;
-										    case "dht21":
-										        $hivetemp = shell_exec("/home/HiveControl/scripts/temp/dht22.sh");
-										        echo ' (Status, Temp C, Humidity %)</td>';
-										        break;
-										    case "temperhum":
-										        $hivetemp = shell_exec("/usr/bin/sudo /usr/local/bin/tempered");
+										    case "cpw200plus":
+										        $weight = shell_exec("/usr/bin/sudo /usr/local/bin/tempered");
 										        echo '</td>';
 										        break;
 										}
