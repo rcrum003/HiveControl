@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 2.0
+# Version 2.1
 
 # Get Variables from central file
 SHELL=/bin/bash
@@ -164,6 +164,9 @@ check pressure_mb
 check A_PRES_IN
 check UV
 check solarradiation
+check precip_1hr_in
+check precip_1hr_metric
+solarradiation
 
 
 # ------ GET LUX -----------
