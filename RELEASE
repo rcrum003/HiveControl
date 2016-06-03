@@ -1,5 +1,14 @@
 Release Notes:
 
+--------------------
+1.70 Release Hotfix
+--------------------
+1. Added a service called pigpiod (needed so when reboots happen)
+
+--------------------
+1.69 Release Hotfix
+--------------------
+2. Fixed pressure_in check - we referenced the wrong value, thus invalidating the check itself, allowing "----" to be inserted into our DBs.
 
 --------------------
 1.68 Release Notes
