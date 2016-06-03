@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v34 - for HiveControl
+# v35 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -60,7 +60,7 @@ function installBeeCount() {
 		fi
 
 	#Install the software
-    /home/HiveControl/software/beecamcounter/setupbeecounter.sh
+    /home/HiveControl/install/setupbeecounter.sh
     return
 
 }	
@@ -275,7 +275,20 @@ cd pigpio-master
 make -j4
 sudo make install
 
-sudo apt-get install python-pigpio python3-pigpio -y
+#
+sudo cp /home/HiveControl/install/init.d/pigpiod /etc/init.d/
+sudo chmod +x /etc/init.d/pigpiod
+
+# Reload init.d to get the new services
+systemctl daemon-reload
+
+#Set to start on boot
+update-rc.d beecounter defaults
+update-rc.d livestream defaults
+
+
+echo "Starting PiGPIOD Service.........."
+service pigpiod start
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs
