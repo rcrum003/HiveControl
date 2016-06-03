@@ -3,7 +3,7 @@
 
 # Check script to see if we can pass the variable name to a function.
 
-function check {
+function check() {
     #Function to check if we have a real value
     #Useful when we pull values from multiple sources
     #Usage check variablename (omit the $)
@@ -17,7 +17,7 @@ function check {
    	fi
 }	
 
-function check_allow_neg {
+function check_allow_neg() {
     #Function to check if we have a real value
     #Useful when we pull values from multiple sources
     #Usage check variablename (omit the $)
