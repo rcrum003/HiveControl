@@ -64,7 +64,8 @@ echo "
 $(function () {
     $('#allcontainer').highcharts({
         chart: {
-            zoomType: 'xy'
+            zoomType: 'xy',
+            alignTicks: false
         },
         title: {
             text: '', 
@@ -89,7 +90,7 @@ $(function () {
             },
            
     yAxis: [{ // Temp yAxis
-            gridLineWidth: 1,
+            gridLineWidth: 0,
             labels: {
                 format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {

@@ -21,3 +21,6 @@
 
 #Get System Status
 */5 * * * * timeout -s KILL 1m /home/HiveControl/scripts/pimonitor/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt
+
+#Restart Our Pi GPIO Library Deamon on restart
+@reboot              /usr/local/bin/pigpiod

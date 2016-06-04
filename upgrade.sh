@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="56"
+Upgrade_ver="58"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -212,6 +212,12 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/* /home/HiveControl/www/public_html/images/
 			let DB_ver="14"
 		fi
+
+		if [[ $DB_ver -eq "14" ]]; then
+			echo "Applying DB Ver15 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_20 
+			let DB_ver="15"
+		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
 	fi
@@ -269,20 +275,12 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 	sudo cp DHTXXD /usr/local/bin/
 fi
 
-if [[ "$Installed_Ver" < "1.70" ]]; then
-	sudo cp /home/HiveControl/install/init.d/pigpiod /etc/init.d/
-	sudo chmod +x /etc/init.d/pigpiod
-
-	# Reload init.d to get the new services
-	systemctl daemon-reload
-
-	#Set to start on boot
-	update-rc.d beecounter defaults
-	update-rc.d livestream defaults
-
-
-	echo "Starting PiGPIOD Service.........."
-	service pigpiod start
+if [[ "$Installed_Ver" < "1.71" ]]; then
+	rm -rf /etc/init.d/
+	sudo crontab -l > /home/HiveControl/install/cron/cron.orig
+	sudo cp /home/HiveControl/install/cron/cron.orig /home/HiveControl/install/cron/cron.new
+	sudo echo "@reboot           /usr/local/bin/pigpiod" >> /home/HiveControl/install/cron/cron.new
+	sudo crontab /home/HiveControl/install/cron/cron.new
 fi
 
 echo "============================================="

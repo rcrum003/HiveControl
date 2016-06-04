@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v35 - for HiveControl
+# v36 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -275,20 +275,6 @@ cd pigpio-master
 make -j4
 sudo make install
 
-#
-sudo cp /home/HiveControl/install/init.d/pigpiod /etc/init.d/
-sudo chmod +x /etc/init.d/pigpiod
-
-# Reload init.d to get the new services
-systemctl daemon-reload
-
-#Set to start on boot
-update-rc.d beecounter defaults
-update-rc.d livestream defaults
-
-
-echo "Starting PiGPIOD Service.........."
-service pigpiod start
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs

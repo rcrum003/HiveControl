@@ -1,6 +1,15 @@
 Release Notes:
 
 --------------------
+1.71 Release
+--------------------
+1. Changed Database table allhive to default to 0 if we don't get a value.
+2. Fixed Tick Marks on main chart
+3. Changed the way we start pigpiod - init.d wasn't working for us, for some reason and the author suggested adding to cron @reboot
+4. Fixed systemadmin page "RemoveZero" humidity actually removed ALL data.
+
+
+--------------------
 1.70 Release Hotfix
 --------------------
 1. Added a service called pigpiod (needed so when reboots happen)
