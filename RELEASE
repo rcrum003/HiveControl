@@ -1,7 +1,7 @@
 Release Notes:
 
 --------------------
-1.71 Release
+1.72 Release
 --------------------
 1. Changed Database table allhive to default to 0 if we don't get a value.
 2. Fixed Tick Marks on main chart
