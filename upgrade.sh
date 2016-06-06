@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="59"
+Upgrade_ver="61"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -276,7 +276,6 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 fi
 
 if [[ "$Installed_Ver" < "1.71" ]]; then
-	rm -rf /etc/init.d/
 	sudo crontab -l > /home/HiveControl/install/cron/cron.orig
 	sudo cp /home/HiveControl/install/cron/cron.orig /home/HiveControl/install/cron/cron.new
 	sudo echo "@reboot           /usr/local/bin/pigpiod" >> /home/HiveControl/install/cron/cron.new

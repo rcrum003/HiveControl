@@ -1,6 +1,11 @@
 Release Notes:
 
 --------------------
+1.73 Release
+--------------------
+
+
+--------------------
 1.72 Release
 --------------------
 1. Changed Database table allhive to default to 0 if we don't get a value.
