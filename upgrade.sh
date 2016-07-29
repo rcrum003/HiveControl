@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="65"
+Upgrade_ver="67"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -224,16 +224,16 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_22
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_23
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_24
-				#Update SUDOERs
-				sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
-				sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
-				CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
-
+			#Update SUDOERs
+			sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
+			sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
+			CHECKSUDO=$(sudo visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
 				if [[ $CHECKSUDO == "OK" ]]; then
 					#Copy over SUDOERs file
 					echo "SUCCESS"
 				else
 					echo "Something went wrong with our SUDOERS file, so I didn't change anything"
+					echo $CHECKSUDO >> /home/HiveControl/sudoerror
 					sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
 				fi
 			let DB_ver="16"
