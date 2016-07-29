@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="64"
+Upgrade_ver="65"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -226,7 +226,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_24
 				#Update SUDOERs
 				sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
-				sudo cp /home/HiveControl/upgrade/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
+				sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
 				CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
 
 				if [[ $CHECKSUDO == "OK" ]]; then
