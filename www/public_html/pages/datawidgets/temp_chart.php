@@ -100,7 +100,8 @@ $(function () {
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
-            }
+            },
+            showEmpty: false
         },
         { // Humidity yAxis
             gridLineWidth: 0,
@@ -118,6 +119,7 @@ $(function () {
                     color: '"; echo "$color_hivehum"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: false
 
         }, 
@@ -135,6 +137,7 @@ $(function () {
                     color: '"; echo "$color_rain"; echo "'
                 }
             },
+            showEmpty: false,
             opposite: true
 
         }],

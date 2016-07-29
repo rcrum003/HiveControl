@@ -1,13 +1,22 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 2.1
+# Version 2.3
 
-# Get Variables from central file
+#############################################
+# Get Config parameters from DB and set some basics
+#############################################
+clear
+
+echo "##########################################################"
+echo "# Starting HiveControl Current Conditions Collection #"
+echo "##########################################################"
+echo "Getting Latest Configurations"
+echo ""
+
 SHELL=/bin/bash
-
-#Get Config parameters from DB
 /home/HiveControl/scripts/data/hiveconfig.sh
+
 
 # Set some basics
 PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather:/home/HiveControl/scripts/system
@@ -19,224 +28,190 @@ source /home/HiveControl/scripts/data/logger.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
+echo "##########################################################"
+
+
+############################################################################################################
+# Used to determine if we should run or not - allows us to pause the collection during manipulation
+############################################################################################################
 if [ $RUN = "no" ]; then
 	loglocal "$DATE" MAIN INFO "Execution of main script is disabled - renable in System Commands screen"
+	echo "This script has been disabled in the UI, under System Commands"
+	echo "Exiting...."
 	exit;
 fi
 
+####################################################################################
 # ------ GET HIVE WEIGHT ----
-echo "--- WEIGHT --- "
-if [ $ENABLE_HIVE_WEIGHT_CHK = "yes" ]; then
-	#echo "Checking Weight" >> $LOG
-	#Get the weight fool
-	HIVEWEIGHTSRC=`$HOMEDIR/scripts/weight/getweight.sh`
-	HIVEWEIGHT=$(echo $HIVEWEIGHTSRC |awk '{print $2}')
-	HIVERAWWEIGHT=$(echo $HIVEWEIGHTSRC |awk '{print $1}')
-	check HIVEWEIGHTSRC
-	check HIVEWEIGHT
-	check HIVERAWWEIGHT
-fi
-if [ $ENABLE_HIVE_WEIGHT_CHK = "no" ]; then
-	HIVEWEIGHT=0
-	HIVERAWWEIGHT=0
-fi
-echo "--- WEIGHT DONE ---"
-
-
-# ------ GET HIVE TEMP ------
-echo "--- TEMP ---"
-if [ $ENABLE_HIVE_TEMP_CHK = "yes" ]; then
-	# Data Fetchers/Parsers in one
-	#echo "Checking TEMP" >> $LOG
-	if [ $TEMPTYPE = "temperhum" ]; then
-	GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh $HIVEDEVICE`
-	elif [[ $TEMPTYPE = "dht22" ]]; then
-	GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
-	elif [[ $TEMPTYPE = "dht21" ]]; then
-	GETTEMP=`$HOMEDIR/scripts/temp/dht21.sh`
+####################################################################################
+	
+	if [ $ENABLE_HIVE_WEIGHT_CHK = "yes" ]; then
+		echo " --- GETTING WEIGHT ---      "
+		HIVEWEIGHTSRC=$($HOMEDIR/scripts/weight/getweight.sh)
+		HIVEWEIGHT=$(echo $HIVEWEIGHTSRC |awk '{print $2}')
+		HIVERAWWEIGHT=$(echo $HIVEWEIGHTSRC |awk '{print $1}')
+		check HIVEWEIGHTSRC
+		check HIVEWEIGHT
+		check HIVERAWWEIGHT		
+	echo "Gross=$HIVERAWWEIGHT, Net=$HIVEWEIGHT "
+		#echo "--- WEIGHT DONE ---"
+	else
+		echo " --- WEIGHT CHECK DISABLED--- 	"
+		HIVEWEIGHT="null"
+		HIVERAWWEIGHT="null"
 	fi
-	HIVETEMPF=$(echo $GETTEMP |awk '{print $1}')
-	HIVETEMPC=$(echo $GETTEMP |awk '{print $4}')
-	HIVEHUMIDITY=$(echo $GETTEMP |awk '{print $2}')
-	HIVEDEW=$(echo $GETTEMP |awk '{print $3}')
-fi
-if [ $ENABLE_HIVE_TEMP_CHK = "no" ]; then
-	HIVETEMPF=0
-	HIVETEMPC=0
-	HIVEHUMIDITY=0
-	HIVEDEW=0
-fi
-echo "--- TEMP DONE ---"
+	echo "		"
+	echo "##########################################################"
+##################################################################
+# ------ GET HIVE TEMP ------
+##################################################################
+	if [ $ENABLE_HIVE_TEMP_CHK = "yes" ]; then
+		echo " --- GETTING HIVE TEMP ---	 "
+		HIVETEMPSRC=$($HOMEDIR/scripts/temp/gettemp.sh)
+		HIVETEMPF=$(echo $HIVETEMPSRC |awk '{print $1}')
+		HIVETEMPC=$(echo $HIVETEMPSRC |awk '{print $4}')
+		HIVEHUMIDITY=$(echo $HIVETEMPSRC |awk '{print $2}')
+		HIVEDEW=$(echo $HIVETEMPSRC |awk '{print $3}')
+		echo "Calculated: TEMPF=$HIVETEMPF, TEMPC=$HIVETEMPC, HUMI=$HIVEHUMIDITY"
+	else
+		echo "--- HIVE TEMP DISABLED ---"
+		HIVETEMPF="null"
+		HIVETEMPC="null"
+		HIVEHUMIDITY="null"
+		HIVEDEW="null"
+	fi
+	#echo "--- TEMP DONE ---"
+	echo "		"
+	echo "##########################################################"
 
-# -------- END GET HIVE TEMP ----------
-
+##########################################################################################
 # --------- Get Beecount -------------
-# Experimental only
-
+##########################################################################################
 if [[ $ENABLE_BEECOUNTER = "yes" ]]; then
-	echo "----- Getting Bee Counts ----"
+	echo "--- Counting Bee Flights ---"
 	INOUT=$($HOMEDIR/scripts/beecount/countbees.sh)
 	#INOUT=$($HOMEDIR/scripts/beecounter/countbees.sh)
 	IN_COUNT=$(echo $INOUT | awk -F, '{print $1}')
 	OUT_COUNT=$(echo $INOUT | awk -F, '{print $2}')
-	echo "----- BEECOUNT Done -------"
 	check IN_COUNT
 	check OUT_COUNT
+	echo "IN=$IN_COUNT, OUT=$OUT_COUNT"
+	#echo "--- Counting Bee Flights Done ---"
 else
-	IN_COUNT=0
-	OUT_COUNT=0
+	IN_COUNT="null"
+	OUT_COUNT="null"
 fi
+	echo "		"
+	echo "##########################################################"
 
+
+##################################################################
 #---------- Get Ambient Weather--------
 # Variables come from variable.inc
 # Weather Data
-echo "--- WX ---"
-if [ $WEATHER_LEVEL = "hive" ]; then
-echo "Getting from Wunderground"
-GETNOW=`/usr/bin/curl --silent http://api.wunderground.com/api/$KEY/conditions/q/pws:$WXSTATION.json`
+##################################################################
+	echo "--- Getting Ambient Weather ---"
+	WXSOURCE=$($HOMEDIR/scripts/weather/getwx.sh)
+	
+	WEATHER_STATIONID=$(echo $WXSOURCE | awk -F, '{print $1}')
+	OBSERVATIONDATETIME=$(echo $WXSOURCE | awk -F, '{print $2}')
+	A_TEMP=$(echo $WXSOURCE | awk -F, '{print $3}')
+	B_HUMIDITY=$(echo $WXSOURCE | awk -F, '{print $4}')
+	A_DEW=$(echo $WXSOURCE | awk -F, '{print $5}')
+	A_TEMP_C=$(echo $WXSOURCE | awk -F, '{print $6}')
+	A_WIND_MPH=$(echo $WXSOURCE | awk -F, '{print $7}')
+	A_WIND_DIR=$(echo $WXSOURCE | awk -F, '{print $8}')
+	wind_degrees=$(echo $WXSOURCE | awk -F, '{print $9}')
+	wind_gust_mph=$(echo $WXSOURCE | awk -F, '{print $10}')
+	wind_kph=$(echo $WXSOURCE | awk -F, '{print $11}')
+	wind_gust_kph=$(echo $WXSOURCE | awk -F, '{print $12}')
+	pressure_mb=$(echo $WXSOURCE | awk -F, '{print $13}')
+	A_PRES_IN=$(echo $WXSOURCE | awk -F, '{print $14}')
+	A_PRES_TREND=$(echo $WXSOURCE | awk -F, '{print $15}')
+	weather_dewc=$(echo $WXSOURCE | awk -F, '{print $16}')
+	solarradiation=$(echo $WXSOURCE | awk -F, '{print $17}')
+	UV=$(echo $WXSOURCE | awk -F, '{print $18}')
+	precip_1hr_in=$(echo $WXSOURCE | awk -F, '{print $19}')
+	precip_1hr_metric=$(echo $WXSOURCE | awk -F, '{print $20}')
+	precip_today_string=$(echo $WXSOURCE | awk -F, '{print $21}')
+	precip_today_in=$(echo $WXSOURCE | awk -F, '{print $22}')
+	precip_today_metric=$(echo $WXSOURCE | awk -F, '{print $23}')
+	
+	echo "$WEATHER_STATIONID,'$OBSERVATIONDATETIME', $A_TEMP ,$B_HUMIDITY,$A_DEW,$A_TEMP_C,'$A_WIND_MPH','$A_WIND_DIR','$wind_degrees','$wind_gust_mph','$wind_kph','$wind_gust_kph','$pressure_mb','$A_PRES_IN','$A_PRES_TREND','$weather_dewc','$solarradiation','$UV','$precip_1hr_in','$precip_1hr_metric','$precip_today_string','$precip_today_in','$precip_today_metric'"
+	
+	echo "		"
+	echo "##########################################################"
 
-A_WIND_MPH=`/bin/echo $GETNOW | JSON.sh -b |grep wind_mph |awk '{print $2}'`
-OBSERVATIONEPOCH=`/bin/echo $GETNOW | JSON.sh -b |grep observation_epoch |awk -F"\"" '{print $6}'`
-OBSERVATIONDATETIME=`date -d @$OBSERVATIONEPOCH '+%F %T %Z'`
-wind_degrees=`/bin/echo $GETNOW | JSON.sh -b |grep wind_degrees |awk  '{print $2}'`
-wind_gust_mph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_mph |awk '{print $2}'`
-wind_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_kph |awk '{print $2}'`
-wind_gust_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_kph |awk '{print $2}'`
-weather_dewc=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_c |awk '{print $2}'`
-
-elif [ $WEATHER_LEVEL = "localws" ]; then
-echo "Getting from LocalWS"
-GETNOW=`$HOMEDIR/scripts/weather/ws1400/getWS1400.sh`
-#Get the data fields that differ from the main set
-A_WIND_MPH=`/bin/echo $GETNOW | JSON.sh -b |grep wind_mph |awk -F"\"" '{print $6}'`
-OBSERVATIONDATETIME=`/bin/echo $GETNOW | JSON.sh -b |grep observation_time |awk -F"\"" '{print $6}'`
-wind_degrees=`/bin/echo $GETNOW | JSON.sh -b |grep wind_degrees |awk -F"\"" '{print $6}'`
-wind_gust_mph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
-wind_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_kph |awk -F"\"" '{print $6}'`
-wind_gust_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
-weather_dewc=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
-
-elif [ $WEATHER_LEVEL = "localsensors" ]; then
-echo "Getting from LocalSenrors"
-GETNOW=`$HOMEDIR/scripts/weather/localsensors/localsensors.sh`
-#Get the data fields that differ from the main set
-A_WIND_MPH=`/bin/echo $GETNOW | JSON.sh -b |grep wind_mph |awk -F"\"" '{print $6}'`
-OBSERVATIONDATETIME=`/bin/echo $GETNOW | JSON.sh -b |grep observation_time |awk -F"\"" '{print $6}'`
-wind_degrees=`/bin/echo $GETNOW | JSON.sh -b |grep wind_degrees |awk -F"\"" '{print $6}'`
-wind_gust_mph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
-wind_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_kph |awk -F"\"" '{print $6}'`
-wind_gust_kph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
-weather_dewc=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
-
-fi
-
-check wind_degrees
-check wind_gust_kph
-check wind_gust_mph
-check wind_kph
-check wind_mph
-check A_WIND_MPH
-
-#Parse the weather 
-# Data Parsers for all weather sources
-A_TEMP=`/bin/echo $GETNOW | JSON.sh -b |grep temp_f |awk '{print $2}'`
-A_TEMP_C=`/bin/echo $GETNOW | JSON.sh -b |grep temp_c |awk '{print $2}'`
-A_TIME=`/bin/echo $GETNOW | JSON.sh -b |grep observation_epoch |awk -F"\"" '{print $6}'`
-A_HUMIDITY=`/bin/echo $GETNOW | JSON.sh -b |grep relative_humidity |awk -F"\"" '{print $6}'`
-B_HUMIDITY=`/bin/echo $A_HUMIDITY | grep -o "\-*[0-9]*\.*[0-9]*"`
-A_WIND_DIR=`/bin/echo $GETNOW | JSON.sh -b |grep wind_dir |awk -F"\"" '{print $6}'`
-A_PRES_IN=`/bin/echo $GETNOW | JSON.sh -b |grep pressure_in |awk -F"\"" '{print $6}'`
-A_PRES_TREND=`/bin/echo $GETNOW | JSON.sh -b |grep pressure_trend |awk -F"\"" '{print $6}'`
-A_DEW=`/bin/echo $GETNOW | JSON.sh -b |grep dewpoint_f |awk '{print $2}'`
-WEATHER_STATIONID=`/bin/echo $GETNOW | JSON.sh -b |grep station_id |awk '{print $2}'`
-pressure_mb=`/bin/echo $GETNOW | JSON.sh -b |grep pressure_mb |awk -F"\"" '{print $6}'`
-UV=`/bin/echo $GETNOW | JSON.sh -b |grep UV |awk -F"\"" '{print $6}'`
-precip_1hr_in=`/bin/echo $GETNOW | JSON.sh -b |grep precip_1hr_in |awk -F"\"" '{print $6}'`
-precip_1hr_metric=`/bin/echo $GETNOW | JSON.sh -b |grep precip_1hr_metric |awk -F"\"" '{print $6}'`
-precip_today_string=`/bin/echo $GETNOW | JSON.sh -b |grep precip_today_string |awk -F"\"" '{print $6}'`
-precip_today_in=`/bin/echo $GETNOW | JSON.sh -b |grep precip_today_in |awk -F"\"" '{print $6}'`
-precip_today_metric=`/bin/echo $GETNOW | JSON.sh -b |grep precip_today_metric |awk -F"\"" '{print $6}'`
-solarradiation=`/bin/echo $GETNOW | JSON.sh -b |grep solarradiation |awk -F"\"" '{print $6}'`
-lux="0"
-
-#Check for non zero values
-check pressure_mb
-check A_PRES_IN
-check UV
-check solarradiation
-check precip_1hr_in
-check precip_1hr_metric
-check solarradiation
-
-
+######################################################################
 # ------ GET LUX -----------
 # Two ways to get Light Levels
 # From a local sensor on the hive, OR
 # from a local weather station
-echo "--- LUX --- "
-if [ $ENABLE_LUX = "yes" ]; then
-		#echo "Getting Lux" >> $LOG
-		if [ $LUX_SOURCE = "tsl2591" ]; then
-			echo "getting LUX from tsl2591"
-			lux=$($HOMEDIR/scripts/light/tsl2591.sh)
-		elif [[ $LUX_SOURCE = "tsl2561" ]]; then
-			echo "Sorry, we don't have a script for TSL2561"
-			lux=$($HOMEDIR/scripts/light/tsl2561.sh)
-		elif [ $LUX_SOURCE = "wx" ]; then
-			echo "getting solarradiation from weatherstation"
-			lux="0"
-		fi
-fi
-check LUX
-		
-echo "--- LUX DONE --- "
+######################################################################
+	if [ $ENABLE_LUX = "yes" ]; then
+		echo "--- GETTING LUX --- "
+		lux=$($HOMEDIR/scripts/light/getlux.sh)
+	fi
+	check lux
+	echo "Calculated LUX = $lux"
+	#echo "--- LUX DONE --- "
+	echo "		"
+	echo "##########################################################"
 
 
-# ----------- END GET Ambient Weather ------------
-#echo "Storing Data in our database"
+######################################################################
+# Storing Data in our database
+######################################################################
+echo "--- Storing in the Database ---"
+#set -x
 sqlite3 $HOMEDIR/data/hive-data.db "insert into allhivedata (hiveid,date,hivetempf,hivetempc,hiveHum,hiveweight,hiverawweight,yardid,sync,beekeeperid,weather_stationID,observationDateTime,weather_tempf,weather_humidity,weather_dewf,weather_tempc,wind_mph,wind_dir,wind_degrees,wind_gust_mph,wind_kph,wind_gust_kph,pressure_mb,pressure_in,pressure_trend,weather_dewc,solarradiation,UV,precip_1hr_in,precip_1hr_metric,precip_today_string,precip_today_in,precip_today_metric,lux,IN_COUNT,OUT_COUNT) \
-values (\"$HIVEID\",\"$DATE\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"$HIVEWEIGHT\",\"$HIVERAWWEIGHT\",\"$YARDID\",1,\"$BEEKEEPERID\", $WEATHER_STATIONID,'$OBSERVATIONDATETIME',$A_TEMP,$B_HUMIDITY,$A_DEW,$A_TEMP_C,'$A_WIND_MPH','$A_WIND_DIR','$wind_degrees','$wind_gust_mph','$wind_kph','$wind_gust_kph','$pressure_mb','$A_PRES_IN','$A_PRES_TREND','$weather_dewc','$solarradiation','$UV','$precip_1hr_in','$precip_1hr_metric','$precip_today_string','$precip_today_in','$precip_today_metric','$lux','$IN_COUNT','$OUT_COUNT');"
-#echo "Success AAD"
+values (\"$HIVEID\",\"$DATE\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"$HIVEWEIGHT\",\"$HIVERAWWEIGHT\",\"$YARDID\",1,\"$BEEKEEPERID\", \"$WEATHER_STATIONID\",\"$OBSERVATIONDATETIME\",\"$A_TEMP\",\"$B_HUMIDITY\",\"$A_DEW\",\"$A_TEMP_C\",\"$A_WIND_MPH\",\"$A_WIND_DIR\",\"$wind_degrees\",\"$wind_gust_mph\",\"$wind_kph\",\"$wind_gust_kph\",\"$pressure_mb\",\"$A_PRES_IN\",\"$A_PRES_TREND\",\"$weather_dewc\",\"$solarradiation\",\"$UV\",\"$precip_1hr_in\",\"$precip_1hr_metric\",\"$precip_today_string\",\"$precip_today_in\",\"$precip_today_metric\",\"$lux\",\"$IN_COUNT\",\"$OUT_COUNT\");"
+	#echo "Success AAD"
+#echo "--- Storing in DB DONE ---"
+echo "		"
 
-
-#-------------------------------------
+######################################################################
 # If sharing, create file and send to other people
-#-------------------------------------
-if [ $SHARE_HIVETOOL = "yes" ]; then
-echo "Sending to Hivetool"
-	# Create XML file, since that is what they like to get
-	SAVEFILE=$HOMEDIR/scripts/system/transmit.xml
-	echo "<hive_data>" > $SAVEFILE
-	echo "        <hive_observation>" >> $SAVEFILE
-	echo "                <hive_id>$HIVENAME</hive_id>" >> $SAVEFILE
-	echo "                <hive_observation_time>$DATE</hive_observation_time>" >> $SAVEFILE
-	echo "                <hive_weight_lbs>$HIVERAWWEIGHT</hive_weight_lbs>" >> $SAVEFILE
-	echo "                <hive_temp_c>$HIVETEMPC</hive_temp_c>" >> $SAVEFILE
-	echo "                <hive_relative_humidity>$HIVEHUMIDITY</hive_relative_humidity>" >> $SAVEFILE
-	echo "                <hive_ambient_temp_c>$A_TEMP_C</hive_ambient_temp_c>" >> $SAVEFILE
-	echo "                <hive_ambient_relative_humidity>$B_HUMIDITY</hive_ambient_relative_humidity>" >> $SAVEFILE
-	echo "        </hive_observation>" >> $SAVEFILE
-	# hivetool likes to get straight wunderground data
-	# so we make another call, TODO will be to parse the JSON we already collected, and send them XML
-	# Maybe we can convince them to support JSON as well
-        if [ $WEATHER_LEVEL = "hive" ]; then
-	/usr/bin/curl --silent http://api.wunderground.com/api/$KEY/conditions/q/pws:$WXSTATION.xml > $HOMEDIR/scripts/system/wx.xml
+######################################################################
+	if [ $SHARE_HIVETOOL = "yes" ]; then
+	echo "--- Sharing with Hivetool.org ---"
+		# Create XML file, since that is what they like to get
+		SAVEFILE=$HOMEDIR/scripts/system/transmit.xml
+		echo "<hive_data>" > $SAVEFILE
+		echo "        <hive_observation>" >> $SAVEFILE
+		echo "                <hive_id>$HIVENAME</hive_id>" >> $SAVEFILE
+		echo "                <hive_observation_time>$DATE</hive_observation_time>" >> $SAVEFILE
+		echo "                <hive_weight_lbs>$HIVERAWWEIGHT</hive_weight_lbs>" >> $SAVEFILE
+		echo "                <hive_temp_c>$HIVETEMPC</hive_temp_c>" >> $SAVEFILE
+		echo "                <hive_relative_humidity>$HIVEHUMIDITY</hive_relative_humidity>" >> $SAVEFILE
+		echo "                <hive_ambient_temp_c>$A_TEMP_C</hive_ambient_temp_c>" >> $SAVEFILE
+		echo "                <hive_ambient_relative_humidity>$B_HUMIDITY</hive_ambient_relative_humidity>" >> $SAVEFILE
+		echo "        </hive_observation>" >> $SAVEFILE
+		# hivetool likes to get straight wunderground data
+		# so we make another call, TODO will be to parse the JSON we already collected, and send them XML
+		# Maybe we can convince them to support JSON as well
+	        if [ $WEATHER_LEVEL = "hive" ]; then
+		#/usr/bin/curl --silent http://api.wunderground.com/api/$KEY/conditions/q/pws:$WXSTATION.xml > $HOMEDIR/scripts/system/wx.xml
+		/usr/bin/curl --silent --retry 5 http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID=$WXSTATION > $HOMEDIR/scripts/system/wx.xml
+		fi
+		if [ $WEATHER_LEVEL = "localws" ]; then
+		echo "Local ws Send"
+		rm -rf $HOMEDIR/scripts/system/wx.xml
+		cp $HOMEDIR/scripts/weather/ws1400/wx.xml $HOMEDIR/scripts/system/wx.xml 
+		fi
+		/usr/bin/xmlstarlet sel -t -c "/response/current_observation" $HOMEDIR/scripts/system/wx.xml >> $SAVEFILE
+		echo "</hive_data>" >> $SAVEFILE
+
+
+	#====================
+	# Try to send to hivetool
+	#====================
+	/usr/bin/curl --silent --retry 5 -k -u $HT_USERNAME:$HT_PASSWORD -X POST --data-binary @$SAVEFILE https://hivetool.org/private/log_hive.pl  -H 'Accept: application/xml' -H 'Content-Type: application/xml'
+		
 	fi
-	if [ $WEATHER_LEVEL = "localws" ]; then
-	echo "Local ws Send"
-	rm -rf $HOMEDIR/scripts/system/wx.xml
-	cp $HOMEDIR/scripts/weather/ws1400/wx.xml $HOMEDIR/scripts/system/wx.xml 
-	fi
-	/usr/bin/xmlstarlet sel -t -c "/response/current_observation" $HOMEDIR/scripts/system/wx.xml >> $SAVEFILE
-	echo "</hive_data>" >> $SAVEFILE
-
-
-#====================
-# Try to send to hivetool
-#====================
-/usr/bin/curl --silent --retry 5 -k -u $HT_USERNAME:$HT_PASSWORD -X POST --data-binary @$SAVEFILE https://hivetool.org/private/log_hive.pl  -H 'Accept: application/xml' -H 'Content-Type: application/xml'
-	
-fi
-
 
 # End Sharing
+
+echo "##########################################################"
+echo "Script Completed"
+

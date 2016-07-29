@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="61"
+Upgrade_ver="64"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -218,6 +218,26 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_20 
 			let DB_ver="15"
 		fi
+		if [[ $DB_ver -eq "15" ]]; then
+			echo "Applying DB Ver16 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_21 
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_22
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_23
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_24
+				#Update SUDOERs
+				sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
+				sudo cp /home/HiveControl/upgrade/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
+				CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
+
+				if [[ $CHECKSUDO == "OK" ]]; then
+					#Copy over SUDOERs file
+					echo "SUCCESS"
+				else
+					echo "Something went wrong with our SUDOERS file, so I didn't change anything"
+					sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+				fi
+			let DB_ver="16"
+		fi
 	else
 		echo "Skipping DB, no new database upgrades available"
 	fi
@@ -251,7 +271,7 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 	make -j4
 	sudo make install
 
-	sudo apt-get install python-pigpio python3-pigpio -y 
+	#sudo apt-get install python-pigpio python3-pigpio -y 
 	#Update SUDOERs
 	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
 	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers

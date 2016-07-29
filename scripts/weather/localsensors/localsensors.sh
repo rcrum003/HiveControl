@@ -17,17 +17,14 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 # Get the data from the device
 # =======================================
 # ------ GET TEMP/Humidity ------
-if [ $WXTEMPTYPE = "temperhum" ]; then
+if [[ $WXTEMPTYPE == "temperhum" ]]; then
 	WXTEMP=`$HOMEDIR/scripts/weather/localsensors/wxtemperhum.sh`
-elif [[ $WXTEMPTYPE = "dht22" ]]; then
+elif [[ $WXTEMPTYPE == "dht22" ]]; then
 	WXTEMP=`$HOMEDIR/scripts/weather/localsensors/wxdht22.sh `
-elif [[ $WXTEMPTYPE = "dht21" ]]; then
+elif [[ $WXTEMPTYPE == "dht21" ]]; then
 	WXTEMP=`$HOMEDIR/scripts/weather/localsensors/wxdht21.sh`
 fi
-	WXTEMPF=$(echo $WXTEMP |awk '{print $1}')
-	WXTEMPC=$(echo $WXTEMP |awk '{print $4}')
-	WXHUMIDITY=$(echo $WXTEMP |awk '{print $2}')
-	WXDEW=$(echo $WXTEMP |awk '{print $3}')
+
 # ------END GET TEMP/Humidity ------
 
 # ------ GET Rain Data ------
@@ -39,6 +36,18 @@ rainmetricdaily=0
 
 #============================================
 
+if [[ -z "$WXTEMP" ]] || [[ "$WXTEMP" == "" ]];  then
+			loglocal "$DATE" WXAmbient  ERROR "Error connecting to Local Sensors for Ambient Weather, skipping collection..."		
+		WXTEMPF="null"
+		WXTEMPC="null"
+		WXHUMIDITY="0"
+		WXDEW="0"
+		else 
+			WXTEMPF=$(echo $WXTEMP |awk '{print $1}')
+			WXTEMPC=$(echo $WXTEMP |awk '{print $4}')
+			WXHUMIDITY=$(echo $WXTEMP |awk '{print $2}')
+			WXDEW=$(echo $WXTEMP |awk '{print $3}')
+fi
 
 #Convert Rain Inches for Hour and Day to Metric
 #precip_1hr_metric="$(echo "scale=2; (${rainofhourly} / 0.039370)" |bc)"
@@ -57,8 +66,8 @@ echo "  ,	\"current_observation\": {"
 echo "		\"station_id\":\"LOCALSENSOR\","
 echo "		\"observation_time\":\"$DATE\","
 echo "		\"temperature_string\":\"$WXTEMPF F ($WXTEMPC C)\","
-echo "		\"temp_f\":\"$WXTEMPF\","
-echo "		\"temp_c\":\"$WXTEMPC\","
+echo "		\"temp_f\":$WXTEMPF,"
+echo "		\"temp_c\":$WXTEMPC,"
 echo "		\"relative_humidity\":\"$WXHUMIDITY%\","
 echo "		\"wind_string\":\"NA\","
 echo "		\"wind_dir\":\"NA\","
@@ -70,8 +79,8 @@ echo "		\"wind_gust_kph\":\"0\","
 echo "		\"pressure_mb\":\"0\","
 echo "		\"pressure_in\":\"0\","
 echo "		\"pressure_trend\":\"-\","
-echo "		\"dewpoint_f\":\"$WXDEW\","
-echo "		\"dewpoint_c\":\"0\","
+echo "		\"dewpoint_f\":$WXDEW,"
+echo "		\"dewpoint_c\":0,"
 echo "		\"windchill_string\":\"NA\","
 echo "		\"windchill_f\":\"NA\","
 echo "		\"windchill_c\":\"NA\","

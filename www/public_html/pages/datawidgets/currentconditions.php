@@ -81,6 +81,9 @@ else {
  date_default_timezone_set($longName);
 
  switch ($period) {
+    case "today":
+		$startdate = date("Y-m-d 00:00");
+        break;
     case "day":
     	$s = strtotime("-1440 minutes");
 		$startdate = date("Y-m-d H:i", $s);

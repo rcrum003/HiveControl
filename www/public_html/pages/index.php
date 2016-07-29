@@ -70,7 +70,25 @@ header("Refresh: $sec; url=$page");
                                     <img src="../images/temp.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h4"><?php echo "$hivetempf "; if ($SHOW_METRIC == "on") { echo " C"; $i = "C"; } else {echo "F"; $i = "F";} echo " / "."$wxtempf"." $i"; ?> </div>
+                                    <div class="h4">
+                                    <?php 
+                                    
+                                    if ($hivetempf == "null" ) {
+                                        $hivetempf="NA"; 
+                                    }
+                                    echo "$hivetempf ";
+
+                                    if ($SHOW_METRIC == "on") {
+                                        echo " C"; $i = "C"; 
+                                        } 
+                                    else { 
+                                         echo "F"; $i = "F";
+                                     } 
+                                if ($wxtempf == "null" ) {
+                                        $wxtempf="NA"; 
+                                    }
+                                        echo " / "."$wxtempf"." $i"; 
+                                        ?> </div>
                                     <div>Temp - Hive / Ambient</div>
                                 </div>
                             </div>
@@ -115,7 +133,15 @@ header("Refresh: $sec; url=$page");
                                      <img src="../images/hum.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h4"><?php echo "$hivehumi"." / "."$wxhumi"; ?>%</div>
+                                    <div class="h4"><?php 
+                                    if ($hivehumi == "null" ) {
+                                        $hivehumi="NA"; 
+                                    }
+                                    if ($wxhumi == "null" ) {
+                                        $wxhumi="NA"; 
+                                    }
+
+                                    echo "$hivehumi"." / "."$wxhumi"; ?>%</div>
                                     <div>Humidity - Hive / Ambient</div>
                                 </div>
                             </div>

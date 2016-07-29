@@ -13,10 +13,10 @@ source /home/HiveControl/scripts/data/logger.inc
 function return_error {
     #Function to return an error value
          loglocal "$DATE2" TEMP ERROR "$message"
-         HUMIDITY="0"
-         TEMPF="0"
-         TEMPC="0"
-         dewpoint_f="0"
+         HUMIDITY="null"
+         TEMPF="null"
+         TEMPC="null"
+         dewpoint_f="null"
          echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC
 } 
 
@@ -122,17 +122,17 @@ do
             ;;
             1 )
               #DHT_BAD_CHECKSUM
-              message="DHT Bad Checksum, returning 0,0 for all values"
+              message="DHT Bad Checksum, returning Null for all values"
               DATA_GOOD=0
             ;;
             2 )
               #Do
-              message="DHT Bad Data, returning 0,0 for all values"
+              message="DHT Bad Data, returning Null for all values"
               DATA_GOOD=0
             ;;
             3 )
               #Do
-              message="DHT Timeout, make sure you have proper GPIO set returning 0,0 for all values"
+              message="DHT Timeout, make sure you have proper GPIO set returning Null for all values"
               DATA_GOOD=0
             ;;
           esac

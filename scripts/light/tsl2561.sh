@@ -10,10 +10,12 @@
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-loglocal "$DATE" LIGHT ERROR "TSL2561 Not Supported"
+DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
+
+loglocal "$DATE2" LIGHT ERROR "TSL2561 Not Supported"
 
 #echo "Using an TS2561 - Not supported" >> $LOG
-echo 0
+echo "null"
 
 
 

@@ -194,7 +194,7 @@ if($v->validate()) {
                                         <td><input type="checkbox" onchange="this.form.submit()" name="chart_smoothing" value="on" <?php if ($result['chart_smoothing'] == "on") {echo "checked='checked'";} ?> > </td>
                                         
                                         </td>
-                                        <td>Sometimes our sensors error out past our routines, which causes zero values. This can cause our charts to looked skewed. This option removes any record that has a zero value - note: this filters the whole row at the momement, so any invalid value will remove all values. This option only applies to the main chart. </td>
+                                        <td>Sometimes our sensors error out past our routines, which causes zero values. This can cause our charts to looked skewed. This option removes any record that has a zero value - This option only applies to the main chart. </td>
                                     </tr>
 
                                      <tr class="odd gradeX">

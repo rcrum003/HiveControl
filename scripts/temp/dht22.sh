@@ -13,10 +13,10 @@ source /home/HiveControl/scripts/data/logger.inc
 function return_error {
     #Function to return an error value
          loglocal "$DATE2" TEMP ERROR "$message"
-         HUMIDITY="0"
-         TEMPF="0"
-         TEMPC="0"
-         dewpoint_f="0"
+         HUMIDITY="null"
+         TEMPF="null"
+         TEMPC="null"
+         dewpoint_f="null"
          echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC
 } 
 

@@ -34,5 +34,7 @@ cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $
 
 loglocal "$DATE" CONFIG SUCCESS "Updated Config to Version $DBVERSION"
 
+echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
+
 
 

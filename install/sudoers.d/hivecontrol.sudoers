@@ -29,4 +29,4 @@ root	ALL=(ALL:ALL) ALL
 
 pi ALL=(ALL) NOPASSWD: ALL
 
-www-data ALL=NOPASSWD: /usr/local/bin/hx711, /usr/local/bin/2591, /usr/bin/nice, /home/hivetool/temperhum.sh, /usr/local/bin/Seeed_DHT21, /usr/local/bin/DHTXXD, /home/HiveControl/scripts/dht22.sh, /usr/bin/python, /usr/local/bin/tempered
+www-data ALL = NOPASSWD: /home/HiveControl/scripts/temp/gettemp.sh, /home/HiveControl/scripts/weight/getweight.sh, /home/HiveControl/scripts/data/hiveconfig.sh, /home/HiveControl/scripts/light/getlux.sh, /bin/sed, /usr/bin/awk, /usr/bin/bc, /home/HiveControl/scripts/weight/getweight.sh, /usr/local/bin/hx711, /usr/local/bin/2591, /usr/bin/nice, /usr/local/bin/Seeed_DHT21, /usr/local/bin/DHTXXD, /home/HiveControl/scripts/dht22.sh, /usr/bin/python, /usr/local/bin/tempered

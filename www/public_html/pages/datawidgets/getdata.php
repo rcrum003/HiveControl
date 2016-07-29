@@ -19,12 +19,33 @@ require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 #period should be the amount of data you are looking 
 #output should be JSON, CSV or Highcharts
 
+#Get some config options
+$sth1 = $conn->prepare("SELECT * from hiveconfig");
+$sth1->execute(); 
+$config = $sth1->fetch(PDO::FETCH_ASSOC);
+$chart_smoothing = $config['chart_smoothing'];
+
+
+
 //Check input for badness
 function test_input($data) {
   $data = trim($data);
   $data = stripslashes($data);
   $data = htmlspecialchars($data);
   return $data;
+}
+
+function smoothchart($value) {
+    #Sets value to null if 0. Only useful for certain trend lines.
+    # usage smoothchart(gdd, 0)
+    # Returns either the correct value or null if 0
+    if ( $value == "0") {
+        $value = "null";
+        return $value;      
+    }
+    else {
+        return $value;
+    }
 }
 
 
@@ -207,17 +228,24 @@ switch ($type) {
 
 # Get Data now depending on what you asked for
 
+
 switch ($chart) {
         case 'line':
             $sth = $conn->prepare("SELECT strftime('%s',date)*1000 AS datetime, $type2 as value FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER BY datetime");
             $sth->execute(); 
             $result = $sth->fetchAll(PDO::FETCH_ASSOC);
             header('Content-Type: text/javascript');
-            echo "$callback([";    
+            #echo "[";    
             foreach($result as $r){
-            echo "[".$r['datetime'].", ".$r['value']."]".", ";}
+                if ( $chart_smoothing == "on" ) {
+                    $value = smoothchart( $r['value'] );
+                }
+                else {
+                    $value = $r['value'];
+                }
+            echo "[".$r['datetime'].", ". $value ."]".", ";}
             echo "\r\n";
-            echo "]);";
+            #echo "]";
             break;
         case 'highlow':
             # Shows HighLow for that day for a given data measurement

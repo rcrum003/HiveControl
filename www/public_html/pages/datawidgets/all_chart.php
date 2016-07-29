@@ -56,6 +56,10 @@ $result3 = $sth3->fetchAll(PDO::FETCH_ASSOC);
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
+
+
+
+
 echo "
 <!-- Chart Code -->
 
@@ -290,7 +294,12 @@ $(function () {
 
         }
         ],
-        plotOptions: {
+        plotOptions: {";
+             if ( $chart_smoothing == "on" ) { 
+                echo "series: {
+                    connectNulls:true
+                },";
+        } echo "
             line: {
                 dataLabels: {
                     enabled: false
@@ -436,7 +445,9 @@ $(function () {
                     text: null
                 }
             });
+
         });
+
 
         Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
             text: 'Enlarge Chart',
@@ -445,8 +456,6 @@ $(function () {
                 return false;
             }
         });
-
-       
 
 });
 </script>";

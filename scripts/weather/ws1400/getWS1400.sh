@@ -17,7 +17,7 @@ URL="http://$local_wx_url/livedata.htm"
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-curl -s $URL -o webpage.html
+curl -s $URL -o webpage.html || exit 1
 
 # Get the data from the device
 eval $(cat webpage.html | egrep "(in|out)(Temp|Humi)" | cut -f 4,14 -d'"' --output-delimiter='=')
@@ -96,11 +96,11 @@ echo "\"conditions\": 1"
 echo "  }"
 echo "	}"
 echo "  ,	\"current_observation\": {"
-echo "		\"station_id\":\"KCTFAIRF23\","
+echo "		\"station_id\":\"$WXSTATION\","
 echo "		\"observation_time\":\"$DATE\","
 echo "		\"temperature_string\":\"${outTemp} F ($outTempC C)\","
-echo "		\"temp_f\":\"${outTemp}\","
-echo "		\"temp_c\":\"$outTempC\","
+echo "		\"temp_f\":${outTemp},"
+echo "		\"temp_c\":${outTempC},"
 echo "		\"relative_humidity\":\"${outHumi}%\","
 echo "		\"wind_string\":\" $DIRECTION at $avgwind MPH, Gust to ${gustspeed}\","
 echo "		\"wind_dir\":\"$DIRECTION\","
@@ -112,7 +112,7 @@ echo "		\"wind_gust_kph\":\"$wind_gust_kph\","
 echo "		\"pressure_mb\":\"$pressure_mb\","
 echo "		\"pressure_in\":\"${AbsPress}\","
 echo "		\"pressure_trend\":\"-\","
-echo "		\"dewpoint_f\":\"$dewpoint_f\","
+echo "		\"dewpoint_f\":$dewpoint_f,"
 echo "		\"dewpoint_c\":\"$dewpoint_c\","
 echo "		\"windchill_string\":\"NA\","
 echo "		\"windchill_f\":\"NA\","

@@ -32,7 +32,7 @@ DATE2=$2
         else
            loglocal "$DATE2" TEMP ERROR "Readings Exceeded Limits: TEMP=$TEMPF, HUMDITY=$HUMIDITY"
            loglocal "$DATE2" TEMP ERROR "$TEMPerHUM"
-          echo "0 0 0 0"
+          echo "null null null null"
          exit
         fi
       fi
@@ -49,7 +49,7 @@ if [[ "$TEMPerHUM" == *"Could not open device"* ]]
   if [[ "$TEMPerHUM" == *"Could not open device"* ]]
     then
   loglocal "$DATE2" TEMP ERROR "$HIVEDEVICE: Could not open device after waiting 5 seconds"
-  echo "0 0 0 0"
+  echo "null null null null"
   exit
   fi       
 fi
@@ -72,13 +72,13 @@ fi
            else 
             loglocal "$DATE2" TEMP ERROR "$HIVEDEVICE not found, looks like your device is $devicesavail"
            fi 
-         echo "0 0 0 0"
+        echo "null null null null"
          exit
         fi
       if [[ $TEMPerHUM == *"devices were found"* ]]
         then
           loglocal "$DATE2" TEMP ERROR "No Devices Found - Check to see if plugged in. Run hid-query -e"
-         echo "0 0 0 0"
+         echo "null null null null"
          exit
       fi
 

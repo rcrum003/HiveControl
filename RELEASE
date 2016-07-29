@@ -1,8 +1,18 @@
 Release Notes:
 
 --------------------
-1.73 Release
+1.80 Release
 --------------------
+Wow, we did a lot of rework and found a few bugs in the process
+1. You can now read the sensors on demand from the Instrument Config Admin
+2. Fixed the Weight trend for the "Today" time period
+3. Fixed when the WS1400 timed out
+4. Fixed Ambient Temp Scripts to deal with errors when collecting data (such as WX offline, or the local sensor not working)
+5. Fixed Currentconditions to show NA when it can't get a good reading
+6. Changed the charts to end the line connecting points when mising data
+7. Overhauled the scripts to output "null" instead of zero, showing better accuracy when we actually have a zero 
+8. Simplified the currconditions.sh script by moving each set of sensor code into their own scripts, called by currconditions
+9. Fixed the problem that if you disabled a sensor, it cleared all configuration entries (really sucked for the weight sensors, as it was hard to recalibrate a live hive)
 
 
 --------------------
