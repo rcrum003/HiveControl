@@ -1,3 +1,5 @@
+
+
 #Check Sensors every 5 Minutes
 */5 * * * * /home/HiveControl/scripts/system/currconditions.sh > /dev/null 2>&1
 
@@ -24,3 +26,4 @@
 
 #Restart Our Pi GPIO Library Deamon on restart
 @reboot              /usr/local/bin/pigpiod
+

@@ -1,4 +1,14 @@
 Release Notes:
+--------------------
+1.81 Release
+--------------------
+1. Changed diskspace output in systemstatus to show human readable format
+2. Fixed an issue with Crontab not installing during install
+3. Created an install image, since unix noobs couldn't figure out how to install without it.
+	- Resizes hard disk on first install
+	- Doesn't include automatic hive registration or default sharing with hivetool, since if you share with hivetool without them expecting, you'll be locked out.
+4. Added support for TSL2561 for David
+
 
 --------------------
 1.80 Release
@@ -13,6 +23,7 @@ Wow, we did a lot of rework and found a few bugs in the process
 7. Overhauled the scripts to output "null" instead of zero, showing better accuracy when we actually have a zero 
 8. Simplified the currconditions.sh script by moving each set of sensor code into their own scripts, called by currconditions
 9. Fixed the problem that if you disabled a sensor, it cleared all configuration entries (really sucked for the weight sensors, as it was hard to recalibrate a live hive)
+10. Changed the upload to hivetool.org for the Ambient Weather - now uses XML instead of the key (key still needed) - but will reduce the amount of overages you get. Still best to get a key per hive.
 
 
 --------------------

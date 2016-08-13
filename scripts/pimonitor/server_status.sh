@@ -9,7 +9,7 @@ hostname
 date
 echo
 echo "                          * * * DISK SPACE * * *"
-/bin/df
+/bin/df -h
 echo
 echo "                           * * * INTERNET * * *"
 /sbin/iwconfig wlan0
