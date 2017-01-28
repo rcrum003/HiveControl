@@ -211,7 +211,7 @@ fi
 
 
 #### Development only, will enable in future versions, in QA
-SHARE_API="yes"
+SHARE_API="no"
 if [[ $SHARE_API = "yes" ]]; then
 	echo "--- Sharing with api.hivetool.org ---"
 	API_URL="http://api.110uni.com/v1/hive/" #no slash at the end
