@@ -173,7 +173,7 @@ echo "		"
 ######################################################################
 # If sharing, create file and send to other people
 ######################################################################
-	if [ $SHARE_HIVETOOL = "yes" ]; then
+if [ $SHARE_HIVETOOL = "yes" ]; then
 	echo "--- Sharing with Hivetool.org ---"
 		# Create XML file, since that is what they like to get
 		SAVEFILE=$HOMEDIR/scripts/system/transmit.xml
@@ -202,13 +202,51 @@ echo "		"
 		/usr/bin/xmlstarlet sel -t -c "/response/current_observation" $HOMEDIR/scripts/system/wx.xml >> $SAVEFILE
 		echo "</hive_data>" >> $SAVEFILE
 
-
 	#====================
 	# Try to send to hivetool
 	#====================
 	/usr/bin/curl --silent --retry 5 -k -u $HT_USERNAME:$HT_PASSWORD -X POST --data-binary @$SAVEFILE https://hivetool.org/private/log_hive.pl  -H 'Accept: application/xml' -H 'Content-Type: application/xml'
 		
-	fi
+fi
+
+
+#### Development only, will enable in future versions, in QA
+SHARE_API="yes"
+if [[ $SHARE_API = "yes" ]]; then
+	echo "--- Sharing with api.hivetool.org ---"
+	API_URL="http://api.110uni.com/v1/hive/" #no slash at the end
+
+	#Check to see if we have a valid hive here, 
+	APIKEY="2bc7c9-805573-2ad96d-93c818-daa4e0"
+	#$API_URL/$API_VER/hive/$hiveid/data
+
+	SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -d  "hive_id=$HIVEID&hive_observation_time_local=$DATE&hive_observation_time_utc=&hive_weight_lbs=$HIVERAWWEIGHT&hive_temp_f=$HIVETEMPF&hive_temp_c=$HIVETEMPC&hive_humidity=$HIVEHUMIDITY&hive_battery_voltage=&ambient_temp_f=$A_TEMP&ambient_temp_c=$A_TEMP_C&ambient_humidity=$B_HUMIDITY&ambient_luminance=$LUX&ambient_precip_in=$precip_1hr_in&wx_station_id=$WXSTATION&hive_flight_in=$IN_COUNT&hive_flight_out=$OUT_COUNT&apikey=$APIKEY&wx_station_id=$WXSTATION&wx_observation_time_rfc822=$OBSERVATIONDATETIME&wx_temp_f=$A_TEMP&wx_temp_c=$A_TEMP_C&wx_relative_humidity=$B_HUMIDITY&wx_wind_dir=$A_WIND_DIR&wx_wind_degrees=$wind_degrees&wx_wind_mph=$wind_mph&wx_wind_gust_mph=$wind_gust_mph&wx_pressure_mb=$pressure_mb&=wx_pressure_in=$A_PRES_IN&wx_dewpoint_f=$A_DEW&wx_dewpoint_c=$weather_dewc&wx_solar_radiation=$solarradiation&wx_precip_1hr_in=$precip_1hr_in&wx_precip_1hr_metric=$precip_1hr_metric&wx_precip_today_in=$precip_today_in&wx_precip_today_in=$precip_today_metric" http://api.110uni.com/v1/hive/$HIVEID/data ) 
+	echo "Status was $SHARE_API_STATUS"
+
+	case $SHARE_API_STATUS in
+		1)
+			#Success
+			echo "Success"
+		;;
+		INVALID_API_KEY)
+			# Sorry key is invalid
+			loglocal "$DATE" SHARE_API ERROR "Invalid API KEY - $APIKEY"
+		;;
+		EXPIRED_API_KEY)
+			# Sorry your key has been expired for some reason
+			loglocal "$DATE" SHARE_API ERROR "Your Hive has been disabled through an expired API Key for some reason."
+		;;
+		API_KEY_NOT_SET)
+			#Need an APIKEY
+			loglocal "$DATE" SHARE_API ERROR "API_KEY was not set for some reason."
+		;;
+		*)
+			#default - unknown error
+			loglocal "$DATE" SHARE_API ERROR "Error: $SHARE_API_STATUS "
+		;;
+	esac
+
+fi
 
 # End Sharing
 

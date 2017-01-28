@@ -40,7 +40,7 @@ if [ $WEATHER_LEVEL = "hive" ]; then
 			OBSERVATIONDATETIME="null"
 			loglocal "$DATE" WXAmbient  ERROR "Error connecting to WeatherUnderground for Ambient weather, check API key and Station, skipping collection..."		
 		else
-			OBSERVATIONDATETIME=`date -d @$OBSERVATIONEPOCH '+%F %T %Z'`
+			OBSERVATIONDATETIME=`date -d @$OBSERVATIONEPOCH '+%F %R'`
 		fi
 		wind_degrees=`/bin/echo $GETNOW | JSON.sh -b |grep wind_degrees |awk  '{print $2}'`
 		wind_gust_mph=`/bin/echo $GETNOW | JSON.sh -b |grep wind_gust_mph |awk '{print $2}'`

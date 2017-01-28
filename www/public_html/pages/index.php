@@ -6,6 +6,10 @@
 // Functions
 // period - specify what timeperiods you want to see
 
+//Set Variables to null to start
+$period="";
+$chart_rounding="";
+
 //Check input for badness
 function test_input($data) {
   $data = trim($data);
@@ -13,9 +17,6 @@ function test_input($data) {
   $data = htmlspecialchars($data);
   return $data;
 }
-
-
-$period = test_input($_GET["period"]);
 
 #Check to see if the neccessary variables exist
 

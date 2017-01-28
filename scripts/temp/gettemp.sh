@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 0.9
+# version 1.1
 # reads the temp sensors as one script
 
 
@@ -13,6 +13,8 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 		# Data Fetchers/Parsers in one
 		if [ $TEMPTYPE = "temperhum" ]; then
 			GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh $HIVEDEVICE`
+		elif [[ $TEMPTYPE = "temper" ]]; then
+			GETTEMP=`$HOMEDIR/scripts/temp/temper.sh $HIVEDEVICE $TEMP_SUBDEVICE`
 		elif [[ $TEMPTYPE = "dht22" ]]; then
 			GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
 		elif [[ $TEMPTYPE = "dht21" ]]; then
@@ -20,10 +22,10 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 		fi
 
 		HIVETEMPF=$(echo $GETTEMP |awk '{print $1}')
-		HIVETEMPC=$(echo $GETTEMP |awk '{print $4}')
 		HIVEHUMIDITY=$(echo $GETTEMP |awk '{print $2}')
 		HIVEDEW=$(echo $GETTEMP |awk '{print $3}')
-		
+		HIVETEMPC=$(echo $GETTEMP |awk '{print $4}')
+
 		#echo "RAW - TEMPF=$HIVETEMPF, TEMPC=$HIVETEMPC, HUMI=$HIVEHUMIDITY"
 		#Use TEMP Slope/Intercept
 		

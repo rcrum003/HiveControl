@@ -15,7 +15,7 @@ source /home/HiveControl/scripts/data/logger.inc
 
 URL="http://$local_wx_url/livedata.htm"
 
-DATE=$(TZ=":$TIMEZONE" date '+%F %T')
+DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
 curl -s $URL -o webpage.html || exit 1
 

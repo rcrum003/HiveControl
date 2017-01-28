@@ -11,7 +11,7 @@
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-DATE=$(TZ=":$TIMEZONE" date '+%F %T')
+DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
 # =======================================
 # Get the data from the device
