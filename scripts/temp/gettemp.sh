@@ -14,7 +14,7 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 		if [ $TEMPTYPE = "temperhum" ]; then
 			GETTEMP=`$HOMEDIR/scripts/temp/temperhum.sh $HIVEDEVICE`
 		elif [[ $TEMPTYPE = "temper" ]]; then
-			GETTEMP=`$HOMEDIR/scripts/temp/temper.sh $HIVEDEVICE $TEMP_SUBDEVICE`
+			GETTEMP=`$HOMEDIR/scripts/temp/temper.sh $HIVEDEVICE $HIVE_TEMP_SUB`
 		elif [[ $TEMPTYPE = "dht22" ]]; then
 			GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
 		elif [[ $TEMPTYPE = "dht21" ]]; then
