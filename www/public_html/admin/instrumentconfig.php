@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v->rule('required', ['ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_LUX'], 1)->message('{field} is required');
     $v->rule('slug', ['WXTEMPTYPE']);
     $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER'], ['no', 'yes']);
-    $v->rule('integer', ['HIVE_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO'], 1)->message('{field} must be a integer');
+    $v->rule('integer', ['HIVE_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO', 'HIVE_TEMP_SUB'], 1)->message('{field} must be a integer');
     $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT'], 1)->message('{field} must be numeric');
     $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type'], 1)->message('{field} must be alphaNum only');
     $v->rule('lengthmax', ['WX_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO'], 2);
@@ -91,6 +91,7 @@ if($v->validate()) {
         # Set values to whatever they were before
         $TEMPTYPE = $old['TEMPTYPE'];
         $HIVEDEVICE = $old['HIVEDEVICE'];
+        $HIVE_TEMP_SUB = $old['HIVE_TEMP_SUB'];
         $HIVE_TEMP_GPIO = $old['HIVE_TEMP_GPIO'];
         $HIVE_TEMP_SLOPE = $old['HIVE_TEMP_SLOPE'];
         $HIVE_TEMP_INTERCEPT = $old['HIVE_TEMP_INTERCEPT'];
@@ -99,6 +100,7 @@ if($v->validate()) {
         
         echo '<input type="hidden" name="TEMPTYPE" value="' . $TEMPTYPE . '">
         <input type="hidden" name="HIVEDEVICE" value="' . $HIVEDEVICE . '">
+        <input type="hidden" name="HIVE_TEMP_SUB" value="' . $HIVE_TEMP_SUB . '">
         <input type="hidden" name="HIVE_TEMP_GPIO" value="' . $HIVE_TEMP_GPIO . '">
         <input type="hidden" name="HIVE_TEMP_SLOPE" value="' . $HIVE_TEMP_SLOPE . '">
         <input type="hidden" name="HIVE_TEMP_INTERCEPT" value="' . $HIVE_TEMP_INTERCEPT . '">
@@ -107,6 +109,7 @@ if($v->validate()) {
     } else {
         $TEMPTYPE = test_input($_POST["TEMPTYPE"]);
         $HIVEDEVICE = test_input($_POST["HIVEDEVICE"]);
+        $HIVE_TEMP_SUB = test_input($_POST["HIVE_TEMP_SUB"]);
         $HIVE_TEMP_GPIO = test_input($_POST["HIVE_TEMP_GPIO"]);
         $HIVE_TEMP_SLOPE = test_input($_POST["HIVE_TEMP_SLOPE"]);
         $HIVE_TEMP_INTERCEPT = test_input($_POST["HIVE_TEMP_INTERCEPT"]);
@@ -189,8 +192,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB));
     sleep(1);
 
 
@@ -264,6 +267,7 @@ if($v->validate()) {
                                             <?php if ($result['ENABLE_HIVE_TEMP_CHK'] == "yes") {
                                                 echo '
                                                 <input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="temperhum"'; if ($result['TEMPTYPE'] == "temperhum") {echo "checked";} echo '> TemperHum
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="temper"'; if ($result['TEMPTYPE'] == "temper") {echo "checked";} echo '> Temper 
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22 
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21';
                                             }
@@ -272,8 +276,15 @@ if($v->validate()) {
                                             <?PHP if ($result['ENABLE_HIVE_TEMP_CHK'] == "yes") {
                                                     if ($result['TEMPTYPE'] == "temperhum") {
                                                         echo '<a href="#" title="Specify Device" data-toggle="popover" data-placement="bottom" data-content="Specify the device you want to use (usually /dev/hidraw1, if you only have one device. Use
-                                                        temperhum -e from the console to see choices)"><p class="fa fa-question-circle fa-fw"></P></a>Device:
+                                                        tempered -e from the console to see choices)"><p class="fa fa-question-circle fa-fw"></P></a>Device:
                                                          <input type="text" name="HIVEDEVICE" onchange="this.form.submit()" value="'; echo $result['HIVEDEVICE']; echo '"">';
+                                                    }
+                                                    if ($result['TEMPTYPE'] == "temper") {
+                                                        echo '<a href="#" title="Specify Device" data-toggle="popover" data-placement="bottom" data-content="Specify the device you want to use (usually /dev/hidraw1, if you only have one device. Use
+                                                        tempered -e from the console to see choices)"><p class="fa fa-question-circle fa-fw"></P></a>Device:
+                                                         <input type="text" name="HIVEDEVICE" onchange="this.form.submit()" value="'; echo $result['HIVEDEVICE']; echo '"">';
+                                                         echo '<input type="text" name="HIVE_TEMP_SUB" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_SUB']; echo '"">';
+
                                                     }
                                                     if ($result['TEMPTYPE'] == "dht22") {
                                                         echo '<a href="#" title="Specify GPIO" data-toggle="popover" data-placement="bottom" data-content="Specify the GPIO you want to use to connect to this sensor"><p class="fa fa-question-circle fa-fw"></P></a>GPIO:

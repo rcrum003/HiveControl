@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="70"
+Upgrade_ver="71"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -248,7 +248,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_25
 			let DB_ver="18"
 		fi
-
+		if [[ $DB_ver -eq "18" ]]; then
+			echo "Applying DB Ver19 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_26
+			let DB_ver="19"
+		fi
 		#if [[ $DB_ver -eq "17" ]]; then
 		#	echo "Applying DB Ver16 Upgrades"
 		#	sqlite3 $DestDB < $DBPatches/DB_PATCH_21 
