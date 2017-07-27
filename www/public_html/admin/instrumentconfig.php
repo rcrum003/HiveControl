@@ -283,7 +283,7 @@ if($v->validate()) {
                                                         echo '<a href="#" title="Specify Device" data-toggle="popover" data-placement="bottom" data-content="Specify the device you want to use (usually /dev/hidraw1, if you only have one device. Use
                                                         tempered -e from the console to see choices)"><p class="fa fa-question-circle fa-fw"></P></a>Device:
                                                          <input type="text" name="HIVEDEVICE" onchange="this.form.submit()" value="'; echo $result['HIVEDEVICE']; echo '"">';
-                                                         echo '<input type="text" name="HIVE_TEMP_SUB" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_SUB']; echo '"">';
+                                                         echo '<a href="#" title="Specify Sub Device" data-toggle="popover" data-placement="bottom" data-content="Specificy the sub device, if you have one. This is only used when you have two sensors on one temper device. )"><p class="fa fa-question-circle fa-fw"></P></a>Sub-Device:<input type="text" name="HIVE_TEMP_SUB" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_SUB']; echo '"">';
 
                                                     }
                                                     if ($result['TEMPTYPE'] == "dht22") {

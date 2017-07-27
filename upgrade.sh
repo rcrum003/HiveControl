@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="71"
+Upgrade_ver="72"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -322,6 +322,13 @@ if [[ "$Installed_Ver" < "1.71" ]]; then
 	sudo cp /home/HiveControl/install/cron/cron.orig /home/HiveControl/install/cron/cron.new
 	sudo echo "@reboot           /usr/local/bin/pigpiod" >> /home/HiveControl/install/cron/cron.new
 	sudo crontab /home/HiveControl/install/cron/cron.new
+fi
+
+if [[ "$Installed_Ver" < "1.83" ]]; then
+	sudo apt-get update
+	#Install Jq to work better with JSON data
+	sudo apt-get install jq
+	
 fi
 
 echo "============================================="

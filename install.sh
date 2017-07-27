@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v38 - for HiveControl
+# v39 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -167,7 +167,7 @@ sudo apt-get install apache2 php5 libapache2-mod-php5 -y
 echo "Installing SQLite for local storage, and mysql-client for communications"
 sudo apt-get install sqlite3 php5-sqlite -y
 sudo apt-get install mysql-client -y
-
+sudo apt-get install jq -y
 
 # Copy Apache Configuration for LocalHost
 sudo cp /etc/apache2/sites-available/000-default.conf /home/HiveControl/install/apache/default.bckup
@@ -194,6 +194,9 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_21
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_22
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_23
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_24
+sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET RUN=\"yes\" WHERE id=\"1\";"
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_25
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_26
 
 #Set shell scripts to be executable
 cd /home/HiveControl/

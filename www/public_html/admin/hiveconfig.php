@@ -1,8 +1,19 @@
 <?PHP
 
+// Standard includes
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
+require $_SERVER["DOCUMENT_ROOT"] . '/admin/http.php';
+//require $_SERVER["DOCUMENT_ROOT"] . '/admin/api.php';
 
+###################################################
+# Declare Empty Variables
+###################################################
+$GDDSTATUS="";
+
+###################################################
+# GET Process
+###################################################
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
 $sth = $conn->prepare("SELECT * FROM hiveconfig");
 $sth->execute();
@@ -22,25 +33,32 @@ if (strtotime($result['GDD_START_DATE']) > strtotime('-1 year')) {
 }
 
 }
-
+###################################################
+# POST Process
+###################################################
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 
-$regex1 = "/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/";
+    $regex1 = "/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/";
 
-$v = new Valitron\Validator($_POST);
-$v->rule('required', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY'], 1)->message('{field} is required');
-$v->rule('slug', ['HIVENAME', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
-$v->rule('integer', ['YARDID', 'BEEKEEPERID'],  1)->message('{field} can only be an integer');
-$v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
-$v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
-$v->rule('lengthmax', ['HIVENAME', 'HIVEID', 'BEEKEEPERID', 'YARDID', 'CITY', 'STATE', 'COUNTRY', 'LATITUDE', 'LONGITUDE', 'ZIP'], 40);
-
-$v->rule('regex', ['CITY', 'STATE', 'COUNTRY'], $regex1);
-$v->rule('numeric', ['BEEKEEPERID', 'YARDID', 'GDD_BASE_TEMP', 'ZIP']);
-
+    ###################################################
+    # Validation
+    ###################################################
+    $v = new Valitron\Validator($_POST);
+    $v->rule('required', ['HIVENAME', 'HIVEAPI', 'CITY', 'STATE', 'COUNTRY'], 1)->message('{field} is required');
+    $v->rule('slug', ['HIVENAME', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
+    #$v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
+    #$v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
+    $v->rule('lengthmax', ['HIVENAME', 'CITY', 'STATE', 'COUNTRY', 'LATITUDE', 'LONGITUDE', 'ZIP'], 40);
+    $v->rule('lengthmax', ['HIVEAPI'], 70);
+    $v->rule('alphaNum', ['HIVEAPI']);
+    $v->rule('regex', ['CITY', 'STATE', 'COUNTRY'], $regex1);
+    $v->rule('numeric', ['GDD_BASE_TEMP', 'ZIP']);
 
 }
+###################################################
+# Functions 
+###################################################
 //Check input for badness
 function test_input($data) {
   $data = trim($data);
@@ -54,8 +72,9 @@ function test_input_allow_slash($data) {
   $data = htmlspecialchars($data);
   return $data;
 }
-
+#####################################################################################################
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -74,7 +93,8 @@ function test_input_allow_slash($data) {
                 <!-- /.col-lg-12 -->
             </div>
             <!-- /.row -->
-    <?PHP
+
+<?PHP
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
 if($v->validate()) {
@@ -90,8 +110,8 @@ if($v->validate()) {
 // Probably not needed, but doesn't hurt
 
     $hivename = test_input($_POST["HIVENAME"]);
-    $hiveid = test_input($_POST["HIVEID"]);
-    $beekeeperid = test_input($_POST["BEEKEEPERID"]);    
+    #$hiveid = test_input($_POST["HIVEID"]);
+    $HIVEAPI = test_input($_POST["HIVEAPI"]);    
     $yardid = test_input($_POST["YARDID"]);
     $city = test_input($_POST["CITY"]);
     $state = test_input($_POST["STATE"]);
@@ -116,20 +136,17 @@ if($v->validate()) {
     $ZIP = test_input($_POST["ZIP"]);
     
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveid=?,beekeeperid=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,version=?,timezone=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,ZIP=? WHERE id=1");
-    $doit->execute(array($hivename,$hiveid,$beekeeperid,$yardid,$city,$state,$country,$latitude,$longitude,$version,$timezone,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$ZIP));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveapi=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,version=?,timezone=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,ZIP=? WHERE id=1");
+    $doit->execute(array($hivename,$HIVEAPI,$yardid,$city,$state,$country,$latitude,$longitude,$version,$timezone,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$ZIP));
     sleep(3);
 
     // Refresh the fields in the form
-    $sth = $conn->prepare("SELECT * FROM hiveconfig");
-    $sth->execute();
-    $result = $sth->fetch(PDO::FETCH_ASSOC);
+    $sth2 = $conn->prepare("SELECT * FROM hiveconfig");
+    $sth2->execute();
+    $result = $sth2->fetch(PDO::FETCH_ASSOC);
+
+
     
-    // Tell user it saved
-    //echo '<div class="alert alert-success alert-dismissable">
-      //                          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-    //echo 'Successfully Saved';
-    //echo '</div>';
 } else {
     // Errors
      echo '<div class="alert alert-danger alert-dismissable"> <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
@@ -143,7 +160,6 @@ if($v->validate()) {
     $sth->execute();
     $result = $sth->fetch(PDO::FETCH_ASSOC);    
 }
-
                
     }
 
@@ -178,18 +194,13 @@ if($v->validate()) {
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>Hive ID</td>
-                                            <td><input type="text" name="HIVEID" value="<?PHP echo $result['HIVEID'];?>" onchange="this.form.submit()"></td>
-                                            <td>Unique identifier for this hive. See documentation to get your unique key</td>
+                                            <td><?PHP echo $result['HIVEID'];?></td>
+                                            <td>Unique identifier for this hive.</td>
                                         </tr>
                                         <tr class="odd gradeX">
-                                            <td>Beekeeper ID</td>
-                                            <td><input type="text" name="BEEKEEPERID" value="<?PHP echo $result['BEEKEEPERID'];?>" onchange="this.form.submit()"></td>
-                                            <td>Unique BeeKeeperID to identify you when sharing data. If you are not sharing, then just set to 0</td>
-                                        </tr>
-                                        <tr class="odd gradeX">
-                                            <td>Yard ID</td>
-                                            <td><input type="text" name="YARDID" value="<?PHP echo $result['YARDID'];?>" onchange="this.form.submit()"></td>
-                                            <td>Unique ID of the Apirary Yard this hive is located in. Used in conjunction with Apirary Controller or HiveTool.org to organize multiple hives.</td>
+                                            <td>Hive API</td>
+                                            <td><input type="text" name="HIVEAPI" value="<?PHP echo $result['HIVEAPI'];?>" onchange="this.form.submit()"></td>  
+                                            <td>Required Key - register yours are <a href="https://www.hivecontrol.org/">HiveControl</td>
                                         </tr>
                                         <tr class="odd gradeX">
                                             <td>City</td>
@@ -711,12 +722,12 @@ if($v->validate()) {
 
                                    <! ***************************************************** -->
 
-                                   </tr>
-                                       <tr class="odd gradeX">
+                                    <tr class="odd gradeX">
                                         <td>Start Date</td>
                                         <td><input type="text" name="START_DATE" value="<?PHP echo $result['START_DATE'];?>" onchange="this.form.submit()"></td> 
                                         <td>Date you put this hive into Online status for Hivetool.org. </td>
-                                  
+                                   </tr>
+
                                     </tbody>
                                 </table>
                             </div>
@@ -760,6 +771,7 @@ if($v->validate()) {
                             </td>
                             <td>Specify if you want to share data with Hivetool.org.<BR> (Please do, it helps our researchers out)</td>
                         </tr>
+
 
                     </tbody>
                 </table>

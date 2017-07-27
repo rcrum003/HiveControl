@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
 # see hivetool.net
-# Version 2.3
+# Version 2.4
 
 #############################################
 # Get Config parameters from DB and set some basics
@@ -211,42 +211,76 @@ fi
 
 
 #### Development only, will enable in future versions, in QA
-SHARE_API="no"
-if [[ $SHARE_API = "yes" ]]; then
-	echo "--- Sharing with api.hivetool.org ---"
-	API_URL="http://api.110uni.com/v1/hive/" #no slash at the end
 
-	#Check to see if we have a valid hive here, 
-	APIKEY="2bc7c9-805573-2ad96d-93c818-daa4e0"
-	#$API_URL/$API_VER/hive/$hiveid/data
+if [ -z "$HIVEAPI" ]; then
+	echo "--- Unable to share with hivecontrol.org because HIVEAPI is not set"
+else
+	echo "--- Sharing with hivecontrol.org ---"
+	## https://www.hivecontrol.org/api/v1/hive/check
+	CLOUD_URL="https://www.hivecontrol.org/api/v1"
+	CHECKAPI="$CLOUD_URL/hive/check"
+	#http://my.hivecontrol/api/v1/hive/data
+	POST_DATA_URL="$CLOUD_URL/hive/data"
+	#POST_WX_URL="$CLOUD_URL/wx/data"
 
-	SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -d  "hive_id=$HIVEID&hive_observation_time_local=$DATE&hive_observation_time_utc=&hive_weight_lbs=$HIVERAWWEIGHT&hive_temp_f=$HIVETEMPF&hive_temp_c=$HIVETEMPC&hive_humidity=$HIVEHUMIDITY&hive_battery_voltage=&ambient_temp_f=$A_TEMP&ambient_temp_c=$A_TEMP_C&ambient_humidity=$B_HUMIDITY&ambient_luminance=$LUX&ambient_precip_in=$precip_1hr_in&wx_station_id=$WXSTATION&hive_flight_in=$IN_COUNT&hive_flight_out=$OUT_COUNT&apikey=$APIKEY&wx_station_id=$WXSTATION&wx_observation_time_rfc822=$OBSERVATIONDATETIME&wx_temp_f=$A_TEMP&wx_temp_c=$A_TEMP_C&wx_relative_humidity=$B_HUMIDITY&wx_wind_dir=$A_WIND_DIR&wx_wind_degrees=$wind_degrees&wx_wind_mph=$wind_mph&wx_wind_gust_mph=$wind_gust_mph&wx_pressure_mb=$pressure_mb&=wx_pressure_in=$A_PRES_IN&wx_dewpoint_f=$A_DEW&wx_dewpoint_c=$weather_dewc&wx_solar_radiation=$solarradiation&wx_precip_1hr_in=$precip_1hr_in&wx_precip_1hr_metric=$precip_1hr_metric&wx_precip_today_in=$precip_today_in&wx_precip_today_in=$precip_today_metric" http://api.110uni.com/v1/hive/$HIVEID/data ) 
-	echo "Status was $SHARE_API_STATUS"
+	#################################################################
+	# Try posting with our current hive_id
+	# If it exists, it'll post.
+	# We'll also be taking the hive_id setting away from the user
+	##################################################################
+	
+	#Finish sending the fields.
+	SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "hivename=$HIVENAME" -F "hive_observation_time_local=$DATE" -F "hive_temp_f=$HIVETEMPF" -F "hive_temp_c=$HIVETEMPC" -F "hive_humidity=$HIVEHUMIDITY" -F "hive_weight_lbs=$HIVEWEIGHT" -F "hive_flight_in=$IN_COUNT" -F "hive_flight_out=$OUT_COUNT" -F "wx_station_id=$WEATHER_STATIONID" -F "wx_observation_time_rfc822=$OBSERVATIONDATETIME" -F "wx_temp_f=$A_TEMP" -F "wx_relative_humidity=$B_HUMIDITY" -F "wx_dewpoint_f=$A_DEW" -F "wx_temp_c=$A_TEMP_C" -F "wx_wind_mph=$A_WIND_MPH" -F "wx_wind_dir=$A_WIND_DIR" -F "wx_wind_degrees=$wind_degrees" -F "wx_wind_gust_mpg=$wind_gust_mph" -F "wx_pressure_mb=$pressure_mb" -F "wx_pressure_in=$A_PRES_IN" -F "wx_dewpoint_c=$weather_dewc" -F "wx_solar_radiation=$solarradiation" -F "wx_precip_1hr_in=$precip_1hr_in" -F "wx_precip_1hr_metric=$precip_1hr_metric" -F "wx_precip_today_in=$precip_today_in" -F "wx_precip_today_metric=$precip_today_metric" "$POST_DATA_URL")
 
-	case $SHARE_API_STATUS in
+	#Parse Various Response and set SHARE_API_STATUS
+		# Check to see if the status was Unauthenticated	
+		SHARE_SUB_STATUS=$(/bin/echo $SHARE_API_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
+
+		#echo "Share Sub is $SHARE_SUB_STATUS"
+
+
+	#Depending on STATUS Number, do something with it
+	case $SHARE_SUB_STATUS in
+		NOT_REGISTERED)
+			#Authenticated properly, but they weren't allowed to post to that ID
+			echo "Unauthorized to Post Data for that Hive ID"
+			loglocal "$DATE" SHARE_API ERROR "Unauthorized to Post Data for that Hive ID at hivecontrol.org"
+		;;
 		1)
 			#Success
-			echo "Success"
+			echo "Successfully Posted to HiveControl.org"
 		;;
-		INVALID_API_KEY)
-			# Sorry key is invalid
-			loglocal "$DATE" SHARE_API ERROR "Invalid API KEY - $APIKEY"
+		Unauthenticated.)
+			#Unauthenticated
+			echo "No API Key, or API is Invalid - basically you failed to authenticate"
+			loglocal "$DATE" SHARE_API ERROR "No API Key, or API is Invalid - Please get an API key from Settings->API at https://www.hivecontrol.org"
 		;;
-		EXPIRED_API_KEY)
-			# Sorry your key has been expired for some reason
-			loglocal "$DATE" SHARE_API ERROR "Your Hive has been disabled through an expired API Key for some reason."
+		INVALID_DATA)
+			#Invalid_data
+			echo "Data Posted was Invalid"
+			loglocal "$DATE" SHARE_API ERROR "Data Posted to hivecontrol.org was Invalid"
 		;;
-		API_KEY_NOT_SET)
-			#Need an APIKEY
-			loglocal "$DATE" SHARE_API ERROR "API_KEY was not set for some reason."
+		UPDATE_HIVEID) 
+			#Bad HiveID, update on local machine
+			echo "Updating HiveID from hivecontrol.org"
+			loglocal "$DATE" SHARE_API INFO "Updated HiveID based on HiveName from hivecontrol.org"
+			
+			HIVEID=$(/bin/echo $SHARE_API_STATUS | ./JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $2}')
+				echo "NewHIVeId is $HIVEID"
+			#Update HiveID in DB, including version
+				DBVERSION=$(sqlite3 $HOMEDIR/data/hive-data.db "select version from hiveconfig;")
+				DBVERSION=$((DBVERSION+1))
+				sqlite3 $HOMEDIR/data/hive-data.db "UPDATE hiveconfig SET hiveid=\"$HIVEID\", version=\"$DBVERSION\";"
+			#Try to send again with new HIVEID
+				SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "hivename=$HIVENAME" -F "hive_observation_time_local=$DATE" -F "hive_temp_f=$HIVETEMPF" -F "hive_temp_c=$HIVETEMPC" -F "hive_humidity=$HIVEHUMIDITY" -F "hive_weight_lbs=$HIVEWEIGHT" -F "hive_flight_in=$IN_COUNT" -F "hive_flight_out=$OUT_COUNT" -F "wx_station_id=$WEATHER_STATIONID" -F "wx_observation_time_rfc822=$OBSERVATIONDATETIME" -F "wx_temp_f=$A_TEMP" -F "wx_relative_humidity=$B_HUMIDITY" -F "wx_dewpoint_f=$A_DEW" -F "wx_temp_c=$A_TEMP_C" -F "wx_wind_mph=$A_WIND_MPH" -F "wx_wind_dir=$A_WIND_DIR" -F "wx_wind_degrees=$wind_degrees" -F "wx_wind_gust_mpg=$wind_gust_mph" -F "wx_pressure_mb=$pressure_mb" -F "wx_pressure_in=$A_PRES_IN" -F "wx_dewpoint_c=$weather_dewc" -F "wx_solar_radiation=$solarradiation" -F "wx_precip_1hr_in=$precip_1hr_in" -F "wx_precip_1hr_metric=$precip_1hr_metric" -F "wx_precip_today_in=$precip_today_in" -F "wx_precip_today_metric=$precip_today_metric" "$POST_DATA_URL")
 		;;
 		*)
 			#default - unknown error
 			loglocal "$DATE" SHARE_API ERROR "Error: $SHARE_API_STATUS "
 		;;
 	esac
-
 fi
+	
 
 # End Sharing
 

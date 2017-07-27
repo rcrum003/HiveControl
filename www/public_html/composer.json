@@ -1,5 +1,6 @@
 {
     "require": {
-        "vlucas/valitron": "^1.2"
+        "vlucas/valitron": "^1.2",
+        "guzzlehttp/guzzle": "~6.0"
     }
 }

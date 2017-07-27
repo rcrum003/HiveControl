@@ -1,30 +1,56 @@
 
 #!/bin/bash
-# Version 5
+# Version 6
 # Script to output WS-1400-IP to a JSON and XML file that matches WUNDERGROUND file format
 #
 # Revision 3 - Had to make only one pull to the WS1400, as it seems to not like 3 hives all pulling 3 html requests at once.
 # Pretty lame, if you ask me, but it's the weather station i have.
-#
+# 
+# Had to add a random sleep because we still can't seem to pull weatherdata all at the same time, as now it takes a few seconds
+# to load the page, causing timeouts for the others.
+# 	
 #Set some variables
 # Url of your WS-1400
 
 # Record the date we pulled it - ignore what time the receiver says so we stay in sync with the local computer time
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
+source /home/HiveControl/scripts/data/check.inc
 
 URL="http://$local_wx_url/livedata.htm"
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
-curl -s $URL -o webpage.html || exit 1
+#Added Sleep Function Here, all in seconds
+#SLEEPTIME=$((1 + RANDOM % 30))
+#sleep $SLEEPTIME
+
+TRYCOUNTER="1" 
+DATA_GOOD="0" 
+
+while [[ $TRYCOUNTER -lt 6 && $DATA_GOOD -eq 0 ]];
+do
+	curl -s $URL -o webpage.html || exit 1
+	CHECKERROR=$(cat webpage.html | grep "outTemp" | cut -f 14 -d'"')
+	if [ "$CHECKERROR" -eq "--.-" ]; then
+		loglocal "$DATE" WEATHER INFO "Did not get a proper outTemp from WS1400, trying again"
+		let TRYCOUNTER+=1
+		rm -rf webpage.html
+	else
+		DATA_GOOD=1
+	fi
+done
+
+if [ $TRYCOUNTER -lt "5" ]; then
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp from WS1400"
+fi
 
 # Get the data from the device
 eval $(cat webpage.html | egrep "(in|out)(Temp|Humi)" | cut -f 4,14 -d'"' --output-delimiter='=')
 eval $(cat webpage.html | egrep "(rainofhourly|uvi|AbsPress|RelPress|windir|avgwind|gustspeed|solarrad)" |cut -f 4,14 -d'"' --output-delimiter='=')
 eval $(cat webpage.html | egrep "(rainofdaily)" |head -n 1 |cut -f 4,12 -d'"' --output-delimiter='=')
-
 rm -rf webpage.html
+
 
 # Do some conversions to
 # My WS is setup to display F by default - below we convert to C
@@ -81,7 +107,7 @@ precip_1hr_metric="$(echo "scale=2; (${rainofhourly} / 0.039370)" |bc)"
 precip_today_metric="$(echo "scale=2; (${rainofdaily} / 0.039370)" |bc)"
 
 if [[ -z "${outTemp}" ]]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp"
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp, even after counter"
 	#Since we didn't get a proper file, we should assume the whole thing is borked
 	exit
 fi
