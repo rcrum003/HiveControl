@@ -292,13 +292,13 @@ if(isset($_GET["command"])) {
                                     <div class="text-center">Server Status</div>
                 </a></button>
                 <a href="/admin/system.php?command=pause">
-                    <?PHP if($RUN == "yes") { 
+                    <?PHP if($RUN == "yes") || ( $RUN == "run"){ 
                         #we are running
                         echo '<button type="button" class="btn btn-outline btn-default btn-lg">
                         <img src="../images/pause.png" width="75" height="75">
                         <div class="text-center">Pause</div>';
                     }
-                        elseif($RUN=="no") {
+                        elseif($RUN == "no") {
                             # we arent running..
                             echo '<button type="button" class="btn btn-danger btn-lg">
                             <img src="../images/play.png" width="75" height="75">

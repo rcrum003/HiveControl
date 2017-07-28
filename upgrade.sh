@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="72"
+Upgrade_ver="78"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -324,7 +324,7 @@ if [[ "$Installed_Ver" < "1.71" ]]; then
 	sudo crontab /home/HiveControl/install/cron/cron.new
 fi
 
-if [[ "$Installed_Ver" < "1.83" ]]; then
+if [[ "$Installed_Ver" < "1.85" ]]; then
 	sudo apt-get update
 	#Install Jq to work better with JSON data
 	sudo apt-get install jq
