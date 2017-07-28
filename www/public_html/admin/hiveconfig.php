@@ -3,7 +3,7 @@
 // Standard includes
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
-require $_SERVER["DOCUMENT_ROOT"] . '/admin/http.php';
+//require $_SERVER["DOCUMENT_ROOT"] . '/admin/http.php';
 //require $_SERVER["DOCUMENT_ROOT"] . '/admin/api.php';
 
 ###################################################
