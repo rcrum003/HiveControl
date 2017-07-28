@@ -3,7 +3,7 @@
 <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 #Get Site Orient and Options
-$sth3 = $conn->prepare("SELECT SITE_ORIENT,HIVENAME,SITE_TYPE,SHOW_METRIC FROM hiveconfig");
+$sth3 = $conn->prepare("SELECT SITE_ORIENT,HIVENAME,SITE_TYPE,SHOW_METRIC,HIVEAPI FROM hiveconfig");
 $sth3->execute();
 $result3 = $sth3->fetch(PDO::FETCH_ASSOC);
 
@@ -11,6 +11,7 @@ $orient = $result3['SITE_ORIENT'];
 $id = $result3['HIVENAME'];
 $SITE_TYPE = $result3['SITE_TYPE'];
 $SHOW_METRIC = $result3['SHOW_METRIC'];
+$HIVEAPI = $result3['HIVEAPI'];
 
 # =====================================================================
 # Set the header
