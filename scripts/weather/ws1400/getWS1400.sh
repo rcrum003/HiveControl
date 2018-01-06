@@ -21,9 +21,13 @@ URL="http://$local_wx_url/livedata.htm"
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
+#Remove old webpage.html
+rm -rf webpage.html
+
+
 #Added Sleep Function Here, all in seconds
-#SLEEPTIME=$((1 + RANDOM % 30))
-#sleep $SLEEPTIME
+SLEEPTIME=$((1 + RANDOM % 30))
+sleep $SLEEPTIME
 
 TRYCOUNTER="1" 
 DATA_GOOD="0" 
