@@ -32,7 +32,7 @@ while [[ $TRYCOUNTER -lt 6 && $DATA_GOOD -eq 0 ]];
 do
 	curl -s $URL -o webpage.html || exit 1
 	CHECKERROR=$(cat webpage.html | grep "outTemp" | cut -f 14 -d'"')
-	if [ "$CHECKERROR" -eq "--.-" ]; then
+	if [ "$CHECKERROR" == "--.-" ]; then
 		loglocal "$DATE" WEATHER INFO "Did not get a proper outTemp from WS1400, trying again"
 		let TRYCOUNTER+=1
 		rm -rf webpage.html

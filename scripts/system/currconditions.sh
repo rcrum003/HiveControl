@@ -1,7 +1,8 @@
 #!/bin/bash
 # Script to gather Current_Conditions to monitor beehives
-# see hivetool.net
-# Version 2.4
+# see hivecontrol.org
+# Author: Ryan Crum
+# Version 2.5
 
 #############################################
 # Get Config parameters from DB and set some basics
@@ -25,6 +26,8 @@ HOST=`hostname`
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/check.inc
 source /home/HiveControl/scripts/data/logger.inc
+source /home/HiveControl/scripts/data/cloud.inc
+
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
@@ -170,6 +173,10 @@ values (\"$HIVEID\",\"$DATE\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"
 #echo "--- Storing in DB DONE ---"
 echo "		"
 
+#Get last DB record so we can send to hivecontrol.org in order
+record_id=$(sqlite3 $HOMEDIR/data/hive-data.db "select id from allhivedata WHERE date = \"$DATE\";")
+
+
 ######################################################################
 # If sharing, create file and send to other people
 ######################################################################
@@ -217,35 +224,58 @@ if [ -z "$HIVEAPI" ]; then
 else
 	echo "--- Sharing with hivecontrol.org ---"
 	## https://www.hivecontrol.org/api/v1/hive/check
-	CLOUD_URL="https://www.hivecontrol.org/api/v1"
-	CHECKAPI="$CLOUD_URL/hive/check"
-	#http://my.hivecontrol/api/v1/hive/data
-	POST_DATA_URL="$CLOUD_URL/hive/data"
-	#POST_WX_URL="$CLOUD_URL/wx/data"
+
 
 	#################################################################
 	# Try posting with our current hive_id
 	# If it exists, it'll post.
 	# We'll also be taking the hive_id setting away from the user
 	##################################################################
-	
+
+	function SendData {	
 	#Finish sending the fields.
-	SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "hivename=$HIVENAME" -F "hive_observation_time_local=$DATE" -F "hive_temp_f=$HIVETEMPF" -F "hive_temp_c=$HIVETEMPC" -F "hive_humidity=$HIVEHUMIDITY" -F "hive_weight_lbs=$HIVEWEIGHT" -F "hive_flight_in=$IN_COUNT" -F "hive_flight_out=$OUT_COUNT" -F "wx_station_id=$WEATHER_STATIONID" -F "wx_observation_time_rfc822=$OBSERVATIONDATETIME" -F "wx_temp_f=$A_TEMP" -F "wx_relative_humidity=$B_HUMIDITY" -F "wx_dewpoint_f=$A_DEW" -F "wx_temp_c=$A_TEMP_C" -F "wx_wind_mph=$A_WIND_MPH" -F "wx_wind_dir=$A_WIND_DIR" -F "wx_wind_degrees=$wind_degrees" -F "wx_wind_gust_mpg=$wind_gust_mph" -F "wx_pressure_mb=$pressure_mb" -F "wx_pressure_in=$A_PRES_IN" -F "wx_dewpoint_c=$weather_dewc" -F "wx_solar_radiation=$solarradiation" -F "wx_precip_1hr_in=$precip_1hr_in" -F "wx_precip_1hr_metric=$precip_1hr_metric" -F "wx_precip_today_in=$precip_today_in" -F "wx_precip_today_metric=$precip_today_metric" "$POST_DATA_URL")
+	SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "hivename=$HIVENAME" -F "hive_observation_time_local=$DATE" -F "hive_temp_f=$HIVETEMPF" -F "hive_temp_c=$HIVETEMPC" -F "hive_humidity=$HIVEHUMIDITY" -F "hive_weight_lbs=$HIVEWEIGHT" -F "hive_flight_in=$IN_COUNT" -F "hive_flight_out=$OUT_COUNT" -F "wx_station_id=$WEATHER_STATIONID" -F "wx_observation_time_rfc822=$OBSERVATIONDATETIME" -F "wx_temp_f=$A_TEMP" -F "wx_relative_humidity=$B_HUMIDITY" -F "wx_dewpoint_f=$A_DEW" -F "wx_temp_c=$A_TEMP_C" -F "wx_wind_mph=$A_WIND_MPH" -F "wx_wind_dir=$A_WIND_DIR" -F "wx_wind_degrees=$wind_degrees" -F "wx_wind_gust_mpg=$wind_gust_mph" -F "wx_pressure_mb=$pressure_mb" -F "wx_pressure_in=$A_PRES_IN" -F "wx_dewpoint_c=$weather_dewc" -F "wx_solar_radiation=$solarradiation" -F "wx_precip_1hr_in=$precip_1hr_in" -F "wx_precip_1hr_metric=$precip_1hr_metric" -F "wx_precip_today_in=$precip_today_in" -F "wx_precip_today_metric=$precip_today_metric" -F "record_id=$record_id" "$POST_DATA_URL")
 
 	#Parse Various Response and set SHARE_API_STATUS
 		# Check to see if the status was Unauthenticated	
 		SHARE_SUB_STATUS=$(/bin/echo $SHARE_API_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
 
-		#echo "Share Sub is $SHARE_SUB_STATUS"
-
 
 	#Depending on STATUS Number, do something with it
 	case $SHARE_SUB_STATUS in
 		NOT_REGISTERED)
-			#Authenticated properly, but they weren't allowed to post to that ID
-			echo "Unauthorized to Post Data for that Hive ID"
-			loglocal "$DATE" SHARE_API ERROR "Unauthorized to Post Data for that Hive ID at hivecontrol.org"
+			#Register our hive now
+				#You look like a new hive, so we will register you
+				echo "trying to register hive"
+				REG_HIVE_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "name=$HIVENAME" -F "hc_version=$HCVersion" -F "timezone=$TIMEZONE" -F "power=$POWER" -F "internet=$INTERNET" -F "status=$STATUS" -F "computer=$COMPUTER" -F "start_date=$$DATE"  "$REG_HIVE_URL")
+				REG_HIVE_SUB_STATUS=$(/bin/echo $REG_HIVE_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
+
+				case $REG_HIVE_SUB_STATUS in
+					1)
+						loglocal "$DATE" HIVECONTROL INFO "Successfully registered this hive at hivecontrol.org"
+						echo "Successfully registered this hive at hivecontrol.org"
+						#If was successful, so try reposting the data again
+						SendData
+					;;
+					INVALID_DATA)
+						ERROR="Invalid data posted to HiveControl for Registration"
+						loglocal "$DATE" HIVECONTROL ERROR "$ERROR"
+						echo "$ERROR"
+						exit;
+					;;
+					DUPLICATE)
+						ERROR="Duplicate HiveName exists under your account"
+						loglocal "$DATE" HIVECONTROL ERROR "$ERROR"
+						echo "$ERROR"
+						exit;
+					;;
+					esac
+
+					#Invalid_data
+					echo "Data Posted was Invalid"
+					loglocal "$DATE" SHARE_API ERROR "Data Posted to hivecontrol.org was Invalid"
 		;;
+		
 		1)
 			#Success
 			echo "Successfully Posted to HiveControl.org"
@@ -266,7 +296,7 @@ else
 			loglocal "$DATE" SHARE_API INFO "Updated HiveID based on HiveName from hivecontrol.org"
 			
 			HIVEID=$(/bin/echo $SHARE_API_STATUS | ./JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $2}')
-				echo "NewHIVeId is $HIVEID"
+				echo "NewHiveId is $HIVEID"
 			#Update HiveID in DB, including version
 				DBVERSION=$(sqlite3 $HOMEDIR/data/hive-data.db "select version from hiveconfig;")
 				DBVERSION=$((DBVERSION+1))
@@ -279,6 +309,9 @@ else
 			loglocal "$DATE" SHARE_API ERROR "Error: $SHARE_API_STATUS "
 		;;
 	esac
+	}
+	#Call the function to senddata
+	SendData
 fi
 	
 
