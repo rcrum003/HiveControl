@@ -2,7 +2,7 @@
 # Script to gather Current_Conditions to monitor beehives
 # see hivecontrol.org
 # Author: Ryan Crum
-# Version 2.5
+# Version 2.6
 
 #############################################
 # Get Config parameters from DB and set some basics
@@ -247,7 +247,7 @@ else
 			#Register our hive now
 				#You look like a new hive, so we will register you
 				echo "trying to register hive"
-				REG_HIVE_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "name=$HIVENAME" -F "hc_version=$HCVersion" -F "timezone=$TIMEZONE" -F "power=$POWER" -F "internet=$INTERNET" -F "status=$STATUS" -F "computer=$COMPUTER" -F "start_date=$$DATE"  "$REG_HIVE_URL")
+				REG_HIVE_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "name=$HIVENAME" -F "hc_version=$HCVersion" -F "timezone=$TIMEZONE" -F "power=$POWER" -F "internet=$INTERNET" -F "status=$STATUS" -F "computer=$COMPUTER" -F "start_date=$DATE"  "$REG_HIVE_URL")
 				REG_HIVE_SUB_STATUS=$(/bin/echo $REG_HIVE_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
 
 				case $REG_HIVE_SUB_STATUS in
@@ -302,7 +302,7 @@ else
 				DBVERSION=$((DBVERSION+1))
 				sqlite3 $HOMEDIR/data/hive-data.db "UPDATE hiveconfig SET hiveid=\"$HIVEID\", version=\"$DBVERSION\";"
 			#Try to send again with new HIVEID
-				SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "hivename=$HIVENAME" -F "hive_observation_time_local=$DATE" -F "hive_temp_f=$HIVETEMPF" -F "hive_temp_c=$HIVETEMPC" -F "hive_humidity=$HIVEHUMIDITY" -F "hive_weight_lbs=$HIVEWEIGHT" -F "hive_flight_in=$IN_COUNT" -F "hive_flight_out=$OUT_COUNT" -F "wx_station_id=$WEATHER_STATIONID" -F "wx_observation_time_rfc822=$OBSERVATIONDATETIME" -F "wx_temp_f=$A_TEMP" -F "wx_relative_humidity=$B_HUMIDITY" -F "wx_dewpoint_f=$A_DEW" -F "wx_temp_c=$A_TEMP_C" -F "wx_wind_mph=$A_WIND_MPH" -F "wx_wind_dir=$A_WIND_DIR" -F "wx_wind_degrees=$wind_degrees" -F "wx_wind_gust_mpg=$wind_gust_mph" -F "wx_pressure_mb=$pressure_mb" -F "wx_pressure_in=$A_PRES_IN" -F "wx_dewpoint_c=$weather_dewc" -F "wx_solar_radiation=$solarradiation" -F "wx_precip_1hr_in=$precip_1hr_in" -F "wx_precip_1hr_metric=$precip_1hr_metric" -F "wx_precip_today_in=$precip_today_in" -F "wx_precip_today_metric=$precip_today_metric" "$POST_DATA_URL")
+				SHARE_API_STATUS=$(/usr/bin/curl --silent --retry 5 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "hivename=$HIVENAME" -F "hive_observation_time_local=$DATE" -F "hive_temp_f=$HIVETEMPF" -F "hive_temp_c=$HIVETEMPC" -F "hive_humidity=$HIVEHUMIDITY" -F "hive_weight_lbs=$HIVEWEIGHT" -F "hive_flight_in=$IN_COUNT" -F "hive_flight_out=$OUT_COUNT" -F "wx_station_id=$WEATHER_STATIONID" -F "wx_observation_time_rfc822=$OBSERVATIONDATETIME" -F "wx_temp_f=$A_TEMP" -F "wx_relative_humidity=$B_HUMIDITY" -F "wx_dewpoint_f=$A_DEW" -F "wx_temp_c=$A_TEMP_C" -F "wx_wind_mph=$A_WIND_MPH" -F "wx_wind_dir=$A_WIND_DIR" -F "wx_wind_degrees=$wind_degrees" -F "wx_wind_gust_mpg=$wind_gust_mph" -F "wx_pressure_mb=$pressure_mb" -F "wx_pressure_in=$A_PRES_IN" -F "wx_dewpoint_c=$weather_dewc" -F "wx_solar_radiation=$solarradiation" -F "wx_precip_1hr_in=$precip_1hr_in" -F "wx_precip_1hr_metric=$precip_1hr_metric" -F "wx_precip_today_in=$precip_today_in" -F "wx_precip_today_metric=$precip_today_metric" -F "record_id=$record_id" "$POST_DATA_URL")
 		;;
 		*)
 			#default - unknown error
