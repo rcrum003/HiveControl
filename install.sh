@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v39 - for HiveControl
+# v40 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -162,10 +162,10 @@ echo "========================================================================"
 
 #Install webserver 
 echo "Installing Apache/PHP"
-sudo apt-get install apache2 php5 libapache2-mod-php5 -y
+sudo apt-get install apache2 php libapache2-mod-php -y
 
 echo "Installing SQLite for local storage, and mysql-client for communications"
-sudo apt-get install sqlite3 php5-sqlite -y
+sudo apt-get install sqlite3 php-sqlite3 -y
 sudo apt-get install mysql-client -y
 sudo apt-get install jq -y
 
@@ -197,6 +197,8 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_24
 sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET RUN=\"yes\" WHERE id=\"1\";"
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_25
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_26
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_27
+
 
 #Set shell scripts to be executable
 cd /home/HiveControl/
@@ -215,16 +217,18 @@ echo "========================================================================"
 ####################################################################################
 # Make Phidget software
 echo "Installing Phidget software "
-cd /home/HiveControl/software/Phidgets
-tar -xzvf libphidget.tar.gz
-cd /home/HiveControl/software/Phidgets/libphidget-2.1.8.20150410
-sudo ./configure 
-sudo make 
-sudo make install
 
-cd ../
-sudo unzip PhidgetsPython.zip
-cd PhidgetsPython
+#New apt-get method
+wget -qO- http://www.phidgets.com/gpgkey/pubring.gpg | apt-key add -
+#Get Release
+DEB_RELEASE=$(cat /etc/os-release |grep VERSION= |awk -F\( '{print $2}' | awk -F\) '{print $1}')
+echo 'deb http://www.phidgets.com/debian $DEB_RELEASE main' > /etc/apt/sources.list.d/phidgets.list
+sudo apt-get update
+apt-get install libphidget22
+
+cd /home/HiveControl/software/Phidgets
+sudo unzip Phidgets22Python.zip
+cd Phidgets22Python
 sudo python setup.py install
 
 ####################################################################################
@@ -273,12 +277,13 @@ echo "Installing PIGPIO library for DHT and HX711 Sensors"
 #Kill pigpiod just in case it is already running
 sudo killall pigpiod
 #Get code
-cd /home/HiveControl/software
-sudo wget https://github.com/joan2937/pigpio/archive/master.zip
-sudo unzip master.zip
-cd pigpio-master
-make -j4
-sudo make install
+#cd /home/HiveControl/software
+#sudo wget https://github.com/joan2937/pigpio/archive/master.zip
+#sudo unzip master.zip
+#cd pigpio-master
+#make -j4
+#sudo make install
+sudo apt-get install pigpio -y
 
 
 #Allow www-data to run python and other commands

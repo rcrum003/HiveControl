@@ -2,7 +2,7 @@
 # Script to setup beecounter
 # Only install if you are going to use the beecounter
 # If you aren't, then you'll save a ton of space
-
+# Version 2.0
 
 
 #Get Dependencies
@@ -32,12 +32,14 @@ sudo apt-get install python2.7-dev python3-dev -y
 #Let's get OpenCV
 mkdir /opt/OpenCV
 cd /opt/OpenCV
-wget -O opencv.zip https://github.com/rcrum003/opencv/archive/3.1.0.zip
+#wget -O opencv.zip https://github.com/rcrum003/opencv/archive/3.1.0.zip
+wget -O opencv.zip https://github.com/opencv/opencv/archive/3.4.0.zip
+https://github.com/opencv/opencv_contrib/archive/3.4.0.zip
 unzip opencv.zip
 rm -rf opencv.zip
 
 #Let's get contrib as well, to get some algorithms that aren't included in the base
-wget -O opencv_contrib.zip https://github.com/rcrum003/opencv_contrib/archive/3.1.0.zip
+wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.4.0.zip
 unzip opencv_contrib.zip
 rm -rf opencv_contrib.zip
 
@@ -52,14 +54,14 @@ pip install numpy
 
 
 #Compile and install OpenCV into our container
-cd /opt/OpenCV/opencv-3.1.0/
+cd /opt/OpenCV/opencv-3.4.0/
 mkdir build
 cd build
 cmake -D CMAKE_BUILD_TYPE=RELEASE \
 	-D CMAKE_INSTALL_PREFIX=/usr/local \
 	-D INSTALL_C_EXAMPLES=OFF \
 	-D INSTALL_PYTHON_EXAMPLES=ON \
-	-D OPENCV_EXTRA_MODULES_PATH=/opt/OpenCV/opencv_contrib-3.1.0/modules \
+	-D OPENCV_EXTRA_MODULES_PATH=/opt/OpenCV/opencv_contrib-3.4.0/modules \
 	-D BUILD_EXAMPLES=ON ..
 
 
@@ -79,12 +81,14 @@ echo "-------------------------------------"
 echo "Installing mjpg-streamer code"
 echo "-------------------------------------"
 cd /opt
-sudo git clone https://github.com/rcrum003/mjpg-streamer
+#sudo git clone https://github.com/rcrum003/mjpg-streamer
 # Compile it
-cd /opt/mjpg-streamer/mjpg-streamer-experimental
-sudo make
+sudo apt-get install mjpg-streamer
+
+#cd /opt/mjpg-streamer/mjpg-streamer-experimental
+#sudo make
 # Install it
-sudo make install
+#sudo make install
 #Setup mjpg-streamer to start when the machine boots
 sudo cp /home/HiveControl/install/init.d/livestream /etc/init.d/
 
