@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v40 - for HiveControl
+# v41 - for HiveControl
 # 
 # Must run under root
 # Usage: sudo ./install.sh
@@ -224,9 +224,11 @@ wget -qO- http://www.phidgets.com/gpgkey/pubring.gpg | apt-key add -
 DEB_RELEASE=$(cat /etc/os-release |grep VERSION= |awk -F\( '{print $2}' | awk -F\) '{print $1}')
 echo 'deb http://www.phidgets.com/debian $DEB_RELEASE main' > /etc/apt/sources.list.d/phidgets.list
 sudo apt-get update
-apt-get install libphidget22
+sudo apt-get install libphidget22
 
-cd /home/HiveControl/software/Phidgets
+cd /home/HiveControl/software
+sudo mkdir Phidgets
+sudo wget https://www.phidgets.com/downloads/phidget22/libraries/any/Phidget22Python.zip
 sudo unzip Phidgets22Python.zip
 cd Phidgets22Python
 sudo python setup.py install
