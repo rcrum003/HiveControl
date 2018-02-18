@@ -368,6 +368,17 @@ sudo crontab /home/HiveControl/install/cron/cron.new
 #Remove DHCP stuff, since it gets in the way of finding our machine
 #apt-get remove isc-dhcp-client
 
+
+#Install .htpasswd
+echo "Please set an admin password for http://127.0.0.1/admin/ access:"
+cd /home/HiveControl/www/
+htpasswd -c .htpasswd admin
+sudo service apache2 restart
+
+#Set your timezone
+dpkg-reconfigure tzdata
+
+
 if [[ $BEECOUNTER = "true" ]]; then
 	installBeeCount
 else
@@ -384,15 +395,6 @@ else
 		done
 fi
 
-#Install .htpasswd
-echo "Please set an admin password for http://127.0.0.1/admin/ access:"
-cd /home/HiveControl/www/
-htpasswd -c .htpasswd admin
-sudo service apache2 restart
-
-#Set your timezone
-dpkg-reconfigure tzdata
-
 echo "========================================================"
 echo "Completed Setup of HiveControl"
 echo "========================================================"
@@ -402,6 +404,8 @@ read aok
 echo "REBOOTING...."
 /bin/sync
 /sbin/reboot
+
+
 
 
 
