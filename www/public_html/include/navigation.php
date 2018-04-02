@@ -11,7 +11,6 @@ $orient = $result3['SITE_ORIENT'];
 $id = $result3['HIVENAME'];
 $SITE_TYPE = $result3['SITE_TYPE'];
 $SHOW_METRIC = $result3['SHOW_METRIC'];
-$HIVEAPI = $result3['HIVEAPI'];
 
 # =====================================================================
 # Set the header

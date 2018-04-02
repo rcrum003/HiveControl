@@ -2,10 +2,11 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v41 - for HiveControl
+# v42 - for HiveControl
 # 
 # Must run under root
-# Usage: sudo ./install.sh
+# sudo bash 
+# Usage: ./install.sh
 # ==================================================
 
 
@@ -116,6 +117,8 @@ fi
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
+#Running update again because upgrade breaks it for some reason
+sudo apt-get update -y
 
 
 # Install the basics
@@ -199,6 +202,9 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_25
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_26
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_27
 
+VER=$(cat /home/HiveControl/VERSION)
+sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET hc_version='$VER' WHERE id=\"1\";"
+
 
 #Set shell scripts to be executable
 cd /home/HiveControl/
@@ -278,14 +284,7 @@ sudo cp utils/hid-query /usr/local/bin/
 echo "Installing PIGPIO library for DHT and HX711 Sensors"
 #Kill pigpiod just in case it is already running
 sudo killall pigpiod
-#Get code
-#cd /home/HiveControl/software
-#sudo wget https://github.com/joan2937/pigpio/archive/master.zip
-#sudo unzip master.zip
-#cd pigpio-master
-#make -j4
-#sudo make install
-sudo apt-get install pigpio -y
+sudo apt-get install pigpio python-pigpio python3-pigpio -y
 
 
 #Allow www-data to run python and other commands
