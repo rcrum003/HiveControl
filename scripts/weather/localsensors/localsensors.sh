@@ -1,6 +1,6 @@
 
 #!/bin/bash
-# Version 1.1
+# Version 1.2
 # Script to output localized DHT22 and RainSensor that matches WUNDERGROUND file format
 #
 # 
@@ -13,6 +13,11 @@ source /home/HiveControl/scripts/data/logger.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
+#Set some default values for the sensors that don't provide it
+WXPRESSURE_MB="0"
+WXPRESSURE_IN="0"
+
+
 # =======================================
 # Get the data from the device
 # =======================================
@@ -23,7 +28,16 @@ elif [[ $WXTEMPTYPE == "dht22" ]]; then
 	WXTEMP=`$HOMEDIR/scripts/weather/localsensors/wxdht22.sh `
 elif [[ $WXTEMPTYPE == "dht21" ]]; then
 	WXTEMP=`$HOMEDIR/scripts/weather/localsensors/wxdht21.sh`
+elif [[ $WXTEMPTYPE = "sht31d" ]]; then
+	WXTEMP=$($HOMEDIR/scripts/weather/localsensors/wxsht31-d.sh)
+elif [[ $WXTEMPTYPE = "bme680" ]]; then
+    WXTEMP=$($HOMEDIR/scripts/weather/localsensors/wxbme680.sh)
+    WXPRESSURE_MB=$(echo $WXTEMP |awk '{print $5}')
+    WXGAS=$(echo $WXTEMP |awk '{print $6}')
+    #To convert millibars to inches of mercury, multiply the millibar value by 0.0295301
+    WXPRESSURE_IN=$(echo "scale=2; ($WXPRESSURE_MB * 0.0295301)" | bc )
 fi
+
 
 # ------END GET TEMP/Humidity ------
 
@@ -32,6 +46,7 @@ raininhourly=0
 rainmetrichour=0
 rainindaily=0
 rainmetricdaily=0
+
 # ------ END GET Rain Data ------
 
 #============================================
@@ -76,8 +91,8 @@ echo "		\"wind_mph\":\"0\","
 echo "		\"wind_gust_mph\":\"0\","
 echo "		\"wind_kph\":\"0\","
 echo "		\"wind_gust_kph\":\"0\","
-echo "		\"pressure_mb\":\"0\","
-echo "		\"pressure_in\":\"0\","
+echo "		\"pressure_mb\":\"$WXPRESSURE_MB\","
+echo "		\"pressure_in\":\"$WXPRESSURE_IN\","
 echo "		\"pressure_trend\":\"-\","
 echo "		\"dewpoint_f\":$WXDEW,"
 echo "		\"dewpoint_c\":0,"
@@ -119,8 +134,8 @@ echo "
 		<wind_gust_mph>0</wind_gust_mph>
 		<wind_kph>0</wind_kph>
 		<wind_gust_kph>0</wind_gust_kph>
-		<pressure_mb>0</pressure_mb>
-		<pressure_in>0</pressure_in>
+		<pressure_mb>$WXPRESSURE_MB</pressure_mb>
+		<pressure_in>$WXPRESSURE_IN</pressure_in>
 		<pressure_trend>-</pressure_trend>
 		<dewpoint_f>$WXDEW</dewpoint_f>
 		<dewpoint_c>0</dewpoint_c>

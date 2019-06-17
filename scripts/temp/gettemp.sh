@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 1.1
+# version 1.2, 2019-01-21
 # reads the temp sensors as one script
 
 
@@ -19,6 +19,10 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 			GETTEMP=`$HOMEDIR/scripts/temp/dht22.sh`
 		elif [[ $TEMPTYPE = "dht21" ]]; then
 			GETTEMP=`$HOMEDIR/scripts/temp/dht21.sh`
+		elif [[ $TEMPTYPE = "sht31d" ]]; then
+			GETTEMP=$($HOMEDIR/scripts/temp/sht31-d.sh)
+		elif [[ $TEMPTYPE = "bme680" ]]; then
+			GETTEMP=$($HOMEDIR/scripts/temp/bme680.sh)
 		fi
 
 		HIVETEMPF=$(echo $GETTEMP |awk '{print $1}')

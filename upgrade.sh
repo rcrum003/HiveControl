@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="80"
+Upgrade_ver="81"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -263,7 +263,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_28
 			let DB_ver="21"
 		fi
-		
+
 	else
 		echo "Skipping DB, no new database upgrades available"
 	fi
@@ -334,6 +334,16 @@ if [[ "$Installed_Ver" < "1.85" ]]; then
 	sudo apt-get install jq
 	
 fi
+
+if [[ "$Installed_Ver" < "1.90" ]]; then
+	#Install 1.90 Version
+		
+	
+		#Lets update all of our libraries at the end, so the reboot don't mess with our Jo-Jo
+		sudo apt-get update
+	
+fi
+
 
 echo "============================================="
 echo "success"

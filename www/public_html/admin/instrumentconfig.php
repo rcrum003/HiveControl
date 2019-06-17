@@ -269,7 +269,9 @@ if($v->validate()) {
                                                 <input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="temperhum"'; if ($result['TEMPTYPE'] == "temperhum") {echo "checked";} echo '> TemperHum
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="temper"'; if ($result['TEMPTYPE'] == "temper") {echo "checked";} echo '> Temper 
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22 
-                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21';
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="sht31d"'; if ($result['TEMPTYPE'] == "sht31d") {echo "checked";} echo '> SHT31-D
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="bme680"'; if ($result['TEMPTYPE'] == "bme680") {echo "checked";} echo '> BME680';
                                             }
                                             ?></td>
                                             <td>
@@ -542,10 +544,12 @@ if($v->validate()) {
                             <td><a href="#" title="Weather Source" data-toggle="popover" data-placement="bottom" data-content="Specify where you want to get your ambient weather data from."><p class="fa fa-question-circle fa-fw"></P></a>Weather Source<br>
 
 <!-- ******************************************************************************************** -->
+
                             
                             <select name="WEATHER_LEVEL" onchange="this.form.submit()">
                             <!-- <option value="yard" <?php #if ($result['WEATHER_LEVEL'] == "yard") {echo "selected='selected'";} ?>>Yard Controller</option> -->
                             <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
+                            <option value="ambientwx" <?php if ($result['WEATHER_LEVEL'] == "ambientwx") {echo "selected='selected'";} ?>>AmbientWeather.net</option>
                             <option value="localws" <?php if ($result['WEATHER_LEVEL'] == "localws") {echo "selected='selected'";} ?>>Local Weather Station</option>
                             <option value="localsensors" <?php if ($result['WEATHER_LEVEL'] == "localsensors") {echo "selected='selected'";} ?>>Local Hive Sensors</option>
                             </select></td>
@@ -565,7 +569,18 @@ if($v->validate()) {
                                     //echo '<input type="hidden" name="KEY" value="'; echo $result['KEY']; echo '">';
                                     //echo '<input type="hidden" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">';    
                                 }
-                                    
+                                
+                                if ($result['WEATHER_LEVEL'] == "ambientwx") {
+                                    //Ambient Weeather.net settings
+                                    //ambient_APIKEY="921a16ba268c40de86bd014246476a536fed326ffb9c41fda8b17ca0cab977af"
+                                    //ambient_APPKey="99d38400a7ff405a9389b113423f3416440cf4e7738841709862a048d7faaa8a"
+                                    //ambient_deviceMAC="B4:E6:2D:07:87:49"
+                                    //ambient_device_url="https://api.ambientweather.net/v1/devices"
+
+                                    echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
+                                    echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
+                                }
+
                                 if ($result['WEATHER_LEVEL'] == "localws") {
                                     #echo 'Using WS1400.sh for local WX Station';
                                     echo '
@@ -581,7 +596,9 @@ if($v->validate()) {
                                     echo '
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="temperhum"'; if ($result['WXTEMPTYPE'] == "temperhum") {echo "checked";} echo '> Temperhum<br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21<br>
-                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22';
+                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22<br>
+                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="sht31d"'; if ($result['WXTEMPTYPE'] == "sht31d") {echo "checked";} echo '> SHT31-D<br>
+                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="bme680"'; if ($result['WXTEMPTYPE'] == "bme680") {echo "checked";} echo '> BME680';
                                     if ($result['WXTEMPTYPE'] == "temperhum") {
                                         echo '</td><td>Device <input type="text" name="WX_TEMPER_DEVICE" onchange="this.form.submit()" value="'; echo $result['WX_TEMPER_DEVICE']; echo '"">';
 
@@ -595,27 +612,6 @@ if($v->validate()) {
                                 <td> </td>
                                 <td></td>
                         </tr>
-
-                        <?PHP if ($result['WEATHER_LEVEL'] == "localws" || $result['WEATHER_LEVEL'] == "localsensors" ) {
-                            echo '
-                            <tr class="odd gradeX">
-                            <td><a href="#" title="Weather Source" data-toggle="modal" data-target="#wx"><p class="fa fa-question-circle fa-fw"></P></a>Weather Forecast Source</td>
-                            <td>
-
-                            <select name="WEATHER_DETAIL" onchange="this.form.submit()">
-                            <option value="station"'; if ($result['WEATHER_DETAIL'] == "station") {echo "selected='selected'";} echo '>WX Station</option>
-                            <option value="city"'; if ($result['WEATHER_DETAIL'] == "city") {echo "selected='selected'";} echo '>City</option>
-                            </select></td>
-                            <td>
-                                API KEY <input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
-                                if ($result['WEATHER_DETAIL'] == "station") {
-                                echo 'STATION ID <input type="text" onchange="this.form.submit()" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">'; }   
-                            echo '</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>'; } ?>
-
                                     </tbody>
                                 </table>
 
