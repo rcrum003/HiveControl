@@ -103,10 +103,6 @@ echo '
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
-            
-                 <li>
-                    <a href="/pages/environment.php"><i class="fa fa-table fa-fw"></i>Weather</a>
-                </li>
                     <li>
                             <a href="/pages/video.php"><i class="fa fa-video-camera fa-fw"></i>Camera</a>
                         </li>
@@ -171,9 +167,6 @@ if ($orient == "normal") {
                                 </li>
                                 
                             </ul>
-                        <li>
-                            <a href="/pages/environment.php"><i class="fa fa-table fa-fw"></i> Weather</a>
-                        </li>
                         <li>
                             <a href="/pages/video.php"><i class="fa fa-video-camera fa-fw"></i> Live WebCam</a>
                         </li>

@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="81"
+Upgrade_ver="82"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -331,17 +331,38 @@ fi
 if [[ "$Installed_Ver" < "1.85" ]]; then
 	sudo apt-get update
 	#Install Jq to work better with JSON data
-	sudo apt-get install jq
+	sudo apt-get install jq -y
 	
 fi
 
 if [[ "$Installed_Ver" < "1.90" ]]; then
 	#Install 1.90 Version
 		
-	
 		#Lets update all of our libraries at the end, so the reboot don't mess with our Jo-Jo
 		sudo apt-get update
-	
+
+				#install i2c - do this last becasue we may reboot
+		sudo ./setup_i2c.sh
+		
+		echo "-------------------------------"
+		echo "Installing new BME680 Drivers"
+		echo "-------------------------------"
+		#Copy the code, #BME Drive includes modified code for our specific output.
+		cd /home/HiveControl/software
+		sudo git clone https://github.com/rcrum003/BME680_driver
+		cd BME680_driver
+		sudo gcc bme680_main.c bme680.c -o bme680
+		sudo cp bme680 /usr/local/bin
+
+		echo "-------------------------------"
+		echo "Installing new SHT Drivers"
+		echo "-------------------------------"
+		cd /home/HiveControl/software
+		sudo git clone https://github.com/rcrum003/Adafruit-sht31-for-PI
+		cd Adafruit-sht31-for-PI/
+		sudo make
+		sudo cp sht31-d /usr/local/bin
+
 fi
 
 
