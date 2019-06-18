@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v42 - for HiveControl
+# v43 - for HiveControl
 # 
 # Must run under root
 # sudo bash 
@@ -160,6 +160,12 @@ cd /home
 sudo git clone https://github.com/rcrum003/HiveControl 
 
 echo "========================================================================"
+echo "Setting up i2c"
+echo "========================================================================"
+sudo chmod u+x /home/HiveControl/install/setup_i2c.sh
+sudo /home/HiveControl/install/setup_i2c.sh
+
+echo "========================================================================"
 echo "Installing Web Server Software"
 echo "========================================================================"
 
@@ -201,6 +207,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET RUN=\"ye
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_25
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_26
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_27
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_28
 
 VER=$(cat /home/HiveControl/VERSION)
 sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET hc_version='$VER' WHERE id=\"1\";"
@@ -327,6 +334,29 @@ if [[ $XRDP == "true" ]]; then
 	#Used for folks who like to RDP to the server (aka the Nate Feature)
 	sudo apt-get install xrdp -y
 fi
+####################################################################################
+# BME680 and SHT31-D Temp Sensor Support
+####################################################################################
+		echo "-------------------------------"
+		echo "Installing new BME680 Drivers"
+		echo "-------------------------------"
+		#Copy the code, #BME Drive includes modified code for our specific output.
+		cd /home/HiveControl/software
+		sudo git clone https://github.com/rcrum003/BME680_driver
+		cd BME680_driver
+		sudo gcc bme680_main.c bme680.c -o bme680
+		sudo cp bme680 /usr/local/bin
+
+		echo "-------------------------------"
+		echo "Installing new SHT Drivers"
+		echo "-------------------------------"
+		cd /home/HiveControl/software
+		sudo git clone https://github.com/rcrum003/Adafruit-sht31-for-PI
+		cd Adafruit-sht31-for-PI/
+		sudo make
+		sudo cp sht31-d /usr/local/bin
+####################################################################################
+
 
 if [[ $KEYBOARD = "true" ]]; then
 	#Adds touch screen keyboard
@@ -403,6 +433,9 @@ read aok
 echo "REBOOTING...."
 /bin/sync
 /sbin/reboot
+
+
+
 
 
 
