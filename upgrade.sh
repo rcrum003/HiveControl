@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="84"
+Upgrade_ver="85"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -363,6 +363,17 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 		cd Adafruit-sht31-for-PI/
 		sudo make
 		sudo cp sht31-d /usr/local/bin
+
+		#Need to reboot
+		echo "========================================================"
+		echo "Completed Upgrade to 1.90 of HiveControl"
+		echo "========================================================"
+		echo "SORRY, A REBOOT IS REQUIRED NOW!"
+		echo "Press ENTER to reboot : \c"
+		read aok
+		echo "REBOOTING...."
+		/bin/sync
+		/sbin/reboot
 
 fi
 
