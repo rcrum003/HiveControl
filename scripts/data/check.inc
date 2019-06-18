@@ -38,3 +38,4 @@ function check_allow_neg() {
       let ${1}='null'
     fi
 }
+
