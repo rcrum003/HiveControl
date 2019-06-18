@@ -1,11 +1,11 @@
 #!/bin/bash
 # Script to get variables from db to use in our scripts
-# Version 4.0
+# Version 2019061801
 
 source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/cloud.inc
 
-set -x
+
 #Set some default variables
 LOCALDATABASE=/home/HiveControl/data/hive-data.db
 CONFIGOUT="/home/HiveControl/scripts/hiveconfig.inc"
@@ -190,7 +190,16 @@ else # 1.
 				fi
 
 			}
-
+			##############################################
+			#
+			#
+			#
+			# Look here - it's not finished below.
+			#
+			#
+			#
+			#
+			###############################################
 			#try this function before we do a whole bunch
 			A POST_hiveapi hive_api
 			A POST_power power
@@ -201,6 +210,7 @@ else # 1.
 			MESSAGE="Updating Local Config with Newer Version from HiveControl.org"
 			loglocal "$DATE" CONFIG INFO "$MESSAGE"
 			echo "$MESSAGE"
+			echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
 			
 			
 		 	fi # 4.
@@ -221,13 +231,17 @@ else # 1.
 			#Parse Various Response and set SHARE_API_STATUS
 			# Check to see if the status was Unauthenticated	
 			#SHARE_SUB_STATUS=$(/bin/echo $SHARE_API_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
+				 
 				 fi	#5
 	
 		fi #2
 	
-		#POST_GETCONFIG_URL 
-		#POST_UPDATECONFIG_URL		
-	
+		
+		###############################################################
+		# 
+		# Finish up by exporting to a flat file for the scripts to use
+		#
+		###############################################################
 		# If we passed the two tests above, we can continue
 		# Dump to a tempfile
 		sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
@@ -235,9 +249,7 @@ else # 1.
 
 		cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT 
 
-		loglocal "$DATE" CONFIG SUCCESS "Updated Config to Version $DBVERSION"
-
-		echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
+		
 
 	fi # 1.
 #######################################################
@@ -265,9 +277,8 @@ else # 1.
 
 	cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT 
 
-	loglocal "$DATE" CONFIG SUCCESS "Updated Config to Version $DBVERSION"
-
-	echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
+	#loglocal "$DATE" CONFIG SUCCESS "Updated Config to Version $DBVERSION"
+  echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
 
 ##########
 # END

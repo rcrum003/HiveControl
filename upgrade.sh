@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="85"
+Upgrade_ver="86"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -374,6 +374,13 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 		echo "REBOOTING...."
 		/bin/sync
 		/sbin/reboot
+
+		if [[ $DB_ver -eq "20" ]]; then
+			echo "Applying DB Ver21 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_28
+			let DB_ver="21"
+			sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
+		fi
 
 fi
 
