@@ -1,4 +1,15 @@
 Release Notes:
+
+--------------------
+1.91 Release
+--------------------
+
+- HiveControl.net
+	1. Added/Fixed script to connect and register with hivecontrol.org
+	2. Added functions to sync hivecontrol.net and the local hive configuration files, this will help if you need to rebuild a hive
+
+- Added Version Footer, so you can easily see what version each hive is running.
+
 --------------------
 1.90 Release
 --------------------
@@ -12,10 +23,6 @@ Release Notes:
 		See HiveControl wiki for instructions
 - OS Updates
 	1. Forced all hives to upgrade/update packages
-
-- HiveControl.net
-	1. Added/Fixed script to connect and register with hivecontrol.org
-	2. Added functions to sync hivecontrol.net and the local hive configuration files, this will help if you need to rebuild a hive
 
 
 --------------------

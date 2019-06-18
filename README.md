@@ -3,7 +3,11 @@
 # HiveControl
 This is a supporting application to the Hivetool.org software.
 
-[![Gitter](https://badges.gitter.im/rcrum003/HiveControl.svg)](https://gitter.im/rcrum003/HiveControl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+## Release Notes
+Latest Release = 1.91
+[Release Notes](https://raw.githubusercontent.com/rcrum003/HiveControl/master/RELEASE)
+
 
 ## Now includes beecounter code
 Only use these instructions if you have version 1.61 and below.
