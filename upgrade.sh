@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="82"
+Upgrade_ver="83"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -342,7 +342,7 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 		sudo apt-get update
 
 				#install i2c - do this last becasue we may reboot
-		sudo ./setup_i2c.sh
+		sudo /home/HiveControl/install/setup_i2c.sh
 		
 		echo "-------------------------------"
 		echo "Installing new BME680 Drivers"
