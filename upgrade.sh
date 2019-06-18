@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="83"
+Upgrade_ver="84"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -342,6 +342,7 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 		sudo apt-get update
 
 				#install i2c - do this last becasue we may reboot
+		sudo chmod u+x /home/HiveControl/install/setup_i2c.sh
 		sudo /home/HiveControl/install/setup_i2c.sh
 		
 		echo "-------------------------------"
