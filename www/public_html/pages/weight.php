@@ -210,7 +210,8 @@ if(isset($_GET["chart"])) {
     
     
     <!-- Custom Theme JavaScript -->
-
+<!-- Footer -->
+         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
 </body>
 
 </html>

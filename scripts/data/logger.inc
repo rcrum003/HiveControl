@@ -3,8 +3,10 @@
 # include in script file
 # source /home/HiveControl/scripts/data/logger.inc
 
-function loglocal {
 
+function loglocal {
+#Just in case one of our other scripts decides to overwrite this var
+HOMEDIR="/home/HiveControl"
 #Stores log entries locally
 # This script takes 4 inputs and puts them into the DB
 # 1 - Date

@@ -2,7 +2,7 @@
 # Script to gather Current_Conditions to monitor beehives
 # see hivecontrol.org
 # Author: Ryan Crum
-# Version 1.90
+# Version 2019061802
 
 #############################################
 # Get Config parameters from DB and set some basics
@@ -224,9 +224,10 @@ if [ -z "$HIVEAPI" ]; then
 else
 	echo "--- Sharing with hivecontrol.org ---"
 	## https://www.hivecontrol.org/api/v1/hive/check
+	source /home/HiveControl/scripts/data/cloud.inc
 
 	#Call the function to senddata
-	hivecontrol_api_senddata
+	hc_senddata
 	
 fi
 	

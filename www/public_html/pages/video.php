@@ -225,7 +225,8 @@ $today_pop = $parsed_json->{'forecast'}->{'simpleforecast'}->{'forecastday'}[0]-
  
     
     <!-- Custom Theme JavaScript -->
-
+<!-- Footer -->
+         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
 </body>
 
 </html>
