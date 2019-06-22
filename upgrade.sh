@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="86"
+Upgrade_ver="87"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -364,17 +364,6 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 		sudo make
 		sudo cp sht31-d /usr/local/bin
 
-		#Need to reboot
-		echo "========================================================"
-		echo "Completed Upgrade to 1.90 of HiveControl"
-		echo "========================================================"
-		echo "SORRY, A REBOOT IS REQUIRED NOW!"
-		echo "Press ENTER to reboot : \c"
-		read aok
-		echo "REBOOTING...."
-		/bin/sync
-		/sbin/reboot
-
 		if [[ $DB_ver -eq "20" ]]; then
 			echo "Applying DB Ver21 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_28
@@ -396,5 +385,17 @@ sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver WHERE id=1"
 cp /home/HiveControl/upgrade/HiveControl/VERSION /home/HiveControl/
 
 
+if [[ "$Installed_Ver" < "1.90" ]]; then
+	#Need to reboot
+		echo "========================================================"
+		echo "Completed Upgrade to 1.90 of HiveControl"
+		echo "========================================================"
+		echo "SORRY, A REBOOT IS REQUIRED NOW!"
+		echo "Press ENTER to reboot : \c"
+		read aok
+		echo "REBOOTING...."
+		/bin/sync
+		/sbin/reboot
 
+fi	
 
