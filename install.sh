@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v43 - for HiveControl
+# v44 - for HiveControl
 # 
 # Must run under root
 # sudo bash 
@@ -312,10 +312,7 @@ sudo apt-get install pigpio python-pigpio python3-pigpio -y
 ####################################################################################
 	#Installing DHTXX Code
 	echo "Installing DHT Code"
-	cd /home/HiveControl/software
-	sudo mkdir DHTXXD
-	cd DHTXXD
-	sudo wget http://abyz.co.uk/rpi/pigpio/code/DHTXXD.zip
+	cd /home/HiveControl/software/DHTXXD
 	unzip DHTXXD.zip
 	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
 	sudo cp DHTXXD /usr/local/bin/
