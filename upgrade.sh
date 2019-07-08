@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="87"
+Upgrade_ver="88"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -373,6 +373,10 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 
 fi
 
+if [[ "$Installed_Ver" < "1.93" ]]; then
+	#Only run this if we haven't got the latest code
+	sudo chmod u+x /home/HiveControl/scripts/weather/wxunderground/*
+fi
 
 echo "============================================="
 echo "success"

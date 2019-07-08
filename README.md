@@ -5,9 +5,13 @@ This is a supporting application to the Hivetool.org software.
 
 
 ## Release Notes
-Latest Release = 1.91
+Latest Release = 1.93
 [Release Notes](https://raw.githubusercontent.com/rcrum003/HiveControl/master/RELEASE)
 
+## Update
+We currently support all Raspberry PI hardward/software platforms except the new PI4.
+Current install works on the lastest Raspbian OS, except the new one for PI4.
+We have ordered a PI4 and are awaiting to test compatability
 
 ## Now includes beecounter code
 Only use these instructions if you have version 1.61 and below.

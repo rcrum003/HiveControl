@@ -561,7 +561,7 @@ if($v->validate()) {
                                     // KEY
                                     // WXSTATION
 
-                                    echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
+                                    //echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
                                     echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
  
                                 }
@@ -571,11 +571,6 @@ if($v->validate()) {
                                 }
                                 
                                 if ($result['WEATHER_LEVEL'] == "ambientwx") {
-                                    //Ambient Weeather.net settings
-                                    //ambient_APIKEY="921a16ba268c40de86bd014246476a536fed326ffb9c41fda8b17ca0cab977af"
-                                    //ambient_APPKey="99d38400a7ff405a9389b113423f3416440cf4e7738841709862a048d7faaa8a"
-                                    //ambient_deviceMAC="B4:E6:2D:07:87:49"
-                                    //ambient_device_url="https://api.ambientweather.net/v1/devices"
 
                                     echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
                                     echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    

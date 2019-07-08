@@ -10,6 +10,7 @@ source /home/HiveControl/scripts/data/check.inc
 
 PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather:/home/HiveControl/scripts/system
 
+
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 WEATHER_STATIONID="$WXSTATION"
 JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
@@ -33,23 +34,28 @@ JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 
 if [ $WEATHER_LEVEL = "hive" ]; then
 
-		GETNOW=`/usr/bin/curl --silent http://api.wunderground.com/api/$KEY/conditions/q/pws:$WXSTATION.json`
+		GETNOW=$($HOMEDIR/scripts/weather/wxunderground/getwxxml.sh)
 
-		A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk '{print $2}'`
-		OBSERVATIONEPOCH=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_epoch |awk -F"\"" '{print $6}'`
-		if [[ -z "$OBSERVATIONEPOCH" ]] || [[ "$OBSERVATIONEPOCH" == "" ]];  then
-			OBSERVATIONDATETIME="null"
-			loglocal "$DATE" WXAmbient  ERROR "Error connecting to WeatherUnderground for Ambient weather, check API key and Station, skipping collection..."		
-		else
-			OBSERVATIONDATETIME=`date -d @$OBSERVATIONEPOCH '+%F %R'`
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			#echo "Getnow was empty"
+			wind_degrees="null"
+			wind_gust_kph="null"
+			wind_gust_mph="null"
+			wind_kph="null"
+			wind_mph="null"
+			A_WIND_MPH="null"
+		else 
+			#Get the data fields that differ from the main set
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
 		fi
-		wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk  '{print $2}'`
-		wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk '{print $2}'`
-		wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk '{print $2}'`
-		wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk '{print $2}'`
-		weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk '{print $2}'`
-		A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk '{print $2}'`
-		A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk '{print $2}'`
 
 elif [ $WEATHER_LEVEL = "localws" ]; then
 

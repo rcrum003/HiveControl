@@ -1,6 +1,42 @@
 Release Notes:
 
 --------------------
+1.93 Release
+--------------------
+HiveControl - Local Hive
+- Removed the API calls to WXunderground, because IBM are jerks and no longer provide community weather data
+- Reverted WXUnderground to pull XML since they still allow that, based on request from ptegler
+
+--------------------
+1.92 Release
+--------------------
+
+HiveControl.org
+- Ability to filter hives and yards based on status
+- Fixed the charts for hives that send data - now shows on individual hive pages
+- Fixed the ability for hives to send proper data
+
+
+HiveControl - Local Hive
+- Added Version Footer, so you can easily see what version each hive is running.
+
+- Weather (Outside Temp/Humidity/Solar/Wind, etc)
+	1. WeatherUnderground was bought by IBM, so no longer allows API access to the data YOU give them! - Currently leaving option to select
+	2. Added Support for AmbientWeather.net (since they discontinued local access for their weather stations)
+- HiveTemp/Humidity Sensors
+	1. Added support for SHT31-D (if using HiveTool Dev board, use the LUX TS2591 I2C jack, or attach to PINs on side of board)
+		See HiveControl wiki for instructions
+	2. Added support for BME680 (if using HiveTool Dev board, use the LUX TS2591 I2C jack, or attach to PINs on side of board)
+		See HiveControl wiki for instructions
+- OS Updates
+	1. Forced all hives to upgrade/update packages
+
+-  Added/Fixed script to connect and register with hivecontrol.org
+-  Added functions to sync hivecontrol.net and the local hive configuration files, this will help if you need to rebuild a hive
+
+
+
+--------------------
 1.91 Release
 --------------------
 
