@@ -134,7 +134,11 @@ if [[ -z "$TEMP_F" ]]; then
 	exit
 fi
 
-	
+#ConvertDate
+WX_DATE_TIME=$(date -d @$(($DATEUTC/1000)) '+%Y-%m-%d %H:%M:%S')
+
+#B4:E6:2D:07:87:49,1562721300000,72.9,80,66.36,22.7,0,0,224,0,0,0,1014,29.95,0,19.0,0,0,0,0,0,0,0
+#LOCALSENSOR,2019-07-09 21:20,73.8,45.20,54.08,20.9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	
 # Return a JSON file to mimic WUNderground file format
 echo "{"
 echo "\"response\": {"
@@ -145,7 +149,7 @@ echo "  }"
 echo "	}"
 echo "  ,	\"current_observation\": {"
 echo "		\"station_id\":\"$WXSTATION\","
-echo "		\"observation_time\":\"$DATEUTC\","
+echo "		\"observation_time\":\"$WX_DATE_TIME\","
 echo "		\"temperature_string\":\"$TEMP_F F ($temp_c C)\","
 echo "		\"temp_f\":\"$TEMP_F\","
 echo "		\"temp_c\":\"$temp_c\","

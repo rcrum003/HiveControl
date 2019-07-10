@@ -110,7 +110,7 @@ header("Refresh: $sec; url=$page");
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
-                                     <img src="/images/scalesm.png">
+                                     <img src="/images/scalesm.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
             

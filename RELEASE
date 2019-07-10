@@ -1,6 +1,13 @@
 Release Notes:
 
 --------------------
+1.94 Release
+--------------------
+HiveControl - Local Hive
+- Fixed cloud.inc send file to stop converting all weather station dates, and moved that into AmbientWeather.sh
+- Fixed Icon Size for Weight icon, thanks ptegler for the report
+
+--------------------
 1.93 Release
 --------------------
 HiveControl - Local Hive
