@@ -480,6 +480,8 @@ else # 1.
 ########################################################################
 # Write the latest version to the local file, to be used by the scripts
 ########################################################################
+dump_config_to_file
+
 	if [ $FILEVERSION -gt $DBVERSION ]; then
 		loglocal "$DATE" CONFIG ERROR "File Version is higher than DB Version - Did you edit manually"
 		echo "ERROR: File Version is higher than DB Version - Did you edit manually?"

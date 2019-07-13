@@ -23,6 +23,7 @@ SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather:/home/HiveControl/scripts/system
 HOST=`hostname`
 #Load the results of the script above
+
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/check.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -169,7 +170,9 @@ fi
 ######################################################################
 	if [[ $ENABLE_AIR = "yes" ]]; then
 			echo "--- Getting Air Quality ---"
-			GETAIR_DATA=$($HOMEDIR/scripts/air/getair.sh)
+		
+		GETAIR_DATA=$($HOMEDIR/scripts/air/getair.sh)
+		
 		AIR_DATE=$(echo $GETAIR_DATA |awk -F, '{print $1}')
 		AIR_TEMP=$(echo $GETAIR_DATA |awk -F, '{print $2}')
 		AIR_HUMIDITY=$(echo $GETAIR_DATA |awk -F, '{print $3}')

@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 1.0, 2019-07-11
+# version 1.0, 2019-07-13
 # reads the temp sensors as one script
 
 
@@ -21,6 +21,17 @@ case $air_type in
 		;;
 esac
 
+
+if [[ $GETAIR_DATA = "ERROR" ]]; then
+	#set values to null
+		AIR_DATE="null"
+		AIR_TEMP="null"
+		AIR_HUMIDITY="null"
+		AIR_PM1="null"
+		AIR_PM2_5="null"
+		AIR_PM10="null"
+
+fi
 
 #echo "DATE,AIR_TEMP,AIR_HUMIDITY,PM1_0,PM2_5,PM10"
 echo "$GETAIR_DATA"

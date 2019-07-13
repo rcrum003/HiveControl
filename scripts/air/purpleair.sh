@@ -17,7 +17,6 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 
-air_id="7634"
 
 #Instructions
 #Documentation here:
@@ -48,8 +47,8 @@ air_id="7634"
 #####################
 #set -x
 
-#TEMPFILE="/home/HiveControl/scripts/air/output.json"
-TEMPFILE="/home/pi/purpleair/output.json"
+TEMPFILE="/home/HiveControl/scripts/air/output.json"
+#TEMPFILE="/home/pi/purpleair/output.json"
 
 #Get all sensors
 #https://www.purpleair.com/json 

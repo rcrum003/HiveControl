@@ -2,6 +2,11 @@ Release Notes:
 
 
 --------------------
+1.96 Release
+--------------------
+- Slight fixes to the last release, mostly update scripts and some getair error checking.
+
+--------------------
 1.95 Release
 --------------------
 - Hiveconfig.sh now makes sure that code version number is correct in the database
@@ -16,7 +21,7 @@ Release Notes:
 	- queen_start
 	- queen_color
 - Aligned Timezone fields between LocalHive and Hivecontrol.org - stops the overwriting with invalid options
-- Oh man, just realized that our upgrade.sh script would totatlly mess up a database structure if you didn't upgrade right when we released. We may have a bunch of table missing columns and such! Oh vei! So we fixed that. Luckily we don't change the DB structure that much, but as DB changes occur, we would have a slow drift of misconfigured databases....
+
 
 
 --------------------
