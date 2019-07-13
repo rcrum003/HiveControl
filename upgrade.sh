@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="90"
+Upgrade_ver="91"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -112,8 +112,8 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 	#Get the version available
 	DB_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/data/DBVERSION)
 
-	if [[ "$DB_ver" -lt "$DB_latest_ver" ]]; then
-		echo "Upgrading DBs"
+	#if [[ "$DB_ver" -lt "$DB_latest_ver" ]]; then
+		echo "Checking for DB Upgrades"
 		if [[ $DB_ver -eq "0" ]]; then
 			#Upgarding to version 1
 			echo "Applying DB Ver1 Upgrades"
@@ -283,9 +283,9 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			let DB_ver="22"
 		fi
 
-	else
-		echo "Skipping DB, no new database upgrades available"
-	fi
+	#else
+	#	echo "Skipping DB, no new database upgrades available"
+	#fi
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
 
 #Update install stuff
