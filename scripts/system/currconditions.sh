@@ -167,7 +167,7 @@ fi
 # ------ GET AIR Quality -----------
 #  Currently support PurpleAir, but plan on supporting more
 ######################################################################
-	if [ $ENABLE_AIR = "yes" ]; then
+	if [[ $ENABLE_AIR = "yes" ]]; then
 			echo "--- Getting Air Quality ---"
 			GETAIR_DATA=$($HOMEDIR/scripts/air/getair.sh)
 		AIR_DATE=$(echo $GETAIR_DATA |awk -F, '{print $1}')
