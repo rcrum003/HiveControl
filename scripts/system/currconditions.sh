@@ -2,7 +2,7 @@
 # Script to gather Current_Conditions to monitor beehives
 # see hivecontrol.org
 # Author: Ryan Crum
-# Version 2019061802
+# Version 2019071101
 
 #############################################
 # Get Config parameters from DB and set some basics
@@ -10,7 +10,7 @@
 clear
 
 echo "##########################################################"
-echo "# Starting HiveControl Current Conditions Collection #"
+echo "# Starting HiveControl Current Conditions Collection     #"
 echo "##########################################################"
 echo "Getting Latest Configurations"
 echo ""
@@ -29,7 +29,8 @@ source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/cloud.inc
 
 
-DATE=$(TZ=":$TIMEZONE" date '+%F %T')
+DATE=$(TZ=":$TIMEZONE" date '+%F %T') #For local display in relation to the user's timezone
+DATE_UTC=$(TZ=":$UTC" date '+%F %T')  #For when we send to cloud, so we can compare data across the world
 
 echo "##########################################################"
 
@@ -163,19 +164,52 @@ fi
 
 
 ######################################################################
+# ------ GET AIR Quality -----------
+#  Currently support PurpleAir, but plan on supporting more
+######################################################################
+	if [[ $ENABLE_AIR = "yes" ]]; then
+			echo "--- Getting Air Quality ---"
+			GETAIR_DATA=$($HOMEDIR/scripts/air/getair.sh)
+		AIR_DATE=$(echo $GETAIR_DATA |awk -F, '{print $1}')
+		AIR_TEMP=$(echo $GETAIR_DATA |awk -F, '{print $2}')
+		AIR_HUMIDITY=$(echo $GETAIR_DATA |awk -F, '{print $3}')
+		AIR_PM1=$(echo $GETAIR_DATA |awk -F, '{print $4}')
+		AIR_PM2_5=$(echo $GETAIR_DATA |awk -F, '{print $5}')
+		AIR_PM10=$(echo $GETAIR_DATA |awk -F, '{print $6}')
+
+		check AIR_TEMP
+		check AIR_HUMIDITY
+		check AIR_PM1
+		check AIR_PM2_5
+		check AIR_PM10
+	
+	echo "AIR: $AIR_DATE,$AIR_TEMP, $AIR_HUMIDITY, $AIR_PM1, $AIR_PM2_5, $AIR_PM10"
+		else
+		echo "--- AIR QUALITY CHECK DISABLED ---"
+		AIR_DATE="null"
+		AIR_TEMP="null"
+		AIR_HUMIDITY="null"
+		AIR_PM1="null"
+		AIR_PM2_5="null"
+		AIR_PM10="null"
+	fi
+	echo "		"
+	echo "##########################################################"
+	
+
+######################################################################
 # Storing Data in our database
 ######################################################################
 echo "--- Storing in the Database ---"
 #set -x
-sqlite3 $HOMEDIR/data/hive-data.db "insert into allhivedata (hiveid,date,hivetempf,hivetempc,hiveHum,hiveweight,hiverawweight,yardid,sync,beekeeperid,weather_stationID,observationDateTime,weather_tempf,weather_humidity,weather_dewf,weather_tempc,wind_mph,wind_dir,wind_degrees,wind_gust_mph,wind_kph,wind_gust_kph,pressure_mb,pressure_in,pressure_trend,weather_dewc,solarradiation,UV,precip_1hr_in,precip_1hr_metric,precip_today_string,precip_today_in,precip_today_metric,lux,IN_COUNT,OUT_COUNT) \
-values (\"$HIVEID\",\"$DATE\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"$HIVEWEIGHT\",\"$HIVERAWWEIGHT\",\"$YARDID\",1,\"$BEEKEEPERID\", \"$WEATHER_STATIONID\",\"$OBSERVATIONDATETIME\",\"$A_TEMP\",\"$B_HUMIDITY\",\"$A_DEW\",\"$A_TEMP_C\",\"$A_WIND_MPH\",\"$A_WIND_DIR\",\"$wind_degrees\",\"$wind_gust_mph\",\"$wind_kph\",\"$wind_gust_kph\",\"$pressure_mb\",\"$A_PRES_IN\",\"$A_PRES_TREND\",\"$weather_dewc\",\"$solarradiation\",\"$UV\",\"$precip_1hr_in\",\"$precip_1hr_metric\",\"$precip_today_string\",\"$precip_today_in\",\"$precip_today_metric\",\"$lux\",\"$IN_COUNT\",\"$OUT_COUNT\");"
+sqlite3 $HOMEDIR/data/hive-data.db "insert into allhivedata (hiveid,date,date_utc,hivetempf,hivetempc,hiveHum,hiveweight,hiverawweight,yardid,sync,beekeeperid,weather_stationID,observationDateTime,weather_tempf,weather_humidity,weather_dewf,weather_tempc,wind_mph,wind_dir,wind_degrees,wind_gust_mph,wind_kph,wind_gust_kph,pressure_mb,pressure_in,pressure_trend,weather_dewc,solarradiation,UV,precip_1hr_in,precip_1hr_metric,precip_today_string,precip_today_in,precip_today_metric,lux,IN_COUNT,OUT_COUNT,air_datetime,air_temp,air_humidity,air_pm1,air_pm2_5,air_pm10) \
+values (\"$HIVEID\",\"$DATE\",\"$DATE_UTC\",\"$HIVETEMPF\",\"$HIVETEMPC\",\"$HIVEHUMIDITY\",\"$HIVEWEIGHT\",\"$HIVERAWWEIGHT\",\"$YARDID\",1,\"$BEEKEEPERID\", \"$WEATHER_STATIONID\",\"$OBSERVATIONDATETIME\",\"$A_TEMP\",\"$B_HUMIDITY\",\"$A_DEW\",\"$A_TEMP_C\",\"$A_WIND_MPH\",\"$A_WIND_DIR\",\"$wind_degrees\",\"$wind_gust_mph\",\"$wind_kph\",\"$wind_gust_kph\",\"$pressure_mb\",\"$A_PRES_IN\",\"$A_PRES_TREND\",\"$weather_dewc\",\"$solarradiation\",\"$UV\",\"$precip_1hr_in\",\"$precip_1hr_metric\",\"$precip_today_string\",\"$precip_today_in\",\"$precip_today_metric\",\"$lux\",\"$IN_COUNT\",\"$OUT_COUNT\",\"$AIR_DATE\",\"$AIR_TEMP\",\"$AIR_HUMIDITY\",\"$AIR_PM1\",\"$AIR_PM2_5\",\"$AIR_PM10\");"
 	#echo "Success AAD"
 #echo "--- Storing in DB DONE ---"
 echo "		"
 
 #Get last DB record so we can send to hivecontrol.org in order
 record_id=$(sqlite3 $HOMEDIR/data/hive-data.db "select id from allhivedata WHERE date = \"$DATE\";")
-
 
 ######################################################################
 # If sharing, create file and send to other people
@@ -216,19 +250,12 @@ if [ $SHARE_HIVETOOL = "yes" ]; then
 		
 fi
 
-
-#### Development only, will enable in future versions, in QA
-
 if [ -z "$HIVEAPI" ]; then
 	echo "--- Unable to share with hivecontrol.org because HIVEAPI is not set"
 else
 	echo "--- Sharing with hivecontrol.org ---"
-	## https://www.hivecontrol.org/api/v1/hive/check
-	source /home/HiveControl/scripts/data/cloud.inc
-
 	#Call the function to senddata
 	hc_senddata
-	
 fi
 	
 
@@ -236,4 +263,9 @@ fi
 
 echo "##########################################################"
 echo "Script Completed"
+echo "##########################################################"
+
+
+
+
 

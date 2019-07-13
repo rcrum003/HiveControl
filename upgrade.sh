@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="88"
+Upgrade_ver="89"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -263,6 +263,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_28
 			let DB_ver="21"
 		fi
+		if [[ $DB_ver -eq "21" ]]; then
+			echo "Applying DB Ver 22 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_30
+			let DB_ver="22"
+		fi
 
 	else
 		echo "Skipping DB, no new database upgrades available"
@@ -374,8 +379,13 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 fi
 
 if [[ "$Installed_Ver" < "1.93" ]]; then
-	#Only run this if we haven't got the latest code
 	sudo chmod u+x /home/HiveControl/scripts/weather/wxunderground/*
+fi
+
+if [[ "$Installed_Ver" < "1.95" ]]; then
+	#Set our new scripts to executable.
+	sudo chmod u+x /home/HiveControl/scripts/air/*	
+
 fi
 
 echo "============================================="
@@ -383,6 +393,9 @@ echo "success"
 #Cleanup and set the flag in the DB
 loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
 sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
+
+Latest_Ver=$(cat "/home/HiveControl/upgrade/HiveControl/VERSION")
+
 sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver WHERE id=1"
 
 #Move the VERSION

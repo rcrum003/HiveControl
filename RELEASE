@@ -1,5 +1,24 @@
 Release Notes:
 
+
+--------------------
+1.95 Release
+--------------------
+- Hiveconfig.sh now makes sure that code version number is correct in the database
+- Added Support for Air Quality Monitors, specifcally PurpleAir. You can select the closet PurpleAir Station.
+	Your hive must be able to reach the Internet to config AND to pull the data. (Note, not configuratble via the UI until the next version)
+- If the LocalHive Updates Hivecontrol.org, we no longer clear the values in hivecontrol.org for things the local hive doesn't configure.
+- Certain Hive Config items are ONLY configurable now at HiveControl.org. This makes our development efforts easier, so we aren't coding in two languages in two places. 
+	- bee_race
+	- bee_source
+	- hive_type
+	- hive_status
+	- queen_start
+	- queen_color
+- Aligned Timezone fields between LocalHive and Hivecontrol.org - stops the overwriting with invalid options
+- Oh man, just realized that our upgrade.sh script would totatlly mess up a database structure if you didn't upgrade right when we released. We may have a bunch of table missing columns and such! Oh vei! So we fixed that. Luckily we don't change the DB structure that much, but as DB changes occur, we would have a slow drift of misconfigured databases....
+
+
 --------------------
 1.94 Release
 --------------------

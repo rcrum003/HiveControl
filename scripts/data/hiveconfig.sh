@@ -1,22 +1,25 @@
 #!/bin/bash
 # Script to get variables from db to use in our scripts
-# Version 2019061801
+# Version 2019071101
 
 source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/cloud.inc
 source /home/HiveControl/scripts/data/check.inc
 
-set -x
+
 #Set some default variables
 LOCALDATABASE="/home/HiveControl/data/hive-data.db"
 CONFIGOUT="/home/HiveControl/scripts/hiveconfig.inc"
 
+function dump_config_to_file() {
+	sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
+	#Clean up said file
+	cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT
+}
 
 if [ ! -f "$CONFIGOUT" ]; then
    #File Doesnt exist so we need to generate it
-   sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
-	#Clean up said file
-	cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT 
+    dump_config_to_file
 fi
 
 
@@ -36,6 +39,15 @@ if [[ -z "$HIVEID" ]]; then
 	HIVEID="9999"
 fi
 
+
+#Tired of these hives not being in sync with Version
+
+	#Get CODE Version
+	HCVersion_file=$(cat /home/HiveControl/VERSION)
+	HCVersion_DB=$(cat $CONFIGOUT |grep -i hcversion |awk -F\" '{print $2}')
+	if [[ "$HCVersion_DB" != "$HCVersion_file" ]]; then
+		sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET HCVersion=\"$HCVersion_file\";"
+	fi
 
 #######################
 #Check Cloud Config
@@ -214,7 +226,6 @@ else # 1.
 			#A POST_created_at created_at
 			#A POST_updated_at updated_at
 			A POST_name hivename
-			echo "second was $POST_name"
 			A POST_user_id user_id
 			A POST_yard_id yard_id
 			#A POST_hiveid hiveid
@@ -295,13 +306,11 @@ else # 1.
 
 
 
-
 			#Make sure all values have a value
 				check_if_blank POST_id
 				#check_if_blank POST_created_at
 				#check_if_blank POST_updated_at
 				check_if_blank POST_name
-				echo "Post_name in check was $POST_name"
 				check_if_blank POST_user_id
 				check_if_blank POST_yard_id
 				#check_if_blank POST_hiveid
@@ -382,17 +391,19 @@ else # 1.
 				
 
 			#Update Local DB
-			 #sqlite3 $LOCALDATABASE "INSERT OR REPLACE INTO hiveconfig(id,HIVEAPI,HIVENAME,HIVEID,CAMERAMODE,CAMERATYPE,check_for_upgrades,COMPUTER,COUNTERTYPE,ENABLE_BEECOUNTER,ENABLE_HIVE_CAMERA,ENABLE_HIVE_TEMP_CHK,ENABLE_HIVE_WEIGHT_CHK,ENABLE_LUX,GDD_BASE_TEMP,GDD_START_DATE,HCVersion,HIVE_HUMIDITY_INTERCEPT,HIVE_HUMIDITY_SLOPE,HIVE_LUX_GPIO,HIVE_LUX_INTERCEPT,HIVE_LUX_SLOPE,HIVE_TEMP_GPIO,HIVE_TEMP_INTERCEPT,HIVE_TEMP_MEASURE,HIVE_TEMP_SLOPE,HIVE_WEIGHT_GPIO,HIVE_WEIGHT_INTERCEPT,HIVE_WEIGHT_SLOPE,HIVEDEVICE,HOMEDIR,INTERNET,LATITUDE,local_wx_type,local_wx_url,LONGITUDE,LUX_SOURCE,NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD,NUM_HIVE_BASE_SOLID_BOTTOM_BOARD,NUM_HIVE_BODY_DEEP_FOUNDATION,NUM_HIVE_BODY_DEEP_FOUNDATION_LESS,NUM_HIVE_BODY_MEDIUM_FOUNDATION,NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS,NUM_HIVE_BODY_SHAL_FOUNDATION,NUM_HIVE_BODY_SHAL_FOUNDATION_LESS,NUM_HIVE_FEEDER,NUM_HIVE_TOP_INNER_COVER,NUM_HIVE_TOP_MIGRATORY_COVER,NUM_HIVE_TOP_TELE_COVER,POWER,PUBLIC_HTML_DIR,RUN,SCALETYPE,START_DATE,STATUS,TEMPTYPE,TIMEZONE,VERSION,WEATHER_DETAIL,WEATHER_LEVEL,WX_HUMIDITY_INTERCEPT,WX_HUMIDITY_SLOPE,WXSTATION,WX_TEMP_GPIO,WX_TEMP_INTERCEPT,WX_TEMP_SLOPE,WXTEMPTYPE,WX_TEMPER_DEVICE) VALUES (1,\"$HIVEAPI\",\"$POST_name\",$POST_id,$POST_cameramode,$POST_cameratype,$POST_check_for_upgrades,$POST_computer,$POST_countertype,$POST_enable_beecounter,$POST_enable_hive_camera,$POST_enable_hive_temp_chk,$POST_enable_hive_weight_chk,$POST_enable_lux,$POST_gdd_base_temp,$POST_gdd_start_date,$POST_hc_version,$POST_hive_humidity_intercept,$POST_hive_humidity_slope,$POST_hive_lux_gpio,$POST_hive_lux_intercept,$POST_hive_lux_slope,$POST_hive_temp_gpio,$POST_hive_temp_intercept,$POST_hive_temp_measure,$POST_hive_temp_slope,$POST_hive_weight_gpio,$POST_hive_weight_intercept,$POST_hive_weight_slope,$POST_hivedevice,$POST_homedir,$POST_internet,$POST_latitude,$POST_local_wx_type,$POST_local_wx_url,$POST_longitude,$POST_lux_source,$POST_NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD,$POST_NUM_HIVE_BASE_SOLID_BOTTOM_BOARD,$POST_NUM_HIVE_BODY_DEEP_FOUNDATION,$POST_NUM_HIVE_BODY_DEEP_FOUNDATION_LESS,$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION,$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS,$POST_NUM_HIVE_BODY_SHAL_FOUNDATION,$POST_NUM_HIVE_BODY_SHAL_FOUNDATION_LESS,$POST_NUM_HIVE_FEEDER,$POST_NUM_HIVE_TOP_INNER_COVER,$POST_NUM_HIVE_TOP_MIGRATORY_COVER,$POST_NUM_HIVE_TOP_TELE_COVER,$POST_power,$POST_public_html_dir,$POST_run,$POST_scaletype,$POST_start_date,$POST_status,$POST_temptype,$POST_timezone,$POST_version,$POST_weather_detail,$POST_weather_level,$POST_wx_humidity_intercept,$POST_wx_humidity_slope,$POST_wx_station,$POST_wx_temp_gpio,$POST_wx_temp_intercept,$POST_wx_temp_slope,$POST_wx_temp_type,$POST_wx_temper_device)"
-			 #sqlite3 $LOCALDATABASE "INSERT OR REPLACE INTO hiveconfig(id,HIVEAPI,HIVENAME,HIVEID,CAMERAMODE,CAMERATYPE,check_for_upgrades,COMPUTER,COUNTERTYPE,ENABLE_BEECOUNTER,ENABLE_HIVE_CAMERA,ENABLE_HIVE_TEMP_CHK,ENABLE_HIVE_WEIGHT_CHK,ENABLE_LUX,GDD_BASE_TEMP,GDD_START_DATE,HCVersion,HIVE_HUMIDITY_INTERCEPT,HIVE_HUMIDITY_SLOPE,HIVE_LUX_GPIO,HIVE_LUX_INTERCEPT,HIVE_LUX_SLOPE,HIVE_TEMP_GPIO,HIVE_TEMP_INTERCEPT,HIVE_TEMP_MEASURE,HIVE_TEMP_SLOPE,HIVE_WEIGHT_GPIO,HIVE_WEIGHT_INTERCEPT,HIVE_WEIGHT_SLOPE,HIVEDEVICE,HOMEDIR,INTERNET,LATITUDE,local_wx_type,local_wx_url,LONGITUDE,LUX_SOURCE,NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD,NUM_HIVE_BASE_SOLID_BOTTOM_BOARD,NUM_HIVE_BODY_DEEP_FOUNDATION,NUM_HIVE_BODY_DEEP_FOUNDATION_LESS,NUM_HIVE_BODY_MEDIUM_FOUNDATION,NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS,NUM_HIVE_BODY_SHAL_FOUNDATION,NUM_HIVE_BODY_SHAL_FOUNDATION_LESS,NUM_HIVE_FEEDER,NUM_HIVE_TOP_INNER_COVER,NUM_HIVE_TOP_MIGRATORY_COVER,NUM_HIVE_TOP_TELE_COVER,POWER,PUBLIC_HTML_DIR,RUN,SCALETYPE,START_DATE,STATUS,TEMPTYPE,TIMEZONE,VERSION,WEATHER_DETAIL,WEATHER_LEVEL,WX_HUMIDITY_INTERCEPT,WX_HUMIDITY_SLOPE,WXSTATION,WX_TEMP_GPIO,WX_TEMP_INTERCEPT,WX_TEMP_SLOPE,WXTEMPTYPE,WX_TEMPER_DEVICE) VALUES (1,\"$HIVEAPI\",\"$POST_name\",\"$POST_id\",\"$POST_cameramode\",\"$POST_cameratype\",\"$POST_check_for_upgrades\",\"$POST_computer\",\"$POST_countertype\",\"$POST_enable_beecounter\",\"$POST_enable_hive_camera\",\"$POST_enable_hive_temp_chk\",\"$POST_enable_hive_weight_chk\",\"$POST_enable_lux\",\"$POST_gdd_base_temp\",\"$POST_gdd_start_date\",\"$POST_hc_version\",\"$POST_hive_humidity_intercept\",\"$POST_hive_humidity_slope\",\"$POST_hive_lux_gpio\",\"$POST_hive_lux_intercept\",\"$POST_hive_lux_slope\",\"$POST_hive_temp_gpio\",\"$POST_hive_temp_intercept\",\"$POST_hive_temp_measure\",\"$POST_hive_temp_slope\",\"$POST_hive_weight_gpio\",\"$POST_hive_weight_intercept\",\"$POST_hive_weight_slope\",\"$POST_hivedevice\",\"$POST_homedir\",\"$POST_internet\",\"$POST_latitude\",\"$POST_local_wx_type\",\"$POST_local_wx_url\",\"$POST_longitude\",\"$POST_lux_source\",\"$POST_NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD\",\"$POST_NUM_HIVE_BASE_SOLID_BOTTOM_BOARD\",\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION\",\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION_LESS\",\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION\",\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS\",\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION\",\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION_LESS\",\"$POST_NUM_HIVE_FEEDER\",\"$POST_NUM_HIVE_TOP_INNER_COVER\",\"$POST_NUM_HIVE_TOP_MIGRATORY_COVER\",\"$POST_NUM_HIVE_TOP_TELE_COVER\",\"$POST_power\",\"$POST_public_html_dir\",\"$POST_run\",\"$POST_scaletype\",\"$POST_start_date\",\"$POST_status\",\"$POST_temptype\",\"$POST_timezone\",\"$POST_version\",\"$POST_weather_detail\",\"$POST_weather_level\",\"$POST_wx_humidity_intercept\",\"$POST_wx_humidity_slope\",\"$POST_wx_station\",\"$POST_wx_temp_gpio\",\"$POST_wx_temp_intercept\",\"$POST_wx_temp_slope\",\"$POST_wx_temp_type\",\"$POST_wx_temper_device\")"
-			 sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET HIVEAPI=\"$HIVEAPI\", HIVENAME=\"$POST_name\", HIVEID=\"$POST_id\", CAMERAMODE=\"$POST_cameramode\", CAMERATYPE=\"$POST_cameratype\", check_for_upgrades=\"$POST_check_for_upgrades\", COMPUTER=\"$POST_computer\", COUNTERTYPE=\"$POST_countertype\", ENABLE_BEECOUNTER=\"$POST_enable_beecounter\", ENABLE_HIVE_CAMERA=\"$POST_enable_hive_camera\", ENABLE_HIVE_TEMP_CHK=\"$POST_enable_hive_temp_chk\", ENABLE_HIVE_WEIGHT_CHK=\"$POST_enable_hive_weight_chk\", ENABLE_LUX=\"$POST_enable_lux\", GDD_BASE_TEMP=\"$POST_gdd_base_temp\", GDD_START_DATE=\"$POST_gdd_start_date\", HCVersion=\"$POST_hc_version\", HIVE_HUMIDITY_INTERCEPT=\"$POST_hive_humidity_intercept\", HIVE_HUMIDITY_SLOPE=\"$POST_hive_humidity_slope\", HIVE_LUX_GPIO=\"$POST_hive_lux_gpio\", HIVE_LUX_INTERCEPT=\"$POST_hive_lux_intercept\", HIVE_LUX_SLOPE=\"$POST_hive_lux_slope\", HIVE_TEMP_GPIO=\"$POST_hive_temp_gpio\", HIVE_TEMP_INTERCEPT=\"$POST_hive_temp_intercept\", HIVE_TEMP_MEASURE=\"$POST_hive_temp_measure\", HIVE_TEMP_SLOPE=\"$POST_hive_temp_slope\", HIVE_WEIGHT_GPIO=\"$POST_hive_weight_gpio\", HIVE_WEIGHT_INTERCEPT=\"$POST_hive_weight_intercept\", HIVE_WEIGHT_SLOPE=\"$POST_hive_weight_slope\", HIVEDEVICE=\"$POST_hivedevice\", INTERNET=\"$POST_internet\", LATITUDE=\"$POST_latitude\", local_wx_type=\"$POST_local_wx_type\", local_wx_url=\"$POST_local_wx_url\", LONGITUDE=\"$POST_longitude\", LUX_SOURCE=\"$POST_lux_source\", NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD\", NUM_HIVE_BASE_SOLID_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SOLID_BOTTOM_BOARD\", NUM_HIVE_BODY_DEEP_FOUNDATION=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION\", NUM_HIVE_BODY_DEEP_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION_LESS\", NUM_HIVE_BODY_MEDIUM_FOUNDATION=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION\", NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS\", NUM_HIVE_BODY_SHAL_FOUNDATION=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION\", NUM_HIVE_BODY_SHAL_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION_LESS\", NUM_HIVE_FEEDER=\"$POST_NUM_HIVE_FEEDER\", NUM_HIVE_TOP_INNER_COVER=\"$POST_NUM_HIVE_TOP_INNER_COVER\", NUM_HIVE_TOP_MIGRATORY_COVER=\"$POST_NUM_HIVE_TOP_MIGRATORY_COVER\", NUM_HIVE_TOP_TELE_COVER=\"$POST_NUM_HIVE_TOP_TELE_COVER\", POWER=\"$POST_power\", PUBLIC_HTML_DIR=\"$POST_public_html_dir\", RUN=\"$POST_run\", SCALETYPE=\"$POST_scaletype\", START_DATE=\"$POST_start_date\", STATUS=\"$POST_status\", TEMPTYPE=\"$POST_temptype\", TIMEZONE=\"$POST_timezone\", VERSION=\"$POST_version\", WEATHER_DETAIL=\"$POST_weather_detail\", WEATHER_LEVEL=\"$POST_weather_level\", WX_HUMIDITY_INTERCEPT=\"$POST_wx_humidity_intercept\", WX_HUMIDITY_SLOPE=\"$POST_wx_humidity_slope\", WXSTATION=\"$POST_wx_station\", WX_TEMP_GPIO=\"$POST_wx_temp_gpio\", WX_TEMP_INTERCEPT=\"$POST_wx_temp_intercept\", WX_TEMP_SLOPE=\"$POST_wx_temp_slope\", WXTEMPTYPE=\"$POST_wx_temp_type\", WX_TEMPER_DEVICE=\"$POST_wx_temper_device\";"
+		 	sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET HIVEAPI=\"$HIVEAPI\", HIVENAME=\"$POST_name\", HIVEID=\"$POST_id\", CAMERAMODE=\"$POST_cameramode\", CAMERATYPE=\"$POST_cameratype\", check_for_upgrades=\"$POST_check_for_upgrades\", COMPUTER=\"$POST_computer\", COUNTERTYPE=\"$POST_countertype\", ENABLE_BEECOUNTER=\"$POST_enable_beecounter\", ENABLE_HIVE_CAMERA=\"$POST_enable_hive_camera\", ENABLE_HIVE_TEMP_CHK=\"$POST_enable_hive_temp_chk\", ENABLE_HIVE_WEIGHT_CHK=\"$POST_enable_hive_weight_chk\", ENABLE_LUX=\"$POST_enable_lux\", GDD_BASE_TEMP=\"$POST_gdd_base_temp\", GDD_START_DATE=\"$POST_gdd_start_date\", HCVersion=\"$POST_hc_version\", HIVE_HUMIDITY_INTERCEPT=\"$POST_hive_humidity_intercept\", HIVE_HUMIDITY_SLOPE=\"$POST_hive_humidity_slope\", HIVE_LUX_GPIO=\"$POST_hive_lux_gpio\", HIVE_LUX_INTERCEPT=\"$POST_hive_lux_intercept\", HIVE_LUX_SLOPE=\"$POST_hive_lux_slope\", HIVE_TEMP_GPIO=\"$POST_hive_temp_gpio\", HIVE_TEMP_INTERCEPT=\"$POST_hive_temp_intercept\", HIVE_TEMP_MEASURE=\"$POST_hive_temp_measure\", HIVE_TEMP_SLOPE=\"$POST_hive_temp_slope\", HIVE_WEIGHT_GPIO=\"$POST_hive_weight_gpio\", HIVE_WEIGHT_INTERCEPT=\"$POST_hive_weight_intercept\", HIVE_WEIGHT_SLOPE=\"$POST_hive_weight_slope\", HIVEDEVICE=\"$POST_hivedevice\", INTERNET=\"$POST_internet\", LATITUDE=\"$POST_latitude\", local_wx_type=\"$POST_local_wx_type\", local_wx_url=\"$POST_local_wx_url\", LONGITUDE=\"$POST_longitude\", LUX_SOURCE=\"$POST_lux_source\", NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD\", NUM_HIVE_BASE_SOLID_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SOLID_BOTTOM_BOARD\", NUM_HIVE_BODY_DEEP_FOUNDATION=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION\", NUM_HIVE_BODY_DEEP_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION_LESS\", NUM_HIVE_BODY_MEDIUM_FOUNDATION=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION\", NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS\", NUM_HIVE_BODY_SHAL_FOUNDATION=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION\", NUM_HIVE_BODY_SHAL_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION_LESS\", NUM_HIVE_FEEDER=\"$POST_NUM_HIVE_FEEDER\", NUM_HIVE_TOP_INNER_COVER=\"$POST_NUM_HIVE_TOP_INNER_COVER\", NUM_HIVE_TOP_MIGRATORY_COVER=\"$POST_NUM_HIVE_TOP_MIGRATORY_COVER\", NUM_HIVE_TOP_TELE_COVER=\"$POST_NUM_HIVE_TOP_TELE_COVER\", POWER=\"$POST_power\", PUBLIC_HTML_DIR=\"$POST_public_html_dir\", RUN=\"$POST_run\", SCALETYPE=\"$POST_scaletype\", START_DATE=\"$POST_start_date\", STATUS=\"$POST_status\", TEMPTYPE=\"$POST_temptype\", TIMEZONE=\"$POST_timezone\", VERSION=\"$POST_version\", WEATHER_DETAIL=\"$POST_weather_detail\", WEATHER_LEVEL=\"$POST_weather_level\", WX_HUMIDITY_INTERCEPT=\"$POST_wx_humidity_intercept\", WX_HUMIDITY_SLOPE=\"$POST_wx_humidity_slope\", WXSTATION=\"$POST_wx_station\", WX_TEMP_GPIO=\"$POST_wx_temp_gpio\", WX_TEMP_INTERCEPT=\"$POST_wx_temp_intercept\", WX_TEMP_SLOPE=\"$POST_wx_temp_slope\", WXTEMPTYPE=\"$POST_wx_temp_type\", WX_TEMPER_DEVICE=\"$POST_wx_temper_device\";"
 			 #Register Success
+			 	#Set DBVersion to match the HiveControl.org version
+				DBVersion=$POST_version
 				MESSAGE="Updated Local Config with Newer Version from HiveControl.org"
 				loglocal "$DATE" CONFIG INFO "$MESSAGE"
 				echo "$MESSAGE"
 				PUBLIC_HTML_DIR="$HOMEDIR/www/public_html/"
 				echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
-			
-			
+				dump_config_to_file
+
+				exit 1
+		 	
 		 	fi # 4.
 			###############################################################
 			#	
@@ -401,8 +412,9 @@ else # 1.
 			###############################################################
 			if [ "$DBVERSION" -gt "$HIVE_CONFIG_VERSION" ]; then #5
 				#Get Local Config from Database, Dump to a tempfile that we can source
-				sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
-				cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT
+				dump_config_to_file
+				#sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
+				#cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT
 				source $CONFIGOUT
 
 				###################################
@@ -451,26 +463,14 @@ else # 1.
 			#Parse Various Response and set SHARE_API_STATUS
 			# Check to see if the status was Unauthenticated	
 			#SHARE_SUB_STATUS=$(/bin/echo $SHARE_API_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
-				 
+				 dump_config_to_file
+
+				 exit 1
+
 				 fi	#5
 	
 		fi #2
 	
-		
-		###############################################################
-		# 
-		# Finish up by exporting to a flat file for the scripts to use
-		#
-		###############################################################
-		# If we passed the two tests above, we can continue
-		# Dump to a tempfile
-		sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
-		#Clean up said file
-
-		cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT 
-
-		
-
 	fi # 1.
 #######################################################
 # End Cloud Config
@@ -480,25 +480,11 @@ else # 1.
 ########################################################################
 # Write the latest version to the local file, to be used by the scripts
 ########################################################################
-
-	if [ $DBVERSION -eq $FILEVERSION ]; then
-		echo "No Change - Versions are the same"
-		exit 1
-		fi
 	if [ $FILEVERSION -gt $DBVERSION ]; then
 		loglocal "$DATE" CONFIG ERROR "File Version is higher than DB Version - Did you edit manually"
 		echo "ERROR: File Version is higher than DB Version - Did you edit manually?"
 		exit 1
-		fi
-	# If we passed the two tests above, we can continue
-	# Dump to a tempfile
-	sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
-	#Clean up said file
-
-	cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT 
-	PUBLIC_HTML_DIR="$HOMEDIR/www/public_html/"
-	#loglocal "$DATE" CONFIG SUCCESS "Updated Config to Version $DBVERSION"
-  echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
+	fi
 
 ##########
 # END

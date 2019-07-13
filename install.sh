@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v44 - for HiveControl
+# v45 - for HiveControl
 # 
 # Must run under root
 # sudo bash 
@@ -208,9 +208,10 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_25
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_26
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_27
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_28
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_30
 
 VER=$(cat /home/HiveControl/VERSION)
-sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET hc_version='$VER' WHERE id=\"1\";"
+sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET HCVersion='$VER' WHERE id=\"1\";"
 
 
 #Set shell scripts to be executable
