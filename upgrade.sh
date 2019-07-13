@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="91"
+Upgrade_ver="93"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -410,10 +410,20 @@ sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
 
 Latest_Ver=$(cat "/home/HiveControl/upgrade/HiveControl/VERSION")
 
-sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver WHERE id=1"
-
 #Move the VERSION
 cp /home/HiveControl/upgrade/HiveControl/VERSION /home/HiveControl/
+
+#Get latest Variable
+source /home/HiveControl/scripts/hiveconfig.inc
+
+#Advance the version
+((VERSION++))
+
+sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver, VERSION=$VERSION WHERE id=1"
+
+#Dump our config again
+/home/HiveControl/scripts/data/hiveconfig.sh
+
 
 
 if [[ "$Installed_Ver" < "1.90" ]]; then
