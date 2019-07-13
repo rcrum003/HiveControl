@@ -15,14 +15,28 @@ source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
 
-#Check to see if the update.sh is at the latest version available
-checkupgrade=$(/home/HiveControl/scripts/system/checkupgrades.sh |head -1)
-	if [[ $checkupgrade = "NEWUPGRADE" ]]; then
-					echo "running new upgrade file"
-					exec /home/HiveControl/upgrade.sh
-					exit
-	fi
+SKIP_CHECKUPGRADE=$1
 
+if [[ $SKIP_CHECKUPGRADE != "SKIP" ]]; then
+	#Check to see if the update.sh is at the latest version available
+	checkupgrade=$( /home/HiveControl/scripts/system/checkupgrades.sh |head -1 )
+		if [[ $checkupgrade = "NEWUPGRADE" ]]; then
+						echo "running new upgrade file"
+						AREWENEW=$(cat /home/HiveControl/upgrade.sh |grep Upgrade_ver | head -1 | awk -F\" '{print $2}')
+						if [[ $AREWENEW > $Upgrade_ver ]]; then
+							#We can execute
+							loglocal "$DATE" UPGRADE ERROR "Using new upgrade.sh file to upgrade your hive."
+							#Preventing an upgrade loop here.
+							exec /home/HiveControl/upgrade.sh SKIP
+							exit 1
+						else
+							ERROR="Upgrade attempted, but didn't have a new upgrade file"
+							loglocal "$DATE" UPGRADE ERROR "$ERROR"
+							echo "$ERROR"
+							exit 1
+						fi
+		fi
+fi
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 

@@ -10,11 +10,11 @@ source /home/HiveControl/scripts/data/logger.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-Upgrade_ver=$(cat /home/HiveControl/upgrade.sh | grep "Upgrade_ver" |head -1 |awk -F\" '{print $2}')
+Upgrade_ver_file=$(cat /home/HiveControl/upgrade.sh | grep "Upgrade_ver" |head -1 |awk -F\" '{print $2}')
 	#Get the version available
 	Upgrade_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh |grep "Upgrade_ver" |head -1 |awk -F\" '{print $2}')
 
-	if [[ $( echo "$Upgrade_ver < $Upgrade_latest_ver" | bc) -eq 1 ]]; then
+	if [[ $( echo "$Upgrade_ver_file < $Upgrade_latest_ver" | bc) -eq 1 ]]; then
 			echo "NEWUPGRADE"
 			echo "Found a new version of upgrade.sh, downloading.."
 			loglocal "$DATE" UPGRADE SUCCESS "Downloaded upgrade.sh to version - $Upgrade_latest_ver"
