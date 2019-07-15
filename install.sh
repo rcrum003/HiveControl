@@ -209,6 +209,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_26
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_27
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_28
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_30
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_31
 
 VER=$(cat /home/HiveControl/VERSION)
 sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET HCVersion='$VER' WHERE id=\"1\";"
