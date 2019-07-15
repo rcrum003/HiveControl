@@ -1,5 +1,9 @@
 Release Notes:
 
+--------------------
+1.97 Release
+--------------------
+- Added a way to configure the air monitors - sorry, you'll have to go purpleair.com and find the id at the moment
 
 --------------------
 1.96 Release
@@ -21,7 +25,6 @@ Release Notes:
 	- queen_start
 	- queen_color
 - Aligned Timezone fields between LocalHive and Hivecontrol.org - stops the overwriting with invalid options
-
 
 
 --------------------

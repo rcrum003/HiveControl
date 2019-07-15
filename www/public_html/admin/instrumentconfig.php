@@ -1,4 +1,5 @@
 <?PHP
+# Version 2019-07-14-01
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
@@ -44,10 +45,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v = new Valitron\Validator($_POST);
     $v->rule('required', ['ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_LUX'], 1)->message('{field} is required');
     $v->rule('slug', ['WXTEMPTYPE']);
-    $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER'], ['no', 'yes']);
+    $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER', 'ENABLE_AIR'], ['no', 'yes']);
     $v->rule('integer', ['HIVE_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO', 'HIVE_TEMP_SUB'], 1)->message('{field} must be a integer');
     $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT'], 1)->message('{field} must be numeric');
-    $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type'], 1)->message('{field} must be alphaNum only');
+    $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type', 'AIR_ID', 'AIR_TYPE'], 1)->message('{field} must be alphaNum only');
     $v->rule('lengthmax', ['WX_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO'], 2);
 
 }
@@ -183,7 +184,11 @@ if($v->validate()) {
     $WX_HUMIDITY_SLOPE = test_input($_POST["WX_HUMIDITY_SLOPE"]);
     $WX_HUMIDITY_INTERCEPT = test_input($_POST["WX_HUMIDITY_INTERCEPT"]);
 
-
+    #Air Quality
+    $ENABLE_AIR = test_input($_POST["ENABLE_AIR"]);
+    $AIR_TYPE= test_input($_POST["AIR_TYPE"]);
+    $AIR_ID = test_input($_POST["AIR_ID"]);
+    
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
     $ver->execute();
@@ -192,8 +197,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID));
     sleep(1);
 
 
@@ -543,7 +548,7 @@ if($v->validate()) {
                                 <tr class="odd gradeX">
                             <td><a href="#" title="Weather Source" data-toggle="popover" data-placement="bottom" data-content="Specify where you want to get your ambient weather data from."><p class="fa fa-question-circle fa-fw"></P></a>Weather Source<br>
 
-<!-- ******************************************************************************************** -->
+    <!-- ******************************************************************************************** -->
 
                             
                             <select name="WEATHER_LEVEL" onchange="this.form.submit()">
@@ -607,6 +612,37 @@ if($v->validate()) {
                                 <td> </td>
                                 <td></td>
                         </tr>
+<?PHP ###############################################################################################################
+      # AirQuality
+      ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td>
+                                <a href="#" title="Air Quality" data-toggle="popover" data-placement="bottom" data-content="Enable Air Quailty Checks and specify which air sensors you use or one that is within 10 miles of your hives."><p class="fa fa-question-circle fa-fw"></P></a>
+                                Air Quaility<br>
+                            
+                            <select name="ENABLE_AIR" onchange="this.form.submit()">
+                            <option value="yes" <?php if ($result['ENABLE_AIR'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
+                            <option value="no" <?php if ($result['ENABLE_AIR'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
+                            </select></td>
+
+                            <td>
+                            <?php if ($result['ENABLE_AIR'] == "yes") {
+                                echo '
+                                <input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purple"'; if ($result['AIR_TYPE'] == "purple") {echo "checked";} echo '> PurpleAir';} #Only one at the moment
+                            ?>
+                            </td>
+                            <td>
+                            <?PHP if ($result['ENABLE_AIR'] == "yes" && $result['AIR_TYPE'] == "purple") {
+                                echo '<a href="#" title="Air ID" data-toggle="popover" data-placement="bottom" data-content="Go to <a href=\'https://www.purpleair.com/map\' target=\'_blank\' title=\'purpleair\'>Purpleair.com</a> to get an ID."><p class="fa fa-question-circle fa-fw"></P></a>';
+                                    echo 'STATION ID <br><input type="text" name="AIR_ID" onchange="this.form.submit()" value="'; echo $result['AIR_ID']; echo '">';    
+                                } ?>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+<?PHP ############################################################################################################### ?>
+
                                     </tbody>
                                 </table>
 
@@ -688,7 +724,7 @@ if($v->validate()) {
     
     <script>
     $(document).ready(function(){
-    $('[data-toggle="popover"]').popover(); 
+    $('[data-toggle="popover"]').popover({html:true}); 
     });
     </script>
     

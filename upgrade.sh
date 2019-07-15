@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="93"
+Upgrade_ver="94"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -282,6 +282,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_30
 			let DB_ver="22"
 		fi
+		if [[ $DB_ver -eq "22" ]]; then
+			echo "Applying DB Ver 23 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_31
+			let DB_ver="23"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -399,7 +404,6 @@ fi
 if [[ "$Installed_Ver" < "1.95" ]]; then
 	#Set our new scripts to executable.
 	sudo chmod u+x /home/HiveControl/scripts/air/*	
-
 fi
 
 echo "============================================="
