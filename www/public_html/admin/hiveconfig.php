@@ -188,6 +188,12 @@ if($v->validate()) {
                                     </thead>
                                     <tbody>
                                         <tr class="odd gradeX">
+                                            <td>Hive API</td>
+                                            <td><input type="text" name="HIVEAPI" value="<?PHP echo $result['HIVEAPI'];?>" onchange="this.form.submit()"></td>  
+                                            <td>Required Key - register at <a href="https://www.hivecontrol.org/">HiveControl</a><br>
+                                            Click on Beekeeper picture, then "Your Settings", then "API". Type a name, then hit create. Copy and paste that key here. Note: you can use one API key for all of your hives.</td>
+                                        </tr>
+                                        <tr class="odd gradeX">
                                             <td>Hive Name</td>
                                             <td><input type="text" name="HIVENAME" value="<?PHP echo $result['HIVENAME'];?>" onchange="this.form.submit()"></td>  
                                             <td>Name identifier for this hive.</td>
@@ -197,11 +203,7 @@ if($v->validate()) {
                                             <td><?PHP echo $result['HIVEID'];?></td>
                                             <td>Unique identifier for this hive.</td>
                                         </tr>
-                                        <tr class="odd gradeX">
-                                            <td>Hive API</td>
-                                            <td><input type="text" name="HIVEAPI" value="<?PHP echo $result['HIVEAPI'];?>" onchange="this.form.submit()"></td>  
-                                            <td>Required Key - register yours are <a href="https://www.hivecontrol.org/">HiveControl</td>
-                                        </tr>
+
                                         <tr class="odd gradeX">
                                             <td>City</td>
                                             <td><input type="text" name="CITY" value="<?PHP echo $result['CITY'];?>" onchange="this.form.submit()"></td>

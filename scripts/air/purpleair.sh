@@ -5,7 +5,7 @@
 #
 # Script to pull air quality reports from a Purple Air sensor
 #
-# v 2019070301
+# v 2019081201
 
 #Pull configs and logger library
 source /home/HiveControl/scripts/hiveconfig.inc
@@ -61,7 +61,7 @@ TEMPFILE="/home/HiveControl/scripts/air/output.json"
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
 	#https://www.purpleair.com/json?show=7634
-	RESULT=$(/usr/bin/curl -s -w %{http_code} "https://www.purpleair.com/json?show=$air_id" -o $TEMPFILE)
+	RESULT=$(/usr/bin/curl -s -w %{http_code} "https://www.purpleair.com/json?show=$AIR_ID" -o $TEMPFILE)
 		
 	#Get Channel A	
 	THINKSPEAK_A_ID=$(jq --compact-output --raw-output '.results[] | .THINGSPEAK_PRIMARY_ID' <$TEMPFILE | head -1)
@@ -72,7 +72,7 @@ do
 
 	if [[ -z $THINKSPEAK_A_ID ]]; then
 		#Looks like something failed
-		loglocal "$DATE" AIR ERROR "Purple ID cannot be found, please check your entry of $air_id, CURL $RESULT"
+		loglocal "$DATE" AIR ERROR "Purple ID cannot be found, please check your entry of $AIR_ID, CURL $RESULT"
 		echo "ERROR"
 		exit 1
 	fi

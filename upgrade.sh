@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="94"
+Upgrade_ver="95"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -286,6 +286,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			echo "Applying DB Ver 23 Upgrades"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_31
 			let DB_ver="23"
+			AIR_QUALITY_NULL=$(sqlite3 $DestDB "SELECT ENABLE_AIR from hiveconfig;")			
+			if [[ $AIR_QUALITY_NULL == "" || $AIR_QUALITY_NULL == "NULL" ]]; then
+				#statements
+				sqlite3 $DestDB "UPDATE hiveconfig SET ENABLE_AIR = 'no';"
+			fi
 		fi
 
 	#else
@@ -410,7 +415,7 @@ echo "============================================="
 echo "success"
 #Cleanup and set the flag in the DB
 loglocal "$DATE" UPGRADE SUCCESS "Upgraded to HiveControl ver $Latest_Ver"
-sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
+sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
 
 Latest_Ver=$(cat "/home/HiveControl/upgrade/HiveControl/VERSION")
 
@@ -433,7 +438,7 @@ sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver, VERSION=$VERSION W
 if [[ "$Installed_Ver" < "1.90" ]]; then
 	#Need to reboot
 		echo "========================================================"
-		echo "Completed Upgrade to 1.90 of HiveControl"
+		echo "Completed Upgrade to $Latest_Ver of HiveControl"
 		echo "========================================================"
 		echo "SORRY, A REBOOT IS REQUIRED NOW!"
 		echo "Press ENTER to reboot : \c"
