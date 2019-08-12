@@ -9,9 +9,8 @@ Latest Release = 1.97
 [Release Notes](https://raw.githubusercontent.com/rcrum003/HiveControl/master/RELEASE)
 
 ## Update
-We currently support all Raspberry PI hardward/software platforms except the new PI4.
-Current install works on the lastest Raspbian OS, except the new one for PI4.
-We have ordered a PI4 and are awaiting to test compatability
+We currently support all Raspberry PI hardward/software platforms, INCLUDING the new PI4, Raspbian Buster
+Verified install.sh works as expected on Raspbian Buster as of 8/13/2019.
 
 ## Now includes beecounter code
 Only use these instructions if you have version 1.61 and below.
