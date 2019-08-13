@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v45 - for HiveControl
+# v98 - for HiveControl
 # 
 # Must run under root
 # sudo bash 
@@ -15,7 +15,8 @@ function show_help {
 	echo "--------------------"
 	echo "HiveControl Installation Help"
 	echo "--------------------"
-	echo " -b  Beecounter Webcam Setup (Warning: Can take up to 8 hrs to run)"
+	echo " -b  Use RaspiCam as a Beecounter Setup (Warning: Can take up to 8 hrs to run)"
+	echo " -w  Use RaspiCam as Livestream"
 	echo " -x  Install XRDP for you Windows Users"
 	echo " -k  Touch Screen Keyboard Install"
 	echo " -h or -?  This help message"
@@ -24,10 +25,9 @@ function show_help {
 
 }
 
-function installBeeCount() {
-   #Enable the camera and turn off the LED
 
-		if grep "start_x=1" /boot/config.txt
+function enablePICam() {
+	if grep "start_x=1" /boot/config.txt
 		then
 		        echo "Start_x already set"
 		elif "start_x=0"
@@ -60,22 +60,37 @@ function installBeeCount() {
 		        #reboot
 		fi
 
+}
+
+function installBeeCount() {
+   #Enable the camera and turn off the LED
+	enablePICam
 	#Install the software
     /home/HiveControl/install/setupbeecounter.sh
     return
 
 }	
+
+function install_hivecam() {
+	   #Enable the camera and turn off the LED
+		enablePICam
+		#Install the software
+		
+
+}
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-while getopts "h?bdxk" opt; do
+while getopts "h?bwdxk" opt; do
     case "$opt" in
     h|\?)
         show_help
         exit 0
         ;;
     b)  BEECOUNTER="true"
-        ;;    
+        ;;
+    w)  HIVECAM="true"
+    	;;    
     d)  DEBUG="true"
 	    ;;
 	x) XRDP="true"
@@ -92,6 +107,18 @@ shift $((OPTIND-1))
 if [[ $DEBUG = true ]]; then
     set -x
 fi
+
+if [[ $BEECOUNTER = true && $HIVECAM = true ]]; then
+	#All hell no, can't setup the cam to be both fool, tell the user and bomb
+	echo "Sorry - can't setup RaspiCam to be both a BeeCounter and HiveCam - Pick one only"
+	exit 1
+fi
+
+if [[ -z $BEECOUNTER ]]; then
+	#echo "Lets install the hivecam for you"
+	install_hivecam
+fi
+
 
 #Sorry, need to run as root due to some compiling errors we get when we aren't root
 whoami=$(whoami)
@@ -293,8 +320,18 @@ sudo cp utils/hid-query /usr/local/bin/
 echo "Installing PIGPIO library for DHT and HX711 Sensors"
 #Kill pigpiod just in case it is already running
 sudo killall pigpiod
-sudo apt-get install pigpio python-pigpio python3-pigpio -y
+#sudo apt-get install pigpio python-pigpio python3-pigpio -y
+#Added for PigPIO
 
+sudo apt install python-setuptools python3-setuptools -y
+cd /home/HiveControl/software
+sudo git clone https://github.com/rcrum003/pigpio
+cd pigpio/
+sudo make
+sudo make install
+sudo cp /usr/local/bin/pigpiod /usr/bin/
+sudo apt install python-pigpio python3-pigpio
+sudo pigpiod
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs

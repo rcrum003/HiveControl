@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="95"
+Upgrade_ver="98"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -409,6 +409,20 @@ fi
 if [[ "$Installed_Ver" < "1.95" ]]; then
 	#Set our new scripts to executable.
 	sudo chmod u+x /home/HiveControl/scripts/air/*	
+fi
+
+if [[ "$Installed_Ver" < "1.98" ]]; then
+	#Update PigPIO to support Raspi4
+	sudo killall pigpio 	
+	sudo apt purge pigpio
+	sudo apt install python-setuptools python3-setuptools -y
+	cd /home/HiveControl/software
+	sudo git clone https://github.com/rcrum003/pigpio
+	cd pigpio/
+	sudo make
+	sudo make install
+	sudo cp /usr/local/bin/pigpiod /usr/bin/
+	sudo pigpiod
 fi
 
 echo "============================================="
