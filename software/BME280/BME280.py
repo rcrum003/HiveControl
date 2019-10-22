@@ -7,7 +7,7 @@ import time
 # Public Domain
 
 # Modified for HiveControl 10.21.2019
-# Version 2019102101
+# Version 2019102102
 
 """
 Code to read the BME280 pressure, humidity, and temperature sensor._
