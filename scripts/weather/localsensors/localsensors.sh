@@ -1,6 +1,6 @@
 
 #!/bin/bash
-# Version 1.2
+# Version 1.3
 # Script to output localized DHT22 and RainSensor that matches WUNDERGROUND file format
 #
 # 
@@ -21,7 +21,7 @@ WXPRESSURE_IN="0"
 # =======================================
 # Get the data from the device
 # =======================================
-# ------ GET TEMP/Humidity ------
+# ------ GET TEMP/Humidity/Pressure/Gas ------
 if [[ $WXTEMPTYPE == "temperhum" ]]; then
 	WXTEMP=`$HOMEDIR/scripts/weather/localsensors/wxtemperhum.sh`
 elif [[ $WXTEMPTYPE == "dht22" ]]; then
@@ -34,6 +34,11 @@ elif [[ $WXTEMPTYPE = "bme680" ]]; then
     WXTEMP=$($HOMEDIR/scripts/weather/localsensors/wxbme680.sh)
     WXPRESSURE_MB=$(echo $WXTEMP |awk '{print $5}')
     WXGAS=$(echo $WXTEMP |awk '{print $6}')
+    #To convert millibars to inches of mercury, multiply the millibar value by 0.0295301
+    WXPRESSURE_IN=$(echo "scale=2; ($WXPRESSURE_MB * 0.0295301)" | bc )
+elif [[ $WXTEMPTYPE = "bme280" ]]; then
+    WXTEMP=$($HOMEDIR/scripts/weather/localsensors/wxbme280.sh)
+    WXPRESSURE_MB=$(echo $WXTEMP |awk '{print $5}')
     #To convert millibars to inches of mercury, multiply the millibar value by 0.0295301
     WXPRESSURE_IN=$(echo "scale=2; ($WXPRESSURE_MB * 0.0295301)" | bc )
 fi

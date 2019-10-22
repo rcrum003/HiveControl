@@ -1,5 +1,5 @@
 <?PHP
-# Version 2019-07-14-01
+# Version 2019102201
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
@@ -276,7 +276,9 @@ if($v->validate()) {
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['TEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22 
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="sht31d"'; if ($result['TEMPTYPE'] == "sht31d") {echo "checked";} echo '> SHT31-D
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="bme280"'; if ($result['TEMPTYPE'] == "bme280") {echo "checked";} echo '> BME280
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="bme680"'; if ($result['TEMPTYPE'] == "bme680") {echo "checked";} echo '> BME680';
+
                                             }
                                             ?></td>
                                             <td>
@@ -598,6 +600,7 @@ if($v->validate()) {
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21<br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22<br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="sht31d"'; if ($result['WXTEMPTYPE'] == "sht31d") {echo "checked";} echo '> SHT31-D<br>
+                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="bme280"'; if ($result['WXTEMPTYPE'] == "bme280") {echo "checked";} echo '> BME280 <br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="bme680"'; if ($result['WXTEMPTYPE'] == "bme680") {echo "checked";} echo '> BME680';
                                     if ($result['WXTEMPTYPE'] == "temperhum") {
                                         echo '</td><td>Device <input type="text" name="WX_TEMPER_DEVICE" onchange="this.form.submit()" value="'; echo $result['WX_TEMPER_DEVICE']; echo '"">';

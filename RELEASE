@@ -1,6 +1,17 @@
 Release Notes:
 
 --------------------
+1.99 Release
+--------------------
+- Added support for BME280 Temp/Humidity/Pressure sensor (if using HiveTool Sensore board, use the LUX TS2591 I2C jack, or attach to PINs on side of board)
+	- Thank you to Davey Rance for the sensor donation
+
+--------------------
+1.98 Release
+--------------------
+- Added support for Raspberry PI 4 hardware
+
+--------------------
 1.97 Release
 --------------------
 - Added a way to configure the air monitors - sorry, you'll have to go purpleair.com and find the id at the moment
