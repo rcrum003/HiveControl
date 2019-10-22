@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="98"
+Upgrade_ver="99"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -76,7 +76,8 @@ DestWWWRepo="/home/HiveControl/www/public_html"
 DestDB="/home/HiveControl/data/hive-data.db"
 scriptsource="/home/HiveControl/upgrade/HiveControl/scripts"
 scriptDest="/home/HiveControl/scripts"
-
+softwareSource="/home/HiveControl/upgrade/software"
+softwareDest="/home/HiveControl/software"
 #Remove some initial installation files from repository for upgrade
 #Remove the offending file, since we don't want to upgrade these 
 rm -rf $WWWTempRepo/include/db-connect.php
@@ -103,6 +104,15 @@ cd $scriptDest
 find . -name '*.sh' -exec chmod u+x {} +
 
 echo "============================================="
+
+
+echo "Upgrading our binaries"
+cp -Rp $softwareSource/* $softwareDest/
+#cd $scriptDest
+#find . -name '*.sh' -exec chmod u+x {} +
+
+echo "============================================="
+
 
 #Upgrade our DB
 #Get DBVersion
