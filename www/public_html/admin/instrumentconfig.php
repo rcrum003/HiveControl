@@ -1,5 +1,5 @@
 <?PHP
-# Version 2019102201
+# Version 2020033001
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
@@ -277,7 +277,8 @@ if($v->validate()) {
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['TEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="sht31d"'; if ($result['TEMPTYPE'] == "sht31d") {echo "checked";} echo '> SHT31-D
                                                 <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="bme280"'; if ($result['TEMPTYPE'] == "bme280") {echo "checked";} echo '> BME280
-                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="bme680"'; if ($result['TEMPTYPE'] == "bme680") {echo "checked";} echo '> BME680';
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="bme680"'; if ($result['TEMPTYPE'] == "bme680") {echo "checked";} echo '> BME680
+                                                <br><input type="radio" name="TEMPTYPE" onchange="this.form.submit()" value="broodminder"'; if ($result['TEMPTYPE'] == "broodminder") {echo "checked";} echo '> BroodMinder T/TH';
 
                                             }
                                             ?></td>
@@ -302,6 +303,10 @@ if($v->validate()) {
                                                     if ($result['TEMPTYPE'] == "dht21") {
                                                         echo '<a href="#" title="Specify GPIO" data-toggle="popover" data-placement="bottom" data-content="Specify the GPIO you want to use to connect to this sensor"><p class="fa fa-question-circle fa-fw"></P></a>GPIO:
                                                          <input type="text" name="HIVE_TEMP_GPIO" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
+                                                    }
+                                                    if ($result['TEMPTYPE'] == "broodminder") {
+                                                        echo '<a href="#" title="Specify Device Address" data-toggle="popover" data-placement="bottom" data-content="Specify which BLE device you want to listen for in the format of 42:1C:8A, which is written on device"><p class="fa fa-question-circle fa-fw"></P></a>Device:
+                                                         <input type="text" name="HIVEDEVICE" onchange="this.form.submit()" value="'; echo $result['HIVEDEVICE']; echo '"">';
                                                     }
                                             }?>
                                             </td>

@@ -5,7 +5,7 @@ This is a supporting application to the Hivetool.org software.
 
 
 ## Release Notes
-Latest Release = 1.97
+Latest Release = 2.00
 [Release Notes](https://raw.githubusercontent.com/rcrum003/HiveControl/master/RELEASE)
 
 ## Update
@@ -18,7 +18,7 @@ Follow the install instructions if you are setting up from scratch.
 [Beecounter Setup](https://github.com/rcrum003/HiveControl/wiki/BeeCounter-Setup)
 
 ## Current version supports:
-Weight, Temperature, Webcam, Weather, GDD, LUX
+Weight, Temperature, Webcam, Weather, GDD, LUX, Purple Air Pollution
 
 [Supported Sensors](https://github.com/rcrum003/HiveControl/wiki/Sensor-Support)
 

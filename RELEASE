@@ -1,6 +1,11 @@
 Release Notes:
 
 --------------------
+2.00 Release
+--------------------
+- Added support for BroodMinder BLE Temp/Humidity sensor (Wireless) 
+
+--------------------
 1.99 Release
 --------------------
 - Added support for BME280 Temp/Humidity/Pressure sensor (if using HiveTool Sensore board, use the LUX TS2591 I2C jack, or attach to PINs on side of board)

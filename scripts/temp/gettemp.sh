@@ -25,7 +25,7 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 			GETTEMP=$($HOMEDIR/scripts/temp/bme680.sh)
 		elif [[ $TEMPTYPE = "bme280" ]]; then
 			GETTEMP=$($HOMEDIR/scripts/temp/bme280.sh)
-		fi
+		
 
 		HIVETEMPF=$(echo $GETTEMP |awk '{print $1}')
 		HIVEHUMIDITY=$(echo $GETTEMP |awk '{print $2}')

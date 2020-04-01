@@ -1,11 +1,11 @@
 #!/bin/bash
-# read the bme280 Temp/Humidity/Presure Sensor
-# Version 1.1
+# read the BroodMinder Temp/Humidity Sensor
+# Version 1.0
 # Supporting the HiveControl project
 # gets and returns data like the temperhum
 
 
-# Requires that the python script BME280.py is in /home/HiveControl/software/BME280
+# Requires that the python script BM_Scan.py is in /home/HiveControl/software/broodminder
 
 #Get our standard includes
 source /home/HiveControl/scripts/hiveconfig.inc
@@ -24,6 +24,9 @@ function return_error {
 
 DATA_GOOD=0
 COUNTER=1
+ #      1    2         3    4    5      6    7     8   9 
+#DeviceId, DeviceMAC,RSSI,Date,Record,TempC,TempF,Hum,Battery
+#42:1C:8A,06:09:16:42:1c:8a,-72,2020-03-31 22:01:04,66,22.9,73.2,41,100
 
 
 ############################################################
@@ -33,28 +36,43 @@ COUNTER=1
 while [ $COUNTER -lt 3 ] && [ $DATA_GOOD -eq 0 ]
 do
         DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
-        #Run the C Code to read the sensor
+        #Run the Python Code to read the sensor
         
-        bme280_out=$(sudo python /home/HiveControl/software/BME280/BME280.py 2>&1)
-        
-        #echo " Output was $bme280_out"
+        #Get the varialble on which device they want
 
-        #Check for error status, which is included in the C code
-          bme280STATUS=$(echo $bme280_out |awk '{print $1}')
-          #echo "Status was $SHT31DSTATUS"
+        broodminder_out=$(sudo python /home/HiveControl/software/broodminder/BM_Scan.py |grep -i $HIVEDEVICE | tail -1 2>&1)
+        #echo " Output was $broodminder_out"
 
-          if [[ "$bme280STATUS" != "Error" ]]; then
+        #Check for Error or Empty by checking to see if first field contains our hivedevice
+        CHECK_DEVICE_STATUS=$(echo $broodminder_out |awk -F, '{print $1}')
+
+
+        #Check for error status
+          if [[ $CHECK_DEVICE_STATUS = $HIVEDEVICE ]]; then
            #Must have been good
-            #echo "Doing Else.............."
             #IF we had a good value, then run the conversions and such
                   
-                  TEMPF_RAW=$(echo $bme280_out | awk '{print $1}')
-                  TEMPC_RAW=$(echo $bme280_out | awk '{print $2}')
-                  HUMIDITY=$(echo $bme280_out | awk '{print $3}')
-                  PRESSURE=$(echo $bme280_out | awk '{print $4}')
+                  TEMPF_RAW=$(echo $broodminder_out | awk -F, '{print $7}')
+                  TEMPC_RAW=$(echo $broodminder_out | awk -F, '{print $6}')
+                  HUMIDITY=$(echo $broodminder_out | awk -F, '{print $8}')
+                  BATTERY=$(echo $broodminder_out | awk -F, '{print $9}')
                   
+                  #Check Battery
+                  if [[ $BATTERY -lt "5" ]]; then
+                    #Battery is getting low
+                    message="BroodMinder Battery is at $BATTERY%, change soon"
+                    loglocal "$DATE2" TEMP ERROR "$message"
+                  elif [[ $BATTERY -lt "2" ]]; then
+                    #Battery is basically dead
+                    message="BroodMinder Battery is at $BATTERY%, stopping collection"
+                    return_error
+                    exit
+                  fi
+
                   TEMPF=$(echo "scale=1; ($TEMPF_RAW/1)" |bc)
                   TEMPC=$(echo "scale=1; ($TEMPC_RAW/1)" |bc)
+
+
 
                   #echo "Humidity was $HUMIDITY, Temp was $TEMPF"
       
@@ -70,19 +88,20 @@ do
                   if [ $HUMIDITY_MINTEST == "0" ] && [ $TEMP_MINTEST != "0" ] && [ $HUMIDITY_MAXTEST == "0" ] && [ $TEMP_MAXTEST == "0" ] 
                     then
                     #Return a value for use by other scripts
-                   echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC $PRESSURE 
+                   echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC 
                   else
-                      message="ERROR Temp readings were good, but the values failed validation"
+                      message="Temp readings were good, but the values failed validation"
                       return_error
                       exit
                   fi
                 DATA_GOOD=1
               
           else
-
-            #Check for Error states, if so, try again
-            message="$bme280_out"
-            DATA_GOOD=0
+            #Check for Error states, if so, try again            
+                    #Looks like we had an error
+                    #message="Attempt $COUNTER - Failed to find BroodMinder Device $HIVEDEVICE, $broodminder_out"
+                    #loglocal "$DATE2" TEMP ERROR "$message"  
+              DATA_GOOD=0
             
 
           fi
@@ -93,6 +112,7 @@ do
 done
 
 if [[ $COUNTER -gt "2" ]]; then
+  message="Failed to find BroodMinder Device $HIVEDEVICE $broodminder_out"
   return_error
 fi
 

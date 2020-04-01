@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="101"
+Upgrade_ver="102"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -433,6 +433,21 @@ if [[ "$Installed_Ver" < "1.98" ]]; then
 	sudo make install
 	sudo cp /usr/local/bin/pigpiod /usr/bin/
 	sudo pigpiod
+fi
+
+if [[ "$Installed_Ver" < "2.00" ]]; then
+
+	#For some reason, who owned our data directory got changed, so let's make sure everyone is set to the right version
+	chown www-data:www-data /home/HiveControl/data
+	chown www-data:www-data /home/HiveControl/data/hive-data.db
+
+	#Phidget hasn't updated to buster yet, and it's breaking everything, so let's leave it at stretch
+	echo "deb http://www.phidgets.com/debian stretch main" > /etc/apt/sources.list.d/phidgets.list
+
+	#If you got a Rasp 4 - you need an EEPROM update
+	
+	sudo apt update && sudo apt upgrade && sudo apt install rpi-eeprom rpi-eeprom-images -y
+	rpi-eeprom-update -a
 fi
 
 echo "============================================="

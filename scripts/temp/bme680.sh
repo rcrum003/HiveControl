@@ -73,7 +73,7 @@ do
                     #Return a value for use by other scripts
                    echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC $PRESSURE $GAS
                   else
-                      $message="ERROR Temp readings were good, but the values failed validation"
+                      message="ERROR Temp readings were good, but the values failed validation"
                       return_error
                       exit
                   fi
