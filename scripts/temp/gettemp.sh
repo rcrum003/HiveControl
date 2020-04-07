@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 1.3, 2019-10-22
+# version 1.34 2020-03-31
 # reads the temp sensors as one script
 
 
@@ -25,7 +25,9 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 			GETTEMP=$($HOMEDIR/scripts/temp/bme680.sh)
 		elif [[ $TEMPTYPE = "bme280" ]]; then
 			GETTEMP=$($HOMEDIR/scripts/temp/bme280.sh)
-		
+		elif [[ $TEMPTYPE = "broodminder" ]]; then
+			GETTEMP=$($HOMEDIR/scripts/temp/broodminder.sh $HIVEDEVICE)
+		fi
 
 		HIVETEMPF=$(echo $GETTEMP |awk '{print $1}')
 		HIVEHUMIDITY=$(echo $GETTEMP |awk '{print $2}')
