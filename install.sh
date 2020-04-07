@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v98 - for HiveControl
+# v2.00 - for HiveControl
 # 
 # Must run under root
 # sudo bash 
@@ -258,22 +258,22 @@ echo "========================================================================"
 # Phidget
 ####################################################################################
 # Make Phidget software
-echo "Installing Phidget software "
+#echo "Installing Phidget software "
 
 #New apt-get method
-wget -qO- http://www.phidgets.com/gpgkey/pubring.gpg | apt-key add -
+#wget -qO- http://www.phidgets.com/gpgkey/pubring.gpg | apt-key add -
 #Get Release
-DEB_RELEASE=$(cat /etc/os-release |grep VERSION= |awk -F\( '{print $2}' | awk -F\) '{print $1}')
-echo 'deb http://www.phidgets.com/debian $DEB_RELEASE main' > /etc/apt/sources.list.d/phidgets.list
-sudo apt-get update
-sudo apt-get install libphidget22
+#DEB_RELEASE=$(cat /etc/os-release |grep VERSION= |awk -F\( '{print $2}' | awk -F\) '{print $1}')
+#echo "deb http://www.phidgets.com/debian $DEB_RELEASE main" > /etc/apt/sources.list.d/phidgets.list
+#sudo apt-get update
+#sudo apt-get install libphidget22
 
-cd /home/HiveControl/software
-sudo mkdir Phidgets
-sudo wget https://www.phidgets.com/downloads/phidget22/libraries/any/Phidget22Python.zip
-sudo unzip Phidgets22Python.zip
-cd Phidgets22Python
-sudo python setup.py install
+#cd /home/HiveControl/software
+#sudo mkdir Phidgets
+#sudo wget https://www.phidgets.com/downloads/phidget22/libraries/any/Phidget22Python.zip
+#sudo unzip Phidgets22Python.zip
+#cd Phidgets22Python
+#sudo python setup.py install
 
 ####################################################################################
 # Tempered Software
@@ -394,6 +394,18 @@ fi
 ####################################################################################
 
 
+####################################################################################
+# BroodMinder Temp Sensor Support
+####################################################################################
+echo "-------------------------------"
+echo "Installing Bluetooth Support for BroodMinder Devices"
+echo "-------------------------------"
+sudo pip install --upgrade pip -y
+
+#Install bluepy
+sudo pip install bluepy -y
+####################################################################################
+
 if [[ $KEYBOARD = "true" ]]; then
 	#Adds touch screen keyboard
 echo "Installing Touch Screen Keyboard Support"
@@ -459,6 +471,10 @@ else
 		    esac
 		done
 fi
+
+echo "Installing EEPROM updates"
+sudo apt install rpi-eeprom rpi-eeprom-images -y
+rpi-eeprom-update -a
 
 echo "========================================================"
 echo "Completed Setup of HiveControl"

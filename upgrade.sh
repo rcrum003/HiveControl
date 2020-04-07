@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="102"
+Upgrade_ver="105"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -445,10 +445,18 @@ if [[ "$Installed_Ver" < "2.00" ]]; then
 	echo "deb http://www.phidgets.com/debian stretch main" > /etc/apt/sources.list.d/phidgets.list
 
 	#If you got a Rasp 4 - you need an EEPROM update
-	
 	sudo apt update && sudo apt upgrade && sudo apt install rpi-eeprom rpi-eeprom-images -y
 	rpi-eeprom-update -a
+
+	#We added support for BroodMinder, which talks via Bluetooth, so we need those tools installed.
+		#Upgrade PIP, while we are at it
+		sudo pip install --upgrade pip -y
+
+		#Install bluepy
+		sudo pip install bluepy -y
+
 fi
+
 
 echo "============================================="
 echo "success"
