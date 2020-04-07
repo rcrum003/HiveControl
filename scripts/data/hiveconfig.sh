@@ -49,6 +49,10 @@ fi
 		sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET HCVersion=\"$HCVersion_file\";"
 	fi
 
+#If Hive API is going to be blank, we are going to set it manually
+#GhCf3D26mV06a8j7TWGObqJL1NulwGVdxGhcpqCfAXh4ZZmV2zGu1TyV3dBj
+
+
 #######################
 #Check Cloud Config
 #######################
@@ -111,7 +115,7 @@ else # 1.
 					#POST_created_at=$(jq -r .created_at $HIVE_CONFIG)
 					#POST_updated_at=$(jq -r .updated_at $HIVE_CONFIG)
 					POST_name=$(jq -r .name $HIVE_CONFIG)
-					echo "First was $POST_name"
+					#echo "First was $POST_name"
 					#POST_hiveid=$(jq -r .hiveid $HIVE_CONFIG) # this comes back null, as it's the same as POST_id
 					POST_user_id=$(jq -r .user_id $HIVE_CONFIG)
 					POST_yard_id=$(jq -r .yard_id $HIVE_CONFIG)
@@ -189,6 +193,11 @@ else # 1.
 					POST_wx_temper_device=$(jq -r .wx_temper_device $HIVE_CONFIG)
 					POST_wx_station=$(jq -r .wx_station $HIVE_CONFIG)
 					POST_wx_temp_type=$(jq -r .wx_temp_type $HIVE_CONFIG)
+					
+					POST_enable_hive_air_chk=$(jq -r .enable_hive_air_chk $HIVE_CONFIG)
+					POST_hive_air_type=$(jq -r .hive_air_type $HIVE_CONFIG)
+					POST_hive_air_id=$(jq -r .hive_air_id $HIVE_CONFIG)
+					POST_hive_air_api=$(jq -r .hive_air_api $HIVE_CONFIG)
 
 			#You have to evaluate if something is blank, if so, use the local copy.
 			#let's make a function
@@ -219,7 +228,7 @@ else # 1.
 
 			##############################################
 			#
-			# If a value is det locally and we get a null result from 
+			# If a value is detected locally and we get a null result from the 
 			#
 			###############################################
 			A POST_id hiveid

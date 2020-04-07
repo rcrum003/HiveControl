@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="106"
+Upgrade_ver="108"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -448,15 +448,17 @@ if [[ "$Installed_Ver" < "2.00" ]]; then
 	sudo apt update -y && sudo apt upgrade -y && sudo apt install rpi-eeprom rpi-eeprom-images -y
 	rpi-eeprom-update -a
 
-	#We added support for BroodMinder, which talks via Bluetooth, so we need those tools installed.
-		#Upgrade PIP, while we are at it
-		sudo pip install --upgrade pip -y
-
-		#Install bluepy
-		sudo pip install bluepy -y
-
 fi
 
+if [[ "$Installed_Ver" < "2.01" ]]; then
+
+	#We added support for BroodMinder, which talks via Bluetooth, so we need those tools installed.
+		#Upgrade PIP, while we are at it
+		sudo pip install --upgrade pip
+
+		#Install bluepy
+		sudo pip install bluepy
+fi
 
 echo "============================================="
 echo "success"

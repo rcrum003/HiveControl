@@ -2,7 +2,7 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v2.00 - for HiveControl
+# v2.01 - for HiveControl
 # 
 # Must run under root
 # sudo bash 
@@ -400,10 +400,10 @@ fi
 echo "-------------------------------"
 echo "Installing Bluetooth Support for BroodMinder Devices"
 echo "-------------------------------"
-sudo pip install --upgrade pip -y
+sudo pip install --upgrade pip
 
 #Install bluepy
-sudo pip install bluepy -y
+sudo pip install bluepy
 ####################################################################################
 
 if [[ $KEYBOARD = "true" ]]; then
