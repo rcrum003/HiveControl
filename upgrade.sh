@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="108"
+Upgrade_ver="109"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -450,9 +450,10 @@ if [[ "$Installed_Ver" < "2.00" ]]; then
 
 fi
 
-if [[ "$Installed_Ver" < "2.01" ]]; then
+if [[ "$Installed_Ver" < "2.02" ]]; then
 
 	#We added support for BroodMinder, which talks via Bluetooth, so we need those tools installed.
+
 		#Upgrade PIP, while we are at it
 		sudo pip install --upgrade pip
 

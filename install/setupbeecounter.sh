@@ -2,13 +2,13 @@
 # Script to setup beecounter
 # Only install if you are going to use the beecounter
 # If you aren't, then you'll save a ton of space
-# Version 2.0
+# Version 2.01
 
 
 #Get Dependencies
 # Don't run if part of install.sh script as it just ran
-sudo apt-get update -y
-sudo apt-get upgrade -y
+#sudo apt-get update -y
+#sudo apt-get upgrade -y
 
 #Make sure we have core developer tools
 sudo apt-get install build-essential git cmake pkg-config -y
@@ -44,10 +44,11 @@ unzip opencv_contrib.zip
 rm -rf opencv_contrib.zip
 
 #Install PIP
-mkdir /opt/pip
-cd /opt/pip
-wget https://bootstrap.pypa.io/get-pip.py
-sudo python get-pip.py
+sudo apt-get install python-pip -y
+#mkdir /opt/pip
+#cd /opt/pip
+#wget https://bootstrap.pypa.io/get-pip.py
+#sudo python get-pip.py
 
 #Install Numpy - this will take 15minutes
 pip install numpy

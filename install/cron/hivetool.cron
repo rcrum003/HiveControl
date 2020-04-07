@@ -1,10 +1,8 @@
 
 
-#Check Sensors every 5 Minutes
-*/5 * * * * /home/HiveControl/scripts/system/currconditions.sh > /dev/null 2>&1
+#Check Sensors every 60 Minutes
+*/60 * * * * /home/HiveControl/scripts/system/currconditions.sh > /dev/null 2>&1
 
-#Upload data once every 30 minutes to yardcontroller - disabled by default
-#*/32 * * * * /home/HiveControl/scripts/data/synchive.sh > /dev/null 2>&1
 
 #Take a Pic
 #*/5 * * * * /home/HiveControl/scripts/image/takepic.sh > /dev/null 2>&1
@@ -22,7 +20,7 @@
 */1 * * * * /home/HiveControl/scripts/system/msgqueue.sh > /dev/null 2>&1
 
 #Get System Status
-*/5 * * * * timeout -s KILL 1m /home/HiveControl/scripts/pimonitor/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt
+*/30 * * * * timeout -s KILL 1m /home/HiveControl/scripts/pimonitor/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt
 
 #Restart Our Pi GPIO Library Deamon on restart
 @reboot              /usr/bin/pigpiod
