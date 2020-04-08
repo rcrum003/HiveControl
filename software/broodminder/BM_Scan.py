@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 __author__ = "Jesse Ross-Jones"
 __license__ = "Public Domain"
-__version__ = "1.1"
+__version__ = "1.2"
 
 ## Tested with Python 2.7
 ## Using bluepy, scan for bluetooth devices for 15 seconds.
@@ -55,7 +55,7 @@ def checkBM(data):
     return check
 
 
-def extractData(deviceId, observationDate, data):
+def extractData(observationDate, data):
     offset = 8  # There are 8 bits less than described in BroodMinder documentation
 
     byteNumAdvdeviceModelIFllc_1 = 10 - offset
@@ -121,7 +121,7 @@ def extractData(deviceId, observationDate, data):
                                                                       #batteryPercent))
         #print("Device = {}, RSSI={}, Sample = {}, TemperatureF = {}, Humidity = {}, Battery = {}".format(dev.addr, dev.rssi, sampleNumber, temperatureDegreesF, humidityPercent,
                                                                       #batteryPercent))
-        print("{},{},{},{},{},{},{},{},{}".format(deviceId, dev.addr, dev.rssi, observationDate, sampleNumber, temperatureDegreesCRound, temperatureDegreesF, humidityPercent,batteryPercent))
+        print("{},{},{},{},{},{},{},{}".format(dev.addr, dev.rssi, observationDate, sampleNumber, temperatureDegreesCRound, temperatureDegreesF, humidityPercent,batteryPercent))
                                                                       
         # Send the info to MyBroodMinder.com
         #print "Sending device '" + deviceId + "' data to the MyBroodMinder Cloud ..."
@@ -163,5 +163,4 @@ for dev in devices:
             # Trap for the BroodMinder ID
             if (desc == "Complete Local Name"):
                 deviceId = value
-
-        extractData(deviceId, observationDate, dev.getValueText(255))
+        extractData(observationDate, dev.getValueText(255))

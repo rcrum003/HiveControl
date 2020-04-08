@@ -1,6 +1,6 @@
 #!/bin/bash
 # read the BroodMinder Temp/Humidity Sensor
-# Version 1.0
+# Version 1.1
 # Supporting the HiveControl project
 # gets and returns data like the temperhum
 
@@ -24,9 +24,9 @@ function return_error {
 
 DATA_GOOD=0
 COUNTER=1
- #      1    2         3    4    5      6    7     8   9 
-#DeviceId, DeviceMAC,RSSI,Date,Record,TempC,TempF,Hum,Battery
-#42:1C:8A,06:09:16:42:1c:8a,-72,2020-03-31 22:01:04,66,22.9,73.2,41,100
+ #      1    2    3    4    5      6    7     8  
+#DeviceMAC,RSSI,Date,Record,TempC,TempF,Hum,Battery
+#06:09:16:42:1c:8a,-72,2020-03-31 22:01:04,66,22.9,73.2,41,100
 
 
 ############################################################
@@ -52,10 +52,10 @@ do
            #Must have been good
             #IF we had a good value, then run the conversions and such
                   
-                  TEMPF_RAW=$(echo $broodminder_out | awk -F, '{print $7}')
-                  TEMPC_RAW=$(echo $broodminder_out | awk -F, '{print $6}')
-                  HUMIDITY=$(echo $broodminder_out | awk -F, '{print $8}')
-                  BATTERY=$(echo $broodminder_out | awk -F, '{print $9}')
+                  TEMPF_RAW=$(echo $broodminder_out | awk -F, '{print $6}')
+                  TEMPC_RAW=$(echo $broodminder_out | awk -F, '{print $5}')
+                  HUMIDITY=$(echo $broodminder_out | awk -F, '{print $7}')
+                  BATTERY=$(echo $broodminder_out | awk -F, '{print $8}')
                   
                   #Check Battery
                   if [[ $BATTERY -lt "5" ]]; then
