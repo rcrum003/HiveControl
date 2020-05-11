@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="109"
+Upgrade_ver="110"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -459,6 +459,10 @@ if [[ "$Installed_Ver" < "2.02" ]]; then
 
 		#Install bluepy
 		sudo pip install bluepy
+fi
+
+if [[ "$Installed_Ver" < "2.04" ]]; then
+	sudo chmod u+x /home/HiveControl/install/*
 fi
 
 echo "============================================="
