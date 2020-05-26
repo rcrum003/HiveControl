@@ -1,12 +1,14 @@
-
 #!/bin/bash
 # Version 6
-# Script to output API.Ambientweather.net to a JSON and XML file that matches WUNDERGROUND file format
+# Script to output weatherflow data to a JSON and XML file that matches WUNDERGROUND file format
 #
-# Revision 2
+# Listens on the local network for UDP broadcast of the weatherstation.
+#
+# Revision 1
 # 2020-05-26
 # 
 # 	
+
 
 
 #Get our variables
@@ -15,13 +17,7 @@ source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/check.inc
 
-#move to db
-ambient_APPID="99d38400a7ff405a9389b113423f3416440cf4e7738841709862a048d7faaa8a"
-ambient_APIKEY=$KEY
-ambient_deviceMAC=$WXSTATION
-ambient_device_url="https://api.ambientweather.net/v1/devices"
-
-#Specific Device
+#JSON Parser Script
 JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
@@ -30,7 +26,27 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 #SLEEPTIME=$((1 + RANDOM % 30))
 #sleep $SLEEPTIME
 
-WXSTATION="AMW_$ambient_deviceMAC"
+
+function listen_for_event {
+ 
+ timeout 60 nc -kluw 0 50222 | (
+    cnt=0
+    line=
+    while read -N 1 c; do
+        line="$line$c"
+        if [ "$c" = "{" ]; then
+            cnt=$((cnt+1))
+        elif [ "$c" = "}" ]; then
+            cnt=$((cnt-1))
+            if [ $cnt -eq 0 ]; then
+                printf "%s\n" "$line"
+                line=
+            fi
+        fi
+    done
+) | grep "obs" |grep "$WXSTATION" | tail -1
+
+}
 
 TRYCOUNTER="1" 
 DATA_GOOD="0" 
@@ -38,9 +54,9 @@ DATA_GOOD="0"
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
 	
-	GETDATA=$(/usr/bin/curl --silent "$ambient_device_url/$ambient_deviceMAC?apiKey=$ambient_APIKEY&applicationKey=$ambient_APPID&limit=1")
+	GETDATA=$(listen_for_event)
 	
-	CHECKERROR=$(/bin/echo $GETDATA | $JSON_PATH -b | grep tempf |awk '{print $2}')
+	CHECKERROR=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
 	 
 	if [ -z "$CHECKERROR"  ]; then
 		loglocal "$DATE" WEATHER INFO "Did not get a proper response from AmbientWeather.net, trying again"
@@ -55,28 +71,33 @@ if [ $DATA_GOOD = "0" ]; then
 
 fi
 
+#jq '.obs[] | .[0]'
 
 #Now that we are successful, do the needful.
-DATEUTC=$(/bin/echo $GETDATA | $JSON_PATH -b | grep dateutc |awk '{print $2}')
-WIND_DIR=$(/bin/echo $GETDATA | $JSON_PATH -b | grep winddir |awk '{print $2}')
-WIND_SPEED_MPH=$(/bin/echo $GETDATA | $JSON_PATH -b | grep windspeedmph |awk '{print $2}')
-WIND_GUST_MPH=$(/bin/echo $GETDATA | $JSON_PATH -b | grep windgustmph |awk '{print $2}')
-WIND_MAX_DAILY_GUST=$(/bin/echo $GETDATA | $JSON_PATH -b | grep windgustmph |awk '{print $2}')
-TEMP_F=$(/bin/echo $GETDATA | $JSON_PATH -b | grep tempf |awk '{print $2}')
-RAIN_HOURLY_IN=$(/bin/echo $GETDATA | $JSON_PATH -b | grep hourlyrainin |awk '{print $2}')
-RAIN_EVENT_IN=$(/bin/echo $GETDATA | $JSON_PATH -b | grep eventrainin |awk '{print $2}')
-RAIN_DAILY_IN=$(/bin/echo $GETDATA | $JSON_PATH -b | grep dailyrainin |awk '{print $2}')
-BAROM_REL_IN=$(/bin/echo $GETDATA | $JSON_PATH -b | grep baromrelin |awk '{print $2}')
-BAROM_ABS_IN=$(/bin/echo $GETDATA | $JSON_PATH -b | grep baromabsin |awk '{print $2}')
-HUMIDITY=$(/bin/echo $GETDATA | $JSON_PATH -b | grep humidity |grep -v humidityin |awk '{print $2}')
-UV=$(/bin/echo $GETDATA | $JSON_PATH -b | grep uv |awk '{print $2}')
-SOLARRADIATION=$(/bin/echo $GETDATA | $JSON_PATH -b | grep solarradiation |awk '{print $2}')
-DATE_NORM=$(/bin/echo $GETDATA | $JSON_PATH -b | grep "date" |grep -v "dateutc" |awk '{print $2}')
+WXSTATION=$(/bin/echo $GETDATA | jq --raw-output '.serial_number')
+DATEUTC=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
+WIND_DIR=$(/bin/echo $GETDATA | jq '.obs[] | .[4]')
+WIND_SPEED_MS=$(/bin/echo $GETDATA | jq '.obs[] | .[2]')
+WIND_GUST_MS=$(/bin/echo $GETDATA | jq '.obs[] | .[3]')
+#WIND_MAX_DAILY_GUST=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
+TEMP_C=$(/bin/echo $GETDATA | jq '.obs[] | .[7]')
+#RAIN_HOURLY_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
+#RAIN_EVENT_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
+RAIN_DAILY_MM=$(/bin/echo $GETDATA | jq '.obs[] | .[12]')
+#BAROM_REL_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[6]')
+pressure_mb=$(/bin/echo $GETDATA | jq '.obs[] | .[6]')
+HUMIDITY=$(/bin/echo $GETDATA | jq '.obs[] | .[8]')
+UV=$(/bin/echo $GETDATA | jq '.obs[] | .[10]')
+SOLARRADIATION=$(/bin/echo $GETDATA | jq '.obs[] | .[11]')
+LUX=$(/bin/echo $GETDATA | jq '.obs[] | .[9]')
+LIGHTNING_STRIKE_COUNT=$(/bin/echo $GETDATA | jq '.obs[] | .[15]')
+LIGHTNING_STRIKE_DISTANCE=$(/bin/echo $GETDATA | jq '.obs[] | .[14]') #km
+#DEWPOINT_F=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
+#DATE_NORM=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
 
 # Do some conversions to
-# AmbientWeather seems to only supply F - below we convert to C
-temp_c=$(echo "scale=1;(($TEMP_F-32)*5)/9" | bc -l)
-
+# WeatherFlow supplies most things in metric-ish settings, need to convert to imperials
+TEMP_F=$(echo "scale=1;((9/5) * $TEMP_C) + 32" | bc -l)
 
 # Convert Wind then DIRECTION Degrees into Text
 
@@ -107,23 +128,28 @@ elif [ 1 -eq "$(echo "$WIND_DIR >= 292.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR
 else DIRECTION="North"
 fi 
 
+# convert Meters Per Second (MS) to mph
+# Formula - Wind(MPH) = 2.23694 * Wind(MS)
+WIND_SPEED_MPH="$(echo "scale=2; ($WIND_SPEED_MS * 2.23694)/1" | bc)"
+WIND_GUST_MPH="$(echo "scale=2; ($WIND_GUST_MS * 2.23694)/1" | bc)"
+
 # convert MPH to kph per hour
 wind_kph="$(echo "scale=2; ($WIND_SPEED_MPH * 1.609344)/1" | bc)"
 wind_gust_kph="$(echo "scale=2; ($WIND_GUST_MPH * 1.609344)/1" | bc)"
 
+#Convert MB pressure to IN
+pressure_in="$(echo "scale=0; ($pressure_mb / 33.8637526)/1" | bc)"
 
-#Convert Pressure in to MB
-pressure_mb="$(echo "scale=0; ($BAROM_ABS_IN * 33.8637526)/1" | bc)"
-
-#Calculate the dewpoint F
+#Calculate the dewpoint F/C
 # Formula:  TDEW = T - 9(100-RH%) / 25
 # Get the integers of the temperature and humidity
-dewpoint_f="$(echo "scale=2; (${TEMP_F} - ( 9* (100 - ${HUMIDITY})) /25)" |bc -l)"
+dewpoint_f="$(echo "scale=2; (${TEMP_F} - ( 9*(100 - ${HUMIDITY})) /25)" |bc -l)"
 dewpoint_c=$(echo "scale=1;((${dewpoint_f}-32)*5)/9" | bc -l)
 
-#Convert Rain Inches for Hour and Day to Metric
-precip_1hr_metric="$(echo "scale=2; ($RAIN_HOURLY_IN / 0.039370)" |bc)"
-precip_today_metric="$(echo "scale=2; ($RAIN_DAILY_IN / 0.039370)" |bc)"
+#Convert Rain MM to Inches
+#precip_1hr_metric="$(echo "scale=2; ($RAIN_HOURLY_IN * 0.039370)" |bc)"
+RAIN_DAILY_IN="$(echo "scale=2; ($RAIN_DAILY_MM * 0.039370)" |bc)"
+precip_today_metric=$RAIN_DAILY_MM
 
 if [[ -z "$TEMP_F" ]]; then
 	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp, even after counter, $GETDATA"
@@ -132,7 +158,7 @@ if [[ -z "$TEMP_F" ]]; then
 fi
 
 #ConvertDate
-WX_DATE_TIME=$(date -d @$(($DATEUTC/1000)) '+%Y-%m-%d %H:%M:%S')
+WX_DATE_TIME=$(date -d @$(($DATEUTC)) '+%Y-%m-%d %H:%M:%S')
 
 #B4:E6:2D:07:87:49,1562721300000,72.9,80,66.36,22.7,0,0,224,0,0,0,1014,29.95,0,19.0,0,0,0,0,0,0,0
 #LOCALSENSOR,2019-07-09 21:20,73.8,45.20,54.08,20.9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0	
@@ -147,9 +173,9 @@ echo "	}"
 echo "  ,	\"current_observation\": {"
 echo "		\"station_id\":\"$WXSTATION\","
 echo "		\"observation_time\":\"$WX_DATE_TIME\","
-echo "		\"temperature_string\":\"$TEMP_F F ($temp_c C)\","
+echo "		\"temperature_string\":\"$TEMP_F F ($TEMP_C C)\","
 echo "		\"temp_f\":\"$TEMP_F\","
-echo "		\"temp_c\":\"$temp_c\","
+echo "		\"temp_c\":\"$TEMP_C\","
 echo "		\"relative_humidity\":\"$HUMIDITY%\","
 echo "		\"wind_string\":\" $DIRECTION at $WIND_SPEED_MPH MPH, Gust to $WIND_GUST_MPH MPH\","
 echo "		\"wind_dir\":\"$DIRECTION\","
@@ -159,21 +185,19 @@ echo "		\"wind_gust_mph\":\"$WIND_GUST_MPH\","
 echo "		\"wind_kph\":\"$wind_kph\","
 echo "		\"wind_gust_kph\":\"$wind_gust_kph\","
 echo "		\"pressure_mb\":\"$pressure_mb\","
-echo "		\"pressure_in\":\"$BAROM_ABS_IN\","
+echo "		\"pressure_in\":\"$pressure_in\","
 echo "		\"pressure_trend\":\"-\","
-echo "		\"dewpoint_f\":$dewpoint_f,"
+echo "		\"dewpoint_f\":\"$dewpoint_f\","
 echo "		\"dewpoint_c\":\"$dewpoint_c\","
 echo "		\"windchill_string\":\"NA\","
 echo "		\"windchill_f\":\"NA\","
 echo "		\"windchill_c\":\"NA\","
 echo "		\"solarradiation\":\"$SOLARRADIATION\","
 echo "		\"UV\":\"$UV\","
-echo "		\"precip_1hr_in\":\"$RAIN_HOURLY_IN\","
-echo "		\"precip_1hr_metric\":\"$precip_1hr_metric\","
+echo "		\"precip_1hr_in\":\"NA\","
+echo "		\"precip_1hr_metric\":\"NA\","
 echo "		\"precip_today_string\":\"$RAIN_DAILY_IN in ($precip_today_metric mm)\","
 echo "		\"precip_today_in\":\"$RAIN_DAILY_IN\","
 echo "		\"precip_today_metric\":\"$precip_today_metric\""
 echo " }"
 echo "}"
-
-

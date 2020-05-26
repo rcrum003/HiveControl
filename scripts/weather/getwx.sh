@@ -1,6 +1,5 @@
 #!/bin/bash
-# version 2018-01-18-1
-# reads the LUX sensors as one script
+# version 2020-05-26-1
 
 
 # Get some variables from our central file
@@ -14,6 +13,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveCont
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 WEATHER_STATIONID="$WXSTATION"
 JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
+
 
 	A_TEMP="null"
 	A_TEMP_C="null"
@@ -123,6 +123,31 @@ elif [ $WEATHER_LEVEL = "ambientwx" ]; then
 			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
 			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
 		fi
+
+elif [ $WEATHER_LEVEL = "wf_tempest_local" ]; then
+		#Getting information from a local weather station that is broadcasting over UDP
+		GETNOW=$($HOMEDIR/scripts/weather/weatherflow/getWeatherFlowLocal.sh)
+
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			#echo "Getnow was empty"
+			wind_degrees="null"
+			wind_gust_kph="null"
+			wind_gust_mph="null"
+			wind_kph="null"
+			wind_mph="null"
+			A_WIND_MPH="null"
+		else 
+			#Get the data fields that differ from the main set
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+		fi
 fi
 	#Parse the weather 
 	# Data Parsers for all weather sources
@@ -177,4 +202,16 @@ fi
 	#echo "weather_stationID,observationDateTime,weather_tempf,weather_humidity,weather_dewf,weather_tempc,wind_mph,wind_dir,wind_degrees,wind_gust_mph,wind_kph,wind_gust_kph,pressure_mb,pressure_in,pressure_trend,weather_dewc,solarradiation,UV,precip_1hr_in,precip_1hr_metric,precip_today_string,precip_today_in,precip_today_metric"
 	echo "$WEATHER_STATIONID,$OBSERVATIONDATETIME,$A_TEMP,$B_HUMIDITY,$A_DEW,$A_TEMP_C,$A_WIND_MPH,$A_WIND_DIR,$wind_degrees,$wind_gust_mph,$wind_kph,$wind_gust_kph,$pressure_mb,$A_PRES_IN,$A_PRES_TREND,$weather_dewc,$solarradiation,$UV,$precip_1hr_in,$precip_1hr_metric,$precip_today_string,$precip_today_in,$precip_today_metric"
 	#echo "--- Getting Ambient Weather Done ---"
+
+
+
+
+
+
+
+
+
+
+
+
 

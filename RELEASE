@@ -1,6 +1,13 @@
 Release Notes:
 
 --------------------
+2.05 Release
+--------------------
+- Added support for WeatherFlow Tempest Weather Station, if the station is on same network as your hives. We use the UDP broadcast here. Future will support their API.
+- Fixed AmbientWeather.net script that was causing errors, sorry about that.
+
+
+--------------------
 2.00 Release
 --------------------
 - Added support for BroodMinder BLE Temp/Humidity sensor (Wireless) 
