@@ -27,8 +27,8 @@ JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
 #Added Sleep Function Here, all in seconds
-#SLEEPTIME=$((1 + RANDOM % 30))
-#sleep $SLEEPTIME
+SLEEPTIME=$((1 + RANDOM % 30))
+
 
 WXSTATION="AMW_$ambient_deviceMAC"
 
@@ -43,7 +43,10 @@ do
 	CHECKERROR=$(/bin/echo $GETDATA | $JSON_PATH -b | grep tempf |awk '{print $2}')
 	 
 	if [ -z "$CHECKERROR"  ]; then
-		loglocal "$DATE" WEATHER INFO "Did not get a proper response from AmbientWeather.net, trying again"
+		#Clean up bad characters
+		ERROR_MSG=$(sed 's/\"//g' <<<"$GETDATA")
+		loglocal "$DATE" WEATHER INFO "Did not get a proper response from AmbientWeather.net, trying again, $ERROR_MSG"
+		sleep $SLEEPTIME
 		let TRYCOUNTER+=1
 	else
 		DATA_GOOD=1
@@ -51,8 +54,9 @@ do
 done
 
 if [ $DATA_GOOD = "0" ]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper response from AmbientWeather - $GETDATA"
-
+	ERROR_MSG=$(sed 's/\"//g' <<<"$GETDATA")
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper response from AmbientWeather - $ERROR_MSG"
+	exit
 fi
 
 
@@ -126,7 +130,8 @@ precip_1hr_metric="$(echo "scale=2; ($RAIN_HOURLY_IN / 0.039370)" |bc)"
 precip_today_metric="$(echo "scale=2; ($RAIN_DAILY_IN / 0.039370)" |bc)"
 
 if [[ -z "$TEMP_F" ]]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp, even after counter, $GETDATA"
+	ERROR_MSG=$(sed 's/\"//g' <<<"$GETDATA")
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp, even after counter, $ERROR_MSG"
 	#Since we didn't get a proper file, we should assume the whole thing is borked
 	exit
 fi
@@ -161,7 +166,7 @@ echo "		\"wind_gust_kph\":\"$wind_gust_kph\","
 echo "		\"pressure_mb\":\"$pressure_mb\","
 echo "		\"pressure_in\":\"$BAROM_ABS_IN\","
 echo "		\"pressure_trend\":\"-\","
-echo "		\"dewpoint_f\":$dewpoint_f,"
+echo "		\"dewpoint_f\":\"$dewpoint_f\","
 echo "		\"dewpoint_c\":\"$dewpoint_c\","
 echo "		\"windchill_string\":\"NA\","
 echo "		\"windchill_f\":\"NA\","
