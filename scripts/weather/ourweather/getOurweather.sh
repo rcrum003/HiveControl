@@ -8,7 +8,7 @@
 # 05/22/20 V 1   - Created to pull REST data from Switchdoc's Ourweather weather station, and convert to Wunderground output
 #                  format to allow Hivecontrol to monitor.
 # 05/26/20 V 1.1 - Changed to support metric to English as REST interface always returns metric.
-# 	
+# 05/26/20 V 1.2 - Neglected to add wx.xml file for hivetool	
 
 #Get our variables
 
@@ -72,7 +72,7 @@ PRESSURE_HG=`echo "scale=2; $PRESSURE_MB / 33.864" | bc`
 WIND_SPEED_MPH=`echo "scale=2; ($WIND_SPEED_KPH / 1.609344)" | bc`
 WIND_GUST_MPH=`echo "scale=2; ($WIND_GUST_KPH / 1.609344)" | bc`
 # Depth
-RAIN_DAILY_IN=`echo "scale=2; ($RAIN_DAILY_IN / 0.039370)" | bc`
+RAIN_DAILY_IN=`echo "scale=2; ($RAIN_DAILY_MM * 25.4)" | bc`
 
 # Derive some new variables
 DEWPOINT_F=`echo "scale=1; $TEMP_F - (100-$HUMIDITY) * 9 / 25" | bc`
@@ -154,4 +154,46 @@ echo "		\"precip_today_metric\":\"$RAIN_DAILY_MM\""
 echo " }"
 echo "}"
 
+# Generate an XML file for use by Hivetool, since they like that also
+
+echo "
+<response>
+  <current_observation>
+		<display_location>
+		<full>$CITY, $STATE</full>
+		<city>$CITY</city>
+		<state>$STATE</state>
+		<country>US</country>
+		<latitude>$LATITUDE</latitude>
+		<longitude>$LONGITUDE</longitude>
+		</display_location>
+		<station_id>$OURWXIP</station_id>
+		<temperature_string>$TEMP_F F $TEMP_C C)</temperature_string>
+		<temp_f>$TEMP_F</temp_f>
+		<temp_c>$TEMP_C</temp_c>
+		<relative_humidity>$HUMIDITY%</relative_humidity>
+		<wind_string>$DIRECTION at $WIND_SPEED_MPH MPH, Gust to $WIND_GUST_MPH</wind_string>
+		<wind_dir>$DIRECTION</wind_dir>
+		<wind_degrees>$WINDDIR</wind_degrees>
+		<wind_mph>$WIND_SPEED_MPH</wind_mph>
+		<wind_gust_mph>$WIND_GUST_MPH</wind_gust_mph>
+		<wind_kph>$WIND_SPEED_KPH</wind_kph>
+		<wind_gust_kph>$WIND_GUST_KPH</wind_gust_kph>
+		<pressure_mb>$PRESSURE_MB</pressure_mb>
+		<pressure_in>$PRESSURE_HG</pressure_in>
+		<pressure_trend>-</pressure_trend>
+		<dewpoint_f>$DEWPOINT_F</dewpoint_f>
+		<dewpoint_c>$DEWPOINT_C</dewpoint_c>
+		<windchill_string>NA</windchill_string>
+		<windchill_f>$WINDCHILL_F</windchill_f>
+		<windchill_c>$WINDCHILL_C</windchill_c>
+	        <solarradiation>${solarrad}</solarradiation>
+		<UV>${uvi}</UV>
+		<precip_1hr_in>NA</precip_1hr_in>
+		<precip_1hr_metric>NA</precip_1hr_metric>
+		<precip_today_string>$RAIN_DAILY_IN} in ($RAIN_DAILY_MM mm)</precip_today_string>
+		<precip_today_in>$RAIN_DAILY_IN</precip_today_in>
+		<precip_today_metric>$RAIN_DAILY_MM</precip_today_metric>
+	</current_observation>
+</response>" > wx.xml
 
