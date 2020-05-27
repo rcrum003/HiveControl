@@ -1,5 +1,6 @@
 <?PHP
-# Version 2020052601
+# Version 202003001
+# Version 202005001 - Added additional local weather station type (ourweather by Switchdoc)
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
@@ -305,7 +306,7 @@ if($v->validate()) {
                                                          <input type="text" name="HIVE_TEMP_GPIO" onchange="this.form.submit()" value="'; echo $result['HIVE_TEMP_GPIO']; echo '"">';
                                                     }
                                                     if ($result['TEMPTYPE'] == "broodminder") {
-                                                        echo '<a href="#" title="Specify Device Address" data-toggle="popover" data-placement="bottom" data-content="Specify which BLE device you want to listen for in the format of 06:09:42:1c:8a, (Full MAC address and lowercase) which is written on device"><p class="fa fa-question-circle fa-fw"></P></a>Device:
+                                                        echo '<a href="#" title="Specify Device Address" data-toggle="popover" data-placement="bottom" data-content="Specify which BLE device you want to listen for in the format of 42:1C:8A, which is written on device"><p class="fa fa-question-circle fa-fw"></P></a>Device:
                                                          <input type="text" name="HIVEDEVICE" onchange="this.form.submit()" value="'; echo $result['HIVEDEVICE']; echo '"">';
                                                     }
                                             }?>
@@ -563,8 +564,7 @@ if($v->validate()) {
                             <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
                             <option value="ambientwx" <?php if ($result['WEATHER_LEVEL'] == "ambientwx") {echo "selected='selected'";} ?>>AmbientWeather.net</option>
                             <option value="localws" <?php if ($result['WEATHER_LEVEL'] == "localws") {echo "selected='selected'";} ?>>Local Weather Station</option>
-                            <option value="localsensors" <?php if ($result['WEATHER_LEVEL'] == "localsensors") {echo "selected='selected'";} ?>>Local Hive Sensors</option>
-                            <option value="wf_tempest_local" <?php if ($result['WEATHER_LEVEL'] == "wf_tempest_local") {echo "selected='selected'";} ?>>WF Tempest UDP</option>
+                             <option value="localsensors" <?php if ($result['WEATHER_LEVEL'] == "localsensors") {echo "selected='selected'";} ?>>Local Hive Sensors</option>
                             </select></td>
                             <td>
 
@@ -589,20 +589,16 @@ if($v->validate()) {
                                     echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
                                 }
 
-                                if ($result['WEATHER_LEVEL'] == "wf_tempest_local") {
-
-                                    #echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
-                                    echo 'STATION SERIAL <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
-                                }
-
+                                
                                 if ($result['WEATHER_LEVEL'] == "localws") {
                                     #echo 'Using WS1400.sh for local WX Station';
-                                    echo '
-                                    <input type="radio" name="local_wx_type" onchange="this.form.submit()" value="WS1400ip"'; if ($result['local_wx_type'] == "WS1400ip") {echo "checked";} echo '> WS1400ip <br></td>';
-                                    if ($result['local_wx_type'] == "WS1400ip") {
+                                    echo '                                  
+                                    <input type="radio" name="local_wx_type" onchange="this.form.submit()" value="WS1400ip"'; if ($result['local_wx_type'] == "WS1400ip") {echo "checked";} echo '> WS1400ip<br>
+                                    <input type="radio" name="local_wx_type" onchange="this.form.submit()" value="ourweather"'; if ($result['local_wx_type'] == "ourweather") {echo "checked";} echo '> Ourweather<br>';                                                              
+                                    if ($result['local_wx_type'] == "WS1400ip" or $result['local_wx_type'] == "ourweather") {
                                         echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'; 
-                                    }  
 
+                                    }  
                                 }
                                     
                                if ($result['WEATHER_LEVEL'] == "localsensors") {
