@@ -239,9 +239,13 @@ if [ $SHARE_HIVETOOL = "yes" ]; then
 		/usr/bin/curl --silent --retry 5 http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID=$WXSTATION > $HOMEDIR/scripts/system/wx.xml
 		fi
 		if [ $WEATHER_LEVEL = "localws" ]; then
-		echo "Local ws Send"
-		rm -rf $HOMEDIR/scripts/system/wx.xml
-		cp $HOMEDIR/scripts/weather/ws1400/wx.xml $HOMEDIR/scripts/system/wx.xml 
+		   echo "Local ws Send"
+		   rm -rf $HOMEDIR/scripts/system/wx.xml
+		   if [ local_wx_type = "WS1400ip" ]; then
+		      cp $HOMEDIR/scripts/weather/ws1400/wx.xml $HOMEDIR/scripts/system/wx.xml
+		   else
+		      cp $HOMEDIR/scripts/weather/ourweather/wx.xml $HOMEDIR/scripts/system/wx.xml			   
+		   fi
 		fi
 		/usr/bin/xmlstarlet sel -t -c "/response/current_observation" $HOMEDIR/scripts/system/wx.xml >> $SAVEFILE
 		echo "</hive_data>" >> $SAVEFILE
@@ -267,8 +271,3 @@ fi
 echo "##########################################################"
 echo "Script Completed"
 echo "##########################################################"
-
-
-
-
-
