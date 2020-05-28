@@ -2,7 +2,7 @@
 # Script to gather Current_Conditions to monitor beehives
 # see hivecontrol.org
 # Author: Ryan Crum
-# Version 2019071101
+# Version 2020052801
 
 #############################################
 # Get Config parameters from DB and set some basics
@@ -241,7 +241,14 @@ if [ $SHARE_HIVETOOL = "yes" ]; then
 		if [ $WEATHER_LEVEL = "localws" ]; then
 		echo "Local ws Send"
 		rm -rf $HOMEDIR/scripts/system/wx.xml
-		cp $HOMEDIR/scripts/weather/ws1400/wx.xml $HOMEDIR/scripts/system/wx.xml 
+			case $local_wx_type in
+				"WS1400ip" )
+					cp $HOMEDIR/scripts/weather/ws1400/wx.xml $HOMEDIR/scripts/system/wx.xml
+					;;
+				"ourweather" )
+					cp $HOMEDIR/scripts/weather/ourweather/wx.xml $HOMEDIR/scripts/system/wx.xml
+				    ;;
+			esac 
 		fi
 		/usr/bin/xmlstarlet sel -t -c "/response/current_observation" $HOMEDIR/scripts/system/wx.xml >> $SAVEFILE
 		echo "</hive_data>" >> $SAVEFILE
