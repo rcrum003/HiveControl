@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 2020-05-26-1
+# version 2020-05-27-1
 
 
 # Get some variables from our central file
@@ -59,7 +59,15 @@ if [ $WEATHER_LEVEL = "hive" ]; then
 
 elif [ $WEATHER_LEVEL = "localws" ]; then
 
-		GETNOW=`$HOMEDIR/scripts/weather/ws1400/getWS1400.sh`
+		#Allows for different weather types
+		case $local_wx_type in
+			"WS1400ip" )
+				GETNOW=`$HOMEDIR/scripts/weather/ws1400/getWS1400.sh`
+				;;
+			"ourweather" )
+				GETNOW=`$HOMEDIR/scripts/weather/ourweather/getOurweather.sh`
+				;;
+		esac
 
 		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
 			#echo "Getnow was empty"
@@ -203,7 +211,7 @@ fi
 	echo "$WEATHER_STATIONID,$OBSERVATIONDATETIME,$A_TEMP,$B_HUMIDITY,$A_DEW,$A_TEMP_C,$A_WIND_MPH,$A_WIND_DIR,$wind_degrees,$wind_gust_mph,$wind_kph,$wind_gust_kph,$pressure_mb,$A_PRES_IN,$A_PRES_TREND,$weather_dewc,$solarradiation,$UV,$precip_1hr_in,$precip_1hr_metric,$precip_today_string,$precip_today_in,$precip_today_metric"
 	#echo "--- Getting Ambient Weather Done ---"
 
-
+	
 
 
 
