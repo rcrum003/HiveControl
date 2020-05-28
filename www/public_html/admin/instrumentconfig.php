@@ -1,5 +1,5 @@
 <?PHP
-# Version 2020052701
+# Version 2020052801
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
@@ -598,16 +598,14 @@ if($v->validate()) {
                                 if ($result['WEATHER_LEVEL'] == "localws") {
                                     #echo 'Using WS1400.sh for local WX Station';
                                     #First, set the radio buttons to the proper station
-                                    echo '
-                                    <input type="radio" name="local_wx_type" onchange="this.form.submit()" value="WS1400ip"'; 
+                                    echo '<input type="radio" name="local_wx_type" onchange="this.form.submit()" value="WS1400ip"'; 
                                     if ($result['local_wx_type'] == "WS1400ip") {echo "checked";} echo '> WS1400ip <br></td>';
                                     if ($result['local_wx_type'] == "ourweather") {echo "checked";} echo '> OurWeather <br></td>';
                                     
                                     #Then, set the particular fields needed
-                                    if ($result['local_wx_type'] == "WS1400ip") {echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'; 
-                                    if ($result['local_wx_type'] == "ourweather") {echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'; 
-                                    }  
-
+    if ($result['local_wx_type'] == "WS1400ip") {echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'}; 
+    if ($result['local_wx_type'] == "ourweather") {echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'}; 
+                            
                                 }
                                     
                                if ($result['WEATHER_LEVEL'] == "localsensors") {
