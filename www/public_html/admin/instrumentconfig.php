@@ -597,22 +597,22 @@ if($v->validate()) {
 
                                 if ($result['WEATHER_LEVEL'] == "localws") {
                                     #echo 'Using WS1400.sh for local WX Station';
-                                    #First, set the radio buttons to the proper station
-                                    echo '<input type="radio" name="local_wx_type" onchange="this.form.submit()" value="WS1400ip"'; 
-                                    if ($result['local_wx_type'] == "WS1400ip") {echo "checked";} echo '> WS1400ip <br></td>';
-                                    if ($result['local_wx_type'] == "ourweather") {echo "checked";} echo '> OurWeather <br></td>';
                                     
-                                    #Then, set the particular fields needed
-    if ($result['local_wx_type'] == "WS1400ip") {echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'}; 
-    if ($result['local_wx_type'] == "ourweather") {echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'}; 
-                            
+                                    echo '
+                                    <input type="radio" name="local_wx_type" onchange="this.form.submit()" value="WS1400ip"'; if ($result['local_wx_type'] == "WS1400ip") {echo "checked";} echo '> WS1400ip <br>
+                                    <input type="radio" name="local_wx_type" onchange="this.form.submit()" value="ourweather"'; if ($result['local_wx_type'] == "ourweather") {echo "checked";} echo '> OurWeather <br>
+                                    </td>';
+                                    if ($result['local_wx_type'] == "WS1400ip" || "ourweather") {
+                                        echo '<td>IP <input type="text" name="local_wx_url" onchange="this.form.submit()" value="'; echo $result['local_wx_url']; echo '"</td>'; 
+                                    }  
+
                                 }
                                     
                                if ($result['WEATHER_LEVEL'] == "localsensors") {
                                     //echo 'Using Locally Connected Sensores for local WX Station';
-                                    echo '
-                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="temperhum"'; if ($result['WXTEMPTYPE'] == "temperhum") {echo "checked";} echo '> Temperhum<br>
-                                    <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21<br>
+                                echo '
+                                <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="temperhum"'; if ($result['WXTEMPTYPE'] == "temperhum") {echo "checked";} echo '> Temperhum<br>
+                                <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht21"'; if ($result['WXTEMPTYPE'] == "dht21") {echo "checked";} echo '> DHT21<br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="dht22"'; if ($result['WXTEMPTYPE'] == "dht22") {echo "checked";} echo '> DHT22<br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="sht31d"'; if ($result['WXTEMPTYPE'] == "sht31d") {echo "checked";} echo '> SHT31-D<br>
                                     <input type="radio" name="WXTEMPTYPE" onchange="this.form.submit()" value="bme280"'; if ($result['WXTEMPTYPE'] == "bme280") {echo "checked";} echo '> BME280 <br>
