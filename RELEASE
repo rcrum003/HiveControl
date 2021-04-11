@@ -1,4 +1,9 @@
 Release Notes:
+--------------------
+2.08 Release
+--------------------
+- Added a retry function to GetWeight to reduce the random zero values when trying to get weight
+
 
 --------------------
 2.05 - 2.06 Release
