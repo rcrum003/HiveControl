@@ -5,7 +5,7 @@ This is a supporting application to the Hivetool.org software.
 
 
 ## Release Notes
-Latest Release = 2.06
+Latest Release = 2.08
 [Release Notes](https://raw.githubusercontent.com/rcrum003/HiveControl/master/RELEASE)
 
 ## Update

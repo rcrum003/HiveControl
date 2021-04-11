@@ -4,6 +4,10 @@ Release Notes:
 --------------------
 - Added a retry function to GetWeight to reduce the random zero values when trying to get weight
 
+--------------------
+2.07 Release
+--------------------
+- Added support for OurWeather station for jhalt/Duncan
 
 --------------------
 2.05 - 2.06 Release
