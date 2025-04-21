@@ -133,13 +133,13 @@ fi
 #Check the size of the disk
 # If not big enough, then say you need to run rasp-
 # Need 500,000 to install, with room for data
-HDsize=$(df |grep /dev/root |awk '{print $4}')
-HDNeed="500000"
-if [[ $HDsize -lt $HDNeed ]]; then
-	echo "We need at least 500 MB to install all the needed software."
-	echo "Please free up more space or run raspi-config to expand your file system"
-	exit
-fi
+#HDsize=$(df |grep /dev/root |awk '{print $4}')
+#HDNeed="500000"
+#if [[ $HDsize -lt $HDNeed ]]; then
+#	echo "We need at least 500 MB to install all the needed software."
+#	echo "Please free up more space or run raspi-config to expand your file system"
+#	exit
+#fi
 # update this OS
 sudo apt-get update -y
 sudo apt-get upgrade -y
