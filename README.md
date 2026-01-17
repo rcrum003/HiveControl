@@ -5,8 +5,11 @@ This is a supporting application to the Hivetool.org software.
 
 
 ## Release Notes
-Latest Release = 2.08
+Latest Release = 2.10
 [Release Notes](https://raw.githubusercontent.com/rcrum003/HiveControl/master/RELEASE)
+
+## Documentation
+- [Backup & Restore Feature](documentation/BACKUP_FEATURE.md)
 
 ## Update
 We currently support all Raspberry PI hardward/software platforms, INCLUDING the new PI4, Raspbian Buster

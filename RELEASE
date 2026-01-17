@@ -3,6 +3,18 @@ Release Notes:
 --------------------
 2.10 Release
 --------------------
+NEW FEATURES:
+- Added Backup & Restore System (backup.php)
+  * Create full database backups (60MB+ databases supported)
+  * Create configuration-only backups for quick settings preservation
+  * Restore from any backup with automatic safety backup before restore
+  * Download backups to local computer
+  * Delete old backups to manage storage
+  * All operations logged with user IP tracking
+  * Protected backup directory with .htaccess deny rules
+  * Optimized for large databases using file copy instead of SQL export
+  * Updated navigation menus to include "Backup & Restore" option
+
 Major Security and Performance Refactoring of currconditions.sh
 
 CRITICAL SECURITY FIXES:

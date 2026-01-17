@@ -1,5 +1,9 @@
 <?PHP
 
+// Increase execution time for large database operations
+set_time_limit(300); // 5 minutes
+ini_set('memory_limit', '256M');
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
@@ -70,8 +74,8 @@ $now = date('Y-m-d H:i:s');
 $user_ip = getUserIP();
 
 // Define backup directory
-$backup_dir = $_SERVER["DOCUMENT_ROOT"] . "/../data/backups/";
-$db_path = $_SERVER["DOCUMENT_ROOT"] . "/../data/hive-data.db";
+$backup_dir = $_SERVER["DOCUMENT_ROOT"] . "/../../data/backups/";
+$db_path = $_SERVER["DOCUMENT_ROOT"] . "/../../data/hive-data.db";
 
 // Create backup directory if it doesn't exist
 if (!file_exists($backup_dir)) {
@@ -92,12 +96,14 @@ if ($action == "create") {
 
     try {
         if ($backup_type == "full") {
-            // Full database backup using SQLite backup command
-            $backup_db = new SQLite3($backup_path);
-            $source_db = new SQLite3($db_path);
-            $source_db->backup($backup_db);
-            $source_db->close();
-            $backup_db->close();
+            // Full database backup using simple file copy (faster and more reliable)
+            // Close any active connections first to ensure clean backup
+            $conn->exec("PRAGMA wal_checkpoint(TRUNCATE)");
+
+            // Copy the database file
+            if (!copy($db_path, $backup_path)) {
+                throw new Exception("Failed to copy database file");
+            }
 
             $size = filesize($backup_path);
             loglocal($now, "BACKUP", "SUCCESS", "Full backup created: $backup_file (" . formatBytes($size) . ") by IP $user_ip");
@@ -204,6 +210,10 @@ if ($action == "delete" && !empty($filename)) {
         $message = "Backup file not found: $filename";
         $message_type = "danger";
     }
+
+    // Redirect to manage tab after delete
+    header("Location: ?tab=manage");
+    exit;
 }
 
 if ($action == "download" && !empty($filename)) {
@@ -256,7 +266,41 @@ $db_size = file_exists($db_path) ? filesize($db_path) : 0;
          <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
     <!-- /Navigation -->
 
-    <div id="wrapper">
+    <style>
+    /* Fix modal z-index issues */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1040;
+        background-color: #000;
+        opacity: 0.5;
+    }
+    .modal {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1050;
+        overflow: hidden;
+        outline: 0;
+        display: none;
+    }
+    .modal.in {
+        display: block !important;
+    }
+    .modal-dialog {
+        position: relative;
+        width: auto;
+        margin: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    </style>
+
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Backup & Restore</h1>
@@ -425,52 +469,34 @@ $db_size = file_exists($db_path) ? filesize($db_path) : 0;
                     </div>
                 </div>
             </div>
-
     </div>
     <!-- /#wrapper -->
 
-<!-- Confirmation Modals -->
-<div class="modal fade" id="restoreModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Confirm Restore</h4>
-            </div>
-            <div class="modal-body">
-                <p><strong>Are you sure you want to restore from this backup?</strong></p>
-                <p>Filename: <span id="restore-filename"></span></p>
-                <p class="text-danger">This will replace your current database. A safety backup will be created automatically.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <a href="#" id="restore-confirm-btn" class="btn btn-warning">Restore Now</a>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- jQuery -->
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Confirm Delete</h4>
-            </div>
-            <div class="modal-body">
-                <p><strong>Are you sure you want to delete this backup?</strong></p>
-                <p>Filename: <span id="delete-filename"></span></p>
-                <p class="text-danger">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <a href="#" id="delete-confirm-btn" class="btn btn-danger">Delete</a>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../dist/js/sb-admin-2.js"></script>
 
 <script>
+// Activate correct tab based on URL parameter
+$(document).ready(function() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var activeTab = urlParams.get('tab');
+
+    if (activeTab === 'restore') {
+        $('.nav-tabs a[href="#restore-tab"]').tab('show');
+    } else if (activeTab === 'manage') {
+        $('.nav-tabs a[href="#manage-tab"]').tab('show');
+    }
+});
+
 // Update backup help text based on selection
 document.getElementById('backup-type-select').addEventListener('change', function() {
     var helpText = document.getElementById('backup-help');
@@ -482,15 +508,15 @@ document.getElementById('backup-type-select').addEventListener('change', functio
 });
 
 function confirmRestore(filename) {
-    document.getElementById('restore-filename').textContent = filename;
-    document.getElementById('restore-confirm-btn').href = '?action=restore&file=' + encodeURIComponent(filename);
-    $('#restoreModal').modal('show');
+    if (confirm('Are you sure you want to restore from backup: ' + filename + '?\n\nThis will replace your current database. A safety backup will be created automatically.\n\nThis action cannot be easily undone.')) {
+        window.location.href = '?action=restore&file=' + encodeURIComponent(filename);
+    }
 }
 
 function confirmDelete(filename) {
-    document.getElementById('delete-filename').textContent = filename;
-    document.getElementById('delete-confirm-btn').href = '?action=delete&file=' + encodeURIComponent(filename);
-    $('#deleteModal').modal('show');
+    if (confirm('Are you sure you want to delete this backup?\n\nFilename: ' + filename + '\n\nThis action cannot be undone.')) {
+        window.location.href = '?action=delete&file=' + encodeURIComponent(filename) + '&tab=manage';
+    }
 }
 </script>
 
