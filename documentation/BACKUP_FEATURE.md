@@ -10,11 +10,13 @@ The Backup & Restore feature provides a web-based interface for creating, managi
 ### Backup Types
 
 1. **Full Backup** (Recommended)
-   - Complete SQLite database file copy
+   - Complete SQLite database file copy using optimized file copy method
    - Includes all historical measurements
    - Includes all configuration settings
    - Includes logs, notifications, and queue data
-   - Typical size: ~26MB (varies with data collection duration)
+   - Supports large databases (60MB+) without timeout issues
+   - Typical size: 26-60MB+ (varies with data collection duration)
+   - Uses WAL checkpoint before copy to ensure database consistency
 
 2. **Configuration Only**
    - Exports only the `hiveconfig` table as SQL
@@ -77,14 +79,38 @@ Examples:
 
 ## Technical Implementation
 
+### Performance Optimizations
+
+**Execution Time & Memory Limits:**
+```php
+set_time_limit(300); // 5 minutes for large databases
+ini_set('memory_limit', '256M'); // Sufficient for file operations
+```
+
+These limits ensure that large database backups (60MB+) can complete without PHP timeout errors, which are common with the default 30-second execution limit.
+
 ### Database Operations
 
-**Full Backup:**
+**Full Backup Method (Optimized for Large Databases):**
+
+The system uses a simple file copy approach instead of SQLite's backup API for better performance and reliability:
+
 ```php
-$backup_db = new SQLite3($backup_path);
-$source_db = new SQLite3($db_path);
-$source_db->backup($backup_db);
+// Ensure WAL (Write-Ahead Logging) is synced to main database file
+$conn->exec("PRAGMA wal_checkpoint(TRUNCATE)");
+
+// Direct file copy - much faster than SQLite backup() for large databases
+if (!copy($db_path, $backup_path)) {
+    throw new Exception("Failed to copy database file");
+}
 ```
+
+**Why File Copy Instead of SQLite Backup API:**
+- **Speed**: Direct file copy is significantly faster than SQLite's backup() method
+- **Memory Efficient**: Doesn't load entire database into memory
+- **Reliability**: Avoids timeout issues with 60MB+ databases
+- **Simplicity**: Standard PHP copy() function is well-tested and reliable
+- **WAL Safety**: PRAGMA wal_checkpoint(TRUNCATE) ensures all changes are in main file before copy
 
 **Configuration Backup:**
 ```php
@@ -228,10 +254,19 @@ Example log entries:
 ## Troubleshooting
 
 ### Backup Creation Fails
+
+**Blank Screen or Timeout:**
+- This was a known issue with databases larger than 60MB using the SQLite backup API
+- Now resolved by using direct file copy method
+- If still experiencing issues, check PHP execution time limit in `/etc/php/php.ini`
+- Script sets `max_execution_time = 300` but server config may override it
+
+**General Failures:**
 - Check disk space: `df -h`
-- Verify backup directory exists and is writable
-- Check PHP error logs
+- Verify backup directory exists and is writable: `ls -la /home/HiveControl/data/backups`
+- Check PHP error logs: `/var/log/apache2/error.log` or `/var/log/php-fpm/error.log`
 - Ensure database is not locked by other processes
+- Verify database file is readable: `ls -la /home/HiveControl/data/hive-data.db`
 
 ### Restore Fails
 - Check that backup file exists and is valid SQLite database
@@ -274,7 +309,11 @@ Potential features for future versions:
 - Safety backup system
 - Audit logging
 - Download/delete management
-- Bootstrap-based responsive UI
+- Optimized for large databases (60MB+) using file copy method
+- Native browser confirm dialogs (simpler and more reliable than Bootstrap modals)
+- Tab state preservation after operations
+- Increased PHP execution time and memory limits for large database support
+- WAL checkpoint before backup for data consistency
 
 ## Support
 
