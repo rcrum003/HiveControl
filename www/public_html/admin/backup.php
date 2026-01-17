@@ -5,6 +5,7 @@ set_time_limit(300); // 5 minutes
 ini_set('memory_limit', '256M');
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
 # Backup and Restore System for HiveControl
@@ -22,32 +23,17 @@ function test_input($data) {
 
 function getUserIP()
 {
-    $client  = @$_SERVER['HTTP_CLIENT_IP'];
-    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-    $remote  = $_SERVER['REMOTE_ADDR'];
-
-    if(filter_var($client, FILTER_VALIDATE_IP))
-    {
-        $ip = $client;
-    }
-    elseif(filter_var($forward, FILTER_VALIDATE_IP))
-    {
-        $ip = $forward;
-    }
-    else
-    {
-        $ip = $remote;
-    }
-
-    return $ip;
+    // SECURITY: Only trust REMOTE_ADDR to prevent IP spoofing
+    return $_SERVER['REMOTE_ADDR'];
 }
 
 function loglocal($date, $program, $type, $message) {
   #Stores log entries locally
   include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-  $sth99 = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
-  $sth99->execute();
+  // SECURITY FIX: Use proper parameterized query to prevent SQL injection
+  $sth99 = $conn->prepare("INSERT INTO logs (date,program,type,message) VALUES (?,?,?,?)");
+  $sth99->execute([$date, $program, $type, $message]);
   unset($sth99);
 }
 
@@ -89,6 +75,9 @@ $message = "";
 $message_type = "";
 
 if ($action == "create") {
+    // SECURITY: Verify CSRF token for POST actions
+    require_csrf_token();
+
     $backup_type = test_input($_POST["backup_type"] ?? "full");
     $timestamp = date('Y-m-d_His');
     $backup_file = "hivecontrol_{$backup_type}_{$timestamp}.db";
@@ -343,6 +332,7 @@ $db_size = file_exists($db_path) ? filesize($db_path) : 0;
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <form method="POST" action="?action=create">
+                                                <?php echo csrf_field(); ?>
                                                 <div class="form-group">
                                                     <label>Backup Type</label>
                                                     <select name="backup_type" class="form-control" id="backup-type-select">

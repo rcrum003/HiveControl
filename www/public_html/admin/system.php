@@ -16,39 +16,25 @@ function test_input($data) {
 
 function getUserIP()
 {
-    $client  = @$_SERVER['HTTP_CLIENT_IP'];
-    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-    $remote  = $_SERVER['REMOTE_ADDR'];
-
-    if(filter_var($client, FILTER_VALIDATE_IP))
-    {
-        $ip = $client;
-    }
-    elseif(filter_var($forward, FILTER_VALIDATE_IP))
-    {
-        $ip = $forward;
-    }
-    else
-    {
-        $ip = $remote;
-    }
-
-    return $ip;
+    // SECURITY: Only trust REMOTE_ADDR to prevent IP spoofing
+    // HTTP_CLIENT_IP and HTTP_X_FORWARDED_FOR can be easily forged by attackers
+    return $_SERVER['REMOTE_ADDR'];
 }
 
 function loglocal($date, $program, $type, $message) {
   #Stores log entries locally
 # This script takes 4 inputs and puts them into the DB
-# 1 - Date - 
+# 1 - Date -
 # 2 - Program
 # 3 - Type (Error, Success, Warning)
 # 4 - Message (Optional)
 
         include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
-       
-        $sth99 = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
-        $sth99->execute();
-       unset($sth99); 
+
+        // SECURITY FIX: Use proper parameterized query to prevent SQL injection
+        $sth99 = $conn->prepare("INSERT INTO logs (date,program,type,message) VALUES (?,?,?,?)");
+        $sth99->execute([$date, $program, $type, $message]);
+       unset($sth99);
 }
 
 function getlog($conn)
@@ -58,7 +44,7 @@ function getlog($conn)
     $sth1 = $conn->prepare("SELECT * FROM logs ORDER by date DESC LIMIT 1000");
     $sth1->execute();
     $result = $sth1->fetchall(PDO::FETCH_ASSOC);
-    unset($sth1); 
+    unset($sth1);
 
     echo '<table width="100%" class="table table-striped table-bordered table-hover" id="dataTables-example">
     <thead>
@@ -71,10 +57,11 @@ function getlog($conn)
             </thead>
             <tbody>';
                  foreach($result as $r){
-                    echo '<tr><td>'.$r['date'].'</td>';
-                    echo '<td>'.$r['program'].'</td>';
-                    echo '<td>'.$r['type'].'</td>';
-                    echo '<td>'.$r['message'].'</td></tr>';
+                    // SECURITY FIX: Escape output to prevent XSS
+                    echo '<tr><td>'.htmlspecialchars($r['date']).'</td>';
+                    echo '<td>'.htmlspecialchars($r['program']).'</td>';
+                    echo '<td>'.htmlspecialchars($r['type']).'</td>';
+                    echo '<td>'.htmlspecialchars($r['message']).'</td></tr>';
                         }
                     echo '</tbody></table>';
 }
@@ -134,8 +121,9 @@ if(isset($_GET["command"])) {
                 $message = "upgrade";
                 $status = "new";
                 $date = date('Y-m-d H:i:s');
-                $sth4 = $conn->prepare("insert into msgqueue (date,message,status) values (\"$date\",\"$message\",\"$status\")");
-                $sth4->execute();
+                // SECURITY FIX: Use proper parameterized query to prevent SQL injection
+                $sth4 = $conn->prepare("INSERT INTO msgqueue (date,message,status) VALUES (?,?,?)");
+                $sth4->execute([$date, $message, $status]);
                 unset($sth4);
                 $now = date('Y-m-d H:i:s');
 
@@ -189,11 +177,18 @@ if(isset($_GET["command"])) {
                 if ( $confirm == "yes" ) {
                     # Confirmed we want to remove zeros
                     if ( isset($table)) {
+                        // SECURITY FIX: Whitelist allowed column names to prevent SQL injection
+                        $allowed_columns = ['hivetempf', 'hiveHum', 'hiveweight', 'IN_COUNT'];
+                        if (!in_array($table, $allowed_columns)) {
+                            $user_ip = getUserIP();
+                            loglocal($now, "REMOVEZERO", "ERROR", "Invalid table parameter '$table' by Admin from source IP $user_ip");
+                            break;
+                        }
                         # need to tell us what table you want remove the zeros for
                     $sth14 = $conn->prepare("DELETE from allhivedata WHERE $table='0'");
                     $sth14->execute();
                     $user_ip = getUserIP();
-                    
+
                     loglocal($now, "REMOVEZERO", "INFO", "Successfully removed zero data for $table by Admin from source IP $user_ip");
                     break;
                     }
@@ -319,12 +314,13 @@ if(isset($_GET["command"])) {
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-body">
-                        <?PHP 
-                        if(isset($error)) { 
+                        <?PHP
+                        if(isset($error)) {
                             // echo "Last Error Message was: $error";
+                            // SECURITY FIX: Escape output to prevent XSS
                             echo '<div class="alert alert-danger alert-dismissable">
-                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'; 
-                            echo '<b>Upgrade Request '.$msgid.' Errored Out </b><br>'; echo $error; echo '</div>';
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+                            echo '<b>Upgrade Request '.htmlspecialchars($msgid).' Errored Out </b><br>'; echo htmlspecialchars($error); echo '</div>';
                             } 
                         if ($command == "clearlogs" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "none") {
                             getlog($conn);

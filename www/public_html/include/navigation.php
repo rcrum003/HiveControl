@@ -133,6 +133,9 @@ echo '
                                 <li>
                                     <a href="/admin/backup.php">Backup & Restore</a>
                                 </li>
+                                <li>
+                                    <a href="/admin/changepassword.php">Change Password</a>
+                                </li>
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
@@ -200,6 +203,9 @@ if ($orient == "normal") {
                                 </li>
                                 <li>
                                     <a href="/admin/backup.php">Backup & Restore</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/changepassword.php">Change Password</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

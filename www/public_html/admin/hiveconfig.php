@@ -122,7 +122,7 @@ if($v->validate()) {
     $timezone = test_input_allow_slash($_POST["TIMEZONE"]);
     $share_hivetool = test_input($_POST["SHARE_HIVETOOL"]);
     $HT_USERNAME = test_input($_POST["HT_USERNAME"]);
-    $HT_PASSWORD = test_input($_POST["HT_PASSWORD"]);
+    $HT_PASSWORD_INPUT = test_input($_POST["HT_PASSWORD"]);
     $HT_URL = test_input($_POST["HT_URL"]);
     $GDD_BASE_TEMP = test_input($_POST["GDD_BASE_TEMP"]);
     $GDD_START_DATE = test_input_allow_slash($_POST["GDD_START_DATE"]);
@@ -132,9 +132,18 @@ if($v->validate()) {
     $STATUS = test_input($_POST["STATUS"]);
     $COMPUTER = test_input($_POST["COMPUTER"]);
     $START_DATE = test_input($_POST["START_DATE"]);
-    
+
     $ZIP = test_input($_POST["ZIP"]);
-    
+
+    // SECURITY FIX: Only update password if a new one was provided
+    // Get current password from database
+    $sth_pwd = $conn->prepare("SELECT HT_PASSWORD FROM hiveconfig WHERE id=1");
+    $sth_pwd->execute();
+    $current_pwd = $sth_pwd->fetchColumn();
+
+    // Use new password if provided, otherwise keep the old one
+    $HT_PASSWORD = !empty($HT_PASSWORD_INPUT) ? $HT_PASSWORD_INPUT : $current_pwd;
+
     // Update into the DB
     $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveapi=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,version=?,timezone=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,ZIP=? WHERE id=1");
     $doit->execute(array($hivename,$HIVEAPI,$yardid,$city,$state,$country,$latitude,$longitude,$version,$timezone,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$ZIP));
@@ -484,19 +493,21 @@ if($v->validate()) {
                             </td>
                             <td>
                                  <?php if ($result['SHARE_HIVETOOL'] == "yes") {
-                            
 
-                                    echo 'Username <input type="text" name="HT_USERNAME" onchange="this.form.submit()" value="'; echo $result['HT_USERNAME']; echo '"><BR>';
-                                    echo 'Password <input type="password" name="HT_PASSWORD" onchange="this.form.submit()" value="'; echo $result['HT_PASSWORD']; echo '"><BR>';    
-                                    echo 'URL <BR><input type="text" name="HT_URL" onchange="this.form.submit()" value="'; echo $result['HT_URL']; echo '"><BR>';    
+
+                                    echo 'Username <input type="text" name="HT_USERNAME" onchange="this.form.submit()" value="'; echo htmlspecialchars($result['HT_USERNAME']); echo '"><BR>';
+                                    // SECURITY FIX: Don't pre-fill password field to prevent exposure
+                                    echo 'Password <input type="password" name="HT_PASSWORD" placeholder="Enter to change" onchange="this.form.submit()"><BR>';
+                                    echo 'URL <BR><input type="text" name="HT_URL" onchange="this.form.submit()" value="'; echo htmlspecialchars($result['HT_URL']); echo '"><BR>';
                                 }
                                 else {
-                                    echo '<input type="hidden" name="HT_USERNAME" value="'; echo $result['HT_USERNAME']; echo '"><BR>';
-                                    echo '<input type="hidden" name="HT_PASSWORD" value="'; echo $result['HT_PASSWORD']; echo '">';    
-                                    echo '<input type="hidden" name="HT_URL" value="'; echo $result['HT_URL']; echo '">';    
+                                    echo '<input type="hidden" name="HT_USERNAME" value="'; echo htmlspecialchars($result['HT_USERNAME']); echo '"><BR>';
+                                    // SECURITY FIX: Don't pre-fill password field to prevent exposure
+                                    echo '<input type="hidden" name="HT_PASSWORD" value="">';
+                                    echo '<input type="hidden" name="HT_URL" value="'; echo htmlspecialchars($result['HT_URL']); echo '">';
 
                                 } ?>
-                                
+
                             </td>
                             <td>Specify if you want to share data with Hivetool.org.<BR> (Please do, it helps our researchers out)</td>
                         </tr>
