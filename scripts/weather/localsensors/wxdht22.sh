@@ -19,6 +19,8 @@ function return_error {
          echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC
 } 
 
+echo "GPIO is $WX_TEMP_GPIO"
+
 DATA_GOOD=0
 COUNTER=1
 ############################################################

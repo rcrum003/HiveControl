@@ -11,6 +11,7 @@
 switch ($period) {
     case "today":
         $sqlperiod = "start of day";
+        $groupby="";
         break;
     case "day":
         $sqlperiod = "-24 hours";
@@ -29,7 +30,11 @@ switch ($period) {
         break;
     }
 
-    # Echo back the Javascript code
+#Useful when summary by month is needed:
+    #select strftime("%Y-%m-%d", date) as observerd, min(hivetempf) as low, max(hivetempf) from allhivedata where hivetempf != "" AND hivetempf != "null" GROUP BY strftime("%Y-%m-%d", date);
+    
+
+# Echo back the Javascript code
  
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 

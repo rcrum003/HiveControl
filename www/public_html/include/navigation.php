@@ -101,6 +101,9 @@ echo '
                         <li>
                             <a href="/pages/beecount.php?chart=line&period=week">Flights</a>
                         </li>
+                        <li>
+                            <a href="/pages/air.php?chart=line&period=week">Air Quality</a>
+                        </li>
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
@@ -126,6 +129,9 @@ echo '
                                 </li>
                                 <li>
                                     <a href="/admin/system.php">System Commands</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/backup.php">Backup & Restore</a>
                                 </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -166,6 +172,9 @@ if ($orient == "normal") {
                                 <li>
                                      <a href="/pages/beecount.php?chart=line&period=week">flights</a>
                                 </li>
+                                <li>
+                                    <a href="/pages/air.php?chart=line&period=week">Air Quality</a>
+                                </li>
                                 
                             </ul>
                         <li>
@@ -189,11 +198,14 @@ if ($orient == "normal") {
                                 <li>
                                     <a href="/admin/system.php">System Commands</a>
                                 </li>
+                                <li>
+                                    <a href="/admin/backup.php">Backup & Restore</a>
+                                </li>
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
-                        
-   
+
+
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->

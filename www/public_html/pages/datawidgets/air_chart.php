@@ -43,11 +43,11 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 if ( $SHOW_METRIC == "on" ) {
 
-$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, air_aqi, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 } else {
 
 //Show normal
-$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, air_aqi, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 }
 
 $sth->execute();
@@ -147,21 +147,27 @@ $(function () {
             type: 'line',
             name: 'PM1("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm1']."]".", ";} echo "], 
-            color: '"; echo "$color_netweight"; echo "'
+            color: '"; echo "$color_pm1"; echo "'
         },
         {
            type: 'line',
            name: 'PM2.5 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm2_5']."]".", ";} echo "],
-           color: '"; echo "$color_grossweight"; echo "',
+           color: '"; echo "$color_pm25"; echo "',
            visible: true
+        },
+        {
+            type: 'line',
+            name: 'AQI("; if ( $SHOW_METRIC == "on" ) { echo "um";} else {echo "um";} echo ")',
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_aqi']."]".", ";} echo "], 
+            color: '"; echo "$color_aqi"; echo "'
         },
         {
             type: 'line',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
-            color: '"; echo "$color_outtemp"; echo "',
+            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_rain']."]".", ";} echo "],
+            color: '"; echo "$color_rain"; echo "',
             visible: true
         }
         ]
@@ -200,7 +206,7 @@ $sth = $conn->prepare("SELECT round((hiveweight * 0.453592),2) as hiveweight, ro
 } else {
 
 //Show normal
-$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf,air_aqi,strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 }
 
 $sth->execute();
@@ -245,13 +251,13 @@ $(function () {
             labels: {
                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "ppm";} else {echo "ppm";} echo "',
                 style: {
-                    color: '"; echo "$color_netweight"; echo "'
+                    color: '"; echo "$color_pm1"; echo "'
                 }
             },
             title: {
                 text: 'Weight',
                 style: {
-                    color: '"; echo "$color_netweight"; echo "'
+                    color: '"; echo "$color_pm1"; echo "'
                 },
             ceiling: 500,
             floor: 0
@@ -261,15 +267,15 @@ $(function () {
         }, { // Secondary yAxis
             gridLineWidth: 0,
             title: {
-                text: 'Rain',
+                text: 'AQI',
                 style: {
-                    color: '"; echo "$color_rain"; echo "'
+                    color: '"; echo "$color_aqi"; echo "'
                 }
             },
             labels: {
                  format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
                 style: {
-                    color: '"; echo "$color_rain"; echo "'
+                    color: '"; echo "$color_aqi"; echo "'
                 }
             },
             opposite: true
@@ -280,13 +286,13 @@ $(function () {
             title: {
                 text: 'Wind',
                 style: {
-                    color: '"; echo "$color_wind"; echo "'
+                    color: '"; echo "$color_pm25"; echo "'
                 }
             },
             labels: {
                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "kph";} else {echo "mph";} echo "',
                 style: {
-                    color: '"; echo "$color_wind"; echo "'
+                    color: '"; echo "$color_pm25"; echo "'
                 }
             },
             showEmpty: false,
@@ -319,20 +325,20 @@ $(function () {
             type: 'line',
             name: 'Air PM1 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
             data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm1']."]".", ";} echo "], 
-            color: '"; echo "$color_netweight"; echo "'
+            color: '"; echo "$color_pm1"; echo "'
         },
         {
            type: 'line',
            name: 'Air PM2 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm2_5']."]".", ";} echo "],
-           color: '"; echo "$color_grossweight"; echo "',
+           color: '"; echo "$color_pm25"; echo "',
            visible: true
         },
         {
            type: 'line',
            name: 'Air TempF ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_tempf']."]".", ";} echo "],
-           color: '"; echo "$color_grossweight"; echo "',
+           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_aqi']."]".", ";} echo "],
+           color: '"; echo "$color_aqi"; echo "',
            visible: true
         },
         }, 
@@ -361,7 +367,7 @@ $(function () {
         Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
             text: 'Enlarge Chart',
             onclick: function () {
-                centeredPopup('/pages/fullscreen/weight.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
+                centeredPopup('/pages/fullscreen/air.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
                 return false;
             }
         });

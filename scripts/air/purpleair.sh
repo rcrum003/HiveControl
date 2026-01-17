@@ -5,7 +5,10 @@
 #
 # Script to pull air quality reports from a Purple Air sensor
 #
-# v 2019081201
+# You can pull using one hive, but any more and PurpleAir may block you.
+
+
+# v 2021041101
 
 #Pull configs and logger library
 source /home/HiveControl/scripts/hiveconfig.inc
@@ -45,7 +48,7 @@ JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 #####################
 # Main
 #####################
-#set -x
+
 
 TEMPFILE="/home/HiveControl/scripts/air/output.json"
 #TEMPFILE="/home/pi/purpleair/output.json"
@@ -112,10 +115,14 @@ fi
 #Do Conversion to AQI for US Market
 #https://en.wikipedia.org/wiki/Air_quality_index
 
+#Remove tempfile
+rm -rf $TEMPFILE
+
 #Return output for main script
 
-#echo "DATE,AIR_TEMP,AIR_HUMIDITY,PM1_0,PM2_5,PM10"
-echo "$DATE,$AIR_TEMP,$AIR_HUMIDITY,$PM1_0,$PM2_5,$PM10"
+#Note: last value is the derived 
+#echo "DATE,AIR_TEMP,AIR_HUMIDITY,PM1_0,PM2_5,PM10,AQI"
+echo "$DATE,$AIR_TEMP,$AIR_HUMIDITY,$PM1_0,$PM2_5,$PM10,0"
 
 
 

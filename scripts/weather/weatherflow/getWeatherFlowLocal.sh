@@ -1,13 +1,13 @@
 #!/bin/bash
-# Version 6
+# Version 7
 # Script to output weatherflow data to a JSON and XML file that matches WUNDERGROUND file format
 #
 # Listens on the local network for UDP broadcast of the weatherstation.
 #
-# Revision 1
-# 2020-05-26
-# 
-# 	
+# Revision 2
+# 2026-01-17 - Fixed error handling when no data received
+#
+#
 
 
 
@@ -67,94 +67,110 @@ do
 done
 
 if [ $DATA_GOOD = "0" ]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper response from AmbientWeather - $GETDATA"
-
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper response from WeatherFlow - $GETDATA"
+	# Output empty JSON and exit - getwx.sh expects JSON format
+	exit 1
 fi
 
 #jq '.obs[] | .[0]'
 
 #Now that we are successful, do the needful.
-WXSTATION=$(/bin/echo $GETDATA | jq --raw-output '.serial_number')
-DATEUTC=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
-WIND_DIR=$(/bin/echo $GETDATA | jq '.obs[] | .[4]')
-WIND_SPEED_MS=$(/bin/echo $GETDATA | jq '.obs[] | .[2]')
-WIND_GUST_MS=$(/bin/echo $GETDATA | jq '.obs[] | .[3]')
-#WIND_MAX_DAILY_GUST=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
-TEMP_C=$(/bin/echo $GETDATA | jq '.obs[] | .[7]')
-#RAIN_HOURLY_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
-#RAIN_EVENT_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
-RAIN_DAILY_MM=$(/bin/echo $GETDATA | jq '.obs[] | .[12]')
-#BAROM_REL_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[6]')
-pressure_mb=$(/bin/echo $GETDATA | jq '.obs[] | .[6]')
-HUMIDITY=$(/bin/echo $GETDATA | jq '.obs[] | .[8]')
-UV=$(/bin/echo $GETDATA | jq '.obs[] | .[10]')
-SOLARRADIATION=$(/bin/echo $GETDATA | jq '.obs[] | .[11]')
-LUX=$(/bin/echo $GETDATA | jq '.obs[] | .[9]')
-LIGHTNING_STRIKE_COUNT=$(/bin/echo $GETDATA | jq '.obs[] | .[15]')
-LIGHTNING_STRIKE_DISTANCE=$(/bin/echo $GETDATA | jq '.obs[] | .[14]') #km
-#DEWPOINT_F=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
-#DATE_NORM=$(/bin/echo $GETDATA | jq '.obs[] | .[0]')
+WXSTATION=$(/bin/echo $GETDATA | jq --raw-output '.serial_number' 2>/dev/null)
+DATEUTC=$(/bin/echo $GETDATA | jq '.obs[] | .[0]' 2>/dev/null)
+WIND_DIR=$(/bin/echo $GETDATA | jq '.obs[] | .[4]' 2>/dev/null)
+WIND_SPEED_MS=$(/bin/echo $GETDATA | jq '.obs[] | .[2]' 2>/dev/null)
+WIND_GUST_MS=$(/bin/echo $GETDATA | jq '.obs[] | .[3]' 2>/dev/null)
+#WIND_MAX_DAILY_GUST=$(/bin/echo $GETDATA | jq '.obs[] | .[0]' 2>/dev/null)
+TEMP_C=$(/bin/echo $GETDATA | jq '.obs[] | .[7]' 2>/dev/null)
+#RAIN_HOURLY_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[0]' 2>/dev/null)
+#RAIN_EVENT_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[0]' 2>/dev/null)
+RAIN_DAILY_MM=$(/bin/echo $GETDATA | jq '.obs[] | .[12]' 2>/dev/null)
+#BAROM_REL_IN=$(/bin/echo $GETDATA | jq '.obs[] | .[6]' 2>/dev/null)
+pressure_mb=$(/bin/echo $GETDATA | jq '.obs[] | .[6]' 2>/dev/null)
+HUMIDITY=$(/bin/echo $GETDATA | jq '.obs[] | .[8]' 2>/dev/null)
+UV=$(/bin/echo $GETDATA | jq '.obs[] | .[10]' 2>/dev/null)
+SOLARRADIATION=$(/bin/echo $GETDATA | jq '.obs[] | .[11]' 2>/dev/null)
+LUX=$(/bin/echo $GETDATA | jq '.obs[] | .[9]' 2>/dev/null)
+LIGHTNING_STRIKE_COUNT=$(/bin/echo $GETDATA | jq '.obs[] | .[15]' 2>/dev/null)
+LIGHTNING_STRIKE_DISTANCE=$(/bin/echo $GETDATA | jq '.obs[] | .[14]' 2>/dev/null) #km
+#DEWPOINT_F=$(/bin/echo $GETDATA | jq '.obs[] | .[0]' 2>/dev/null)
+#DATE_NORM=$(/bin/echo $GETDATA | jq '.obs[] | .[0]' 2>/dev/null)
+
+# Check if we have required data - if TEMP_C is null/empty, data is bad
+if [[ -z "$TEMP_C" ]] || [[ "$TEMP_C" == "null" ]]; then
+	loglocal "$DATE" WEATHER ERROR "Did not get valid temperature from WeatherFlow"
+	exit 1
+fi
 
 # Do some conversions to
 # WeatherFlow supplies most things in metric-ish settings, need to convert to imperials
-TEMP_F=$(echo "scale=1;((9/5) * $TEMP_C) + 32" | bc -l)
+TEMP_F=$(echo "scale=1;((9/5) * $TEMP_C) + 32" | bc -l 2>/dev/null)
 
 # Convert Wind then DIRECTION Degrees into Text
+# Set default values if empty
+WIND_DIR="${WIND_DIR:-0}"
+WIND_SPEED_MS="${WIND_SPEED_MS:-0}"
+WIND_GUST_MS="${WIND_GUST_MS:-0}"
+pressure_mb="${pressure_mb:-0}"
+HUMIDITY="${HUMIDITY:-0}"
+RAIN_DAILY_MM="${RAIN_DAILY_MM:-0}"
+UV="${UV:-0}"
+SOLARRADIATION="${SOLARRADIATION:-0}"
 
-if [ 1 -eq "$(echo "$WIND_DIR >= 0" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 22.5" | bc)" ]; 
-	then 
-		DIRECTION="North" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 22.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 67.5" | bc)" ]; 
-	then 
-		DIRECTION="NE" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 67.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 112.5" | bc)" ]; 
-	then 
-		DIRECTION="East" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 112.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 157.5" | bc)" ]; 
-	then 
-		DIRECTION="SE" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 157.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 202.5" | bc)" ];
-	then 
-		DIRECTION="South" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 202.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 247.5" | bc)" ];
-	then 
-		DIRECTION="SW" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 247.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 292.5" | bc)" ];
-	then 
-		DIRECTION="West" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 292.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 337.5" | bc)" ];
-	then 
-		DIRECTION="NW" 
+if [ 1 -eq "$(echo "$WIND_DIR >= 0" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 22.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="North"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 22.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 67.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="NE"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 67.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 112.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="East"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 112.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 157.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="SE"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 157.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 202.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="South"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 202.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 247.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="SW"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 247.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 292.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="West"
+elif [ 1 -eq "$(echo "$WIND_DIR >= 292.5" | bc 2>/dev/null)" ] && [ 1 -eq "$(echo "$WIND_DIR < 337.5" | bc 2>/dev/null)" ];
+	then
+		DIRECTION="NW"
 else DIRECTION="North"
 fi 
 
 # convert Meters Per Second (MS) to mph
 # Formula - Wind(MPH) = 2.23694 * Wind(MS)
-WIND_SPEED_MPH="$(echo "scale=2; ($WIND_SPEED_MS * 2.23694)/1" | bc)"
-WIND_GUST_MPH="$(echo "scale=2; ($WIND_GUST_MS * 2.23694)/1" | bc)"
+WIND_SPEED_MPH="$(echo "scale=2; ($WIND_SPEED_MS * 2.23694)/1" | bc 2>/dev/null)"
+WIND_GUST_MPH="$(echo "scale=2; ($WIND_GUST_MS * 2.23694)/1" | bc 2>/dev/null)"
 
 # convert MPH to kph per hour
-wind_kph="$(echo "scale=2; ($WIND_SPEED_MPH * 1.609344)/1" | bc)"
-wind_gust_kph="$(echo "scale=2; ($WIND_GUST_MPH * 1.609344)/1" | bc)"
+wind_kph="$(echo "scale=2; ($WIND_SPEED_MPH * 1.609344)/1" | bc 2>/dev/null)"
+wind_gust_kph="$(echo "scale=2; ($WIND_GUST_MPH * 1.609344)/1" | bc 2>/dev/null)"
 
 #Convert MB pressure to IN
-pressure_in="$(echo "scale=0; ($pressure_mb / 33.8637526)/1" | bc)"
+pressure_in="$(echo "scale=0; ($pressure_mb / 33.8637526)/1" | bc 2>/dev/null)"
 
 #Calculate the dewpoint F/C
 # Formula:  TDEW = T - 9(100-RH%) / 25
 # Get the integers of the temperature and humidity
-dewpoint_f="$(echo "scale=2; (${TEMP_F} - ( 9*(100 - ${HUMIDITY})) /25)" |bc -l)"
-dewpoint_c=$(echo "scale=1;((${dewpoint_f}-32)*5)/9" | bc -l)
+dewpoint_f="$(echo "scale=2; (${TEMP_F} - ( 9*(100 - ${HUMIDITY})) /25)" | bc -l 2>/dev/null)"
+dewpoint_c=$(echo "scale=1;((${dewpoint_f}-32)*5)/9" | bc -l 2>/dev/null)
 
 #Convert Rain MM to Inches
-#precip_1hr_metric="$(echo "scale=2; ($RAIN_HOURLY_IN * 0.039370)" |bc)"
-RAIN_DAILY_IN="$(echo "scale=2; ($RAIN_DAILY_MM * 0.039370)" |bc)"
+#precip_1hr_metric="$(echo "scale=2; ($RAIN_HOURLY_IN * 0.039370)" | bc 2>/dev/null)"
+RAIN_DAILY_IN="$(echo "scale=2; ($RAIN_DAILY_MM * 0.039370)" | bc 2>/dev/null)"
 precip_today_metric=$RAIN_DAILY_MM
 
-if [[ -z "$TEMP_F" ]]; then
+# Final check - if TEMP_F is still empty or null after all conversions, exit with error
+if [[ -z "$TEMP_F" ]] || [[ "$TEMP_F" == "null" ]]; then
 	loglocal "$DATE" WEATHER ERROR "Did not get a proper outTemp, even after counter, $GETDATA"
-	#Since we didn't get a proper file, we should assume the whole thing is borked
-	exit
+	exit 1
 fi
 
 #ConvertDate

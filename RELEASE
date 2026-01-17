@@ -1,4 +1,119 @@
 Release Notes:
+
+--------------------
+2.10 Release
+--------------------
+Major Security and Performance Refactoring of currconditions.sh
+
+CRITICAL SECURITY FIXES:
+- Fixed SQL injection vulnerability in database operations
+  * All variables now properly escaped before insertion into SQLite database
+  * Added sql_escape() function to prevent database corruption or manipulation
+- Fixed XML injection vulnerability in hivetool.org data sharing
+  * All XML output now properly escaped to prevent structure corruption
+  * Added xml_escape() function for special character handling
+- Improved credential security
+  * Documented password exposure issue with recommendation for .netrc file
+  * Properly quoted all sensitive variables
+
+ROBUSTNESS IMPROVEMENTS:
+- Added set -euo pipefail for fail-fast behavior
+  * Script now exits immediately on errors instead of continuing with bad data
+  * Undefined variables now cause script to fail rather than silently continue
+  * Pipeline failures properly detected and handled
+- Comprehensive error handling throughout script
+  * All sensor script executions now check for failures
+  * Database operations validate success before continuing
+  * File existence verified before operations
+  * Clear error messages with context for troubleshooting
+- Fixed all hardcoded /home/HiveControl paths to use $HOMEDIR variable
+  * Script now portable to different installation directories
+
+PERFORMANCE OPTIMIZATIONS:
+- Dramatically improved parsing efficiency
+  * Reduced 23+ awk calls in weather parsing to single read operation
+  * Weight data parsing: 2 awk calls → 1 read operation
+  * Temperature data parsing: 4 awk calls → 1 read operation
+  * Bee count parsing: 2 awk calls → 1 read operation
+  * Air quality parsing: 6 awk calls → 1 read operation
+  * Overall ~30-50% performance improvement expected
+- Optimized database operations
+  * Now uses last_insert_rowid() instead of querying by date
+  * More efficient and reliable record ID retrieval
+
+CODE QUALITY IMPROVEMENTS:
+- Complete refactoring into modular functions
+  * get_hive_weight() - Collect weight data with error handling
+  * get_hive_temp() - Collect temperature data with error handling
+  * get_bee_count() - Collect bee flight data with error handling
+  * get_weather() - Collect weather data with error handling
+  * get_lux() - Collect light level data with error handling
+  * get_air_quality() - Collect air quality data with error handling
+  * Easier to test, maintain, and extend individual components
+- Fixed typo: print_seperator → print_separator
+- Removed unnecessary clear command
+  * Better for cron job execution and log file preservation
+- Quoted all variable expansions throughout script
+  * Prevents word splitting and globbing issues
+  * Handles paths with spaces or special characters correctly
+- Safer file operations
+  * Changed rm -rf to rm -f for single file deletion
+  * Prevents accidental directory deletion if variables are misconfigured
+- Fixed uninitialized variable bug in lux collection
+- Better exit codes (exit 0 vs exit 1) for proper error signaling
+
+DOCUMENTATION:
+- Added comprehensive REFACTOR_NOTES.md with:
+  * Detailed explanation of all changes
+  * Security vulnerability descriptions and fixes
+  * Testing recommendations and edge cases
+  * Migration notes for existing installations
+  * Performance benchmarking guidance
+  * Future enhancement recommendations
+
+BACKWARD COMPATIBILITY:
+- ALL original functionality preserved
+- No breaking changes to configuration files
+- Database schema unchanged
+- Output format maintained (except enhanced error messages)
+- Integration with external scripts fully compatible
+
+Version updated: 2025042101 → 2026011704
+Script size: 287 lines → 470 lines (due to proper error handling and functions)
+
+BUG FIXES (Post-Release):
+- Version 2026011702: Fixed unbound variable errors with TIMEZONE and UTC
+  * Moved set -eo pipefail after config file loading
+  * Added default values for TIMEZONE and UTC variables
+  * Changed from -euo to -eo pipefail for compatibility with check.inc
+- Version 2026011703: Fixed script termination on sensor failures
+  * Added || true to all sensor collection function calls
+  * Allows script to continue even when individual sensors fail
+  * Ensures data from working sensors is still collected and stored
+- Version 2026011704: Fixed WeatherFlow error handling
+  * Fixed getWeatherFlowLocal.sh to handle missing data gracefully
+  * Added 2>/dev/null to all bc and jq commands to suppress error messages
+  * Returns null CSV format when no weather data available
+  * Added default values for all numeric variables before calculations
+  * Prevents bc "syntax error" when variables are empty
+
+WEATHER STATION FIX:
+- Updated getWeatherFlowLocal.sh (Version 6 → 7)
+  * Fixed error cascade when WeatherFlow Tempest station not broadcasting
+  * Suppressed "syntax error" messages from bc calculator
+  * Added early exit with null values when no data received
+  * Added validation checks before mathematical operations
+  * Improved error logging specificity (WeatherFlow vs AmbientWeather)
+
+This release represents a major upgrade in security, reliability, and maintainability while
+maintaining full backward compatibility with existing HiveControl installations.
+
+--------------------
+2.09 Release
+--------------------
+- Fixed legacy OS issues with Expired LetsEncrypt CA Root Cert
+- Fixed hx711calibrate.sh script to only collect valid entries when trying to help you calculate zerp/slope values
+
 --------------------
 2.08 Release
 --------------------
@@ -14,7 +129,6 @@ Release Notes:
 --------------------
 - Added support for WeatherFlow Tempest Weather Station, if the station is on same network as your hives. We use the UDP broadcast here. Future will support their API.
 - Fixed AmbientWeather.net script that was causing errors, sorry about that.
-
 
 --------------------
 2.00 Release

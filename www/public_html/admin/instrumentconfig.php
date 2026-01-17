@@ -48,11 +48,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER', 'ENABLE_AIR'], ['no', 'yes']);
     $v->rule('integer', ['HIVE_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO', 'HIVE_TEMP_SUB'], 1)->message('{field} must be a integer');
     $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT'], 1)->message('{field} must be numeric');
-    $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type', 'AIR_ID', 'AIR_TYPE'], 1)->message('{field} must be alphaNum only');
+    $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type', 'AIR_ID', 'AIR_TYPE', 'API_AIR_ID', 'API_LOCAL_URL'], 1)->message('{field} must be alphaNum only');
     $v->rule('lengthmax', ['WX_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO'], 2);
 
 }
-
 
 ?>
 
@@ -188,6 +187,8 @@ if($v->validate()) {
     $ENABLE_AIR = test_input($_POST["ENABLE_AIR"]);
     $AIR_TYPE= test_input($_POST["AIR_TYPE"]);
     $AIR_ID = test_input($_POST["AIR_ID"]);
+    $AIR_LOCAL_URL= test_input($_POST["AIR_LOCAL_URL"]);
+    $AIR_API_ID= test_input($_POST["AIR_API_ID"]);
     
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -197,8 +198,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_LOCAL_URL=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_LOCAL_URL));
     sleep(1);
 
 
@@ -644,16 +645,44 @@ if($v->validate()) {
                             </select></td>
 
                             <td>
-                            <?php if ($result['ENABLE_AIR'] == "yes") {
-                                echo '
-                                <input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purple"'; if ($result['AIR_TYPE'] == "purple") {echo "checked";} echo '> PurpleAir';} #Only one at the moment
+                            <?php 
+                            if ($result['ENABLE_AIR'] == "yes") {
+                                echo '<input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purpleapi" ' 
+                                     . ($result['AIR_TYPE'] == "purpleapi" ? 'checked' : '') 
+                                     . '> PurpleAir - From API <br>';
+                                
+                                echo '<input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purplelocal" ' 
+                                     . ($result['AIR_TYPE'] == "purplelocal" ? 'checked' : '') 
+                                     . '> PurpleAir - From Local';
+                            }
                             ?>
                             </td>
                             <td>
-                            <?PHP if ($result['ENABLE_AIR'] == "yes" && $result['AIR_TYPE'] == "purple") {
-                                echo '<a href="#" title="Air ID" data-toggle="popover" data-placement="bottom" data-content="Go to <a href=\'https://www.purpleair.com/map\' target=\'_blank\' title=\'purpleair\'>Purpleair.com</a> to get an ID."><p class="fa fa-question-circle fa-fw"></P></a>';
-                                    echo 'STATION ID <br><input type="text" name="AIR_ID" onchange="this.form.submit()" value="'; echo $result['AIR_ID']; echo '">';    
-                                } ?>
+                            <?php if ($result['ENABLE_AIR'] == "yes" && $result['AIR_TYPE'] == "purpleapi"): ?>
+                              <a href="#" title="Air ID" data-toggle="popover" data-placement="bottom"
+                                 data-content="Go to <a href='https://www.purpleair.com/map' target='_blank' title='purpleair'>Purpleair.com</a> to get an ID.">
+                                 <i class="fa fa-question-circle fa-fw"></i>
+                              </a>
+                              STATION ID <br>
+                              <input type="text" name="AIR_ID" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_ID'], ENT_QUOTES, 'UTF-8'); ?>">
+                              <br>
+                              PURPLE API ID <br>
+                              <input type="text" name="AIR_API_ID" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_API_ID'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php elseif ($result['ENABLE_AIR'] == "yes" && $result['AIR_TYPE'] == "purplelocal"): ?>
+                              <a href="#" title="Air ID" data-toggle="popover" data-placement="bottom"
+                                 data-content="Go to <a href='https://www.purpleair.com/map' target='_blank' title='purpleair'>Purpleair.com</a> to get an ID.">
+                                 <i class="fa fa-question-circle fa-fw"></i>
+                              </a>
+                              STATION ID <br>
+                              <input type="text" name="AIR_ID" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_ID'], ENT_QUOTES, 'UTF-8'); ?>">
+                              <br>
+                              PURPLE LOCAL URL <br>
+                              <input type="text" name="AIR_LOCAL_URL" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_LOCAL_URL'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php endif; ?>
                             </td>
                             <td></td>
                             <td></td>

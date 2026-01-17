@@ -15,8 +15,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 $v = new Valitron\Validator($_POST);
 $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
-$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
-$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
+$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen','color_pm1', 'color_pm25'], 7);
+$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen','color_pm1', 'color_pm25'], 7);
 $v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen'], 2);
 $v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen'], ['on', '']);
 
@@ -76,12 +76,15 @@ if($v->validate()) {
     $color_rain = test_input($_POST["color_rain"]);
     $color_gdd = test_input($_POST["color_gdd"]);
     $color_beecount_in = test_input($_POST["color_beecount_in"]);
-    $color_beecount_out = test_input($_POST["color_beecount_out"]);
-    
+    $color_beecount_out = test_input($_POST["color_beecount_out"]);   
     $color_wind = test_input($_POST["color_wind"]);
     $color_pressure = test_input($_POST["color_pressure"]);
     $color_pollen = test_input($_POST["color_pollen"]);
-
+    #Air Quaility Indicators
+    $color_pm1 = test_input($_POST["color_pm1"]);
+    $color_pm25 = test_input($_POST["color_pm25"]); 
+    $color_aqi = test_input($_POST["color_aqi"]);
+    
     $trend_hivetemp = test_input($_POST["trend_hivetemp"]);
     $trend_hivehum = test_input($_POST["trend_hivehum"]);
     $trend_outtemp = test_input($_POST["trend_outtemp"]);
@@ -97,6 +100,9 @@ if($v->validate()) {
     $trend_wind = test_input($_POST["trend_wind"]);
     $trend_pressure = test_input($_POST["trend_pressure"]);
     $trend_pollen = test_input($_POST["trend_pollen"]);
+    $trend_pm1 = test_input($_POST["trend_pm1"]);
+    $trend_pm25 = test_input($_POST["trend_pm25"]);
+    $trend_aqi = test_input($_POST["trend_aqi"]);
 
     $chart_rounding = test_input($_POST["chart_rounding"]);
     $chart_smoothing = test_input($_POST["chart_smoothing"]);
@@ -113,10 +119,9 @@ if($v->validate()) {
    // $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=?,color_wind=?,color_pressure=?,color_pollen=?,trend_wind=?,trend_pressure=?,trend_pollen=? WHERE id=1");
-    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC,$color_wind,$color_pressure,$color_pollen,$trend_wind,$trend_pressure,$trend_pollen));
+    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=?,color_wind=?,color_pressure=?,color_pollen=?,trend_wind=?,trend_pressure=?,trend_pollen=?,color_pm1=?,color_pm25=?,trend_pm1=?,trend_pm25=?,color_aqi=?,trend_aqi=? WHERE id=1");
+    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC,$color_wind,$color_pressure,$color_pollen,$trend_wind,$trend_pressure,$trend_pollen,$color_pm1,$color_pm25,$trend_pm1,$trend_pm25,$color_aqi,$trend_aqi));
     sleep(1);
-
 
 
     // Refresh the fields in the form
@@ -331,6 +336,27 @@ if($v->validate()) {
                                             <td><input type='color' onchange="this.form.submit()" name='color_pollen' value="<?php echo $result['color_pollen']; ?>" /> </td>
                                         </td>
                                         </tr>
+
+                                         <tr class="odd gradeX">
+                                            <td>Air - AQI </td> 
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_aqi" value="on" <?php if ($result['trend_aqi'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_aqi' value="<?php echo $result['color_aqi']; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                         <tr class="odd gradeX">
+                                            <td>Air - PM1 </td> 
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm1" value="on" <?php if ($result['trend_pm1'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm1' value="<?php echo $result['color_pm1']; ?>" /> </td>
+                                        </td>
+                                        </tr>
+
+                                         <tr class="odd gradeX">
+                                            <td>Air - PM2.5 </td> 
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm25" value="on" <?php if ($result['trend_pm25'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm25' value="<?php echo $result['color_pm25']; ?>" /> </td>
+                                        </td>
+                                        </tr>
+
                                     </tbody>
                                 </table>
                                         <td>Configure your preferred trend colors and weather to show them on the main dashboard. </td>
