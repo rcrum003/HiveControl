@@ -15,6 +15,84 @@ NEW FEATURES:
   * Optimized for large databases using file copy instead of SQL export
   * Updated navigation menus to include "Backup & Restore" option
 
+- Added Admin Password Management System (changepassword.php)
+  * Change admin password through web interface
+  * Current password verification required
+  * Minimum 8 character password requirement
+  * Password confirmation to prevent typos
+  * Supports multiple Apache htpasswd hash formats (APR1, bcrypt, SHA1, crypt)
+  * All password changes logged with IP tracking
+
+WEB APPLICATION SECURITY FIXES:
+- Fixed CRITICAL SQL injection vulnerabilities in admin interface
+  * loglocal() function now uses parameterized queries instead of string interpolation
+  * removezero command uses strict column name whitelisting (hivetempf, hiveHum, hiveweight, IN_COUNT)
+  * Message queue operations converted to parameterized queries
+  * All database operations now use PDO prepared statements with ? placeholders
+  * Prevents database manipulation, data theft, and privilege escalation
+
+- Fixed HIGH severity XSS (Cross-Site Scripting) vulnerabilities
+  * All log output properly escaped with htmlspecialchars() in getlog() function
+  * Error messages properly escaped in system.php command handling
+  * Database content escaped before display to prevent script injection
+  * Prevents session hijacking, credential theft, and malicious JavaScript execution
+
+- Implemented CSRF (Cross-Site Request Forgery) protection
+  * All POST forms now include cryptographically secure CSRF tokens
+  * Token validation required before processing sensitive operations
+  * Implemented in backup.php, changepassword.php, and other admin forms
+  * Session-based token storage with automatic regeneration
+  * Prevents unauthorized actions from malicious websites
+
+- Improved session security configuration
+  * HTTPOnly cookies prevent JavaScript access to session IDs
+  * SameSite=Strict prevents cross-site request attacks
+  * Strict session mode rejects uninitialized session IDs
+  * Session ID regenerated every 5 minutes to prevent session fixation
+  * 1-hour session timeout (configurable in security-init.php)
+  * Note: session.cookie_secure disabled by default (enable if using HTTPS)
+
+- Fixed HIGH severity IP spoofing vulnerability
+  * getUserIP() now only trusts REMOTE_ADDR for accurate logging
+  * Removed trust of HTTP_X_FORWARDED_FOR and HTTP_CLIENT_IP headers
+  * Prevents attackers from forging IP addresses in logs
+  * Command injection via IP spoofing no longer possible
+
+- Removed plaintext password exposure in hiveconfig.php
+  * Hivetool.org password field no longer pre-filled in forms
+  * Password not visible in HTML source code or browser memory
+  * Update logic preserves existing password if field left empty
+  * Prevents password theft via shoulder surfing or page source inspection
+
+- Fixed information disclosure vulnerabilities
+  * Database connection errors now logged instead of displayed to users
+  * Error messages sanitized to prevent information leakage
+  * Prevents attackers from learning database structure or credentials
+
+- Added comprehensive security headers
+  * X-Frame-Options: DENY (prevents clickjacking attacks)
+  * X-Content-Type-Options: nosniff (prevents MIME type sniffing)
+  * Referrer-Policy: strict-origin-when-cross-origin (limits referrer information)
+  * Content-Security-Policy with restrictions on script/style sources
+
+- Created centralized security initialization system
+  * New /include/security-init.php file for all security configuration
+  * Reusable CSRF protection functions: csrf_field(), verify_csrf_token(), require_csrf_token()
+  * Automatic session management with secure defaults
+  * Easy to maintain and extend security features
+
+Files Modified for Security:
+  * /admin/system.php - SQL injection, XSS, IP spoofing, CSRF protection
+  * /admin/changepassword.php - SQL injection, IP spoofing, CSRF protection
+  * /admin/backup.php - SQL injection, IP spoofing, CSRF protection
+  * /admin/hiveconfig.php - Plaintext password removal
+  * /include/db-connect.php - Error disclosure prevention
+  * /include/security-init.php - NEW FILE with session and CSRF configuration
+
+Security Documentation:
+  * SECURITY_AUDIT_2026-01-17.md - Complete vulnerability assessment
+  * SECURITY_FIXES_APPLIED_2026-01-17.md - Detailed fix documentation with testing procedures
+
 Major Security and Performance Refactoring of currconditions.sh
 
 CRITICAL SECURITY FIXES:
