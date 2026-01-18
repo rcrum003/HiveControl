@@ -146,27 +146,55 @@ $(function () {
         series: [{
             type: 'line',
             name: 'PM1("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm1']."]".", ";} echo "], 
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['air_pm1']) && $r['air_pm1'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['air_pm1'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "], 
             color: '"; echo "$color_pm1"; echo "'
         },
         {
            type: 'line',
            name: 'PM2.5 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm2_5']."]".", ";} echo "],
+           data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['air_pm2_5']) && $r['air_pm2_5'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['air_pm2_5'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
            color: '"; echo "$color_pm25"; echo "',
            visible: true
         },
         {
             type: 'line',
             name: 'AQI("; if ( $SHOW_METRIC == "on" ) { echo "um";} else {echo "um";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_aqi']."]".", ";} echo "], 
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['air_aqi']) && $r['air_aqi'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['air_aqi'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "], 
             color: '"; echo "$color_aqi"; echo "'
         },
         {
             type: 'line',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_rain']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['weather_rain']) && $r['weather_rain'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['weather_rain'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: true
         }
@@ -324,20 +352,41 @@ $(function () {
         series: [{
             type: 'line',
             name: 'Air PM1 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm1']."]".", ";} echo "], 
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['air_pm1']) && $r['air_pm1'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['air_pm1'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "], 
             color: '"; echo "$color_pm1"; echo "'
         },
         {
            type: 'line',
            name: 'Air PM2 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_pm2_5']."]".", ";} echo "],
+           data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['air_pm2_5']) && $r['air_pm2_5'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['air_pm2_5'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
            color: '"; echo "$color_pm25"; echo "',
            visible: true
         },
         {
            type: 'line',
            name: 'Air TempF ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['air_aqi']."]".", ";} echo "],
+           data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['air_aqi']) && $r['air_aqi'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['air_aqi'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
            color: '"; echo "$color_aqi"; echo "',
            visible: true
         },
@@ -346,7 +395,14 @@ $(function () {
             type: 'line',
             name: 'Wind',
             yAxis: 2,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['wind']) && $r['wind'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['wind'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_wind"; echo "',
             visible: "; echo "$trend_wind"; echo "
         }

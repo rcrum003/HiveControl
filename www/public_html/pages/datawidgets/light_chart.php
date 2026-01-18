@@ -138,7 +138,14 @@ $(function () {
             type: 'line',
             name: 'Solar (wm/2)',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['solarradiation']) && $r['solarradiation'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['solarradiation'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_solarradiation"; echo "',
             visible: "; echo "$trend_solarradiation"; echo "
         },
@@ -146,7 +153,14 @@ $(function () {
             type: 'line',
             name: 'Lux (lx)',
             yAxis: 1,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['lux']) && $r['lux'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['lux'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_lux"; echo "',
             visible: "; echo "$trend_lux"; echo "
         }

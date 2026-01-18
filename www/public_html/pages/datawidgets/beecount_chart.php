@@ -139,7 +139,14 @@ $(function () {
             type: 'line',
             name: 'Bees In',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['IN_COUNT']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['IN_COUNT']) && $r['IN_COUNT'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['IN_COUNT'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_beecount_in"; echo "',
             visible: "; echo "$trend_beecount_in"; echo "
         },
@@ -147,7 +154,14 @@ $(function () {
             type: 'line',
             name: 'Bees Out',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['OUT_COUNT']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['OUT_COUNT']) && $r['OUT_COUNT'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['OUT_COUNT'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             visible: "; echo "$trend_beecount_out"; echo ",
             color: '"; echo "$color_beecount_out"; echo "'
         },
@@ -155,7 +169,14 @@ $(function () {
             type: 'area',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['precip_1hr_in'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: "; echo "$trend_rain"; echo "
         }

@@ -168,8 +168,16 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) ? floatval($r['hiveweight']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+
+                if (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) {
+
+                    echo "[".$r['datetime'].", ".floatval($r['hiveweight'])."], ";
+
+                } else {
+
+                    echo "[".$r['datetime'].", null], ";
+
+                }
             }
             echo "],
             color: '"; echo "$color_netweight"; echo "'
@@ -180,8 +188,16 @@ $(function () {
            data: [";
            foreach($result as $r){
                // Validate numeric value
-               $val = (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) ? floatval($r['hiverawweight']) : 'null';
-               echo "[".$r['datetime'].", ".$val."], ";
+
+               if (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) {
+
+                   echo "[".$r['datetime'].", ".floatval($r['hiverawweight'])."], ";
+
+               } else {
+
+                   echo "[".$r['datetime'].", null], ";
+
+               }
            }
            echo "],
            color: '"; echo "$color_grossweight"; echo "',
@@ -194,8 +210,16 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) ? floatval($r['precip_1hr_in']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+
+                if (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) {
+
+                    echo "[".$r['datetime'].", ".floatval($r['precip_1hr_in'])."], ";
+
+                } else {
+
+                    echo "[".$r['datetime'].", null], ";
+
+                }
             }
             echo "],
             color: '"; echo "$color_rain"; echo "',
@@ -208,8 +232,16 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['wind']) && $r['wind'] != 0) ? floatval($r['wind']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+
+                if (is_numeric($r['wind']) && $r['wind'] != 0) {
+
+                    echo "[".$r['datetime'].", ".floatval($r['wind'])."], ";
+
+                } else {
+
+                    echo "[".$r['datetime'].", null], ";
+
+                }
             }
             echo "],
             color: '"; echo "$color_wind"; echo "',
@@ -372,8 +404,16 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) ? floatval($r['hiveweight']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+
+                if (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) {
+
+                    echo "[".$r['datetime'].", ".floatval($r['hiveweight'])."], ";
+
+                } else {
+
+                    echo "[".$r['datetime'].", null], ";
+
+                }
             }
             echo "],
             color: '"; echo "$color_netweight"; echo "'
@@ -384,8 +424,16 @@ $(function () {
            data: [";
            foreach($result as $r){
                // Validate numeric value
-               $val = (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) ? floatval($r['hiverawweight']) : 'null';
-               echo "[".$r['datetime'].", ".$val."], ";
+
+               if (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) {
+
+                   echo "[".$r['datetime'].", ".floatval($r['hiverawweight'])."], ";
+
+               } else {
+
+                   echo "[".$r['datetime'].", null], ";
+
+               }
            }
            echo "],
            color: '"; echo "$color_grossweight"; echo "',
@@ -398,8 +446,16 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) ? floatval($r['precip_1hr_in']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+
+                if (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) {
+
+                    echo "[".$r['datetime'].", ".floatval($r['precip_1hr_in'])."], ";
+
+                } else {
+
+                    echo "[".$r['datetime'].", null], ";
+
+                }
             }
             echo "],
             color: '"; echo "$color_rain"; echo "',
@@ -412,8 +468,16 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['wind']) && $r['wind'] != 0) ? floatval($r['wind']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+
+                if (is_numeric($r['wind']) && $r['wind'] != 0) {
+
+                    echo "[".$r['datetime'].", ".floatval($r['wind'])."], ";
+
+                } else {
+
+                    echo "[".$r['datetime'].", null], ";
+
+                }
             }
             echo "],
             color: '"; echo "$color_wind"; echo "',

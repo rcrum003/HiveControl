@@ -1,19 +1,17 @@
 <?PHP
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "GET") {
-
-
+// Get notifications for display
 $sth2 = $conn->prepare("SELECT * FROM notifications");
 $sth2->execute();
 $notifications = $sth2->fetchall(PDO::FETCH_ASSOC);
 
-
-}
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // SECURITY: Verify CSRF token for POST actions
+    require_csrf_token();
 // Set Error Fields
 
 $v = new Valitron\Validator($_POST);
@@ -45,11 +43,10 @@ function test_input_allow_slash($data) {
 <!DOCTYPE html>
 <html lang="en">
 
-
     <!-- Header and Navigation -->
-         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
+    <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
     <!-- /Navigation -->
-    <div id="wrapper">
+
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Notifications </h1>
@@ -166,15 +163,16 @@ if($v->validate()) {
                                     </thead>
                                     <tbody>
                                        <?PHP foreach($notifications as $r){
-                                        echo '<tr><td>'.$r['id'].'</td>';
-                                        echo '<td>'.$r['name'].'</td>';
-                                        echo '<td>'.$r['measure'].'</td>';
-                                        echo '<td>'.$r['threshold_type'].'</td>';
-                                        echo '<td>'.$r['threshold_value'].'</td>';
-                                        echo '<td>'.$r['time_period'].'</td>';
-                                        echo '<td>'.$r['status'].'</td></tr>';
+                                        // SECURITY: Escape output to prevent XSS
+                                        echo '<tr><td>'.htmlspecialchars($r['id']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['name']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['measure']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['threshold_type']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['threshold_value']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['time_period']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['status']).'</td></tr>';
                                     }
-                                    ?>      
+                                    ?>
                                     </tbody>
                                 </table>
                                 <button type="button" class="btn btn-outline btn-default btn-lg" data-toggle="modal" data-target="#NewModal">
@@ -216,10 +214,11 @@ if($v->validate()) {
             </div> <!-- /.panel -->
             
         </div> <!-- /class 12 -->
-        
+
     </div> <!-- /#row -->
-</div> <!-- /#page-wrapper -->
-        <div class="modal fade" id="NewModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+    <!-- Modal for New Notification -->
+    <div class="modal fade" id="NewModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -237,10 +236,15 @@ if($v->validate()) {
                                     <!-- /.modal-content -->
                                 </div>
                                 <!-- /.modal-dialog -->
-            </div>
+    </div>
+    <!-- /.modal -->
 
-</body>
-                
+    </div>
+    <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
     <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -249,19 +253,25 @@ if($v->validate()) {
 
     <!-- Metis Menu Plugin JavaScript -->
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
-    
+
+    <!-- DataTables JavaScript -->
+    <script src="../bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+    <script src="../bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>
+
     <!-- Full Screen Popups -->
-    <script src="/js/popup.js"></script>  
-    
+    <script src="/js/popup.js"></script>
+
     <script>
     $(document).ready(function(){
-    $('[data-toggle="popover"]').popover(); 
+        $('[data-toggle="popover"]').popover();
+        $('#dataTables-example').DataTable({
+            responsive: true
+        });
     });
     </script>
-    
+
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
 
-
-
+</body>
 </html>

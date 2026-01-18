@@ -144,7 +144,14 @@ $(function () {
             type: 'area',
             name: 'GDD',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['gdd']) && $r['gdd'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['gdd'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_gdd"; echo "',
             visible: true
         },
@@ -152,7 +159,14 @@ $(function () {
             type: 'area',
             name: 'Pollen',
             yAxis: 1,
-            data: ["; foreach($result3 as $r){echo "[".$r['datetime'].", ".$r['pollenlevel']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['pollenlevel']) && $r['pollenlevel'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['pollenlevel'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_pollen"; echo "',
             visible: "; echo "$trend_pollen"; echo "
         }

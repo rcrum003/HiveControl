@@ -362,7 +362,14 @@ $(function () {
             type: 'area',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['precip_1hr_in'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: "; echo "$trend_rain"; echo "
         },
@@ -386,7 +393,14 @@ $(function () {
             type: 'line',
             name: 'Solar (wm/2)',
             yAxis: 4,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['solarradiation']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['solarradiation']) && $r['solarradiation'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['solarradiation'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_solarradiation"; echo "',
             visible: "; echo "$trend_solarradiation"; echo "
         },
@@ -394,7 +408,14 @@ $(function () {
             type: 'line',
             name: 'Lux (lx)',
             yAxis: 5,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['lux']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['lux']) && $r['lux'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['lux'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_lux"; echo "',
             visible: "; echo "$trend_lux"; echo "
         },
@@ -402,7 +423,14 @@ $(function () {
             type: 'line',
             name: 'GDD',
             yAxis: 6,
-            data: ["; foreach($result1 as $r){echo "[".$r['datetime'].", ".$r['gdd']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['gdd']) && $r['gdd'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['gdd'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_gdd"; echo "',
             visible: "; echo "$trend_gdd"; echo "
         },
@@ -410,7 +438,14 @@ $(function () {
             type: 'line',
             name: 'Flight Activity',
             yAxis: 7,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['OUT_COUNT']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['OUT_COUNT']) && $r['OUT_COUNT'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['OUT_COUNT'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_beecount_out"; echo "',
             visible: "; echo "$trend_beecount_out"; echo "
         },        
@@ -418,7 +453,14 @@ $(function () {
             type: 'line',
             name: 'Wind',
             yAxis: 8,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['wind']) && $r['wind'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['wind'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_wind"; echo "',
             visible: "; echo "$trend_wind"; echo "
         },
@@ -426,7 +468,14 @@ $(function () {
             type: 'line',
             name: 'Pressure',
             yAxis: 9,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['pressure']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['pressure']) && $r['pressure'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['pressure'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_pressure"; echo "',
             visible: "; echo "$trend_pressure"; echo "
         },
@@ -434,7 +483,14 @@ $(function () {
             type: 'line',
             name: 'Pollen',
             yAxis: 10,
-            data: ["; foreach($result3 as $r){echo "[".$r['datetime'].", ".$r['pollenlevel']."]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['pollenlevel']) && $r['pollenlevel'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['pollenlevel'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_pollen"; echo "',
             visible: "; echo "$trend_pollen"; echo "
         }
