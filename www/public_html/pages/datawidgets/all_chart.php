@@ -332,7 +332,7 @@ $(function () {
             yAxis: 0,
             data: ["; foreach($result as $r){
                 // Validate numeric value
-                if (is_numeric($r['hivetempf']) && $r['hivetempf'] != 0) {
+                if (is_numeric($r['hivetempf'])) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['hivetempf'])."], ";
                     } else {
@@ -351,7 +351,7 @@ $(function () {
             yAxis: 0,
             data: ["; foreach($result as $r){
                 // Validate numeric value
-                if (is_numeric($r['weather_tempf']) && $r['weather_tempf'] != 0) {
+                if (is_numeric($r['weather_tempf'])) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['weather_tempf'])."], ";
                     } else {
