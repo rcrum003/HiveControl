@@ -330,7 +330,18 @@ $(function () {
             type: 'line',
             name: 'Hive Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hivetempf']);else echo $r['hivetempf']; echo "]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['hivetempf']) && $r['hivetempf'] != 0) {
+                    if ($chart_rounding == "on") {
+                        echo "[".$r['datetime'].", ".ceil($r['hivetempf'])."], ";
+                    } else {
+                        echo "[".$r['datetime'].", ".floatval($r['hivetempf'])."], ";
+                    }
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_hivetemp"; echo "',
             visible: "; echo "$trend_hivetemp"; echo "
         },
@@ -338,7 +349,18 @@ $(function () {
             type: 'line',
             name: 'Outside Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['weather_tempf']);else echo $r['weather_tempf']; echo "]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['weather_tempf']) && $r['weather_tempf'] != 0) {
+                    if ($chart_rounding == "on") {
+                        echo "[".$r['datetime'].", ".ceil($r['weather_tempf'])."], ";
+                    } else {
+                        echo "[".$r['datetime'].", ".floatval($r['weather_tempf'])."], ";
+                    }
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             visible: "; echo "$trend_outtemp"; echo ",
             color: '"; echo "$color_outtemp"; echo "'
         },
@@ -346,7 +368,18 @@ $(function () {
             type: 'line',
             name: 'Hive Humidty (%)',
             yAxis: 3,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hiveHum']);else echo $r['hiveHum']; echo "]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) {
+                    if ($chart_rounding == "on") {
+                        echo "[".$r['datetime'].", ".ceil($r['hiveHum'])."], ";
+                    } else {
+                        echo "[".$r['datetime'].", ".floatval($r['hiveHum'])."], ";
+                    }
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_hivehum"; echo "',
             visible: "; echo "$trend_hivehum"; echo "
         },
@@ -354,7 +387,18 @@ $(function () {
             type: 'line',
             name: 'Outside Humidty (%)',
             yAxis: 3,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['weather_humidity']);else echo $r['weather_humidity']; echo "]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) {
+                    if ($chart_rounding == "on") {
+                        echo "[".$r['datetime'].", ".ceil($r['weather_humidity'])."], ";
+                    } else {
+                        echo "[".$r['datetime'].", ".floatval($r['weather_humidity'])."], ";
+                    }
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_outhum"; echo "',
             visible: "; echo "$trend_outhum"; echo "
         },
@@ -377,7 +421,18 @@ $(function () {
             type: 'line',
             yAxis: 2,
             name: 'Hive Weight Net ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hiveweight']);else echo $r['hiveweight']; echo "]".", ";} echo "],
+            data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) {
+                    if ($chart_rounding == "on") {
+                        echo "[".$r['datetime'].", ".ceil($r['hiveweight'])."], ";
+                    } else {
+                        echo "[".$r['datetime'].", ".floatval($r['hiveweight'])."], ";
+                    }
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
             color: '"; echo "$color_netweight"; echo "',
             visible: "; echo "$trend_netweight"; echo "
         },
@@ -385,7 +440,18 @@ $(function () {
            type: 'line',
            yAxis: 2,
            name: 'Hive Weight Gross ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", "; if ($chart_rounding == "on") echo ceil($r['hiverawweight']);else echo $r['hiverawweight']; echo "]".", ";} echo "],
+           data: ["; foreach($result as $r){
+                // Validate numeric value
+                if (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) {
+                    if ($chart_rounding == "on") {
+                        echo "[".$r['datetime'].", ".ceil($r['hiverawweight'])."], ";
+                    } else {
+                        echo "[".$r['datetime'].", ".floatval($r['hiverawweight'])."], ";
+                    }
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
+            } echo "],
            color: '"; echo "$color_grossweight"; echo "',
            visible: "; echo "$trend_grossweight"; echo "
         },
