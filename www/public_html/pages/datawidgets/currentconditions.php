@@ -9,6 +9,28 @@ $sth1 = $conn->prepare("SELECT seasongdd, daygdd FROM gdd ORDER BY datetime(\"ca
 $sth1->execute();
 $gdddata = $sth1->fetch(PDO::FETCH_ASSOC);
 
+// Check if we have data, if not initialize with defaults
+if (!$alldata) {
+	$alldata = [
+		'hiveweight' => 0,
+		'hiverawweight' => 0,
+		'hivetempf' => 0,
+		'hivetempc' => 0,
+		'hiveHum' => 0,
+		'weather_tempf' => 0,
+		'weather_tempc' => 0,
+		'weather_humidity' => 0,
+		'datetime' => date('Y-m-d H:i:s')
+	];
+}
+
+if (!$gdddata) {
+	$gdddata = [
+		'seasongdd' => 0,
+		'daygdd' => 0
+	];
+}
+
 #$getdate = $alldata['datetime'];
 #echo $getdate;
 $recorddate = date("(M d, H:i)", strtotime($alldata['datetime']));
@@ -118,12 +140,12 @@ if ($SHOW_METRIC == "on") {
 $pasthiveweight = round(($pasthiveweight * 0.453592),2);
 }
 
-if (empty($pasthiveweight)) {
-	
+if (empty($pasthiveweight) || !is_numeric($pasthiveweight) || !is_numeric($hiveweight)) {
+
 	$changeweight = "NA";
-} 
+}
 else {
-	$changeweight = round(($hiveweight - $pasthiveweight), 2); 
+	$changeweight = round(($hiveweight - $pasthiveweight), 2);
 }
 
 #echo "<br>starting weight = $pasthiveweight";
