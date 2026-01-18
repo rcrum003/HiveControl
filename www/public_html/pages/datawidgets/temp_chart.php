@@ -177,8 +177,11 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['hivetemp']) && $r['hivetemp'] != 0) ? floatval($r['hivetemp']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+                if (is_numeric($r['hivetemp']) && $r['hivetemp'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['hivetemp'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
             }
             echo "],
             color: '"; echo "$color_hivetemp"; echo "',
@@ -191,8 +194,11 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['weather_temp']) && $r['weather_temp'] != 0) ? floatval($r['weather_temp']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+                if (is_numeric($r['weather_temp']) && $r['weather_temp'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['weather_temp'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
             }
             echo "],
             visible: "; echo "$trend_outtemp"; echo ",
@@ -205,8 +211,11 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) ? floatval($r['hiveHum']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+                if (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['hiveHum'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
             }
             echo "],
             color: '"; echo "$color_hivehum"; echo "',
@@ -219,8 +228,11 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) ? floatval($r['weather_humidity']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+                if (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['weather_humidity'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
             }
             echo "],
             color: '"; echo "$color_outhum"; echo "',
@@ -233,8 +245,11 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric value
-                $val = (is_numeric($r['precip_1hr']) && $r['precip_1hr'] != 0) ? floatval($r['precip_1hr']) : 'null';
-                echo "[".$r['datetime'].", ".$val."], ";
+                if (is_numeric($r['precip_1hr']) && $r['precip_1hr'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['precip_1hr'])."], ";
+                } else {
+                    echo "[".$r['datetime'].", null], ";
+                }
             }
             echo "],
             color: '"; echo "$color_rain"; echo "',
@@ -378,9 +393,13 @@ $(function () {
             data: [";
             foreach($result as $r){
                 // Validate numeric values
-                $minval = (is_numeric($r['minhivetemp']) && $r['minhivetemp'] != 0) ? floatval($r['minhivetemp']) : 'null';
-                $maxval = (is_numeric($r['maxhivetemp']) && $r['maxhivetemp'] != 0) ? floatval($r['maxhivetemp']) : 'null';
-                echo "[".$r['datetime'].", ".$minval.", ".$maxval."], ";
+                $minval = (is_numeric($r['minhivetemp']) && $r['minhivetemp'] != 0) ? floatval($r['minhivetemp']) : null;
+                $maxval = (is_numeric($r['maxhivetemp']) && $r['maxhivetemp'] != 0) ? floatval($r['maxhivetemp']) : null;
+                if ($minval !== null && $maxval !== null) {
+                    echo "[".$r['datetime'].", ".$minval.", ".$maxval."], ";
+                } else {
+                    echo "[".$r['datetime'].", null, null], ";
+                }
             }
             echo "],
             color: '"; echo "$color_hivetemp"; echo "',
