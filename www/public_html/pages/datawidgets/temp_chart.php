@@ -69,7 +69,7 @@ echo "
 
 <script>
 $(function () {
-    $('#container').highcharts({
+    $('#tempcontainer').highcharts({
         chart: {
             zoomType: 'xy'
         },
@@ -139,7 +139,7 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -174,7 +174,13 @@ $(function () {
             type: 'line',
             name: 'Hive Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hivetemp']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['hivetemp']) && $r['hivetemp'] != 0) ? floatval($r['hivetemp']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_hivetemp"; echo "',
             visible: "; echo "$trend_hivetemp"; echo "
         },
@@ -182,7 +188,13 @@ $(function () {
             type: 'line',
             name: 'Outside Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_temp']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['weather_temp']) && $r['weather_temp'] != 0) ? floatval($r['weather_temp']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             visible: "; echo "$trend_outtemp"; echo ",
             color: '"; echo "$color_outtemp"; echo "'
         },
@@ -190,7 +202,13 @@ $(function () {
             type: 'line',
             name: 'Hive Humidty (%)',
             yAxis: 1,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) ? floatval($r['hiveHum']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_hivehum"; echo "',
             visible: "; echo "$trend_hivehum"; echo "
         },
@@ -198,7 +216,13 @@ $(function () {
             type: 'line',
             name: 'Outside Humidty (%)',
             yAxis: 1,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['weather_humidity']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) ? floatval($r['weather_humidity']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_outhum"; echo "',
             visible: "; echo "$trend_outhum"; echo "
         },
@@ -206,7 +230,13 @@ $(function () {
             type: 'area',
             yAxis: 2,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['precip_1hr']) && $r['precip_1hr'] != 0) ? floatval($r['precip_1hr']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: "; echo "$trend_rain"; echo "
         }
@@ -247,7 +277,7 @@ echo "
 
 <script>
 $(function () {
-    $('#container').highcharts({
+    $('#tempcontainer').highcharts({
         chart: {
             type: 'arearange',
             zoomType: 'xy'
@@ -318,7 +348,7 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -345,7 +375,14 @@ $(function () {
             type: 'arearange',
             name: 'Hive Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['minhivetemp'].", ".$r['maxhivetemp']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric values
+                $minval = (is_numeric($r['minhivetemp']) && $r['minhivetemp'] != 0) ? floatval($r['minhivetemp']) : 'null';
+                $maxval = (is_numeric($r['maxhivetemp']) && $r['maxhivetemp'] != 0) ? floatval($r['maxhivetemp']) : 'null';
+                echo "[".$r['datetime'].", ".$minval.", ".$maxval."], ";
+            }
+            echo "],
             color: '"; echo "$color_hivetemp"; echo "',
             visible: "; echo "$trend_hivetemp"; echo "
         }

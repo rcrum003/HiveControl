@@ -49,7 +49,7 @@ echo "
 <!-- Chart Code -->
 <script>
 $(function () {
-    $('#container').highcharts({
+    $('#lightcontainer').highcharts({
         chart: {
             zoomType: 'xy'
         },

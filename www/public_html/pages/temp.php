@@ -93,7 +93,7 @@ if(isset($_GET["chart"])) {
                             Temperature / Humidity Analysis 
                         </div>
                         <div class="panel-body">
-                            <div class="pull-center" id="container"></div>
+                            <div class="pull-center" id="tempcontainer"></div>
                         </div>
                     </div>
                 </div>

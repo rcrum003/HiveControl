@@ -61,7 +61,7 @@ echo "
 
 <script>
 $(function () {
-    $('#container').highcharts({
+    $('#weightcontainer').highcharts({
         chart: {
             
             zoomType: 'x'
@@ -114,7 +114,7 @@ $(function () {
                 }
             },
             labels: {
-                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -165,13 +165,25 @@ $(function () {
         series: [{
             type: 'line',
             name: 'Hive Weight Net ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) ? floatval($r['hiveweight']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_netweight"; echo "'
         },
         {
            type: 'line',
            name: 'Hive Weight Gross ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
+           data: [";
+           foreach($result as $r){
+               // Validate numeric value
+               $val = (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) ? floatval($r['hiverawweight']) : 'null';
+               echo "[".$r['datetime'].", ".$val."], ";
+           }
+           echo "],
            color: '"; echo "$color_grossweight"; echo "',
            visible: true
         },
@@ -179,15 +191,27 @@ $(function () {
             type: 'area',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) ? floatval($r['precip_1hr_in']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: true
-        }, 
+        },
         {
             type: 'line',
             name: 'Wind',
             yAxis: 2,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['wind']) && $r['wind'] != 0) ? floatval($r['wind']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_wind"; echo "',
             visible: "; echo "$trend_wind"; echo "
         }
@@ -241,7 +265,7 @@ echo "
 
 <script>
 $(function () {
-    $('#container').highcharts({
+    $('#weightcontainer').highcharts({
         chart: {
             
             zoomType: 'x'
@@ -294,7 +318,7 @@ $(function () {
                 }
             },
             labels: {
-                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
@@ -345,13 +369,25 @@ $(function () {
         series: [{
             type: 'line',
             name: 'Hive Weight Net ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveweight']."]".", ";} echo "], 
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) ? floatval($r['hiveweight']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_netweight"; echo "'
         },
         {
            type: 'line',
            name: 'Hive Weight Gross ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
-           data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiverawweight']."]".", ";} echo "],
+           data: [";
+           foreach($result as $r){
+               // Validate numeric value
+               $val = (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) ? floatval($r['hiverawweight']) : 'null';
+               echo "[".$r['datetime'].", ".$val."], ";
+           }
+           echo "],
            color: '"; echo "$color_grossweight"; echo "',
            visible: true
         },
@@ -359,15 +395,27 @@ $(function () {
             type: 'area',
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['precip_1hr_in']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) ? floatval($r['precip_1hr_in']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_rain"; echo "',
             visible: true
-        }, 
+        },
         {
             type: 'line',
             name: 'Wind',
             yAxis: 2,
-            data: ["; foreach($result as $r){echo "[".$r['datetime'].", ".$r['wind']."]".", ";} echo "],
+            data: [";
+            foreach($result as $r){
+                // Validate numeric value
+                $val = (is_numeric($r['wind']) && $r['wind'] != 0) ? floatval($r['wind']) : 'null';
+                echo "[".$r['datetime'].", ".$val."], ";
+            }
+            echo "],
             color: '"; echo "$color_wind"; echo "',
             visible: "; echo "$trend_wind"; echo "
         }

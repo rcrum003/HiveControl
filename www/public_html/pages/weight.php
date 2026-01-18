@@ -91,7 +91,7 @@ if(isset($_GET["chart"])) {
                             Weight Analysis
                         </div>
                         <div class="panel-body">
-                            <div class="pull-center" id="container"></div>
+                            <div class="pull-center" id="weightcontainer"></div>
                         </div>
                     </div>
                 </div>
