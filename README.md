@@ -8,31 +8,54 @@
 
 ## 🚀 Quick Start
 
-### Basic Installation
+### Easy Installation (Recommended!)
 
-Install HiveControl on your Raspberry Pi with a single command:
+Install HiveControl with **one simple command** - no technical knowledge required:
 
 ```bash
-curl https://raw.githubusercontent.com/rcrum003/HiveControl/master/install.sh -o install.sh
+curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash
+```
+
+**That's it!** The installer handles everything automatically. Installation takes 30-60 minutes.
+
+### Installation with Optional Features
+
+**Bee Counter Camera** (6-8 hours):
+```bash
+curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash -s -- -b
+```
+
+**Remote Desktop + Touchscreen Keyboard**:
+```bash
+curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash -s -- -xk
+```
+
+**All Features**:
+```bash
+curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash -s -- -bxk
+```
+
+### New to Raspberry Pi?
+
+👉 **See our [Complete Installation Guide](EASY_INSTALL_GUIDE.md)** for step-by-step instructions including:
+- How to install Raspberry Pi OS
+- How to image your SD card
+- How to connect to your Pi
+- Complete setup walkthrough with screenshots
+
+### Alternative: Manual Installation
+
+If you prefer to download and review the code first:
+
+```bash
+curl -O https://raw.githubusercontent.com/rcrum003/HiveControl/master/install.sh
 chmod u+x install.sh
 sudo ./install.sh
 ```
 
-### Custom Installation Options
+**Options**: `-b` (Bee Counter) `-x` (Remote Desktop) `-k` (Touchscreen) `-d` (Debug)
 
-```bash
-./install.sh -option
-
-Options:
-  -b    Beecounter Webcam Setup (Warning: Can take up to 8 hrs)
-  -x    Install XRDP for Windows Remote Desktop users
-  -k    Touch Screen Keyboard Install
-  -h    Show help message
-  -d    Turn on debug mode
-
-# Install all options:
-./install.sh -bxk
-```
+📖 [Download Instructions](DOWNLOAD_INSTRUCTIONS.md) | 📚 [Full Installation Guide](EASY_INSTALL_GUIDE.md)
 
 ### Upgrading
 

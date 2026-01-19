@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download HiveControl - Easy Installation</title>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 0;
+            min-height: 100vh;
+        }
+        .hero {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 1000px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .hero h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .hero .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .install-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .command-box {
+            background: #2d3748;
+            color: #68d391;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            margin: 20px 0;
+        }
+        .command-box code {
+            color: #68d391;
+            font-size: 16px;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        .feature-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        .method-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .method-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .method-btn.active {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        .method-btn:hover {
+            border-color: #667eea;
+        }
+        .method-content {
+            display: none;
+        }
+        .method-content.active {
+            display: block;
+        }
+        .icon-large {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .alert-custom {
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="text-center">
+                <i class="fa fa-download icon-large"></i>
+                <h1>Download HiveControl</h1>
+                <p class="subtitle">Get started with your beehive monitoring system in minutes</p>
+            </div>
+
+            <div class="alert-custom">
+                <strong><i class="fa fa-lightbulb-o"></i> New User?</strong>
+                We've made installation super easy! Just one command and you're ready to go.
+            </div>
+
+            <!-- Method Selector -->
+            <div class="method-selector">
+                <div class="method-btn active" onclick="showMethod('easy')">
+                    <h5><i class="fa fa-rocket"></i> Easy Install</h5>
+                    <small>One command - Recommended!</small>
+                </div>
+                <div class="method-btn" onclick="showMethod('manual')">
+                    <h5><i class="fa fa-code"></i> Manual Install</h5>
+                    <small>Review code first</small>
+                </div>
+                <div class="method-btn" onclick="showMethod('complete')">
+                    <h5><i class="fa fa-book"></i> Complete Guide</h5>
+                    <small>From scratch setup</small>
+                </div>
+            </div>
+
+            <!-- Easy Install Method -->
+            <div id="method-easy" class="method-content active">
+                <div class="install-box">
+                    <h3><i class="fa fa-bolt"></i> Quick Installation</h3>
+                    <p>Copy and paste this command into your Raspberry Pi terminal:</p>
+                </div>
+
+                <div class="command-box">
+                    <button class="copy-btn" onclick="copyCommand('cmd1')">
+                        <i class="fa fa-copy"></i> Copy
+                    </button>
+                    <code id="cmd1">curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash</code>
+                </div>
+
+                <div class="feature-card">
+                    <h4><i class="fa fa-check-circle"></i> What This Does</h4>
+                    <ul>
+                        <li>Downloads and runs the installer automatically</li>
+                        <li>Installs all dependencies (Apache, PHP, SQLite)</li>
+                        <li>Compiles sensor software</li>
+                        <li>Sets up the web interface</li>
+                        <li>Takes 30-60 minutes to complete</li>
+                    </ul>
+                </div>
+
+                <h4 style="margin-top: 30px;">Optional Features</h4>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h5><i class="fa fa-camera"></i> Bee Counter Camera</h5>
+                            <div class="command-box">
+                                <button class="copy-btn" onclick="copyCommand('cmd2')">
+                                    <i class="fa fa-copy"></i> Copy
+                                </button>
+                                <code id="cmd2" style="font-size: 12px;">curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash -s -- -b</code>
+                            </div>
+                            <small class="text-warning"><i class="fa fa-clock-o"></i> Takes 6-8 hours</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h5><i class="fa fa-desktop"></i> Remote Desktop</h5>
+                            <div class="command-box">
+                                <button class="copy-btn" onclick="copyCommand('cmd3')">
+                                    <i class="fa fa-copy"></i> Copy
+                                </button>
+                                <code id="cmd3" style="font-size: 12px;">curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash -s -- -x</code>
+                            </div>
+                            <small class="text-muted"><i class="fa fa-info-circle"></i> For Windows users</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Install Method -->
+            <div id="method-manual" class="method-content">
+                <div class="install-box">
+                    <h3><i class="fa fa-terminal"></i> Manual Installation</h3>
+                    <p>For users who want to review the code before running:</p>
+                </div>
+
+                <div class="feature-card">
+                    <h5><span class="step-number">1</span> Download the installer</h5>
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyCommand('cmd4')">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                        <code id="cmd4">curl -O https://raw.githubusercontent.com/rcrum003/HiveControl/master/install.sh</code>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h5><span class="step-number">2</span> Review the script (optional)</h5>
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyCommand('cmd5')">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                        <code id="cmd5">less install.sh</code>
+                    </div>
+                    <small class="text-muted">Press 'q' to quit viewing</small>
+                </div>
+
+                <div class="feature-card">
+                    <h5><span class="step-number">3</span> Make it executable</h5>
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyCommand('cmd6')">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                        <code id="cmd6">chmod +x install.sh</code>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h5><span class="step-number">4</span> Run the installer</h5>
+                    <div class="command-box">
+                        <button class="copy-btn" onclick="copyCommand('cmd7')">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                        <code id="cmd7">sudo ./install.sh</code>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Options:</strong> <code>-b</code> (Bee Counter) | <code>-x</code> (Remote Desktop) | <code>-k</code> (Touchscreen Keyboard) | <code>-d</code> (Debug)
+                </div>
+            </div>
+
+            <!-- Complete Guide Method -->
+            <div id="method-complete" class="method-content">
+                <div class="install-box">
+                    <h3><i class="fa fa-graduation-cap"></i> Complete Setup Guide</h3>
+                    <p>New to Raspberry Pi? Follow our comprehensive guide:</p>
+                </div>
+
+                <div class="feature-card">
+                    <h4><i class="fa fa-file-text-o"></i> Available Guides</h4>
+                    <div class="list-group" style="margin-top: 20px;">
+                        <a href="https://github.com/rcrum003/HiveControl/blob/master/EASY_INSTALL_GUIDE.md" class="list-group-item" target="_blank">
+                            <h5><i class="fa fa-book"></i> Easy Installation Guide</h5>
+                            <p class="text-muted">Complete walkthrough from SD card to running system. Includes how to install Raspberry Pi OS, configure WiFi, and install HiveControl.</p>
+                        </a>
+                        <a href="https://github.com/rcrum003/HiveControl/blob/master/DOWNLOAD_INSTRUCTIONS.md" class="list-group-item" target="_blank">
+                            <h5><i class="fa fa-download"></i> Download Instructions</h5>
+                            <p class="text-muted">All installation methods compared. Choose the best option for your skill level.</p>
+                        </a>
+                        <a href="https://github.com/rcrum003/HiveControl/blob/master/QUICK_REFERENCE.md" class="list-group-item" target="_blank">
+                            <h5><i class="fa fa-list"></i> Quick Reference Card</h5>
+                            <p class="text-muted">One-page reference for common commands and tasks. Print it and keep it handy!</p>
+                        </a>
+                        <a href="https://github.com/rcrum003/HiveControl/blob/master/README.md" class="list-group-item" target="_blank">
+                            <h5><i class="fa fa-info-circle"></i> Full Documentation</h5>
+                            <p class="text-muted">Complete HiveControl documentation including sensor setup, configuration, and troubleshooting.</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h4><i class="fa fa-question-circle"></i> What You'll Learn</h4>
+                    <ul>
+                        <li>How to download and use Raspberry Pi Imager</li>
+                        <li>How to install Raspberry Pi OS on an SD card</li>
+                        <li>How to configure WiFi and SSH access</li>
+                        <li>How to connect to your Raspberry Pi</li>
+                        <li>How to run the HiveControl installer</li>
+                        <li>How to connect and configure sensors</li>
+                        <li>How to access the web interface</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- After Installation Section -->
+            <div style="margin-top: 40px; padding-top: 40px; border-top: 2px solid #e2e8f0;">
+                <h3><i class="fa fa-rocket"></i> After Installation</h3>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="feature-card text-center">
+                            <i class="fa fa-globe" style="font-size: 36px; color: #667eea;"></i>
+                            <h5>Access Web Interface</h5>
+                            <p>Visit <code>http://YOUR-PI-IP/</code> in your browser</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card text-center">
+                            <i class="fa fa-cogs" style="font-size: 36px; color: #667eea;"></i>
+                            <h5>Configure Sensors</h5>
+                            <p>Go to Admin → Settings → Instruments</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card text-center">
+                            <i class="fa fa-line-chart" style="font-size: 36px; color: #667eea;"></i>
+                            <h5>View Dashboard</h5>
+                            <p>Start monitoring your hive data!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div style="margin-top: 40px;">
+                <h3><i class="fa fa-life-ring"></i> Need Help?</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h5><i class="fa fa-comments"></i> Community Support</h5>
+                            <p>Join our community at <a href="https://hivecontrol.org" target="_blank">hivecontrol.org</a></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <h5><i class="fa fa-bug"></i> Report Issues</h5>
+                            <p>Found a bug? <a href="https://github.com/rcrum003/HiveControl/issues" target="_blank">Report it on GitHub</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function showMethod(method) {
+            // Hide all content
+            document.querySelectorAll('.method-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.method-btn').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected content
+            document.getElementById('method-' + method).classList.add('active');
+            event.target.closest('.method-btn').classList.add('active');
+        }
+
+        function copyCommand(cmdId) {
+            const command = document.getElementById(cmdId).textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                const btn = event.target.closest('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fa fa-check"></i> Copied!';
+                btn.style.background = '#38b2ac';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '#667eea';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
