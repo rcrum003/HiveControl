@@ -293,6 +293,9 @@ header("Refresh: $sec; url=$page");
     </div>
     <!-- /#wrapper -->
 
+    <!-- Footer -->
+    <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
+
     <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -320,9 +323,6 @@ header("Refresh: $sec; url=$page");
   
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
-
-<!-- Footer -->
-         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
 
 </body>
 
