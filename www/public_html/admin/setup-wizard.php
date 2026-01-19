@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #f8f8f8;
             min-height: 100vh;
             padding: 20px 0;
         }
@@ -90,25 +90,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             max-width: 800px;
             margin: 40px auto;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             overflow: hidden;
+            border: 1px solid #e7e7e7;
         }
         .wizard-header {
-            background: #f8b500;
+            background: #e6b800;
             color: white;
             padding: 30px;
             text-align: center;
+            border-bottom: 1px solid #d4a600;
         }
         .wizard-header h1 {
             margin: 0;
             font-size: 32px;
             font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .wizard-header p {
             margin: 10px 0 0 0;
             font-size: 16px;
-            opacity: 0.9;
+            opacity: 0.95;
         }
         .wizard-body {
             padding: 40px;
@@ -118,30 +121,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #333;
         }
         .form-control {
-            height: 45px;
-            border-radius: 5px;
-            border: 2px solid #e0e0e0;
-            font-size: 16px;
+            height: 40px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
         }
         .form-control:focus {
-            border-color: #f8b500;
-            box-shadow: 0 0 0 0.2rem rgba(248, 181, 0, 0.25);
+            border-color: #e6b800;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(230, 184, 0, .6);
         }
         .btn-primary {
-            background-color: #f8b500;
-            border-color: #f8b500;
-            padding: 12px 40px;
-            font-size: 16px;
+            background-color: #e6b800;
+            border-color: #d4a600;
+            padding: 10px 35px;
+            font-size: 14px;
             font-weight: 600;
-            border-radius: 5px;
+            border-radius: 4px;
         }
-        .btn-primary:hover {
-            background-color: #e0a300;
-            border-color: #e0a300;
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: #d4a600;
+            border-color: #c29900;
+        }
+        .btn-default {
+            background-color: #996633;
+            border-color: #885a2d;
+            color: white;
+            padding: 10px 35px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+        .btn-default:hover, .btn-default:focus {
+            background-color: #885a2d;
+            border-color: #774e26;
+            color: white;
         }
         .help-text {
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #737373;
             margin-top: 5px;
         }
         .required-label:after {
@@ -149,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #d9534f;
         }
         .alert {
-            border-radius: 5px;
+            border-radius: 4px;
         }
         .success-container {
             text-align: center;
@@ -162,17 +179,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         .step-indicator {
             background: #f5f5f5;
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 15px;
+            border-bottom: 1px solid #e7e7e7;
             text-align: center;
         }
         .step-indicator span {
             display: inline-block;
             padding: 5px 15px;
-            background: #f8b500;
+            background: #996633;
             color: white;
-            border-radius: 20px;
+            border-radius: 4px;
             font-weight: 600;
+            font-size: 13px;
+        }
+        .wizard-header .fa {
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
     </style>
 </head>
