@@ -6,7 +6,7 @@
 
 ## What You'll Need
 
-- **Raspberry Pi** (Model 3B, 3B+, 4, or Zero W)
+- **Raspberry Pi** (Model 3B, 3B+, 4, 5, or Zero W)
 - **MicroSD Card** (16GB or larger recommended)
 - **Computer** (Windows, Mac, or Linux) to prepare the SD card
 - **Internet Connection** for your Raspberry Pi
