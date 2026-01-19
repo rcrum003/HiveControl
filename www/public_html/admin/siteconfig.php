@@ -13,6 +13,14 @@ $result = $sth->fetch(PDO::FETCH_ASSOC);
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
+// Ensure checkbox fields exist in POST data with empty string if unchecked
+$checkbox_fields = ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'trend_wind', 'trend_pressure', 'trend_pollen', 'chart_rounding', 'chart_smoothing', 'SHOW_METRIC'];
+foreach ($checkbox_fields as $field) {
+    if (!isset($_POST[$field])) {
+        $_POST[$field] = '';
+    }
+}
+
 $v = new Valitron\Validator($_POST);
 $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
 $v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
@@ -152,43 +160,6 @@ if($v->validate()) {
                         <!-- /.panel-heading -->
                         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
                         <div class="panel-body">
-                            <!-- Hidden fields to ensure required fields are always present for validation -->
-                            <input type="hidden" name="SITE_ORIENT" value="<?php echo $result['SITE_ORIENT']; ?>">
-                            <input type="hidden" name="SITE_TYPE" value="<?php echo $result['SITE_TYPE']; ?>">
-                            <input type="hidden" name="www_chart_theme" value="<?php echo $result['www_chart_theme']; ?>">
-                            <input type="hidden" name="SHOW_METRIC" value="<?php echo $result['SHOW_METRIC']; ?>">
-                            <input type="hidden" name="chart_rounding" value="<?php echo $result['chart_rounding']; ?>">
-                            <input type="hidden" name="chart_smoothing" value="<?php echo $result['chart_smoothing']; ?>">
-                            <input type="hidden" name="color_hivetemp" value="<?php echo $result['color_hivetemp']; ?>">
-                            <input type="hidden" name="color_hivehum" value="<?php echo $result['color_hivehum']; ?>">
-                            <input type="hidden" name="color_outtemp" value="<?php echo $result['color_outtemp']; ?>">
-                            <input type="hidden" name="color_outhum" value="<?php echo $result['color_outhum']; ?>">
-                            <input type="hidden" name="color_grossweight" value="<?php echo $result['color_grossweight']; ?>">
-                            <input type="hidden" name="color_netweight" value="<?php echo $result['color_netweight']; ?>">
-                            <input type="hidden" name="color_lux" value="<?php echo $result['color_lux']; ?>">
-                            <input type="hidden" name="color_solarradiation" value="<?php echo $result['color_solarradiation']; ?>">
-                            <input type="hidden" name="color_rain" value="<?php echo $result['color_rain']; ?>">
-                            <input type="hidden" name="color_gdd" value="<?php echo $result['color_gdd']; ?>">
-                            <input type="hidden" name="color_beecount_in" value="<?php echo $result['color_beecount_in']; ?>">
-                            <input type="hidden" name="color_beecount_out" value="<?php echo $result['color_beecount_out']; ?>">
-                            <input type="hidden" name="color_wind" value="<?php echo $result['color_wind']; ?>">
-                            <input type="hidden" name="color_pressure" value="<?php echo $result['color_pressure']; ?>">
-                            <input type="hidden" name="color_pollen" value="<?php echo $result['color_pollen']; ?>">
-                            <input type="hidden" name="trend_hivetemp" value="<?php echo $result['trend_hivetemp']; ?>">
-                            <input type="hidden" name="trend_hivehum" value="<?php echo $result['trend_hivehum']; ?>">
-                            <input type="hidden" name="trend_outtemp" value="<?php echo $result['trend_outtemp']; ?>">
-                            <input type="hidden" name="trend_outhum" value="<?php echo $result['trend_outhum']; ?>">
-                            <input type="hidden" name="trend_grossweight" value="<?php echo $result['trend_grossweight']; ?>">
-                            <input type="hidden" name="trend_netweight" value="<?php echo $result['trend_netweight']; ?>">
-                            <input type="hidden" name="trend_lux" value="<?php echo $result['trend_lux']; ?>">
-                            <input type="hidden" name="trend_solarradiation" value="<?php echo $result['trend_solarradiation']; ?>">
-                            <input type="hidden" name="trend_rain" value="<?php echo $result['trend_rain']; ?>">
-                            <input type="hidden" name="trend_gdd" value="<?php echo $result['trend_gdd']; ?>">
-                            <input type="hidden" name="trend_beecount_in" value="<?php echo $result['trend_beecount_in']; ?>">
-                            <input type="hidden" name="trend_beecount_out" value="<?php echo $result['trend_beecount_out']; ?>">
-                            <input type="hidden" name="trend_wind" value="<?php echo $result['trend_wind']; ?>">
-                            <input type="hidden" name="trend_pressure" value="<?php echo $result['trend_pressure']; ?>">
-                            <input type="hidden" name="trend_pollen" value="<?php echo $result['trend_pollen']; ?>">
                             <div class="dataTable_wrapper">
                                 <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                                     <thead> 
