@@ -137,6 +137,21 @@ $topic = isset($_GET['topic']) ? htmlspecialchars($_GET['topic']) : 'overview';
                                 <a href="?topic=dashboard" class="list-group-item <?php echo ($topic == 'dashboard') ? 'active' : ''; ?>">
                                     <i class="fa fa-dashboard"></i> Dashboard Guide
                                 </a>
+                                <a href="?topic=hivebody" class="list-group-item <?php echo ($topic == 'hivebody') ? 'active' : ''; ?>">
+                                    <i class="fa fa-cubes"></i> Hive Components
+                                </a>
+                                <a href="?topic=site-preferences" class="list-group-item <?php echo ($topic == 'site-preferences') ? 'active' : ''; ?>">
+                                    <i class="fa fa-sliders"></i> Site Preferences
+                                </a>
+                                <a href="?topic=system-commands" class="list-group-item <?php echo ($topic == 'system-commands') ? 'active' : ''; ?>">
+                                    <i class="fa fa-terminal"></i> System Commands
+                                </a>
+                                <a href="?topic=backup-restore" class="list-group-item <?php echo ($topic == 'backup-restore') ? 'active' : ''; ?>">
+                                    <i class="fa fa-life-ring"></i> Backup & Restore
+                                </a>
+                                <a href="?topic=change-password" class="list-group-item <?php echo ($topic == 'change-password') ? 'active' : ''; ?>">
+                                    <i class="fa fa-lock"></i> Change Password
+                                </a>
                                 <a href="?topic=troubleshooting" class="list-group-item <?php echo ($topic == 'troubleshooting') ? 'active' : ''; ?>">
                                     <i class="fa fa-wrench"></i> Troubleshooting
                                 </a>
@@ -171,6 +186,21 @@ $topic = isset($_GET['topic']) ? htmlspecialchars($_GET['topic']) : 'overview';
                                 case 'dashboard':
                                     include 'help/dashboard.php';
                                     break;
+                                case 'hivebody':
+                                    include 'help/hivebody.php';
+                                    break;
+                                case 'site-preferences':
+                                    include 'help/site-preferences.php';
+                                    break;
+                                case 'system-commands':
+                                    include 'help/system-commands.php';
+                                    break;
+                                case 'backup-restore':
+                                    include 'help/backup-restore.php';
+                                    break;
+                                case 'change-password':
+                                    include 'help/change-password.php';
+                                    break;
                                 case 'troubleshooting':
                                     include 'help/troubleshooting.php';
                                     break;
@@ -198,6 +228,9 @@ if ($orient == "wide") {
     echo '</div><!-- /.well -->';
 }
 ?>
+
+    <!-- Footer -->
+    <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
 
     <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
