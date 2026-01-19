@@ -19,7 +19,9 @@ try {
 
     if (!$setup_result ||
         empty($setup_result['HIVENAME']) ||
+        $setup_result['HIVENAME'] === 'NOTSET' ||
         empty($setup_result['HIVEAPI']) ||
+        trim($setup_result['HIVEAPI']) === '' ||
         empty($setup_result['CITY']) ||
         empty($setup_result['STATE'])) {
         header("Location: /admin/setup-wizard.php");

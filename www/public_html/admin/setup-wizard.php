@@ -18,7 +18,9 @@ function isSetupComplete($conn) {
 
         if ($result &&
             !empty($result['HIVENAME']) &&
+            $result['HIVENAME'] !== 'NOTSET' &&
             !empty($result['HIVEAPI']) &&
+            trim($result['HIVEAPI']) !== '' &&
             !empty($result['CITY']) &&
             !empty($result['STATE'])) {
             return true;
