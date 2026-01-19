@@ -12,14 +12,35 @@ LOCALDATABASE="/home/HiveControl/data/hive-data.db"
 CONFIGOUT="/home/HiveControl/scripts/hiveconfig.inc"
 
 function dump_config_to_file() {
+	# Generate config from database
 	sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
-	#Clean up said file
+
+	# Check if tempout has data
+	if [ ! -s tempout ]; then
+		echo "ERROR: tempout file is empty or doesn't exist"
+		return 1
+	fi
+
+	#Clean up said file and write to config
 	cat tempout |awk '{ gsub(/ = /, "=\""); print }' | sed 's/^ *//g' |awk '{print $0"\""}' > $CONFIGOUT
+
+	# Verify config file was created successfully
+	if [ ! -s $CONFIGOUT ]; then
+		echo "ERROR: Failed to create $CONFIGOUT"
+		return 1
+	fi
 }
 
 if [ ! -f "$CONFIGOUT" ]; then
    #File Doesnt exist so we need to generate it
     dump_config_to_file
+else
+   # Check if file is too small (corrupted) - should be at least 100 bytes for a valid config
+   FILESIZE=$(stat -c%s "$CONFIGOUT" 2>/dev/null || stat -f%z "$CONFIGOUT" 2>/dev/null)
+   if [ "$FILESIZE" -lt 100 ]; then
+      echo "Config file appears corrupted (only $FILESIZE bytes), regenerating..."
+      dump_config_to_file
+   fi
 fi
 
 
