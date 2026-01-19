@@ -4,6 +4,40 @@ Release Notes:
 2.10 Release
 --------------------
 NEW FEATURES:
+- Added Easy Installation System
+  * Created easy-install.sh: One-command installer eliminating need for chmod
+  * Installation reduced from 3 commands to 1 simple command:
+    curl -sSL https://raw.githubusercontent.com/rcrum003/HiveControl/master/easy-install.sh | sudo bash
+  * Added EASY_INSTALL_GUIDE.md: Complete beginner's guide from SD card imaging to running system
+    - Step-by-step Raspberry Pi OS 5 installation instructions
+    - How to use Raspberry Pi Imager with screenshots
+    - WiFi and SSH configuration walkthrough
+    - Sensor connection guide
+    - Comprehensive troubleshooting section
+  * Added DOWNLOAD_INSTRUCTIONS.md: All installation methods with comparisons
+    - One-line installation (recommended for beginners)
+    - Manual download and run (for code review)
+    - Git clone method (for developers)
+    - What happens during installation explained
+  * Added QUICK_REFERENCE.md: Printable one-page reference card
+    - Common commands and system control
+    - Web interface quick links
+    - Sensor testing commands
+    - File locations and pin connections
+    - Troubleshooting quick fixes
+  * Created download.html: Beautiful web-based download page
+    - Interactive installation method selector
+    - Copy-to-clipboard buttons for commands
+    - Visual step-by-step guides
+    - Links to all documentation
+  * Updated README.md with simplified installation instructions
+    - Prominent easy installation section
+    - Clear options for different features
+    - Links to comprehensive guides
+  * Added PACKAGING_IMPROVEMENTS.md: Complete documentation of all improvements
+  * Addresses user feedback that "chmod u+x and multiple commands are too hard"
+  * Makes HiveControl accessible to non-technical beekeepers
+
 - Added Backup & Restore System (backup.php)
   * Create full database backups (60MB+ databases supported)
   * Create configuration-only backups for quick settings preservation
@@ -22,6 +56,18 @@ NEW FEATURES:
   * Password confirmation to prevent typos
   * Supports multiple Apache htpasswd hash formats (APR1, bcrypt, SHA1, crypt)
   * All password changes logged with IP tracking
+
+- Added Comprehensive Help Documentation System
+  * Created central help.php with topic-based navigation
+  * Added 13 comprehensive help topics covering all system features
+  * Topics include: Overview, Initial Setup, Basic Settings, Instruments & Sensors,
+    Calibration, Weather Sources, Dashboard Guide, Hive Components, Site Preferences,
+    System Commands, Backup & Restore, Change Password, and Troubleshooting
+  * Professional styling with Font Awesome icons and Bootstrap UI
+  * Step-by-step guides with visual indicators
+  * Code examples and configuration instructions
+  * Best practices and recommendations for each feature area
+  * Added Help link to navigation menu (both wide and normal orientations)
 
 WEB APPLICATION SECURITY FIXES:
 - Fixed CRITICAL SQL injection vulnerabilities in admin interface
@@ -92,6 +138,24 @@ Files Modified for Security:
 Security Documentation:
   * SECURITY_AUDIT_2026-01-17.md - Complete vulnerability assessment
   * SECURITY_FIXES_APPLIED_2026-01-17.md - Detailed fix documentation with testing procedures
+
+BUG FIXES:
+- Fixed footer display issues in web interface
+  * Corrected malformed HTML structure in footer.php (changed from <nav> to <footer>)
+  * Repositioned footer include in index.php for proper rendering
+  * Footer now displays correctly with version information
+
+- Fixed FATAL PHP error in weight gauge display
+  * Added type checking in weightguage-hc.php before arithmetic operations
+  * Implemented is_numeric() validation and floatval() type conversion
+  * Prevents "Unsupported operand types: string - string" error in PHP 8+
+  * Weight gauges now handle null/non-numeric values gracefully
+
+- Added input validation for Hive Name field
+  * Implemented regex validation in setup-wizard.php and hiveconfig.php
+  * Pattern /^[a-zA-Z0-9_-]+$/ ensures only letters, numbers, dashes, and underscores
+  * Prevents special characters that could cause system issues
+  * Validation applied consistently across initial setup and configuration updates
 
 Major Security and Performance Refactoring of currconditions.sh
 
