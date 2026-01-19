@@ -47,11 +47,11 @@ $(function () {
         series: [{
             name: 'Stores',
             color: '#e6b800',
-            data: [ <?php echo $hiveweight; ?> ]
+            data: [ <?php echo is_numeric($hiveweight) ? floatval($hiveweight) : 0; ?> ]
         }, {
             name: 'Equipment',
             color: '#000000',
-            data: [ <?php echo ($rawweight - $hiveweight); ?> ]
+            data: [ <?php echo (is_numeric($rawweight) && is_numeric($hiveweight)) ? (floatval($rawweight) - floatval($hiveweight)) : 0; ?> ]
         }]
     });
 });
