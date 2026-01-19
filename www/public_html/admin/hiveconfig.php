@@ -46,7 +46,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     ###################################################
     $v = new Valitron\Validator($_POST);
     $v->rule('required', ['HIVENAME', 'HIVEAPI', 'CITY', 'STATE', 'COUNTRY'], 1)->message('{field} is required');
-    $v->rule('slug', ['HIVENAME', 'POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
+    $v->rule('regex', 'HIVENAME', '/^[a-zA-Z0-9_-]+$/')->message('Hive Name can only contain letters, numbers, dashes, and underscores');
+    $v->rule('slug', ['POWER', 'INTERNET', 'STATUS', 'COMPUTER']);
     #$v->rule('alphaNum', ['HIVEID'],  1)->message('{field} can only be alpha numeric');
     #$v->rule('lengthmin', ['HIVEID'], 1)->message('{field} is required to be 13 characters');
     $v->rule('lengthmax', ['HIVENAME', 'CITY', 'STATE', 'COUNTRY', 'LATITUDE', 'LONGITUDE', 'ZIP'], 40);
