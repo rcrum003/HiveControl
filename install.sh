@@ -2,11 +2,13 @@
 
 # ==================================================
 # Script to automate the install of all the dependencies
-# v2.02 - for HiveControl
-# 
+# v4.1 - for HiveControl on Raspberry Pi 5 OS (64-bit)
+#
+# Updated January 18, 2026
+#
 # Must run under root
-# sudo bash 
-# Usage: ./install.sh
+# sudo bash
+# Usage: sudo ./install.sh
 # ==================================================
 
 
@@ -30,11 +32,11 @@ function enablePICam() {
 	if grep "start_x=1" /boot/config.txt
 		then
 		        echo "Start_x already set"
-		elif "start_x=0"
+		elif grep "start_x=0" /boot/config.txt
 			then
 		        sed -i "s/start_x=0/start_x=1/g" /boot/config.txt
 		        #reboot
-		else 
+		else
 			 	echo "start_x=1" >> /boot/config.txt
 		fi
 
@@ -55,7 +57,7 @@ function enablePICam() {
 		elif grep "gpu_mem=256" /boot/config.txt
 			then
 				echo "gpu_mem already set to 256"
-		else        
+		else
 		        echo "gpu_mem=256" >> /boot/config.txt
 		        #reboot
 		fi
@@ -69,13 +71,13 @@ function installBeeCount() {
     /home/HiveControl/install/setupbeecounter.sh
     return
 
-}	
+}
 
 function install_hivecam() {
 	   #Enable the camera and turn off the LED
 		enablePICam
 		#Install the software
-		
+
 
 }
 # A POSIX variable
@@ -90,11 +92,11 @@ while getopts "h?bwdxk" opt; do
     b)  BEECOUNTER="true"
         ;;
     w)  HIVECAM="true"
-    	;;    
+    	;;
     d)  DEBUG="true"
 	    ;;
 	x) XRDP="true"
-	    ;;   
+	    ;;
 	k) KEYBOARD="true"
 	    ;;
     esac
@@ -133,13 +135,13 @@ fi
 #Check the size of the disk
 # If not big enough, then say you need to run rasp-
 # Need 500,000 to install, with room for data
-#HDsize=$(df |grep /dev/root |awk '{print $4}')
-#HDNeed="500000"
-#if [[ $HDsize -lt $HDNeed ]]; then
-#	echo "We need at least 500 MB to install all the needed software."
-#	echo "Please free up more space or run raspi-config to expand your file system"
-#	exit
-#fi
+HDsize=$(df -BM / | awk 'NR==2 {print $4}' | sed 's/M//')
+HDNeed="500"
+if [[ $HDsize -lt $HDNeed ]]; then
+	echo "We need at least 500 MB to install all the needed software."
+	echo "Please free up more space or run raspi-config to expand your file system"
+	exit
+fi
 # update this OS
 sudo apt-get update -y
 sudo apt-get upgrade -y
@@ -176,6 +178,10 @@ sudo apt-get install libfox-1.6-dev -y
 sudo apt-get install autotools-dev autoconf automake libtool dh-autoreconf -y
 sudo apt-get install libusb-dev -y
 
+# Install system hidapi library (instead of compiling from source)
+echo "Installing hidapi library from system packages"
+sudo apt-get install libhidapi-dev libhidapi-hidraw0 libhidapi-libusb0 -y
+
 #echo "Installing Python - 2.7"
 #sudo apt-get install python -y
 
@@ -184,7 +190,7 @@ echo "Getting HiveControl Code"
 echo "========================================================================"
 #Get the software from GIT
 cd /home
-sudo git clone https://github.com/rcrum003/HiveControl 
+sudo git clone https://github.com/rcrum003/HiveControl
 
 echo "========================================================================"
 echo "Setting up i2c"
@@ -196,13 +202,15 @@ echo "========================================================================"
 echo "Installing Web Server Software"
 echo "========================================================================"
 
-#Install webserver 
+#Install webserver
 echo "Installing Apache/PHP"
 sudo apt-get install apache2 php libapache2-mod-php -y
 
-echo "Installing SQLite for local storage, and mysql-client for communications"
+echo "Installing SQLite for local storage, and MariaDB client for communications"
 sudo apt-get install sqlite3 php-sqlite3 -y
-sudo apt-get install mysql-client -y
+# Changed from mysql-client to mariadb-client for Raspberry Pi 5 OS compatibility
+echo "Installing MariaDB client (replaces mysql-client)"
+sudo apt-get install mariadb-client -y || echo "Warning: mariadb-client installation failed, skipping..."
 sudo apt-get install jq -y
 
 # Copy Apache Configuration for LocalHost
@@ -212,7 +220,7 @@ sudo apachectl restart
 # Setup Database to be able to be written to by Apache
 sudo chown www-data:www-data /home/HiveControl/data/hive-data.db
 # Dir needs to be owned by www-data as well
-sudo chown www-data:www-data /home/HiveControl/data 
+sudo chown www-data:www-data /home/HiveControl/data
 
 #Ensure www-data owns all of our public_html files
 sudo chown -R www-data:www-data /home/HiveControl/www/public_html/
@@ -237,6 +245,11 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_27
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_28
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_30
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_31
+
+#Setup backup directory
+mkdir /home/HiveControl/data/backups
+#Make www-data the owner
+chown www-data:www-data /home/HiveControl/data/backups
 
 VER=$(cat /home/HiveControl/VERSION)
 sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET HCVersion='$VER' WHERE id=\"1\";"
@@ -276,36 +289,38 @@ echo "========================================================================"
 #sudo python setup.py install
 
 ####################################################################################
-# Tempered Software
+# Tempered Software - FIXED FOR RASPBERRY PI 5
 ####################################################################################
 echo "Installing hidapi - for Tempered Temp Sensor"
-#Get prerequite
-# Make hidapi software
-cd /home/HiveControl/software/
-sudo git clone https://github.com/rcrum003/hidapi
-
-#git clone git://github.com/signal11/hidapi.git
-cd /home/HiveControl/software/hidapi
-sudo ./bootstrap
-sudo ./configure 
-sudo make
-sudo make install
-# Run it again, because if we run just once, it doesn't work
-# Weirdest thing ever, don't have time to figure it out
-# But this works #MessageMeIfYouDo
-sudo ./bootstrap
-sudo ./configure 
-sudo make
-sudo make install
+# Skip compiling hidapi from source, using system package installed earlier
+echo "Using system libhidapi (already installed)"
 
 #Make Tempered software
 cd /home/HiveControl/software/
+echo "Cloning TEMPered software..."
 sudo git clone https://github.com/rcrum003/TEMPered-v6-2015
 cd TEMPered-v6-2015
-sudo cmake .
-sudo make all
-sudo cp utils/tempered /usr/local/bin/
-sudo cp utils/hid-query /usr/local/bin/
+
+# Fix CMake to find the system hidapi library
+echo "Configuring TEMPered with system hidapi..."
+sudo cmake . -DHIDAPI_LIB=/usr/lib/aarch64-linux-gnu/libhidapi-libusb.so || {
+    echo "Warning: CMake configuration failed. Trying alternative hidapi path..."
+    sudo cmake . -DHIDAPI_LIB=/usr/lib/aarch64-linux-gnu/libhidapi-hidraw.so || {
+        echo "Error: Could not configure TEMPered. Skipping tempered installation..."
+        TEMPERED_FAILED=true
+    }
+}
+
+if [[ ! $TEMPERED_FAILED == true ]]; then
+    echo "Building TEMPered..."
+    sudo make all && {
+        sudo cp utils/tempered /usr/local/bin/ 2>/dev/null || echo "Warning: tempered binary not found"
+        sudo cp utils/hid-query /usr/local/bin/ 2>/dev/null || echo "Warning: hid-query binary not found"
+        echo "TEMPered installation completed"
+    } || {
+        echo "Warning: TEMPered build failed, but continuing installation..."
+    }
+fi
 
 ####################################################################################
 # GPIO Library
@@ -319,18 +334,18 @@ sudo cp utils/hid-query /usr/local/bin/
 
 echo "Installing PIGPIO library for DHT and HX711 Sensors"
 #Kill pigpiod just in case it is already running
-sudo killall pigpiod
-#sudo apt-get install pigpio python-pigpio python3-pigpio -y
-#Added for PigPIO
+sudo killall pigpiod 2>/dev/null || true
 
-sudo apt install python-setuptools python3-setuptools -y
+# Python3 setuptools should already be available in modern Raspberry Pi OS
+sudo apt install python3-setuptools -y
+
 cd /home/HiveControl/software
 sudo git clone https://github.com/rcrum003/pigpio
 cd pigpio/
 sudo make
 sudo make install
 sudo cp /usr/local/bin/pigpiod /usr/bin/
-sudo apt install python-pigpio python3-pigpio
+sudo apt install python3-pigpio -y
 sudo pigpiod
 
 #Allow www-data to run python and other commands
@@ -352,7 +367,7 @@ sudo pigpiod
 	#Installing DHTXX Code
 	echo "Installing DHT Code"
 	cd /home/HiveControl/software/DHTXXD
-	unzip DHTXXD.zip
+	unzip -o DHTXXD.zip
 	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
 	sudo cp DHTXXD /usr/local/bin/
 
@@ -371,7 +386,7 @@ if [[ $XRDP == "true" ]]; then
 	sudo apt-get install xrdp -y
 fi
 ####################################################################################
-# BME680 and SHT31-D Temp Sensor Support
+# BME680 and SHT31-D Temp Sensor Support - FIXED FOR RASPBERRY PI 5
 ####################################################################################
 		echo "-------------------------------"
 		echo "Installing new BME680 Drivers"
@@ -389,22 +404,39 @@ fi
 		cd /home/HiveControl/software
 		sudo git clone https://github.com/rcrum003/Adafruit-sht31-for-PI
 		cd Adafruit-sht31-for-PI/
-		sudo make
-		sudo cp sht31-d /usr/local/bin
+
+		# Fix missing include for ioctl
+		echo "Patching sht31-d.c for missing ioctl include..."
+		sudo sed -i '1i#include <sys/ioctl.h>' sht31-d.c
+
+		sudo make && {
+			sudo cp sht31-d /usr/local/bin
+			echo "SHT31 driver installed successfully"
+		} || {
+			echo "Warning: SHT31 compilation failed, skipping..."
+		}
 ####################################################################################
 
 
 ####################################################################################
-# BroodMinder Temp Sensor Support
+# BroodMinder Temp Sensor Support - FIXED FOR RASPBERRY PI 5
 ####################################################################################
 echo "-------------------------------"
 echo "Installing Bluetooth Support for BroodMinder Devices"
 echo "-------------------------------"
-sudo apt-get install python-pip -y
-#sudo pip install --upgrade pip
+sudo apt-get install python3-pip -y
 
-#Install bluepy
-sudo pip install bluepy
+# Install glib development files required for bluepy compilation
+echo "Installing glib development files for bluepy..."
+sudo apt-get install libglib2.0-dev -y
+
+#Install bluepy - Fixed for PEP 668 externally managed environment
+echo "Installing bluepy Python package..."
+sudo pip install bluepy --break-system-packages || {
+	echo "Warning: bluepy installation failed. Trying alternative method..."
+	# Alternative: try to install from system packages if available
+	sudo apt-get install python3-bluepy -y || echo "Warning: Could not install bluepy - BroodMinder support may not work"
+}
 ####################################################################################
 
 if [[ $KEYBOARD = "true" ]]; then
@@ -421,23 +453,16 @@ fi
 echo "========================================================"
 echo "Completed Basic Setup of HiveControl"
 echo "========================================================"
-IP=$(ifconfig |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |grep -v "127.0.0.1")
-IPCount=$(ifconfig |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |wc -l)
-if [[ $IPCount -gt "2" ]]; then
-	echo "Multiple IPs Exist, getting addresses for both eth0 and wlan0"
-	IPeth0=$(ifconfig eth0 |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |grep -v "127.0.0.1")
-	IPwlan0=$(ifconfig wlan0 |grep "inet addr" |awk -F\: '{print $2}' |awk '{print $1}' |grep -v "127.0.0.1")
-	echo "Please go to http://$IPeth0/admin/hiveconfig.php or http://$IPwlan0/admin/hiveconfig.php to setup basic options"
-fi
-if [[ $IPCount -lt "2" ]]; then
-	echo "Please go to http://127.0.0.1/admin/hiveconfig.php to setup basic options"
-fi
-if [[ $IPCount -eq "2" ]]; then
+# Updated IP detection for modern Raspberry Pi OS
+IP=$(hostname -I | awk '{print $1}')
+if [[ -n $IP ]]; then
 	echo "Please go to http://$IP/admin/hiveconfig.php to setup basic options"
+else
+	echo "Please go to http://127.0.0.1/admin/hiveconfig.php to setup basic options"
 fi
 
 #Setup Cron when we are ready to go
-sudo crontab -l > /home/HiveControl/install/cron/cron.orig
+sudo crontab -l > /home/HiveControl/install/cron/cron.orig 2>/dev/null || touch /home/HiveControl/install/cron/cron.orig
 sudo cp /home/HiveControl/install/cron/cron.orig /home/HiveControl/install/cron/cron.new
 sudo cat /home/HiveControl/install/cron/hivetool.cron >> /home/HiveControl/install/cron/cron.new
 sudo crontab /home/HiveControl/install/cron/cron.new
@@ -450,6 +475,7 @@ sudo crontab /home/HiveControl/install/cron/cron.new
 #Install .htpasswd
 echo "Please set an admin password for http://127.0.0.1/admin/ access:"
 cd /home/HiveControl/www/
+chown www-data:www-data .htpasswd
 htpasswd -c .htpasswd admin
 sudo service apache2 restart
 
@@ -486,13 +512,3 @@ read aok
 echo "REBOOTING...."
 /bin/sync
 /sbin/reboot
-
-
-
-
-
-
-
-
-
-
