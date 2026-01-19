@@ -102,7 +102,6 @@ $topic = isset($_GET['topic']) ? htmlspecialchars($_GET['topic']) : 'overview';
     <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
     <!-- /Navigation -->
 
-    <div id="wrapper">
         <div class="row" style="margin: 0;">
             <div class="col-md-3 help-sidebar">
                 <h4><i class="fa fa-book"></i> Help Topics</h4>
@@ -167,7 +166,22 @@ $topic = isset($_GET['topic']) ? htmlspecialchars($_GET['topic']) : 'overview';
                 ?>
             </div>
         </div>
-    </div>
+
+<?PHP
+// Get orientation to close tags properly
+$sth = $conn->prepare("SELECT SITE_ORIENT FROM hiveconfig");
+$sth->execute();
+$result = $sth->fetch(PDO::FETCH_ASSOC);
+$orient = $result['SITE_ORIENT'];
+
+if ($orient == "normal") {
+    echo '</div><!-- /#page-wrapper -->';
+}
+echo '</div><!-- /#wrapper -->';
+if ($orient == "wide") {
+    echo '</div><!-- /.well -->';
+}
+?>
 
     <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
