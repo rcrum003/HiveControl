@@ -10,6 +10,26 @@
 $period="";
 $chart_rounding="";
 
+// Check if initial setup is complete - redirect to wizard if not
+include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+try {
+    $setup_check = $conn->prepare("SELECT HIVENAME, HIVEAPI, CITY, STATE FROM hiveconfig WHERE id=1");
+    $setup_check->execute();
+    $setup_result = $setup_check->fetch(PDO::FETCH_ASSOC);
+
+    if (!$setup_result ||
+        empty($setup_result['HIVENAME']) ||
+        empty($setup_result['HIVEAPI']) ||
+        empty($setup_result['CITY']) ||
+        empty($setup_result['STATE'])) {
+        header("Location: /admin/setup-wizard.php");
+        exit();
+    }
+} catch (Exception $e) {
+    // If there's a database error, let the page continue but it may fail later
+    error_log("Setup check failed: " . $e->getMessage());
+}
+
 //Check input for badness
 function test_input($data) {
   $data = trim($data);
