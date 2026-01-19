@@ -102,70 +102,86 @@ $topic = isset($_GET['topic']) ? htmlspecialchars($_GET['topic']) : 'overview';
     <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
     <!-- /Navigation -->
 
-        <div class="row" style="margin: 0;">
-            <div class="col-md-3 help-sidebar">
-                <h4><i class="fa fa-book"></i> Help Topics</h4>
-                <div class="list-group">
-                    <a href="?topic=overview" class="list-group-item <?php echo ($topic == 'overview') ? 'active' : ''; ?>">
-                        <i class="fa fa-home"></i> Overview
-                    </a>
-                    <a href="?topic=initial-setup" class="list-group-item <?php echo ($topic == 'initial-setup') ? 'active' : ''; ?>">
-                        <i class="fa fa-rocket"></i> Initial Setup
-                    </a>
-                    <a href="?topic=basic-settings" class="list-group-item <?php echo ($topic == 'basic-settings') ? 'active' : ''; ?>">
-                        <i class="fa fa-cog"></i> Basic Settings
-                    </a>
-                    <a href="?topic=instruments" class="list-group-item <?php echo ($topic == 'instruments') ? 'active' : ''; ?>">
-                        <i class="fa fa-tachometer"></i> Instruments & Sensors
-                    </a>
-                    <a href="?topic=calibration" class="list-group-item <?php echo ($topic == 'calibration') ? 'active' : ''; ?>">
-                        <i class="fa fa-balance-scale"></i> Calibration
-                    </a>
-                    <a href="?topic=weather" class="list-group-item <?php echo ($topic == 'weather') ? 'active' : ''; ?>">
-                        <i class="fa fa-cloud"></i> Weather Sources
-                    </a>
-                    <a href="?topic=dashboard" class="list-group-item <?php echo ($topic == 'dashboard') ? 'active' : ''; ?>">
-                        <i class="fa fa-dashboard"></i> Dashboard Guide
-                    </a>
-                    <a href="?topic=troubleshooting" class="list-group-item <?php echo ($topic == 'troubleshooting') ? 'active' : ''; ?>">
-                        <i class="fa fa-wrench"></i> Troubleshooting
-                    </a>
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="page-header">Help & Documentation</h1>
                 </div>
             </div>
 
-            <div class="col-md-9 help-content">
-                <?php
-                switch($topic) {
-                    case 'overview':
-                        include 'help/overview.php';
-                        break;
-                    case 'initial-setup':
-                        include 'help/initial-setup.php';
-                        break;
-                    case 'basic-settings':
-                        include 'help/basic-settings.php';
-                        break;
-                    case 'instruments':
-                        include 'help/instruments.php';
-                        break;
-                    case 'calibration':
-                        include 'help/calibration.php';
-                        break;
-                    case 'weather':
-                        include 'help/weather.php';
-                        break;
-                    case 'dashboard':
-                        include 'help/dashboard.php';
-                        break;
-                    case 'troubleshooting':
-                        include 'help/troubleshooting.php';
-                        break;
-                    default:
-                        include 'help/overview.php';
-                }
-                ?>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-book"></i> Help Topics
+                        </div>
+                        <div class="panel-body" style="padding: 0;">
+                            <div class="list-group" style="margin-bottom: 0;">
+                                <a href="?topic=overview" class="list-group-item <?php echo ($topic == 'overview') ? 'active' : ''; ?>">
+                                    <i class="fa fa-home"></i> Overview
+                                </a>
+                                <a href="?topic=initial-setup" class="list-group-item <?php echo ($topic == 'initial-setup') ? 'active' : ''; ?>">
+                                    <i class="fa fa-rocket"></i> Initial Setup
+                                </a>
+                                <a href="?topic=basic-settings" class="list-group-item <?php echo ($topic == 'basic-settings') ? 'active' : ''; ?>">
+                                    <i class="fa fa-cog"></i> Basic Settings
+                                </a>
+                                <a href="?topic=instruments" class="list-group-item <?php echo ($topic == 'instruments') ? 'active' : ''; ?>">
+                                    <i class="fa fa-tachometer"></i> Instruments & Sensors
+                                </a>
+                                <a href="?topic=calibration" class="list-group-item <?php echo ($topic == 'calibration') ? 'active' : ''; ?>">
+                                    <i class="fa fa-balance-scale"></i> Calibration
+                                </a>
+                                <a href="?topic=weather" class="list-group-item <?php echo ($topic == 'weather') ? 'active' : ''; ?>">
+                                    <i class="fa fa-cloud"></i> Weather Sources
+                                </a>
+                                <a href="?topic=dashboard" class="list-group-item <?php echo ($topic == 'dashboard') ? 'active' : ''; ?>">
+                                    <i class="fa fa-dashboard"></i> Dashboard Guide
+                                </a>
+                                <a href="?topic=troubleshooting" class="list-group-item <?php echo ($topic == 'troubleshooting') ? 'active' : ''; ?>">
+                                    <i class="fa fa-wrench"></i> Troubleshooting
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <?php
+                            switch($topic) {
+                                case 'overview':
+                                    include 'help/overview.php';
+                                    break;
+                                case 'initial-setup':
+                                    include 'help/initial-setup.php';
+                                    break;
+                                case 'basic-settings':
+                                    include 'help/basic-settings.php';
+                                    break;
+                                case 'instruments':
+                                    include 'help/instruments.php';
+                                    break;
+                                case 'calibration':
+                                    include 'help/calibration.php';
+                                    break;
+                                case 'weather':
+                                    include 'help/weather.php';
+                                    break;
+                                case 'dashboard':
+                                    include 'help/dashboard.php';
+                                    break;
+                                case 'troubleshooting':
+                                    include 'help/troubleshooting.php';
+                                    break;
+                                default:
+                                    include 'help/overview.php';
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
 
 <?PHP
 // Get orientation to close tags properly
