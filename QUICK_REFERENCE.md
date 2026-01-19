@@ -114,6 +114,21 @@ cd /home/HiveControl/www/
 sudo htpasswd -c .htpasswd admin
 ```
 
+### Raspberry Connect (Remote Access)
+```bash
+# Sign in to Raspberry Connect
+rpi-connect signin
+
+# Check status
+sudo systemctl status rpi-connect
+
+# Restart service
+sudo systemctl restart rpi-connect
+
+# Access remotely
+# Go to: https://connect.raspberrypi.com
+```
+
 ---
 
 ## File Locations

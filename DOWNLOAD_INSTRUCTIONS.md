@@ -150,7 +150,7 @@ Here's what the installer does (so you know what to expect):
 
 8. **Configure System** (2-3 min)
    - Sets up automatic data collection (cron)
-   - Asks for admin password
+   - **Asks for admin password** - IMPORTANT: Remember this password!
    - Asks for timezone
 
 9. **Final Setup** (1-2 min)
@@ -178,12 +178,16 @@ Here's what the installer does (so you know what to expect):
    - Example: `http://192.168.1.100/`
    - Or try: `http://hivecontrol.local/`
 
-4. **Complete the setup wizard**:
-   - Enter hive name
+4. **Login when prompted**:
+   - Username: `admin`
+   - Password: (the password you set during installation)
+
+5. **Complete the setup wizard**:
+   - Enter hive name (letters, numbers, dashes, underscores only)
    - Enter location
    - Add HiveControl.org API key (optional)
 
-5. **Configure sensors**:
+6. **Configure sensors**:
    - Go to Admin → Settings → Instruments
    - Enable your sensors
    - Set calibration values

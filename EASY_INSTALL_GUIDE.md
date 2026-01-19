@@ -59,6 +59,12 @@ The easiest way to install Raspberry Pi OS is using the official Raspberry Pi Im
    - **Set locale settings**:
      - Set timezone to your location
      - Set keyboard layout to match your keyboard
+   - **Enable Raspberry Connect** (Optional - for remote access):
+     - Check "Enable Raspberry Connect"
+     - This allows you to access your Raspberry Pi remotely from anywhere
+     - You'll need a Raspberry Pi ID account (free at [raspberrypi.com](https://id.raspberrypi.com))
+     - After first boot, sign in to link your device to your Raspberry Pi ID
+     - Great for managing your hive remotely when away from home!
    - Click "Save"
 
 7. **Write to SD Card**:
@@ -209,13 +215,21 @@ Wait 1-2 minutes after reboot, then:
    - Example: `http://192.168.1.100/`
    - Or try: `http://hivecontrol.local/`
 
-4. **You should see the HiveControl dashboard!**
+4. **Login when prompted**:
+   - **IMPORTANT**: You'll immediately see a username/password prompt
+   - Username: `admin`
+   - Password: (the password you set during Step 4 of installation)
+   - This is the admin password you created when the installer asked you to set it
+
+5. **You should now see the First-Time Setup Wizard!**
 
 ### First-Time Setup Wizard
 
-On first access, you'll see a setup wizard:
+After logging in with your admin credentials, you'll see the setup wizard:
 
 1. **Enter Hive Name**: Give your hive a name (e.g., "Backyard Hive 1")
+   - Use only letters, numbers, dashes, and underscores
+   - No spaces or special characters
 
 2. **Enter HiveControl.org API Key** (Optional):
    - Go to [hivecontrol.org](https://hivecontrol.org) and create an account
@@ -225,6 +239,8 @@ On first access, you'll see a setup wizard:
 3. **Enter Location**: City and State/Province
 
 4. **Click Save**
+
+**Note**: The setup wizard runs on first access only. If you need to change these settings later, go to Admin → Settings → Basic.
 
 ### Configure Admin Settings
 
@@ -264,6 +280,98 @@ Now that HiveControl is installed, you can connect your sensors:
 
 ---
 
+## Remote Access with Raspberry Connect (Optional)
+
+If you enabled Raspberry Connect during SD card imaging, you can access your HiveControl system from anywhere in the world!
+
+### What is Raspberry Connect?
+
+Raspberry Connect is a free service from Raspberry Pi that allows you to:
+- Access your Raspberry Pi remotely via web browser
+- No need to configure port forwarding on your router
+- Secure connection through Raspberry Pi's servers
+- Access terminal, VNC, and file sharing remotely
+
+### Setting Up Raspberry Connect
+
+1. **Create a Raspberry Pi ID** (if you don't have one):
+   - Go to [id.raspberrypi.com](https://id.raspberrypi.com)
+   - Click "Create account"
+   - Follow the registration process
+
+2. **Link Your Raspberry Pi**:
+
+   After your Pi boots for the first time, you need to sign in:
+
+   **If using a monitor:**
+   - You'll see a prompt to sign in to Raspberry Connect
+   - Enter your Raspberry Pi ID credentials
+   - Your device will be linked automatically
+
+   **If using SSH (headless):**
+   ```bash
+   # Sign in to Raspberry Connect
+   rpi-connect signin
+   ```
+   - Follow the on-screen instructions
+   - You'll need to open a URL in your web browser
+   - Enter the code shown on your Raspberry Pi
+   - Confirm the linking
+
+3. **Access Your Pi Remotely**:
+   - Go to [connect.raspberrypi.com](https://connect.raspberrypi.com)
+   - Sign in with your Raspberry Pi ID
+   - Click on your device (e.g., "hivecontrol")
+   - Choose connection type:
+     - **Screen sharing** - See the desktop
+     - **Shell** - Terminal access
+     - **File browser** - Transfer files
+
+### Using Raspberry Connect with HiveControl
+
+Once connected, you can:
+- Access the web interface: Open shell and run `hostname -I` to get IP, then navigate to `http://IP-ADDRESS/`
+- Configure sensors remotely
+- Download data backups
+- Troubleshoot issues
+- Update the system
+
+### Security Note
+
+Raspberry Connect is secure, but remember:
+- Keep your Raspberry Pi ID password strong
+- Enable two-factor authentication on your Raspberry Pi ID
+- Only use Raspberry Connect on trusted networks
+- Your Raspberry Pi connects outbound to Raspberry Pi servers (no inbound ports opened)
+
+### Troubleshooting Raspberry Connect
+
+**Can't sign in?**
+```bash
+# Check if rpi-connect is running
+sudo systemctl status rpi-connect
+
+# Restart the service
+sudo systemctl restart rpi-connect
+
+# Sign in again
+rpi-connect signin
+```
+
+**Device not showing up?**
+- Make sure you signed in with the same Raspberry Pi ID used during setup
+- Check internet connection: `ping -c 3 raspberrypi.com`
+- Wait a few minutes for device to register
+
+**Want to disable Raspberry Connect?**
+```bash
+# Disable the service
+sudo systemctl disable rpi-connect
+sudo systemctl stop rpi-connect
+```
+
+---
+
 ## Troubleshooting
 
 ### Can't access the web interface?
@@ -297,11 +405,16 @@ Now that HiveControl is installed, you can connect your sensors:
 
 ### Forgot admin password?
 
-Reset it with:
+If you forgot the password you set during installation:
+
+**Reset it with:**
 ```bash
 cd /home/HiveControl/www/
 sudo htpasswd -c .htpasswd admin
 ```
+Enter a new password when prompted, then confirm it.
+
+You can now login with username `admin` and your new password.
 
 ### Need more help?
 
@@ -351,12 +464,13 @@ sudo /home/HiveControl/scripts/currconditions.sh
 
 Once everything is working:
 
-1. **Monitor your dashboard** for 24 hours to ensure data is collecting
-2. **Set up weather integration** (Settings → Site Configuration)
-3. **Configure Growing Degree Days** if tracking bee development
-4. **Set up email notifications** for alerts
-5. **Join the community** at [hivecontrol.org](https://hivecontrol.org)
-6. **Share your data** with [hivetool.org](https://hivetool.org) research project
+1. **Set up Raspberry Connect** (if enabled) to access your hive remotely from anywhere
+2. **Monitor your dashboard** for 24 hours to ensure data is collecting
+3. **Set up weather integration** (Settings → Site Configuration)
+4. **Configure Growing Degree Days** if tracking bee development
+5. **Set up email notifications** for alerts
+6. **Join the community** at [hivecontrol.org](https://hivecontrol.org)
+7. **Share your data** with [hivetool.org](https://hivetool.org) research project
 
 ---
 
