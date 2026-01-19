@@ -82,7 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <style>
         body {
-            background-color: #f8f8f8;
+            background-color: #f8f8f8 !important;
+            background-image: none !important;
             min-height: 100vh;
             padding: 20px 0;
         }
