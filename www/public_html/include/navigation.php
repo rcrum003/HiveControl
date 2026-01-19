@@ -139,6 +139,9 @@ echo '
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
+                <li>
+                    <a href="/admin/help.php"><i class="fa fa-question-circle fa-fw"></i> Help</a>
+                </li>
             </ul>
             <!-- /.navbar-top-links -->
 
@@ -210,7 +213,9 @@ if ($orient == "normal") {
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
-
+                        <li>
+                            <a href="/admin/help.php"><i class="fa fa-question-circle fa-fw"></i> Help</a>
+                        </li>
 
                     </ul>
                 </div>
