@@ -33,12 +33,12 @@ The easiest way to install Raspberry Pi OS is using the official Raspberry Pi Im
 3. **Open Raspberry Pi Imager**
 
 4. **Choose Operating System**:
-   - Click "Choose OS"
-   - Select "Raspberry Pi OS (other)"
-   - Select "Raspberry Pi OS (64-bit)" or "Raspberry Pi OS (32-bit)"
-     - For Pi 4 or Pi 3B+: Use 64-bit
-     - For older Pi models: Use 32-bit
-   - **Note**: Do NOT use "Lite" version - you need the full OS with desktop
+   - Chose Your Raspberry Device, click next
+   - Choose OS
+      - Select "Raspberry Pi OS (64-bit)" or "Raspberry Pi OS (32-bit)"
+         - For Pi5, Pi 4 or Pi 3B+: Use 64-bit
+         - For older Pi models: Use 32-bit
+   - **Note**: You can use the "Lite" version (under Raspberry Pi OS (other), but you'll have to be comfortable with command line only.
 
 5. **Choose Storage**:
    - Click "Choose Storage"
@@ -47,7 +47,7 @@ The easiest way to install Raspberry Pi OS is using the official Raspberry Pi Im
 
 6. **Configure Settings** (Important!):
    - Click the gear icon ⚙️ (or press Ctrl+Shift+X)
-   - **Set hostname**: Enter a name like `hivecontrol` (optional but helpful)
+   - **Set hostname**: Enter a name like `hivecontrol` (optional but helpful) (REMEMBER THIS NAME)
    - **Enable SSH**: Check "Enable SSH" and select "Use password authentication"
    - **Set username and password**:
      - Username: `pi` (recommended, or choose your own)
@@ -95,13 +95,13 @@ The easiest way to install Raspberry Pi OS is using the official Raspberry Pi Im
 - On Mac/Linux: Open Terminal (built-in)
 
 **Find your Pi's IP address**:
-- Try connecting to the hostname: `ssh pi@hivecontrol.local`
+- Try connecting to the hostname: `ssh pi@hivecontrol.local` (replace hivecontrol.local with YOURHOSTNAME.local)
 - OR use your router's admin page to find the IP address
-- OR use a network scanner app like [Angry IP Scanner](https://angryip.org/)
+- OR use a network scanner app like [Angry IP Scanner](https://angryip.org/) to find devices with port 22 and 80 open
 
 **Connect via SSH**:
 ```bash
-ssh pi@hivecontrol.local
+ssh pi@YOURHOSTNAME.local
 # OR if using IP address:
 ssh pi@192.168.1.XXX
 ```
@@ -166,7 +166,7 @@ The installation will:
 8. Ask you to configure timezone
 9. Reboot automatically
 
-**Total time**: 30-60 minutes (or 6-8 hours with Bee Counter option)
+**Total time**: Between 5-60 minutes depending on the Raspberry Pi model (or 6-8 hours with Bee Counter option)
 
 During installation, you'll see lots of text scroll by - this is normal!
 
@@ -213,7 +213,7 @@ Wait 1-2 minutes after reboot, then:
 
 3. **Go to**: `http://YOUR-PI-IP-ADDRESS/`
    - Example: `http://192.168.1.100/`
-   - Or try: `http://hivecontrol.local/`
+   - Or try: `http://YOURHOSTNAME.local/`
 
 4. **Login when prompted**:
    - **IMPORTANT**: You'll immediately see a username/password prompt

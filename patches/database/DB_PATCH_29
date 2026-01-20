@@ -1,0 +1,53 @@
+
+--
+-- File generated with SQLiteStudio v3.0.7 on Sat Jan 19 21:44:12 2019
+--
+-- Text encoding used: UTF-8
+--
+PRAGMA foreign_keys = off;
+BEGIN TRANSACTION;
+
+-- Table: reference
+CREATE TABLE reference (ref_id INTEGER, ref_lookup TEXT, ref_answer VARCHAR);
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0002', 'Model B Revision 1.0 (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0003', 'Model B Revision 1.0 + ECN0001 (no fuses, D14 removed) (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0004', 'Model B Revision 2.0 (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0005', 'Model B Revision 2.0 (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0006', 'Model B Revision 2.0 (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0007', 'Model A (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0008', 'Model A (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0009', 'Model A (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '000d', 'Model B Revision 2.0 (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '000e', 'Model B Revision 2.0 (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '000f', 'Model B Revision 2.0 (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0010', 'Model B+ (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0011', 'Compute Module (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0012', 'Model A+ (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a01041', 'Pi 2 Model B (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a21041', 'Pi 2 Model B (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '900092', 'PiZero (512MB) (No Camera Connector)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '900093', 'PiZero (512MB) (Camera Connector)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a02082', 'Pi 3 Model B (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a22082', 'Pi 3 Model B (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '9000c1', 'PiZero W (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0013', 'Model B+ (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0014', 'Compute Module 1 (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '0015', 'Model A+ (256MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a01040', 'Pi 2 Model B (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a22042', 'Pi 2 Model B (with BCM2837) (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '900021', 'PI A+ (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '900032', 'PI B+ (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '920093', 'PiZero (512MB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a020a0 ', 'Compute Module 3 (and CM3 Lite) 1 GB');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a32082', 'Pi 3 Model B (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, 'a020d3', 'Pi 3 Model B+ (1GB)');
+INSERT INTO reference (ref_id, ref_lookup, ref_answer) VALUES (1, '9020e0', 'Pi 3 Model A+ (512MB)');
+
+COMMIT TRANSACTION;
+PRAGMA foreign_keys = on;
+
+
+
+
+
+

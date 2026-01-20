@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="110"
+Upgrade_ver="113"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -302,6 +302,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 				sqlite3 $DestDB "UPDATE hiveconfig SET ENABLE_AIR = 'no';"
 			fi
 		fi
+		if [[ $DB_ver -eq "23" ]]; then
+			echo "Applying DB Ver 24 Upgrades"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_32
+			let DB_ver="24"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -463,6 +468,22 @@ fi
 
 if [[ "$Installed_Ver" < "2.04" ]]; then
 	sudo chmod u+x /home/HiveControl/install/*
+fi
+
+
+if [[ "$Installed_Ver" < "2.06" ]]; then
+	#need to update certs and stop trusting DST_Root_CA_X3
+	sudo sed -i '/^mozilla\/DST_Root_CA_X3.crt$/ s/^/!/' /etc/ca-certificates.conf
+	sudo update-ca-certificates -f
+fi
+
+if [[ "$Installed_Ver" < "2.10" ]]; then
+	#Create a Backup folder
+	mkdir /home/HiveControl/data/backups
+	#Make www-data the owner
+	chown www-data:www-data /home/HiveControl/data/backups
+
+
 fi
 
 echo "============================================="
