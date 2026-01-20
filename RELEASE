@@ -140,6 +140,28 @@ Security Documentation:
   * SECURITY_FIXES_APPLIED_2026-01-17.md - Detailed fix documentation with testing procedures
 
 BUG FIXES:
+- Fixed temperature validation to allow valid 0-degree readings
+  * Updated all_chart.php to remove != 0 check from temperature validation
+  * Temperature values of exactly 0 degrees now display correctly on charts
+  * Applies to both hive temperature and weather temperature readings
+
+- Fixed instrumentconfig.php blank screen issue on form submission
+  * Added hidden input fields for all 39 required form validation fields
+  * Ensures all fields are present in POST data even when conditionally hidden
+  * Form now properly validates and reloads instead of showing blank screen
+
+- Fixed siteconfig.php blank screen issue with checkbox validation
+  * Added PHP preprocessing to set unchecked checkboxes to empty string
+  * Handles 18 checkbox fields: trend lines, chart options, and SHOW_METRIC
+  * Unchecked checkboxes now properly pass validation
+
+- Fixed hiveconfig.inc generation failures on fresh installations
+  * Removed stub file from git tracking and added to .gitignore
+  * Added file size validation (<100 bytes triggers regeneration)
+  * Changed INNER JOIN to LEFT JOIN for defensive database queries
+  * Added source command to load config variables into shell environment
+  * Fixes hive registration failures due to undefined variables (POWER, INTERNET, STATUS, COMPUTER)
+
 - Fixed footer display issues in web interface
   * Corrected malformed HTML structure in footer.php (changed from <nav> to <footer>)
   * Repositioned footer include in index.php for proper rendering
