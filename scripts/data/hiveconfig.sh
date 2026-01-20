@@ -13,7 +13,8 @@ CONFIGOUT="/home/HiveControl/scripts/hiveconfig.inc"
 
 function dump_config_to_file() {
 	# Generate config from database
-	sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig INNER JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
+	# Use LEFT JOIN to ensure we get hiveconfig data even if hiveequipmentweight table is empty (fresh install)
+	sqlite3 -header -line $LOCALDATABASE "SELECT * from hiveconfig LEFT JOIN hiveequipmentweight on hiveconfig.id=hiveequipmentweight.id;" |sort | uniq > tempout
 
 	# Check if tempout has data
 	if [ ! -s tempout ]; then
@@ -43,6 +44,8 @@ else
    fi
 fi
 
+# Source the config file to load all variables into the environment
+source $CONFIGOUT
 
 #Get local versions
 FILEVERSION=$(cat $CONFIGOUT |grep VERSION |awk -F\" '{print $2}')
