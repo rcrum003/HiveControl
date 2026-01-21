@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <!-- /.col-lg-12 -->
             </div>
             <!-- /.row -->
-            <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="hive-form">
         <?PHP
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
@@ -817,6 +817,10 @@ if($v->validate()) {
        $.ajaxSetup({ cache: false });
     });
     </script>
+
+    <!-- Hive Spinner JavaScript -->
+    <script src="../js/hive-spinner.js"></script>
+
 </body>
 
 </html>
