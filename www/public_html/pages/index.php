@@ -10,6 +10,28 @@
 $period="";
 $chart_rounding="";
 
+// Check if initial setup is complete - redirect to wizard if not
+include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+try {
+    $setup_check = $conn->prepare("SELECT HIVENAME, HIVEAPI, CITY, STATE FROM hiveconfig WHERE id=1");
+    $setup_check->execute();
+    $setup_result = $setup_check->fetch(PDO::FETCH_ASSOC);
+
+    if (!$setup_result ||
+        empty($setup_result['HIVENAME']) ||
+        $setup_result['HIVENAME'] === 'NOTSET' ||
+        empty($setup_result['HIVEAPI']) ||
+        trim($setup_result['HIVEAPI']) === '' ||
+        empty($setup_result['CITY']) ||
+        empty($setup_result['STATE'])) {
+        header("Location: /admin/setup-wizard.php");
+        exit();
+    }
+} catch (Exception $e) {
+    // If there's a database error, let the page continue but it may fail later
+    error_log("Setup check failed: " . $e->getMessage());
+}
+
 //Check input for badness
 function test_input($data) {
   $data = trim($data);
@@ -66,31 +88,31 @@ header("Refresh: $sec; url=$page");
             <!-- Top Row -->
             <div class="row">
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-green sensor-panel">
+                    <div class="panel panel-green">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
                                     <img src="../images/temp.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h4 sensor-value live">
-                                    <?php
-
+                                    <div class="h4">
+                                    <?php 
+                                    
                                     if ($hivetempf == "null" ) {
-                                        $hivetempf="NA";
+                                        $hivetempf="NA"; 
                                     }
                                     echo "$hivetempf ";
 
                                     if ($SHOW_METRIC == "on") {
-                                        echo " C"; $i = "C";
-                                        }
-                                    else {
+                                        echo " C"; $i = "C"; 
+                                        } 
+                                    else { 
                                          echo "F"; $i = "F";
-                                     }
+                                     } 
                                 if ($wxtempf == "null" ) {
-                                        $wxtempf="NA";
+                                        $wxtempf="NA"; 
                                     }
-                                        echo " / "."$wxtempf"." $i";
+                                        echo " / "."$wxtempf"." $i"; 
                                         ?> </div>
                                     <div>Temp - Hive / Ambient</div>
                                 </div>
@@ -106,15 +128,15 @@ header("Refresh: $sec; url=$page");
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-hiveyellow sensor-panel">
+                    <div class="panel panel-hiveyellow">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
                                      <img src="/images/scalesm.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-
-                                    <div class="h4 sensor-value live"><?php echo "$hiveweight "; if ($SHOW_METRIC == "on") { echo " kg"; $i = "kg"; } else {echo "lb"; $i = "lb";} echo " / "."$changeweight"." $i"; ?> </div>
+            
+                                    <div class="h4"><?php echo "$hiveweight "; if ($SHOW_METRIC == "on") { echo " kg"; $i = "kg"; } else {echo "lb"; $i = "lb";} echo " / "."$changeweight"." $i"; ?> </div>
                                     <div>Weight / Trend </div>
                                 </div>
                             </div>
@@ -129,19 +151,19 @@ header("Refresh: $sec; url=$page");
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-primary sensor-panel">
+                    <div class="panel panel-primary">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
                                      <img src="../images/hum.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h4 sensor-value live"><?php
+                                    <div class="h4"><?php 
                                     if ($hivehumi == "null" ) {
-                                        $hivehumi="NA";
+                                        $hivehumi="NA"; 
                                     }
                                     if ($wxhumi == "null" ) {
-                                        $wxhumi="NA";
+                                        $wxhumi="NA"; 
                                     }
 
                                     echo "$hivehumi"." / "."$wxhumi"; ?>%</div>
@@ -159,14 +181,14 @@ header("Refresh: $sec; url=$page");
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-hivebrown sensor-panel">
+                    <div class="panel panel-hivebrown">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
                                     <img src="../images/treesm.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h4 sensor-value live"><?PHP echo "$daygdd / $seasongdd"; ?></div>
+                                    <div class="h4"><?PHP echo "$daygdd / $seasongdd"; ?></div>
                                     <div>GDD - Day/Season</div>
                                 </div>
                             </div>
@@ -271,6 +293,9 @@ header("Refresh: $sec; url=$page");
     </div>
     <!-- /#wrapper -->
 
+    <!-- Footer -->
+    <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
+
     <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -298,9 +323,6 @@ header("Refresh: $sec; url=$page");
   
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
-
-<!-- Footer -->
-         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
 
 </body>
 

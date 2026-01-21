@@ -141,7 +141,7 @@ $NUM_HIVE_BODY_SHAL_FOUNDATION= test_input($_POST["NUM_HIVE_BODY_SHAL_FOUNDATION
                         
                         </div>
                         <!-- /.panel-heading -->
-                         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="hive-form">
+                         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
                         <div class="panel-body">
                             <div class="dataTable_wrapper">
                                 <table class="table table-striped table-bordered table-hover" id="dataTables-example">
@@ -254,9 +254,6 @@ $NUM_HIVE_BODY_SHAL_FOUNDATION= test_input($_POST["NUM_HIVE_BODY_SHAL_FOUNDATION
 
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>
-
-    <!-- Hive Spinner JavaScript -->
-    <script src="../js/hive-spinner.js"></script>
 
 </body>
 
