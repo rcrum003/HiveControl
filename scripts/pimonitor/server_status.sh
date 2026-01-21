@@ -1,6 +1,6 @@
 #!/bin/bash
 # Server Status
-# Version 2
+# Version 3
 # Original Author: Hivetool.org
 #
 
@@ -20,6 +20,8 @@ echo
 echo
 echo "                        * * * NTP CLOCK SYNCH * * *"
 /usr/bin/ntpq -p
+echo
+/usr/bin/timedatectl
 echo
 echo "                          * * * CPU & MEMORY * * *"
 /usr/bin/top -b -n 1 | head -n 5

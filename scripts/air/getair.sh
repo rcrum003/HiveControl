@@ -1,5 +1,5 @@
 #!/bin/bash
-# version 1.1, 2019-11-22
+# version 1.1, 2026-01-17
 # reads the temp sensors as one script
 
 
@@ -15,6 +15,9 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 case $AIR_TYPE in
 	purple)
 		GETAIR_DATA=$($HOMEDIR/scripts/air/purpleair.sh)
+		;;
+	purplelocal)
+		GETAIR_DATA=$($HOMEDIR/scripts/air/purpleairlocal.sh)
 		;;
 	*)
 		#all others
