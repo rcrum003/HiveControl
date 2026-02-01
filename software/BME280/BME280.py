@@ -358,23 +358,90 @@ class sensor:
 if __name__ == "__main__":
 
    import time
+   import sys
    import BME280
-   import pigpio
 
-   pi = pigpio.pi()
+   # Add path for gpio_abstraction module
+   sys.path.insert(0, '/home/HiveControl/software')
 
-   if not pi.connected:
-      exit(0)
+   # Try to use abstraction layer first (supports Pi 5)
+   # Falls back to direct pigpio for compatibility
+   try:
+      from gpio_abstraction.pi_detect import is_pi5_or_later
+      from gpio_abstraction.gpio_factory import get_gpio, get_i2c, cleanup
 
-   s = BME280.sensor(pi)
+      gpio = get_gpio()
+      if not gpio.connected:
+         exit(0)
 
-   t, p, h = s.read_data()
+      if is_pi5_or_later():
+         # Pi 5: Use smbus2 I2C directly through abstraction
+         i2c = get_i2c()
 
-   #Convert TempC to TempF, t is in Celsius
-   tf = (t * 1.8) + 32
+         # Create a wrapper that provides pigpio-compatible interface
+         class Pi5Wrapper:
+            def __init__(self, i2c_instance):
+               self._i2c = i2c_instance
+               self._handles = {}
 
-   print("{:.2f} {:.2f} {:.2f} {:.1f}".format(tf, t, h, p/100.0))
-   
-   s.cancel()
+            def i2c_open(self, bus, address):
+               return self._i2c.open(bus, address)
 
-   pi.stop()
+            def i2c_write_device(self, handle, data):
+               self._i2c.write_device(handle, data)
+
+            def i2c_read_i2c_block_data(self, handle, register, count):
+               return self._i2c.read_block_data(handle, register, count)
+
+            def i2c_close(self, handle):
+               self._i2c.close(handle)
+
+            # SPI methods (if needed)
+            def spi_open(self, channel, baud, flags=0):
+               from gpio_abstraction.gpio_factory import get_spi
+               self._spi = get_spi()
+               return self._spi.open(channel, baud, flags)
+
+            def spi_xfer(self, handle, data):
+               return self._spi.xfer(handle, data)
+
+            def spi_close(self, handle):
+               self._spi.close(handle)
+
+         pi = Pi5Wrapper(i2c)
+      else:
+         # Pi 4 and earlier: Use pigpio through abstraction
+         pi = gpio.pi
+
+      s = BME280.sensor(pi)
+      t, p, h = s.read_data()
+
+      # Convert TempC to TempF, t is in Celsius
+      tf = (t * 1.8) + 32
+
+      print("{:.2f} {:.2f} {:.2f} {:.1f}".format(tf, t, h, p/100.0))
+
+      s.cancel()
+      cleanup()
+
+   except ImportError:
+      # Fallback to direct pigpio if abstraction not available
+      import pigpio
+
+      pi = pigpio.pi()
+
+      if not pi.connected:
+         exit(0)
+
+      s = BME280.sensor(pi)
+
+      t, p, h = s.read_data()
+
+      # Convert TempC to TempF, t is in Celsius
+      tf = (t * 1.8) + 32
+
+      print("{:.2f} {:.2f} {:.2f} {:.1f}".format(tf, t, h, p/100.0))
+
+      s.cancel()
+
+      pi.stop()

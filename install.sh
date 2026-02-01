@@ -332,21 +332,44 @@ fi
 #cd wiringPI
 #sudo ./build
 
-echo "Installing PIGPIO library for DHT and HX711 Sensors"
-#Kill pigpiod just in case it is already running
-sudo killall pigpiod 2>/dev/null || true
+# Detect Raspberry Pi version for appropriate GPIO library
+PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
+PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
 
-# Python3 setuptools should already be available in modern Raspberry Pi OS
-sudo apt install python3-setuptools -y
+echo "Detected: $PI_MODEL"
 
-cd /home/HiveControl/software
-sudo git clone https://github.com/rcrum003/pigpio
-cd pigpio/
-sudo make
-sudo make install
-sudo cp /usr/local/bin/pigpiod /usr/bin/
-sudo apt install python3-pigpio -y
-sudo pigpiod
+if [ "$PI_VERSION" -ge 5 ]; then
+    echo "------------------------"
+    echo "Installing lgpio for Raspberry Pi 5+"
+    echo "------------------------"
+    # lgpio is the recommended GPIO library for Pi 5
+    sudo apt install python3-lgpio -y
+
+    # Install smbus2 and spidev for I2C/SPI support
+    sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
+
+    echo "lgpio installation complete"
+else
+    echo "------------------------"
+    echo "Installing PIGPIO library for DHT and HX711 Sensors (Pi 4 and earlier)"
+    echo "------------------------"
+    #Kill pigpiod just in case it is already running
+    sudo killall pigpiod 2>/dev/null || true
+
+    # Python3 setuptools should already be available in modern Raspberry Pi OS
+    sudo apt install python3-setuptools -y
+
+    cd /home/HiveControl/software
+    sudo git clone https://github.com/rcrum003/pigpio
+    cd pigpio/
+    sudo make
+    sudo make install
+    sudo cp /usr/local/bin/pigpiod /usr/bin/
+    sudo apt install python3-pigpio -y
+    sudo pigpiod
+
+    echo "pigpio installation complete"
+fi
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs

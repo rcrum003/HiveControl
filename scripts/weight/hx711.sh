@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # read the scale
-# 
-# v9 patch 
+#
+# v9 patch
 # Changed Count to RAW for better readability
 # Added a check to make sure RAW is a number to assist setups that don't always return a number
 # In this case, every couple of times, we were getting "No data to consider"
@@ -11,6 +11,11 @@
 # Realized that patch 4 wasn't the right formula.
 # This formula is now correct.
 # Now using Python Library that leverages PiGPIO.
+#
+# v10 patch - Added Pi 5 support
+# Detects Raspberry Pi version and uses appropriate GPIO library:
+# - Pi 4 and earlier: HX711.py (pigpio)
+# - Pi 5 and later: HX711_lgpio.py (lgpio)
 
 #Removed pulling new variables, as the main script does that for us
 #source /home/HiveControl/scripts/hiveconfig.inc
@@ -58,12 +63,23 @@ if ! [[ $HX711_ZERO =~ $re1 ]] || ! [[ $HX711_CALI =~ $re1 ]]  ; then
 fi
 fi
 #
+# Detect Raspberry Pi version
+PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
+PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
+
+# Select appropriate HX711 script based on Pi version
+if [ "$PI_VERSION" -ge 5 ]; then
+    HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711_lgpio.py"
+else
+    HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711.py"
+fi
+
 # read the scale
 DATA_GOOD=0
 COUNTER=1
 while [ $COUNTER -lt 5 ] && [ $DATA_GOOD -eq 0 ]; do
 
-RAW=$(/usr/bin/sudo /usr/bin/python /home/HiveControl/scripts/weight/HX711.py 2>&1)
+RAW=$(/usr/bin/sudo /usr/bin/python3 "$HX711_SCRIPT" 2>&1)
 #echo "$RAW" >> successrate	
 
 # Check to see if Raw is a number, if not, don't do this
