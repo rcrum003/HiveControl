@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
-Raspberry Pi version detection module.
+Raspberry Pi version and architecture detection module.
 
-Reads /proc/device-tree/model to determine Pi version and select
-the appropriate GPIO library.
+Reads /proc/device-tree/model to determine Pi version and
+detects 32-bit vs 64-bit OS to select the appropriate GPIO library.
 """
 
+import os
+import platform
 import re
+import struct
 from enum import Enum
 from typing import Optional, Tuple
 
@@ -16,6 +19,60 @@ class PiGeneration(Enum):
     LEGACY = "legacy"      # Pi 4 and earlier (uses pigpio)
     RP1 = "rp1"           # Pi 5+ (uses lgpio/gpiod)
     UNKNOWN = "unknown"
+
+
+class OSArchitecture(Enum):
+    """OS architecture (not CPU architecture)."""
+    ARCH_32BIT = "32-bit"
+    ARCH_64BIT = "64-bit"
+    UNKNOWN = "unknown"
+
+
+def get_os_architecture() -> OSArchitecture:
+    """
+    Detect the OS architecture (32-bit or 64-bit).
+
+    This checks the running OS, not the CPU capability.
+    A 64-bit Pi can run 32-bit OS, so we need to check the OS.
+
+    Returns:
+        OSArchitecture.ARCH_32BIT or OSArchitecture.ARCH_64BIT
+    """
+    # Method 1: Check pointer size (most reliable for running Python)
+    pointer_size = struct.calcsize("P") * 8
+    if pointer_size == 64:
+        return OSArchitecture.ARCH_64BIT
+    elif pointer_size == 32:
+        return OSArchitecture.ARCH_32BIT
+
+    # Method 2: Check platform machine type
+    machine = platform.machine().lower()
+    if machine in ('aarch64', 'arm64', 'x86_64', 'amd64'):
+        return OSArchitecture.ARCH_64BIT
+    elif machine in ('armv7l', 'armv6l', 'i386', 'i686'):
+        return OSArchitecture.ARCH_32BIT
+
+    # Method 3: Try uname
+    try:
+        uname = os.uname()
+        if '64' in uname.machine:
+            return OSArchitecture.ARCH_64BIT
+        elif 'arm' in uname.machine.lower():
+            return OSArchitecture.ARCH_32BIT
+    except Exception:
+        pass
+
+    return OSArchitecture.UNKNOWN
+
+
+def is_64bit_os() -> bool:
+    """Quick check if running 64-bit OS."""
+    return get_os_architecture() == OSArchitecture.ARCH_64BIT
+
+
+def is_32bit_os() -> bool:
+    """Quick check if running 32-bit OS."""
+    return get_os_architecture() == OSArchitecture.ARCH_32BIT
 
 
 def read_pi_model() -> Optional[str]:
@@ -118,11 +175,12 @@ def get_detailed_info() -> dict:
     Get detailed Pi information for diagnostics.
 
     Returns:
-        Dictionary with model, version, generation, and recommended library
+        Dictionary with model, version, generation, architecture, and recommended library
     """
     model_string = read_pi_model()
     version, _ = parse_pi_version(model_string)
     generation = get_pi_generation()
+    architecture = get_os_architecture()
 
     library_map = {
         PiGeneration.LEGACY: "pigpio",
@@ -134,6 +192,9 @@ def get_detailed_info() -> dict:
         "model": model_string,
         "version": version,
         "generation": generation.value,
+        "architecture": architecture.value,
+        "is_64bit": architecture == OSArchitecture.ARCH_64BIT,
+        "is_32bit": architecture == OSArchitecture.ARCH_32BIT,
         "recommended_library": library_map[generation],
         "is_pi5_or_later": generation == PiGeneration.RP1
     }
@@ -146,5 +207,7 @@ if __name__ == "__main__":
     print(f"  Model: {info['model']}")
     print(f"  Version: {info['version']}")
     print(f"  Generation: {info['generation']}")
+    print(f"  OS Architecture: {info['architecture']}")
+    print(f"  Is 64-bit OS: {info['is_64bit']}")
     print(f"  Recommended GPIO Library: {info['recommended_library']}")
     print(f"  Is Pi 5 or later: {info['is_pi5_or_later']}")

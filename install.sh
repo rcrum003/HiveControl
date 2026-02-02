@@ -332,11 +332,23 @@ fi
 #cd wiringPI
 #sudo ./build
 
-# Detect Raspberry Pi version for appropriate GPIO library
+# Detect Raspberry Pi version and OS architecture for appropriate GPIO library
 PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
 PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
 
+# Detect OS architecture (32-bit vs 64-bit)
+OS_ARCH=$(uname -m)
+case "$OS_ARCH" in
+    aarch64|arm64|x86_64|amd64)
+        IS_64BIT=true
+        ;;
+    *)
+        IS_64BIT=false
+        ;;
+esac
+
 echo "Detected: $PI_MODEL"
+echo "OS Architecture: $OS_ARCH (64-bit: $IS_64BIT)"
 
 if [ "$PI_VERSION" -ge 5 ]; then
     echo "------------------------"
@@ -370,6 +382,19 @@ else
 
     echo "pigpio installation complete"
 fi
+
+####################################################################################
+# Compile architecture-specific binaries
+####################################################################################
+echo "------------------------"
+echo "Compiling TSL2561 light sensor binary for $OS_ARCH"
+echo "------------------------"
+cd /home/HiveControl/software/tsl2561
+gcc -Wall -O2 -o TSL2561.o -c TSL2561.c
+gcc -Wall -O2 -o TSL2561_test.o -c TSL2561_test.c
+gcc -Wall -O2 -o 2561 TSL2561.o TSL2561_test.o
+rm -f *.o
+echo "TSL2561 compilation complete"
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs

@@ -13,9 +13,10 @@
 # Now using Python Library that leverages PiGPIO.
 #
 # v10 patch - Added Pi 5 support
-# Detects Raspberry Pi version and uses appropriate GPIO library:
+# Detects Raspberry Pi version and OS architecture, uses appropriate GPIO library:
 # - Pi 4 and earlier: HX711.py (pigpio)
 # - Pi 5 and later: HX711_lgpio.py (lgpio)
+# Architecture detection helps with diagnostics and future compatibility
 
 #Removed pulling new variables, as the main script does that for us
 #source /home/HiveControl/scripts/hiveconfig.inc
@@ -63,11 +64,23 @@ if ! [[ $HX711_ZERO =~ $re1 ]] || ! [[ $HX711_CALI =~ $re1 ]]  ; then
 fi
 fi
 #
-# Detect Raspberry Pi version
+# Detect Raspberry Pi version and OS architecture
 PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
 PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
 
+# Detect OS architecture (32-bit vs 64-bit)
+OS_ARCH=$(uname -m)
+case "$OS_ARCH" in
+    aarch64|arm64|x86_64|amd64)
+        IS_64BIT=true
+        ;;
+    *)
+        IS_64BIT=false
+        ;;
+esac
+
 # Select appropriate HX711 script based on Pi version
+# Pi 5+ requires lgpio regardless of 32/64-bit OS
 if [ "$PI_VERSION" -ge 5 ]; then
     HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711_lgpio.py"
 else
