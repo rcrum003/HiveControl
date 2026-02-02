@@ -410,14 +410,33 @@ echo "TSL2561 compilation complete"
 		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
 	fi
 ####################################################################################
-# DHTXXD
+# DHTXXD - DHT11/DHT21/DHT22 Temperature/Humidity Sensors
 ####################################################################################
-	#Installing DHTXX Code
-	echo "Installing DHT Code"
-	cd /home/HiveControl/software/DHTXXD
-	unzip -o DHTXXD.zip
-	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
-	sudo cp DHTXXD /usr/local/bin/
+echo "------------------------"
+echo "Installing DHT Sensor Support"
+echo "------------------------"
+
+cd /home/HiveControl/software/DHTXXD
+unzip -o DHTXXD.zip
+
+if [ "$PI_VERSION" -ge 5 ]; then
+    echo "Pi 5 detected: Using kernel driver for DHT sensors"
+    echo "The DHT kernel driver reads sensors via /sys/devices/platform/dht11@<gpio>/"
+    echo ""
+    echo "IMPORTANT: To use DHT sensors on Pi 5, you must:"
+    echo "  1. Add 'dtoverlay=dht11,gpiopin=<your_gpio>' to /boot/firmware/config.txt"
+    echo "  2. Reboot the Pi"
+    echo ""
+    echo "Example for GPIO 4: dtoverlay=dht11,gpiopin=4"
+    echo ""
+    # Make the Python script executable
+    chmod +x /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py
+else
+    echo "Pi 4 or earlier: Compiling DHTXXD binary (pigpio)"
+    sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
+    sudo cp DHTXXD /usr/local/bin/
+fi
+echo "DHT sensor support installation complete"
 
 ####################################################################################
 # XMLStarlet used to send data to current hivetool.org Perl script

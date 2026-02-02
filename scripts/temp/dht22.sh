@@ -1,13 +1,27 @@
 #!/bin/bash
 # read the DHT22
-# Version 1.2
+# Version 1.3
 # Supporting the Hivetool project
 # gets and returns data like the temperhum
-
-
+#
+# v1.3 - Added Pi 5 support using kernel driver
+# Detects Pi version and uses:
+# - Pi 4 and earlier: DHTXXD binary (pigpio)
+# - Pi 5 and later: DHTXXD_kernel.py (kernel IIO driver)
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
+
+# Detect Raspberry Pi version
+PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
+PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
+
+# Select appropriate DHT reader based on Pi version
+if [ "$PI_VERSION" -ge 5 ]; then
+    USE_KERNEL_DRIVER=true
+else
+    USE_KERNEL_DRIVER=false
+fi
 
 
 function return_error {
@@ -88,8 +102,14 @@ COUNTER=1
 while [ $COUNTER -lt 6 ] && [ $DATA_GOOD -eq 0 ]
 do
         DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
-        #Run the C Code to read the sensor
-        DHT22=$(sudo /usr/local/bin/DHTXXD -g$GPIO)
+        #Run the appropriate code to read the sensor based on Pi version
+        if [ "$USE_KERNEL_DRIVER" = true ]; then
+            # Pi 5+: Use kernel driver via Python script
+            DHT22=$(sudo /usr/bin/python3 /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py -g$GPIO)
+        else
+            # Pi 4 and earlier: Use pigpio-based C binary
+            DHT22=$(sudo /usr/local/bin/DHTXXD -g$GPIO)
+        fi
           
         #Check for error status, which is included in the C code
           DHT_STATUS=$(echo $DHT22 |awk '{print $1}')
