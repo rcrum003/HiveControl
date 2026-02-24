@@ -3,6 +3,8 @@
 // This wizard guides users through the initial configuration
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+// SECURITY FIX: Include security-init for CSRF protection and security headers
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
 $step = isset($_GET['step']) ? (int)$_GET['step'] : 1;

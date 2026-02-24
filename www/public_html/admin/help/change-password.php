@@ -160,12 +160,7 @@
     <ol>
         <li>Check your password manager or secure notes</li>
         <li>Try variations you commonly use</li>
-        <li>If you have database access, you can reset it manually:
-            <div class="code-block" style="margin-top: 10px;">
-                mysql -u root -p hivecontrol<br>
-                UPDATE users SET password=MD5('newpassword') WHERE username='admin';
-            </div>
-        </li>
+        <li>If you have admin access, use the <strong>Change Password</strong> page in the admin panel to reset your password securely.</li>
         <li>Contact your system administrator if available</li>
         <li>As a last resort, reinstall HiveControl (data can be preserved)</li>
     </ol>

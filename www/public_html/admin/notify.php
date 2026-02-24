@@ -1,6 +1,8 @@
 <?PHP
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+// SECURITY FIX: Include security-init for CSRF protection and security headers
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
 # Get some config parameters
@@ -85,13 +87,14 @@ $now = date('Y-m-d H:i:s');
                                     </thead>
                                     <tbody>
                                        <?PHP foreach($notifications as $r){
-                                        echo '<tr><td>'.$r['id'].'</td>';
-                                        echo '<td>'.$r['name'].'</td>';
-                                        echo '<td>'.$r['measure'].'</td>';
-                                        echo '<td>'.$r['threshold_type'].'</td>';
-                                        echo '<td>'.$r['threshold_value'].'</td>';
-                                        echo '<td>'.$r['time_period'].'</td>';
-                                        echo '<td>'.$r['status'].'</td></tr>';
+                                        // SECURITY FIX: Escape output to prevent stored XSS
+                                        echo '<tr><td>'.htmlspecialchars($r['id']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['name']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['measure']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['threshold_type']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['threshold_value']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['time_period']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['status']).'</td></tr>';
                                     }
                                     ?>      
                                     </tbody>

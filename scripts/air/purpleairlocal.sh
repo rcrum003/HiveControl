@@ -31,8 +31,8 @@ JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 
 #Storing URL in AIR_LOCAL_URL field
 AIR_URL="$AIR_LOCAL_URL"
-TEMPFILE="/home/HiveControl/scripts/air/output.json"
-#TEMPFILE="/home/pi/purpleair/output.json"
+TEMPFILE=$(mktemp /tmp/purpleairlocal_XXXXXX.json)
+trap 'rm -f "$TEMPFILE"' EXIT
 
 #Get all sensors
 #https://www.purpleair.com/json 
@@ -85,7 +85,7 @@ fi
 #https://en.wikipedia.org/wiki/Air_quality_index
 
 #Remove downloaded file
-rm -rf $TEMPFILE
+rm -f "$TEMPFILE"
 
 #Return output for main script
 

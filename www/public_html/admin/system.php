@@ -1,6 +1,8 @@
 <?PHP
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+// SECURITY FIX: Include security-init for CSRF protection and security headers
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
 # Get some config parameters
@@ -66,9 +68,10 @@ function getlog($conn)
                     echo '</tbody></table>';
 }
 
-$command = test_input($_GET["command"]);
-$confirm = test_input($_GET["confirm"]);
-$table = test_input($_GET["table"]);
+// SECURITY FIX: Destructive commands now come via POST with CSRF protection
+$command = test_input($_POST["command"] ?? $_GET["command"] ?? "");
+$confirm = test_input($_POST["confirm"] ?? $_GET["confirm"] ?? "");
+$table = test_input($_POST["table"] ?? $_GET["table"] ?? "");
 
 #Get system time
 $shortName = exec('date +%Z');
@@ -136,7 +139,8 @@ if(isset($_GET["command"])) {
                 break;
             
             case "cleardata":
-
+                // SECURITY FIX: Require CSRF token for destructive operations
+                require_csrf_token();
                 if ($confirm == "yes") {
                     # well, you confirmed it, deleting all the data
                     $sth6 = $conn->prepare("DELETE from allhivedata");
@@ -160,7 +164,8 @@ if(isset($_GET["command"])) {
                 break;
 
             case "clearlogs":
-
+                // SECURITY FIX: Require CSRF token for destructive operations
+                require_csrf_token();
                 if ( $confirm == "yes" ) {
                     # Confirmed we want to delete
                     $sth13 = $conn->prepare("DELETE from logs");
@@ -173,7 +178,8 @@ if(isset($_GET["command"])) {
                 break;
 
             case "removezero":
-
+                // SECURITY FIX: Require CSRF token for destructive operations
+                require_csrf_token();
                 if ( $confirm == "yes" ) {
                     # Confirmed we want to remove zeros
                     if ( isset($table)) {
@@ -372,9 +378,15 @@ if(isset($_GET["command"])) {
                                         <div class="modal-body">
                                             Are you sure you want to delete ALL data? This data is non-recoverable, if you confirm. 
                                         </div>
+                                        <!-- SECURITY FIX: Use POST forms with CSRF tokens instead of GET links -->
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here</button>
-                                            <a href="/admin/system.php?command=cleardata&confirm=yes"><button type="button" class="btn btn-danger">Yes, DELETE it all!</button></a>
+                                            <form method="POST" action="/admin/system.php" style="display:inline">
+                                                <?php echo csrf_field(); ?>
+                                                <input type="hidden" name="command" value="cleardata">
+                                                <input type="hidden" name="confirm" value="yes">
+                                                <button type="submit" class="btn btn-danger">Yes, DELETE it all!</button>
+                                            </form>
                                         </div>
                                     </div>
                                     <!-- /.modal-content -->
@@ -390,11 +402,16 @@ if(isset($_GET["command"])) {
                                             <h4 class="modal-title" id="myModalLabel">Please Confirm</h4>
                                         </div>
                                         <div class="modal-body">
-                                            Are you sure you want to clear the logs? 
+                                            Are you sure you want to clear the logs?
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">No, get me out of here</button>
-                                            <a href="/admin/system.php?command=clearlogs&confirm=yes"><button type="button" class="btn btn-danger">Yes, clear it all!</button></a>
+                                            <form method="POST" action="/admin/system.php" style="display:inline">
+                                                <?php echo csrf_field(); ?>
+                                                <input type="hidden" name="command" value="clearlogs">
+                                                <input type="hidden" name="confirm" value="yes">
+                                                <button type="submit" class="btn btn-danger">Yes, clear it all!</button>
+                                            </form>
                                         </div>
                                     </div>
                                     <!-- /.modal-content -->
@@ -414,18 +431,19 @@ if(isset($_GET["command"])) {
                                             <p><br><br><b>
                                             Clicking on any of the following will remove any record where it = 0:
                                             </b><p>
+                                            <!-- SECURITY FIX: Use POST forms with CSRF tokens -->
                                             <div class="table-responsive">
                                             <table class="table">
                                                 <tbody>
                                                     <tr>
-                                                        <td><a href="/admin/system.php?command=removezero&confirm=yes&table=hivetempf">Hive Temp</a></td>
-                                                        <td><a href="/admin/system.php?command=removezero&confirm=yes&table=hiveHum">Hive Humidity</a></td>
-                                                 
+                                                        <td><form method="POST" action="/admin/system.php" style="display:inline"><?php echo csrf_field(); ?><input type="hidden" name="command" value="removezero"><input type="hidden" name="confirm" value="yes"><input type="hidden" name="table" value="hivetempf"><button type="submit" class="btn btn-link">Hive Temp</button></form></td>
+                                                        <td><form method="POST" action="/admin/system.php" style="display:inline"><?php echo csrf_field(); ?><input type="hidden" name="command" value="removezero"><input type="hidden" name="confirm" value="yes"><input type="hidden" name="table" value="hiveHum"><button type="submit" class="btn btn-link">Hive Humidity</button></form></td>
+
                                                     </tr>
                                                     <tr>
-                                                       <td><a href="/admin/system.php?command=removezero&confirm=yes&table=hiveweight">Hive Weight</a></td>
-                                                        <td><a href="/admin/system.php?command=removezero&confirm=yes&table=IN_COUNT">Flight</a></td>
-                                                    
+                                                       <td><form method="POST" action="/admin/system.php" style="display:inline"><?php echo csrf_field(); ?><input type="hidden" name="command" value="removezero"><input type="hidden" name="confirm" value="yes"><input type="hidden" name="table" value="hiveweight"><button type="submit" class="btn btn-link">Hive Weight</button></form></td>
+                                                        <td><form method="POST" action="/admin/system.php" style="display:inline"><?php echo csrf_field(); ?><input type="hidden" name="command" value="removezero"><input type="hidden" name="confirm" value="yes"><input type="hidden" name="table" value="IN_COUNT"><button type="submit" class="btn btn-link">Flight</button></form></td>
+
                                                     </tr>
                                                 </tbody>
                                             </table>

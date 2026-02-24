@@ -51,7 +51,7 @@ if ($weather_detail == "city") {
 
 
 // Get Current Conditions from a specific Weather Station
-  $json_string_current = file_get_contents("http://api.wunderground.com/api/$key/conditions/q/$wxlocation.json");
+  $json_string_current = file_get_contents("https://api.wunderground.com/api/$key/conditions/q/$wxlocation.json");
   $parsed_json_current = json_decode($json_string_current);
 
   $location= $parsed_json_current->{'current_observation'}->{'display_location'}->{'full'};  
@@ -68,12 +68,12 @@ if ($weather_detail == "city") {
   $current_weather = $parsed_json_current->{'current_observation'}->{'weather'};
 
 // Get Hourly Forecast - 
-  $json_string_hourly = file_get_contents("http://api.wunderground.com/api/$key/hourly/q/$wxlocation.json");
+  $json_string_hourly = file_get_contents("https://api.wunderground.com/api/$key/hourly/q/$wxlocation.json");
   $parsed_json_hourly = json_decode($json_string_hourly);
  
 
 // Get 10day forecast - used below 
-  $json_string = file_get_contents("http://api.wunderground.com/api/$key/forecast10day/q/$wxlocation.json");
+  $json_string = file_get_contents("https://api.wunderground.com/api/$key/forecast10day/q/$wxlocation.json");
   $parsed_json = json_decode($json_string);
 
 if ($SHOW_METRIC == "on") {

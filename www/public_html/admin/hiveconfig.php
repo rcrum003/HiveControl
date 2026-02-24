@@ -2,6 +2,8 @@
 
 // Standard includes
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+// SECURITY FIX: Include security-init for CSRF protection and security headers
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 //require $_SERVER["DOCUMENT_ROOT"] . '/admin/http.php';
 //require $_SERVER["DOCUMENT_ROOT"] . '/admin/api.php';
@@ -97,7 +99,9 @@ function test_input_allow_slash($data) {
 
 <?PHP
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        
+        // SECURITY FIX: Validate CSRF token on POST
+        require_csrf_token();
+
 if($v->validate()) {
 
 // Get current version    
@@ -186,6 +190,7 @@ if($v->validate()) {
                     
                         <!-- /.panel-heading -->
                         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                        <?php echo csrf_field(); ?>
                         <div class="panel-body">
                             <div class="dataTable_wrapper">
                                 <table class="table table-striped table-bordered table-hover" id="dataTables-example">

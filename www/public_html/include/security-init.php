@@ -30,6 +30,17 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+// SECURITY FIX: Generate CSP nonce for script-src (replaces unsafe-inline)
+$_SESSION['csp_nonce'] = bin2hex(random_bytes(16));
+
+/**
+ * Get CSP nonce for inline scripts
+ * @return string CSP nonce value
+ */
+function get_csp_nonce() {
+    return $_SESSION['csp_nonce'] ?? '';
+}
+
 /**
  * Get CSRF token for forms
  * @return string CSRF token
@@ -76,7 +87,9 @@ function require_csrf_token() {
 header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: strict-origin-when-cross-origin");
-// CSP header - adjust as needed for your application
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
+header("X-XSS-Protection: 1; mode=block");
+header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
+// SECURITY FIX: CSP header uses nonce instead of unsafe-inline for scripts
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-" . get_csp_nonce() . "'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
 
 ?>
