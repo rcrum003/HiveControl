@@ -170,44 +170,48 @@ if ($action == "change") {
                 // {SHA} = SHA1
                 // others = traditional crypt()
 
+                $needs_rehash = false;
                 if (strpos($current_hash, '$apr1$') === 0) {
                     // Apache MD5 format - use our custom verification function
                     $verified = apr1_md5_verify($current_password, $current_hash);
+                    $needs_rehash = true; // SECURITY FIX: MD5 is weak, force upgrade to bcrypt
                 } elseif (strpos($current_hash, '$2y$') === 0 || strpos($current_hash, '$2a$') === 0) {
                     // bcrypt format
                     if (password_verify($current_password, $current_hash)) {
                         $verified = true;
                     }
+                    // Check if bcrypt cost needs updating
+                    $needs_rehash = password_needs_rehash($current_hash, PASSWORD_BCRYPT);
                 } elseif (strpos($current_hash, '{SHA}') === 0) {
                     // SHA1 format (base64 encoded)
                     $sha_hash = '{SHA}' . base64_encode(sha1($current_password, true));
                     if ($sha_hash === $current_hash) {
                         $verified = true;
                     }
+                    $needs_rehash = true; // SECURITY FIX: SHA1 is weak, force upgrade to bcrypt
                 } else {
                     // Try traditional crypt()
                     if (crypt($current_password, $current_hash) === $current_hash) {
                         $verified = true;
                     }
+                    $needs_rehash = true; // SECURITY FIX: crypt() is weak, force upgrade to bcrypt
+                }
+
+                // SECURITY FIX: Auto-upgrade weak password hashes to bcrypt on successful verification
+                if ($verified && $needs_rehash) {
+                    $upgraded_hash = password_hash($current_password, PASSWORD_BCRYPT);
+                    $upgraded_content = "$username:$upgraded_hash\n";
+                    if (file_put_contents($htpasswd_file, $upgraded_content) !== false) {
+                        loglocal($now, "PASSWORD", "INFO", "Password hash auto-upgraded to bcrypt for user $username by IP $user_ip");
+                    }
                 }
             }
 
             if (!$verified) {
-                // Determine hash type for error message
-                $hash_type = "unknown";
-                if (strpos($current_hash, '$apr1$') === 0) {
-                    $hash_type = "Apache MD5";
-                } elseif (strpos($current_hash, '$2y$') === 0 || strpos($current_hash, '$2a$') === 0) {
-                    $hash_type = "bcrypt";
-                } elseif (strpos($current_hash, '{SHA}') === 0) {
-                    $hash_type = "SHA1";
-                } else {
-                    $hash_type = "crypt";
-                }
-
-                $message = "Current password is incorrect. (Hash type detected: $hash_type)";
+                // SECURITY FIX: Generic error message - do not disclose hash type
+                $message = "Current password is incorrect.";
                 $message_type = "danger";
-                loglocal($now, "PASSWORD", "ERROR", "Failed password change attempt - incorrect current password (hash type: $hash_type) by IP $user_ip");
+                loglocal($now, "PASSWORD", "ERROR", "Failed password change attempt - incorrect current password by IP $user_ip");
             } else {
                 // Generate new password hash using bcrypt
                 $new_hash = password_hash($new_password, PASSWORD_BCRYPT);

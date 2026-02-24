@@ -40,7 +40,12 @@ TEMPFILE="/home/HiveControl/scripts/air/output.json"
 #GET https://api.purpleair.com/v1/sensors/7634  
 #X-API-Key: 251486F2-9B9F-11EB-912F-42010A800259
 
-PURPLE_API_KEY="251486F2-9B9F-11EB-912F-42010A800259"
+# SECURITY FIX: API key should be configured in hiveconfig.inc, not hardcoded
+PURPLE_API_KEY="${PURPLE_API_KEY:-}"
+if [ -z "$PURPLE_API_KEY" ]; then
+	echo "ERROR: PURPLE_API_KEY not configured in hiveconfig.inc"
+	exit 1
+fi
 
 #TEMPFILE="/home/pi/purpleair/output.json"
 

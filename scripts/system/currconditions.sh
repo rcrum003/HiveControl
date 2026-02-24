@@ -449,7 +449,8 @@ if [ "$SHARE_HIVETOOL" = "yes" ]; then
 	# Note: Credentials should ideally be in .netrc file for better security
 	# but keeping original implementation for compatibility
 	#====================
-	if ! /usr/bin/curl --silent --retry 5 -k -u "$HT_USERNAME:$HT_PASSWORD" -X POST \
+	# SECURITY FIX: Removed -k flag to enforce TLS certificate verification
+	if ! /usr/bin/curl --silent --retry 5 -u "$HT_USERNAME:$HT_PASSWORD" -X POST \
 		--data-binary "@$SAVEFILE" \
 		https://hivetool.org/private/log_hive.pl \
 		-H 'Accept: application/xml' \

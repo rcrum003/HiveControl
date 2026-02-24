@@ -1,7 +1,7 @@
 <?PHP
 
 #API Variables
-$MODE="DEV"; #Dev or Prod
+$MODE="PROD"; #Dev or Prod
 
 
 if ($MODE == "DEV") {
