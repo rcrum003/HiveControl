@@ -10,13 +10,15 @@ if [ -z "$SCALETYPE" ]; then
     exit 1
 fi
 
-# Detect Raspberry Pi version for HX711 script selection
+# Detect Raspberry Pi version and OS architecture for HX711 script selection
 PI_MODEL=$(tr -d '\0' < /proc/device-tree/model 2>/dev/null || echo "Unknown")
 PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
+OS_ARCH=$(uname -m)
 
 case "$SCALETYPE" in
     hx711)
-        if [ "$PI_VERSION" -ge 5 ]; then
+        # Pi 5+ requires lgpio; 64-bit OS on any Pi also needs lgpio (pigpiod can't access GPIO on 64-bit kernels)
+        if [ "$PI_VERSION" -ge 5 ] || [ "$OS_ARCH" = "aarch64" ] || [ "$OS_ARCH" = "arm64" ]; then
             HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711_lgpio.py"
         else
             HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711.py"

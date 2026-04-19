@@ -79,9 +79,9 @@ case "$OS_ARCH" in
         ;;
 esac
 
-# Select appropriate HX711 script based on Pi version
-# Pi 5+ requires lgpio regardless of 32/64-bit OS
-if [ "$PI_VERSION" -ge 5 ]; then
+# Select appropriate HX711 script based on Pi version and OS architecture
+# Pi 5+ requires lgpio; 64-bit OS on any Pi also needs lgpio (pigpiod can't access GPIO on 64-bit kernels)
+if [ "$PI_VERSION" -ge 5 ] || [ "$IS_64BIT" = true ]; then
     HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711_lgpio.py"
 else
     HX711_SCRIPT="/home/HiveControl/scripts/weight/HX711.py"
