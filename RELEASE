@@ -1,6 +1,51 @@
 Release Notes:
 
 --------------------
+2.11 Release
+--------------------
+NEW FEATURES:
+- Weight Drift Compensation System
+  * Environmental compensation reduces weight drift caused by temperature and
+    humidity changes on the load cell and mechanical components
+  * Multivariate linear regression model: compensated = net - (alpha * delta_temp) - (beta * delta_humidity)
+  * Uses cached ambient weather station data (not hive-internal sensors)
+  * Configurable via admin Instruments page (enable/disable, view coefficients)
+
+- High-Frequency Weight Monitor (weight_monitor.sh)
+  * Lightweight 15-minute cron job dedicated to weight sampling
+  * Runs independently of currconditions.sh (hourly full sensor sweep)
+  * Stores readings in new weight_readings table with raw, net, and compensated values
+  * flock-based mutual exclusion prevents concurrent HX711 GPIO access
+
+- Trimmed Mean Sampling for HX711 Weight Sensor
+  * Collects 50 samples, discards top and bottom 10%, averages remaining 40
+  * Reduces noise from electrical spikes and ADC jitter
+  * Implemented in both HX711.py (Pi 4 pigpio) and HX711_lgpio.py (Pi 5+ lgpio)
+
+- Calibration Workflow (calibrate_env_compensation.sh + compute_compensation.py)
+  * Place a static test weight on the scale and run calibration for 24-48 hours
+  * Automatically collects weight/temp/humidity samples via weight_monitor.sh
+  * Computes least-squares regression coefficients when calibration is stopped
+  * Requires R-squared >= 0.3 to enable compensation (rejects weak correlations)
+  * Writes coefficients directly to hiveconfig database
+
+BUG FIXES:
+- Fixed infinite retry loop in getweight.sh (wrong variable name in counter increment)
+- Fixed time.sleep race condition in HX711_lgpio.py when valid_after is in the past
+- Added flock to currconditions.sh get_hive_weight() for safe concurrent access
+  with weight_monitor.sh
+
+DATABASE CHANGES:
+- DB_PATCH_33: Added weight_readings table with indexes on date, date_utc, hiveid
+- DB_PATCH_33: Added calibration_data table for compensation calibration samples
+- DB_PATCH_33: Added 6 columns to hiveconfig: WEIGHT_TEMP_COEFF, WEIGHT_HUMIDITY_COEFF,
+  WEIGHT_REF_TEMP, WEIGHT_REF_HUMIDITY, WEIGHT_COMPENSATION_ENABLED, WEIGHT_MONITOR_INTERVAL
+
+ADMIN UI:
+- Added Weight Drift Compensation section to Instruments configuration page
+- Shows current compensation status, coefficients, and reference values
+
+--------------------
 2.10 Release
 --------------------
 NEW FEATURES:

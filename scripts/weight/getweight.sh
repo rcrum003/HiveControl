@@ -6,6 +6,7 @@
 # Added logic to check to see if we have set our intercepts.
 
 WEIGHTRUNDIR=/home/HiveControl/scripts/weight
+
 # Get some variables from our central file
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -82,7 +83,7 @@ do
 	else
 	#Ok, we got a bad value, let's try to run the scripts again.
 	#Increment Counter and try again
-	let "COUNTER += 1"
+	let "GETWEIGHTCOUNTER += 1"
 	DATA_GOOD=1
 		#Something bad happened, set values to zero and exit	    
 	fi

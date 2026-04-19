@@ -149,6 +149,36 @@ class sensor:
 
       self.pi.set_watchdog(self.CLOCK, 0) # cancel timeout
 
+   def read_trimmed_mean(self, times=50, trim=0.1):
+      """
+      Collect multiple readings via the callback mechanism, discard
+      outliers, and return the mean. More robust than a single reading
+      against electrical noise spikes.
+      """
+      if not (0.0 <= trim < 0.5):
+         raise ValueError("trim must be in [0.0, 0.5), got {}".format(trim))
+
+      readings = []
+      last_count = self._count
+      timeout = time.time() + (times * 0.2)
+      while len(readings) < times and time.time() < timeout:
+         if self._count > last_count and self._reading is not None:
+            readings.append(self._reading)
+            last_count = self._count
+         time.sleep(0.05)
+
+      if not readings:
+         return None
+
+      readings.sort()
+      cut = int(len(readings) * trim)
+      trimmed = readings[cut:len(readings) - cut] if cut > 0 else readings
+
+      if not trimmed:
+         return None
+
+      return sum(trimmed) / len(trimmed)
+
    def _callback(self, gpio, level, tick):
 
       if gpio == self.CLOCK:
@@ -194,62 +224,20 @@ if __name__ == "__main__":
    import pigpio
    import HX711
 
-   #def cbf(count, mode, reading):
-   #  print(count, mode, reading)
-
    pi = pigpio.pi()
    if not pi.connected:
       exit(0)
 
-   #print("start with CH_B_GAIN_32 and callback")
-
    s = HX711.sensor(pi, DATA=23, CLOCK=24, mode=CH_A_GAIN_128, callback=None)
-
-   time.sleep(5)
-
-   #s.set_mode(CH_A_GAIN_64)
-
-   #print("Change mode to CH_A_GAIN_64")
-
-   #time.sleep(5)
-
-   #s.set_mode(CH_A_GAIN_128)
-
-   #print("Change mode to CH_A_GAIN_128")
-
-   #time.sleep(5)
-
-   #s.pause()
-
-   #print("Pause")
-
-   #time.sleep(5)
-
    s.start()
+   time.sleep(2)
 
-   #print("Start")
-
-   time.sleep(5)
-
-   #s.set_callback(None)
-
-   #print("Cancel callback and read manually")
-
-   stop = time.time() + 5
-
-   c, m, r = s.get_reading()
-
-   print(r)
-
-   #while time.time() < stop:
-    #  count, mode, reading = s.get_reading()
-     # if count != c:
-      #   c = count
-       #  print(mode, reading)
-      #time.sleep(0.01)
+   result = s.read_trimmed_mean(times=50, trim=0.1)
+   if result is not None:
+      print(int(result))
+   else:
+      print("No data to consider")
 
    s.pause()
-
    s.cancel()
-
    pi.stop()

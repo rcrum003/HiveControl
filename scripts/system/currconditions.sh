@@ -113,6 +113,15 @@ fi
 function get_hive_weight() {
 	if [ "$ENABLE_HIVE_WEIGHT_CHK" = "yes" ]; then
 		echo " --- GETTING WEIGHT ---"
+		# Acquire lock to prevent concurrent HX711 access with weight_monitor.sh
+		local LOCKFILE="/tmp/hivecontrol_weight.lock"
+		exec 200>"$LOCKFILE"
+		if ! flock -w 60 200; then
+			echo "WARNING: Could not acquire HX711 lock after 60s"
+			HIVEWEIGHT="null"
+			HIVERAWWEIGHT="null"
+			return 1
+		fi
 		local weight_output
 		if ! weight_output=$("$HOMEDIR/scripts/weight/getweight.sh" 2>&1); then
 			echo "ERROR: Failed to get weight data: $weight_output"

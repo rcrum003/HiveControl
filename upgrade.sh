@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="113"
+Upgrade_ver="114"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -307,6 +307,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_32
 			let DB_ver="24"
 		fi
+		if [[ $DB_ver -eq "24" ]]; then
+			echo "Applying DB Ver 25 Upgrades - Weight drift compensation"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_33
+			let DB_ver="25"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -484,6 +489,21 @@ if [[ "$Installed_Ver" < "2.10" ]]; then
 	chown www-data:www-data /home/HiveControl/data/backups
 
 
+fi
+
+if [[ "$Installed_Ver" < "2.11" ]]; then
+	# Weight drift compensation scripts
+	sudo chmod u+x /home/HiveControl/scripts/weight/weight_monitor.sh
+	sudo chmod u+x /home/HiveControl/scripts/weight/calibrate_env_compensation.sh
+	sudo chmod u+x /home/HiveControl/scripts/weight/compute_compensation.py
+
+	# Install weight monitor cron job (every 15 min) if not already present
+	CRON_ENTRY="*/15 * * * * /home/HiveControl/scripts/weight/weight_monitor.sh >> /home/HiveControl/logs/weight_monitor.log 2>&1"
+	(sudo crontab -u root -l 2>/dev/null | grep -v "weight_monitor.sh"; echo "$CRON_ENTRY") | sudo crontab -u root -
+
+	# Ensure log file exists
+	sudo touch /home/HiveControl/logs/weight_monitor.log
+	sudo chown root:root /home/HiveControl/logs/weight_monitor.log
 fi
 
 echo "============================================="

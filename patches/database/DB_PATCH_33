@@ -1,0 +1,40 @@
+-- DB_PATCH_33: Weight drift compensation support
+-- Adds weight_readings table for high-frequency weight monitoring
+-- Adds compensation config columns to hiveconfig
+-- Adds calibration_data table for compensation calibration
+
+CREATE TABLE IF NOT EXISTS weight_readings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    hiveid TEXT,
+    date TEXT,
+    date_utc TEXT,
+    raw_weight REAL,
+    net_weight REAL,
+    compensated_weight REAL,
+    ambient_temp_f REAL,
+    ambient_humidity REAL,
+    temp_source TEXT DEFAULT 'weather_cache',
+    sample_count INTEGER DEFAULT 50,
+    sync INTEGER DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_weight_readings_date ON weight_readings(date);
+CREATE INDEX IF NOT EXISTS idx_weight_readings_hiveid ON weight_readings(hiveid);
+CREATE INDEX IF NOT EXISTS idx_weight_readings_date_utc ON weight_readings(date_utc);
+
+CREATE TABLE IF NOT EXISTS calibration_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT,
+    raw_weight REAL,
+    net_weight REAL,
+    ambient_temp_f REAL,
+    ambient_humidity REAL,
+    temp_source TEXT DEFAULT 'weather_cache'
+);
+
+ALTER TABLE hiveconfig ADD COLUMN WEIGHT_TEMP_COEFF REAL DEFAULT 0;
+ALTER TABLE hiveconfig ADD COLUMN WEIGHT_HUMIDITY_COEFF REAL DEFAULT 0;
+ALTER TABLE hiveconfig ADD COLUMN WEIGHT_REF_TEMP REAL DEFAULT NULL;
+ALTER TABLE hiveconfig ADD COLUMN WEIGHT_REF_HUMIDITY REAL DEFAULT NULL;
+ALTER TABLE hiveconfig ADD COLUMN WEIGHT_COMPENSATION_ENABLED TEXT DEFAULT 'no';
+ALTER TABLE hiveconfig ADD COLUMN WEIGHT_MONITOR_INTERVAL INTEGER DEFAULT 15;

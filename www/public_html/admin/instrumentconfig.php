@@ -47,7 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v->rule('slug', ['WXTEMPTYPE']);
     $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER', 'ENABLE_AIR'], ['no', 'yes']);
     $v->rule('integer', ['HIVE_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO', 'HIVE_TEMP_SUB'], 1)->message('{field} must be a integer');
-    $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT'], 1)->message('{field} must be numeric');
+    $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT','WEIGHT_TEMP_COEFF','WEIGHT_HUMIDITY_COEFF','WEIGHT_REF_TEMP','WEIGHT_REF_HUMIDITY'], 1)->message('{field} must be numeric');
+    $v->rule('in', ['WEIGHT_COMPENSATION_ENABLED'], ['no', 'yes']);
     $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type', 'AIR_ID', 'AIR_TYPE'], 1)->message('{field} must be alphaNum only');
     $v->rule('lengthmax', ['WX_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO'], 2);
 
@@ -126,17 +127,32 @@ if($v->validate()) {
         $HIVE_WEIGHT_GPIO = $old['HIVE_WEIGHT_GPIO'];
         $HIVE_WEIGHT_SLOPE = $old['HIVE_WEIGHT_SLOPE'];
         $HIVE_WEIGHT_INTERCEPT = $old['HIVE_WEIGHT_INTERCEPT'];
-        
+        $WEIGHT_COMPENSATION_ENABLED = $old['WEIGHT_COMPENSATION_ENABLED'] ?? 'no';
+        $WEIGHT_TEMP_COEFF = $old['WEIGHT_TEMP_COEFF'] ?? '0';
+        $WEIGHT_HUMIDITY_COEFF = $old['WEIGHT_HUMIDITY_COEFF'] ?? '0';
+        $WEIGHT_REF_TEMP = $old['WEIGHT_REF_TEMP'] ?? '';
+        $WEIGHT_REF_HUMIDITY = $old['WEIGHT_REF_HUMIDITY'] ?? '';
+
         echo '<input type="hidden" name="SCALETYPE" value="' . $SCALETYPE . '">
         <input type="hidden" name="HIVE_WEIGHT_GPIO" value="' . $HIVE_WEIGHT_GPIO . '">
         <input type="hidden" name="HIVE_WEIGHT_SLOPE" value="' . $HIVE_WEIGHT_SLOPE . '">
-        <input type="hidden" name="HIVE_WEIGHT_INTERCEPT" value="' . $HIVE_WEIGHT_INTERCEPT . '">';
+        <input type="hidden" name="HIVE_WEIGHT_INTERCEPT" value="' . $HIVE_WEIGHT_INTERCEPT . '">
+        <input type="hidden" name="WEIGHT_COMPENSATION_ENABLED" value="' . $WEIGHT_COMPENSATION_ENABLED . '">
+        <input type="hidden" name="WEIGHT_TEMP_COEFF" value="' . $WEIGHT_TEMP_COEFF . '">
+        <input type="hidden" name="WEIGHT_HUMIDITY_COEFF" value="' . $WEIGHT_HUMIDITY_COEFF . '">
+        <input type="hidden" name="WEIGHT_REF_TEMP" value="' . $WEIGHT_REF_TEMP . '">
+        <input type="hidden" name="WEIGHT_REF_HUMIDITY" value="' . $WEIGHT_REF_HUMIDITY . '">';
 
     } else {
         $SCALETYPE = test_input($_POST["SCALETYPE"]);
         $HIVE_WEIGHT_GPIO = test_input($_POST["HIVE_WEIGHT_GPIO"]);
         $HIVE_WEIGHT_SLOPE = test_input($_POST["HIVE_WEIGHT_SLOPE"]);
         $HIVE_WEIGHT_INTERCEPT = test_input($_POST["HIVE_WEIGHT_INTERCEPT"]);
+        $WEIGHT_COMPENSATION_ENABLED = test_input($_POST["WEIGHT_COMPENSATION_ENABLED"] ?? 'no');
+        $WEIGHT_TEMP_COEFF = test_input($_POST["WEIGHT_TEMP_COEFF"] ?? '0');
+        $WEIGHT_HUMIDITY_COEFF = test_input($_POST["WEIGHT_HUMIDITY_COEFF"] ?? '0');
+        $WEIGHT_REF_TEMP = test_input($_POST["WEIGHT_REF_TEMP"] ?? '');
+        $WEIGHT_REF_HUMIDITY = test_input($_POST["WEIGHT_REF_HUMIDITY"] ?? '');
     }
 
     
@@ -197,8 +213,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY));
     sleep(1);
 
 
@@ -263,6 +279,11 @@ if($v->validate()) {
                             <input type="hidden" name="HIVE_WEIGHT_GPIO" value="<?php echo $result['HIVE_WEIGHT_GPIO']; ?>">
                             <input type="hidden" name="HIVE_WEIGHT_SLOPE" value="<?php echo $result['HIVE_WEIGHT_SLOPE']; ?>">
                             <input type="hidden" name="HIVE_WEIGHT_INTERCEPT" value="<?php echo $result['HIVE_WEIGHT_INTERCEPT']; ?>">
+                            <input type="hidden" name="WEIGHT_COMPENSATION_ENABLED" value="<?php echo htmlspecialchars($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WEIGHT_TEMP_COEFF" value="<?php echo htmlspecialchars($result['WEIGHT_TEMP_COEFF'] ?? '0', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WEIGHT_HUMIDITY_COEFF" value="<?php echo htmlspecialchars($result['WEIGHT_HUMIDITY_COEFF'] ?? '0', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WEIGHT_REF_TEMP" value="<?php echo htmlspecialchars($result['WEIGHT_REF_TEMP'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WEIGHT_REF_HUMIDITY" value="<?php echo htmlspecialchars($result['WEIGHT_REF_HUMIDITY'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="LUX_SOURCE" value="<?php echo $result['LUX_SOURCE']; ?>">
                             <input type="hidden" name="HIVE_LUX_GPIO" value="<?php echo $result['HIVE_LUX_GPIO']; ?>">
                             <input type="hidden" name="HIVE_LUX_SLOPE" value="<?php echo $result['HIVE_LUX_SLOPE']; ?>">
@@ -477,6 +498,55 @@ if($v->validate()) {
                                             ?>
                                             </td>
                                         </tr>
+
+<?PHP ###############################################################################################################
+      # Weight Environmental Compensation
+      ############################################################################################################### ?>
+                                        <?PHP if ($result['ENABLE_HIVE_WEIGHT_CHK'] == "yes") { ?>
+                                        <tr class="odd gradeX">
+                                            <td>
+                                            <a href="#" title="Weight Drift Compensation" data-toggle="popover" data-placement="bottom" data-content="Environmental compensation corrects for temperature and humidity drift on the load cell. Run the calibration script on the Pi to compute coefficients automatically."><p class="fa fa-question-circle fa-fw"></P></a>
+                                                 Weight Drift Compensation<br>
+
+                                            <select name="WEIGHT_COMPENSATION_ENABLED" onchange="this.form.submit()">
+                                            <option value="yes" <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {echo "selected='selected'";} ?>>Enabled</option>
+                                            <option value="no" <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "no") {echo "selected='selected'";} ?>>Disabled</option>
+                                            </select></td>
+                                            <td colspan="2">
+                                            <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {
+                                                echo '<small>Coefficients are computed by the calibration script.<br>
+                                                Run on the Pi: <code>calibrate_env_compensation.sh start</code></small>';
+                                            } else {
+                                                echo '<small>Enable to correct weight drift caused by<br>temperature and humidity changes.</small>';
+                                            } ?>
+                                            </td>
+                                            <td>
+                                            <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {
+                                                echo '<table>
+                                                    <tr><td>Temp Coeff </td><td>
+                                                    <input type="text" name="WEIGHT_TEMP_COEFF" size="10" onchange="this.form.submit()" value="';
+                                                echo $result['WEIGHT_TEMP_COEFF'] ?? '0'; echo '"> lbs/&deg;F</td></tr>
+                                                    <tr><td>Humidity Coeff </td><td>
+                                                    <input type="text" name="WEIGHT_HUMIDITY_COEFF" size="10" onchange="this.form.submit()" value="';
+                                                echo $result['WEIGHT_HUMIDITY_COEFF'] ?? '0'; echo '"> lbs/%RH</td></tr>
+                                                </table>';
+                                            } ?>
+                                            </td>
+                                            <td>
+                                            <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {
+                                                echo '<table>
+                                                    <tr><td>Ref Temp </td><td>
+                                                    <input type="text" name="WEIGHT_REF_TEMP" size="8" onchange="this.form.submit()" value="';
+                                                echo $result['WEIGHT_REF_TEMP'] ?? ''; echo '"> &deg;F</td></tr>
+                                                    <tr><td>Ref Humidity </td><td>
+                                                    <input type="text" name="WEIGHT_REF_HUMIDITY" size="8" onchange="this.form.submit()" value="';
+                                                echo $result['WEIGHT_REF_HUMIDITY'] ?? ''; echo '"> %RH</td></tr>
+                                                </table>';
+                                            } ?>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <?PHP } ?>
 
 <?PHP ###############################################################################################################
       # Lux

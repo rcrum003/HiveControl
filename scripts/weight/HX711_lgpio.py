@@ -176,7 +176,7 @@ class sensor:
             return None
 
         if time.time() < self._valid_after:
-            time.sleep(self._valid_after - time.time())
+            time.sleep(max(0, self._valid_after - time.time()))
 
         value = self._read_raw()
 
@@ -210,6 +210,43 @@ class sensor:
 
         return sum(values) / len(values)
 
+    def read_trimmed_mean(self, times: int = 50, trim: float = 0.1) -> float | None:
+        """
+        Read multiple values, discard outliers, and return the mean.
+
+        Sorts readings, removes the top and bottom `trim` fraction,
+        and averages the remaining values. More robust than simple
+        averaging against electrical noise spikes.
+
+        Args:
+            times: Number of readings to collect
+            trim: Fraction to discard from each end (0.0 to <0.5)
+
+        Returns:
+            Trimmed mean reading value, or None if no valid readings
+        """
+        if not (0.0 <= trim < 0.5):
+            raise ValueError(f"trim must be in [0.0, 0.5), got {trim}")
+
+        values = []
+        for _ in range(times):
+            val = self.read()
+            if val is not None:
+                values.append(val)
+            time.sleep(0.01)
+
+        if not values:
+            return None
+
+        values.sort()
+        cut = int(len(values) * trim)
+        trimmed = values[cut:len(values) - cut] if cut > 0 else values
+
+        if not trimmed:
+            return None
+
+        return sum(trimmed) / len(trimmed)
+
     def cancel(self):
         """
         Cancel the sensor and release resources.
@@ -227,34 +264,23 @@ class sensor:
 
 
 if __name__ == "__main__":
-    """Test the HX711 sensor."""
 
-    # Open GPIO chip
     chip = lgpio.gpiochip_open(0)
     if chip < 0:
         print("Failed to open GPIO chip")
         exit(1)
 
     try:
-        # Create sensor instance (default pins for HiveControl)
         s = sensor(chip, DATA=23, CLOCK=24, mode=CH_A_GAIN_128)
-
-        # Start readings
         s.start()
+        time.sleep(2)
 
-        # Wait for sensor to stabilize
-        time.sleep(5)
+        result = s.read_trimmed_mean(times=50, trim=0.1)
+        if result is not None:
+            print(int(result))
+        else:
+            print("No data to consider")
 
-        # Read a few values
-        for _ in range(5):
-            s.read()
-            time.sleep(0.5)
-
-        # Get final reading
-        count, mode, reading = s.get_reading()
-        print(reading)
-
-        # Clean up
         s.cancel()
 
     finally:
