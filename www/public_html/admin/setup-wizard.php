@@ -585,27 +585,124 @@ elseif ($step === 3): ?>
                         </div>
                     <?php endforeach; ?>
 
-                    <div class="row" style="margin-top:15px;">
-                        <div class="col-md-6">
-                            <label>Calibration Values</label>
-                            <div class="form-group">
-                                <label class="help-text">Zero/Intercept</label>
-                                <input type="text" class="form-control" name="HIVE_WEIGHT_INTERCEPT" value="<?php echo htmlspecialchars($config['HIVE_WEIGHT_INTERCEPT'] ?? '0'); ?>">
-                                <p class="help-text">Raw sensor value with no weight on the scale</p>
+                    <!-- Calibration Sub-Wizard -->
+                    <div id="cal-section" style="margin-top:15px;">
+
+                        <div id="cpw-notice" style="display:none; padding:15px; background:#fcf8e3; border:1px solid #faebcc; border-radius:4px; margin-bottom:15px;">
+                            <i class="fa fa-info-circle" style="color:#8a6d3b;"></i>
+                            <strong>Factory Calibrated</strong> &mdash; The CPW 200 Plus is a pre-calibrated serial scale. No calibration wizard is needed. Use the Test Scale button to verify readings.
+                        </div>
+
+                        <div id="cal-wizard-launcher" style="margin-bottom:15px;">
+                            <button type="button" class="btn btn-primary" id="btn-start-cal" onclick="CalWiz.start()" style="margin-right:10px;">
+                                <i class="fa fa-sliders"></i> Calibrate Scale
+                            </button>
+                            <span class="help-text">Guided calibration: zero the scale, place a known weight, auto-calculate.</span>
+                        </div>
+
+                        <!-- Sub-wizard steps (hidden until started) -->
+                        <div id="cal-wizard" style="display:none; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:4px; padding:20px; margin-bottom:15px;">
+
+                            <!-- Progress indicator -->
+                            <div style="margin-bottom:15px; text-align:center;">
+                                <span class="cal-prog" id="cal-prog-1" style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; background:#e6b800; color:white; margin:0 2px;">1. Zero</span>
+                                <span class="cal-prog" id="cal-prog-2" style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; background:#eee; color:#999; margin:0 2px;">2. Load</span>
+                                <span class="cal-prog" id="cal-prog-3" style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; background:#eee; color:#999; margin:0 2px;">3. Results</span>
                             </div>
-                            <div class="form-group">
-                                <label class="help-text">Calibration/Slope</label>
-                                <input type="text" class="form-control" name="HIVE_WEIGHT_SLOPE" value="<?php echo htmlspecialchars($config['HIVE_WEIGHT_SLOPE'] ?? '1'); ?>">
-                                <p class="help-text">Conversion factor from raw reading to lbs</p>
+
+                            <!-- Step 1: Tare/Zero -->
+                            <div class="cal-step" id="cal-step-1">
+                                <h4 style="margin-top:0;"><i class="fa fa-balance-scale"></i> Step 1: Zero the Scale</h4>
+                                <p>Remove <strong>all weight</strong> from the scale, including any hive equipment. The scale should be completely empty.</p>
+                                <p class="help-text">We'll take a raw sensor reading to establish the zero point.</p>
+                                <button type="button" class="btn btn-test" id="btn-zero" onclick="CalWiz.takeZeroReading()">
+                                    <i class="fa fa-play"></i> Take Zero Reading
+                                </button>
+                                <button type="button" class="btn btn-skip" onclick="CalWiz.cancel()" style="margin-left:8px;">Cancel</button>
+                                <div id="cal-zero-result" class="test-result waiting" style="margin-top:10px;">Ready when you are...</div>
+                            </div>
+
+                            <!-- Step 2: Load -->
+                            <div class="cal-step" id="cal-step-2" style="display:none;">
+                                <h4 style="margin-top:0;"><i class="fa fa-download"></i> Step 2: Place Known Weight</h4>
+                                <p>Place a <strong>known weight</strong> on the scale. Use the heaviest weight you have for better accuracy (e.g. 20-50 lbs).</p>
+                                <div class="form-group" style="max-width:300px;">
+                                    <label>Known Weight (lbs)</label>
+                                    <input type="number" class="form-control" id="cal-known-weight" min="1" max="500" step="0.1" placeholder="e.g. 30">
+                                    <p class="help-text">Enter the exact weight in pounds</p>
+                                </div>
+                                <button type="button" class="btn btn-test" id="btn-loaded" onclick="CalWiz.takeLoadedReading()">
+                                    <i class="fa fa-play"></i> Take Loaded Reading
+                                </button>
+                                <button type="button" class="btn btn-back" onclick="CalWiz.showStep(1)" style="margin-left:8px;">
+                                    <i class="fa fa-arrow-left"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-skip" onclick="CalWiz.cancel()" style="margin-left:8px;">Cancel</button>
+                                <div id="cal-loaded-result" class="test-result waiting" style="margin-top:10px;">Place weight and click above...</div>
+                            </div>
+
+                            <!-- Step 3: Results -->
+                            <div class="cal-step" id="cal-step-3" style="display:none;">
+                                <h4 style="margin-top:0;"><i class="fa fa-check-circle" style="color:#5cb85c;"></i> Step 3: Calibration Results</h4>
+                                <table class="table" style="max-width:400px; margin-bottom:10px;">
+                                    <tr><td style="font-weight:600;">Zero (Intercept)</td><td id="cal-result-intercept">--</td></tr>
+                                    <tr><td style="font-weight:600;">Slope</td><td id="cal-result-slope">--</td></tr>
+                                    <tr><td style="font-weight:600;">Known Weight</td><td id="cal-result-known">--</td></tr>
+                                </table>
+
+                                <div style="margin-bottom:15px;">
+                                    <button type="button" class="btn btn-test" id="btn-verify" onclick="CalWiz.verify()">
+                                        <i class="fa fa-check"></i> Verify Calibration
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="btn-save-cal" onclick="CalWiz.save()" style="margin-left:8px;">
+                                        <i class="fa fa-floppy-o"></i> Save Calibration
+                                    </button>
+                                    <button type="button" class="btn btn-back" onclick="CalWiz.start()" style="margin-left:8px;">
+                                        <i class="fa fa-refresh"></i> Start Over
+                                    </button>
+                                </div>
+                                <div id="cal-verify-result" class="test-result waiting" style="display:none;">Verification result will appear here...</div>
+                                <div id="cal-save-result" style="display:none; padding:10px; background:#dff0d8; border:1px solid #d6e9c6; border-radius:4px; color:#3c763d; margin-top:10px;">
+                                    <i class="fa fa-check-circle"></i> Calibration saved successfully!
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="test-panel">
-                                <h4><i class="fa fa-bolt"></i> Test Scale</h4>
-                                <p class="help-text">Click to read the scale. Place a known weight to verify accuracy.</p>
-                                <button type="button" class="btn btn-test" onclick="testSensor('hiveweight')"><i class="fa fa-play"></i> Test Now</button>
-                                <div class="test-result waiting" id="test-result">Waiting for test...</div>
+
+                        <!-- Hidden form fields that get populated by calibration wizard or manual entry -->
+                        <input type="hidden" name="HIVE_WEIGHT_INTERCEPT" id="form-intercept" value="<?php echo htmlspecialchars($config['HIVE_WEIGHT_INTERCEPT'] ?? '0'); ?>">
+                        <input type="hidden" name="HIVE_WEIGHT_SLOPE" id="form-slope" value="<?php echo htmlspecialchars($config['HIVE_WEIGHT_SLOPE'] ?? '1'); ?>">
+
+                        <!-- Manual entry (collapsible) -->
+                        <div style="margin-bottom:15px;">
+                            <a href="#" onclick="$('#manual-cal').toggle(); return false;" style="font-size:13px; color:#737373;">
+                                <i class="fa fa-wrench"></i> Advanced: Manual Calibration Entry
+                            </a>
+                        </div>
+                        <div id="manual-cal" style="display:none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="help-text">Zero/Intercept</label>
+                                        <input type="text" class="form-control" id="manual-intercept" value="<?php echo htmlspecialchars($config['HIVE_WEIGHT_INTERCEPT'] ?? '0'); ?>" onchange="document.getElementById('form-intercept').value=this.value;">
+                                        <p class="help-text">Raw sensor value with no weight on the scale</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="help-text">Calibration/Slope</label>
+                                        <input type="text" class="form-control" id="manual-slope" value="<?php echo htmlspecialchars($config['HIVE_WEIGHT_SLOPE'] ?? '1'); ?>" onchange="document.getElementById('form-slope').value=this.value;">
+                                        <p class="help-text">Conversion factor from raw reading to lbs</p>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- Test Scale (always available) -->
+                        <div class="test-panel">
+                            <h4><i class="fa fa-bolt"></i> Test Scale</h4>
+                            <p class="help-text">Read the scale using the current calibration values. Place a known weight to verify accuracy.</p>
+                            <button type="button" class="btn btn-test" onclick="testSensor('hiveweight')"><i class="fa fa-play"></i> Test Now</button>
+                            <div class="test-result waiting" id="test-result">Waiting for test...</div>
                         </div>
                     </div>
                 </div>
@@ -981,6 +1078,9 @@ elseif ($step === 8): ?>
                 3 => ['Weight Scale', 'fa-balance-scale', [
                     'Status' => $config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no',
                     'Scale Type' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes') ? strtoupper($config['SCALETYPE'] ?? '') : 'N/A',
+                    'Calibration' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes')
+                        ? 'Slope: ' . ($config['HIVE_WEIGHT_SLOPE'] ?? '1') . ', Intercept: ' . ($config['HIVE_WEIGHT_INTERCEPT'] ?? '0')
+                        : 'N/A',
                 ]],
                 4 => ['Light Sensor', 'fa-sun-o', [
                     'Status' => $config['ENABLE_LUX'] ?? 'no',
@@ -1123,6 +1223,276 @@ elseif ($step === 8): ?>
             }
         });
     }
+
+    // Show/hide calibration wizard vs CPW notice based on scale type
+    function updateScaleOptions() {
+        var sel = document.querySelector('input[name="SCALETYPE"]:checked');
+        if (!sel) return;
+        var v = sel.value;
+        var cpwNotice = document.getElementById('cpw-notice');
+        var calLauncher = document.getElementById('cal-wizard-launcher');
+        var calWizard = document.getElementById('cal-wizard');
+        if (!cpwNotice) return;
+        if (v === 'cpw200plus') {
+            cpwNotice.style.display = 'block';
+            if (calLauncher) calLauncher.style.display = 'none';
+            if (calWizard) calWizard.style.display = 'none';
+        } else {
+            cpwNotice.style.display = 'none';
+            if (calLauncher) calLauncher.style.display = 'block';
+        }
+    }
+    if (document.querySelector('input[name="SCALETYPE"]')) {
+        document.querySelectorAll('input[name="SCALETYPE"]').forEach(function(r) {
+            r.addEventListener('change', updateScaleOptions);
+        });
+        updateScaleOptions();
+    }
+
+    // Calibration Sub-Wizard
+    var CalWiz = {
+        rawZero: null,
+        rawLoaded: null,
+        slope: null,
+        intercept: null,
+
+        getScaleType: function() {
+            var sel = document.querySelector('input[name="SCALETYPE"]:checked');
+            return sel ? sel.value : '';
+        },
+
+        showStep: function(n) {
+            document.querySelectorAll('.cal-step').forEach(function(el) { el.style.display = 'none'; });
+            var step = document.getElementById('cal-step-' + n);
+            if (step) step.style.display = 'block';
+            // Update progress indicators
+            for (var i = 1; i <= 3; i++) {
+                var prog = document.getElementById('cal-prog-' + i);
+                if (!prog) continue;
+                if (i < n) { prog.style.background = '#5cb85c'; prog.style.color = 'white'; }
+                else if (i === n) { prog.style.background = '#e6b800'; prog.style.color = 'white'; }
+                else { prog.style.background = '#eee'; prog.style.color = '#999'; }
+            }
+        },
+
+        start: function() {
+            this.rawZero = null;
+            this.rawLoaded = null;
+            this.slope = null;
+            this.intercept = null;
+            document.getElementById('cal-wizard').style.display = 'block';
+            document.getElementById('cal-zero-result').className = 'test-result waiting';
+            document.getElementById('cal-zero-result').innerHTML = 'Ready when you are...';
+            document.getElementById('cal-save-result').style.display = 'none';
+            document.getElementById('cal-verify-result').style.display = 'none';
+            this.showStep(1);
+        },
+
+        cancel: function() {
+            document.getElementById('cal-wizard').style.display = 'none';
+        },
+
+        setButtonLoading: function(btnId, loading) {
+            var btn = document.getElementById(btnId);
+            if (!btn) return;
+            btn.disabled = loading;
+            if (loading) {
+                btn.setAttribute('data-orig', btn.innerHTML);
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Reading...';
+            } else {
+                var orig = btn.getAttribute('data-orig');
+                if (orig) btn.innerHTML = orig;
+            }
+        },
+
+        takeZeroReading: function() {
+            var scaleType = this.getScaleType();
+            if (!scaleType) { alert('Please select a scale type first.'); return; }
+            var self = this;
+            var el = document.getElementById('cal-zero-result');
+            el.className = 'test-result waiting';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking zero reading... this takes a few seconds';
+            this.setButtonLoading('btn-zero', true);
+
+            $.ajax({
+                url: 'calibrate_raw_reading.php?scaletype=' + scaleType,
+                timeout: 60000,
+                dataType: 'json',
+                success: function(data) {
+                    self.setButtonLoading('btn-zero', false);
+                    if (data.success) {
+                        self.rawZero = parseFloat(data.raw_value);
+                        el.className = 'test-result success';
+                        el.innerHTML = 'Zero reading: <strong>' + data.raw_value + '</strong>';
+                        setTimeout(function() { self.showStep(2); }, 800);
+                    } else {
+                        el.className = 'test-result error';
+                        el.innerHTML = data.error || 'Failed to get reading';
+                    }
+                },
+                error: function(xhr, status) {
+                    self.setButtonLoading('btn-zero', false);
+                    el.className = 'test-result error';
+                    el.innerHTML = (status === 'timeout')
+                        ? 'Timeout: sensor did not respond within 60 seconds. Check wiring.'
+                        : 'Error communicating with sensor endpoint.';
+                }
+            });
+        },
+
+        takeLoadedReading: function() {
+            var scaleType = this.getScaleType();
+            var knownWeight = parseFloat(document.getElementById('cal-known-weight').value);
+            if (!knownWeight || knownWeight <= 0) {
+                alert('Please enter a valid known weight greater than zero.');
+                return;
+            }
+            var self = this;
+            var el = document.getElementById('cal-loaded-result');
+            el.className = 'test-result waiting';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking loaded reading... this takes a few seconds';
+            this.setButtonLoading('btn-loaded', true);
+
+            $.ajax({
+                url: 'calibrate_raw_reading.php?scaletype=' + scaleType,
+                timeout: 60000,
+                dataType: 'json',
+                success: function(data) {
+                    self.setButtonLoading('btn-loaded', false);
+                    if (data.success) {
+                        self.rawLoaded = parseFloat(data.raw_value);
+                        el.className = 'test-result success';
+                        el.innerHTML = 'Loaded reading: <strong>' + data.raw_value + '</strong>';
+
+                        var result = self.calculate(self.rawZero, self.rawLoaded, knownWeight, scaleType);
+                        if (result.error) {
+                            el.className = 'test-result error';
+                            el.innerHTML = result.error;
+                            return;
+                        }
+
+                        self.slope = result.slope;
+                        self.intercept = result.intercept;
+
+                        document.getElementById('cal-result-intercept').textContent = self.intercept;
+                        document.getElementById('cal-result-slope').textContent = self.slope;
+                        document.getElementById('cal-result-known').textContent = knownWeight + ' lbs';
+
+                        setTimeout(function() { self.showStep(3); }, 800);
+                    } else {
+                        el.className = 'test-result error';
+                        el.innerHTML = data.error || 'Failed to get reading';
+                    }
+                },
+                error: function(xhr, status) {
+                    self.setButtonLoading('btn-loaded', false);
+                    el.className = 'test-result error';
+                    el.innerHTML = (status === 'timeout')
+                        ? 'Timeout: sensor did not respond within 60 seconds. Check wiring.'
+                        : 'Error communicating with sensor endpoint.';
+                }
+            });
+        },
+
+        calculate: function(rawZero, rawLoaded, knownWeight, scaleType) {
+            var diff = rawLoaded - rawZero;
+            if (Math.abs(diff) < 1) {
+                return { error: 'Zero and loaded readings are too similar. The sensor may not be responding to weight changes. Check wiring and connections.' };
+            }
+            var slope, intercept;
+            intercept = rawZero;
+            if (scaleType === 'phidget1046') {
+                // Phidget: weight = (raw - zero) * multiplier
+                slope = knownWeight / diff;
+            } else {
+                // HX711: weight = (raw - zero) / slope
+                slope = diff / knownWeight;
+            }
+            return {
+                slope: parseFloat(slope.toFixed(2)),
+                intercept: parseFloat(intercept.toFixed(2))
+            };
+        },
+
+        verify: function() {
+            var el = document.getElementById('cal-verify-result');
+            el.style.display = 'block';
+            el.className = 'test-result waiting';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving and verifying... leave the weight on the scale';
+            this.setButtonLoading('btn-verify', true);
+            var self = this;
+
+            // Save first, then read through the calibrated path
+            $.ajax({
+                url: 'calibrate_save.php',
+                method: 'POST',
+                data: { slope: self.slope, intercept: self.intercept },
+                dataType: 'json',
+                timeout: 15000,
+                success: function() {
+                    // Now read through the normal calibrated endpoint
+                    $.ajax({
+                        url: 'livevalue.php?sensor=hiveweight',
+                        timeout: 90000,
+                        success: function(data) {
+                            self.setButtonLoading('btn-verify', false);
+                            if (data && data.trim().length > 0) {
+                                el.className = 'test-result success';
+                                el.innerHTML = '<strong>Verification reading:</strong><br>' + data.replace(/\n/g, '<br>') + '<br><br><em>Compare this to the weight you placed on the scale.</em>';
+                            } else {
+                                el.className = 'test-result error';
+                                el.innerHTML = 'No data returned. Check sensor.';
+                            }
+                        },
+                        error: function() {
+                            self.setButtonLoading('btn-verify', false);
+                            el.className = 'test-result error';
+                            el.innerHTML = 'Verification read failed. The calibration values were saved — try "Test Scale" below.';
+                        }
+                    });
+                },
+                error: function() {
+                    self.setButtonLoading('btn-verify', false);
+                    el.className = 'test-result error';
+                    el.innerHTML = 'Failed to save calibration for verification. Check database permissions.';
+                }
+            });
+        },
+
+        save: function() {
+            var self = this;
+            this.setButtonLoading('btn-save-cal', true);
+
+            $.ajax({
+                url: 'calibrate_save.php',
+                method: 'POST',
+                data: { slope: self.slope, intercept: self.intercept },
+                dataType: 'json',
+                timeout: 15000,
+                success: function(data) {
+                    self.setButtonLoading('btn-save-cal', false);
+                    if (data.success) {
+                        // Update the hidden form fields
+                        document.getElementById('form-slope').value = self.slope;
+                        document.getElementById('form-intercept').value = self.intercept;
+                        // Update manual entry fields too
+                        var mi = document.getElementById('manual-intercept');
+                        var ms = document.getElementById('manual-slope');
+                        if (mi) mi.value = self.intercept;
+                        if (ms) ms.value = self.slope;
+                        // Show success
+                        document.getElementById('cal-save-result').style.display = 'block';
+                    } else {
+                        alert('Save failed: ' + (data.error || 'Unknown error'));
+                    }
+                },
+                error: function() {
+                    self.setButtonLoading('btn-save-cal', false);
+                    alert('Failed to save calibration. Check database permissions.');
+                }
+            });
+        }
+    };
 
     // Auto-fire test if we came back from a save+test action
     $(document).ready(function() {
