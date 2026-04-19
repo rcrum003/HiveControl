@@ -65,7 +65,7 @@ fi
 fi
 #
 # Detect Raspberry Pi version and OS architecture
-PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
+PI_MODEL=$(tr -d '\0' < /proc/device-tree/model 2>/dev/null || echo "Unknown")
 PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
 
 # Detect OS architecture (32-bit vs 64-bit)
