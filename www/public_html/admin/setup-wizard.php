@@ -1080,11 +1080,12 @@ elseif ($step === 8): ?>
         var resultId = (type === 'camera') ? 'test-result-cam' : 'test-result';
         var el = document.getElementById(resultId);
         el.className = 'test-result waiting';
-        el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Reading sensor... this may take a few seconds';
+        el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Reading sensor... this may take up to a minute';
 
+        var ajaxTimeout = (type === 'hiveweight') ? 90000 : 30000;
         $.ajax({
             url: 'livevalue.php?sensor=' + type,
-            timeout: 30000,
+            timeout: ajaxTimeout,
             success: function(data) {
                 if (data && data.trim().length > 0) {
                     el.className = 'test-result success';

@@ -27,7 +27,7 @@ switch ($sensor) {
         break;
 
     case "hiveweight":
-        $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/weight/getweight.sh 2>&1 | awk '{print $1}'");
+        $value = shell_exec("/usr/bin/timeout 60 sudo /home/HiveControl/scripts/weight/getweight.sh 2>&1 | awk '{print $1}'");
         $valueheader = "Gross Weight (lbs)";
         break;
 
