@@ -22,27 +22,27 @@ $r = $sthlive->fetch(PDO::FETCH_ASSOC);
 
 switch ($sensor) {
     case "hivetemp":
-        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/temp/gettemp.sh 2>&1");
+        $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/temp/gettemp.sh 2>&1");
         $valueheader = "Temp F, Humidity%, Dew F, Temp C";
         break;
 
     case "hiveweight":
-        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/weight/getweight.sh 2>&1 | awk '{print $1}'");
+        $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/weight/getweight.sh 2>&1 | awk '{print $1}'");
         $valueheader = "Gross Weight (lbs)";
         break;
 
     case "hivelux":
-        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/light/getlux.sh 2>&1");
+        $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/light/getlux.sh 2>&1");
         $valueheader = "LUX";
         break;
 
     case "weather":
-        $value = shell_exec("sudo /usr/bin/timeout 20 /home/HiveControl/scripts/weather/getwx.sh 2>&1 | tail -5");
+        $value = shell_exec("/usr/bin/timeout 20 sudo /home/HiveControl/scripts/weather/getwx.sh 2>&1 | tail -5");
         $valueheader = "Weather Data";
         break;
 
     case "camera":
-        $value = shell_exec("sudo /usr/bin/timeout 10 /home/HiveControl/scripts/image/takepic.sh 2>&1");
+        $value = shell_exec("/usr/bin/timeout 10 sudo /home/HiveControl/scripts/image/takepic.sh 2>&1");
         if ($value === null || trim($value) === '') {
             $value = "Camera capture completed. Check /home/HiveControl/www/public_html/images/ for output.";
         }
@@ -50,7 +50,7 @@ switch ($sensor) {
         break;
 
     case "airquality":
-        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/air/getair.sh 2>&1 | tail -5");
+        $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/air/getair.sh 2>&1 | tail -5");
         $valueheader = "Air Quality Data";
         break;
 
