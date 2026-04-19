@@ -24,9 +24,10 @@ $errors = [];
 $saved = false;
 
 // Load current config
-$sth = $conn->prepare("SELECT * FROM hiveconfig WHERE id=1");
+$sth = $conn->prepare("SELECT * FROM hiveconfig");
 $sth->execute();
 $config = $sth->fetch(PDO::FETCH_ASSOC);
+if (!$config) { $config = []; }
 
 // Process POST submissions
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -49,15 +50,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $v->rule('required', ['HIVENAME', 'CITY', 'STATE'])->message('{field} is required');
             $v->rule('regex', 'HIVENAME', '/^[a-zA-Z0-9_-]+$/')->message('Hive Name can only contain letters, numbers, dashes, and underscores');
             $v->rule('lengthMax', ['HIVENAME', 'CITY', 'STATE'], 40);
-            $v->rule('lengthMax', ['HIVEAPI'], 70);
             if ($v->validate()) {
-                $update_fields = ['HIVENAME=?', 'CITY=?', 'STATE=?', 'HIVEAPI=?', 'TIMEZONE=?'];
+                $update_fields = ['HIVENAME=?', 'CITY=?', 'STATE=?', 'TIMEZONE=?'];
                 $update_values = [
                     test_input($_POST['HIVENAME']),
                     test_input($_POST['CITY']),
                     test_input($_POST['STATE']),
-                    test_input($_POST['HIVEAPI'] ?? ''),
-                    test_input_allow_slash($_POST['TIMEZONE'] ?? $config['TIMEZONE'])
+                    test_input_allow_slash($_POST['TIMEZONE'] ?? ($config['TIMEZONE'] ?? 'America/New_York'))
                 ];
             }
             break;
@@ -72,9 +71,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $update_fields = array_merge($update_fields, ['TEMPTYPE=?', 'HIVEDEVICE=?', 'HIVE_TEMP_SUB=?', 'HIVE_TEMP_GPIO=?', 'HIVE_TEMP_SLOPE=?', 'HIVE_TEMP_INTERCEPT=?', 'HIVE_HUMIDITY_SLOPE=?', 'HIVE_HUMIDITY_INTERCEPT=?']);
                     $update_values = array_merge($update_values, [
                         test_input($_POST['TEMPTYPE']),
-                        test_input($_POST['HIVEDEVICE'] ?? $config['HIVEDEVICE']),
-                        test_input($_POST['HIVE_TEMP_SUB'] ?? $config['HIVE_TEMP_SUB']),
-                        test_input($_POST['HIVE_TEMP_GPIO'] ?? $config['HIVE_TEMP_GPIO']),
+                        test_input($_POST['HIVEDEVICE'] ?? ($config['HIVEDEVICE'] ?? '/dev/hidraw1')),
+                        test_input($_POST['HIVE_TEMP_SUB'] ?? ($config['HIVE_TEMP_SUB'] ?? '')),
+                        test_input($_POST['HIVE_TEMP_GPIO'] ?? ($config['HIVE_TEMP_GPIO'] ?? '2')),
                         test_input($_POST['HIVE_TEMP_SLOPE'] ?? '1'),
                         test_input($_POST['HIVE_TEMP_INTERCEPT'] ?? '0'),
                         test_input($_POST['HIVE_HUMIDITY_SLOPE'] ?? '1'),
@@ -94,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $update_fields = array_merge($update_fields, ['SCALETYPE=?', 'HIVE_WEIGHT_GPIO=?', 'HIVE_WEIGHT_SLOPE=?', 'HIVE_WEIGHT_INTERCEPT=?']);
                     $update_values = array_merge($update_values, [
                         test_input($_POST['SCALETYPE']),
-                        test_input($_POST['HIVE_WEIGHT_GPIO'] ?? $config['HIVE_WEIGHT_GPIO']),
+                        test_input($_POST['HIVE_WEIGHT_GPIO'] ?? ($config['HIVE_WEIGHT_GPIO'] ?? '')),
                         test_input($_POST['HIVE_WEIGHT_SLOPE'] ?? '1'),
                         test_input($_POST['HIVE_WEIGHT_INTERCEPT'] ?? '0')
                     ]);
@@ -112,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $update_fields = array_merge($update_fields, ['LUX_SOURCE=?', 'HIVE_LUX_GPIO=?', 'HIVE_LUX_SLOPE=?', 'HIVE_LUX_INTERCEPT=?']);
                     $update_values = array_merge($update_values, [
                         test_input($_POST['LUX_SOURCE']),
-                        test_input($_POST['HIVE_LUX_GPIO'] ?? $config['HIVE_LUX_GPIO']),
+                        test_input($_POST['HIVE_LUX_GPIO'] ?? ($config['HIVE_LUX_GPIO'] ?? '')),
                         test_input($_POST['HIVE_LUX_SLOPE'] ?? '1'),
                         test_input($_POST['HIVE_LUX_INTERCEPT'] ?? '0')
                     ]);
@@ -126,13 +125,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $update_fields = ['WEATHER_LEVEL=?', 'KEY=?', 'WXSTATION=?', 'WXTEMPTYPE=?', 'WX_TEMPER_DEVICE=?', 'WX_TEMP_GPIO=?', 'local_wx_type=?', 'local_wx_url=?'];
                 $update_values = [
                     test_input($_POST['WEATHER_LEVEL']),
-                    test_input($_POST['KEY'] ?? $config['KEY']),
-                    test_input($_POST['WXSTATION'] ?? $config['WXSTATION']),
-                    test_input($_POST['WXTEMPTYPE'] ?? $config['WXTEMPTYPE']),
-                    test_input_allow_slash($_POST['WX_TEMPER_DEVICE'] ?? $config['WX_TEMPER_DEVICE']),
-                    test_input($_POST['WX_TEMP_GPIO'] ?? $config['WX_TEMP_GPIO']),
-                    test_input($_POST['local_wx_type'] ?? $config['local_wx_type']),
-                    test_input($_POST['local_wx_url'] ?? $config['local_wx_url'])
+                    test_input($_POST['KEY'] ?? ($config['KEY'] ?? '')),
+                    test_input($_POST['WXSTATION'] ?? ($config['WXSTATION'] ?? '')),
+                    test_input($_POST['WXTEMPTYPE'] ?? ($config['WXTEMPTYPE'] ?? '')),
+                    test_input_allow_slash($_POST['WX_TEMPER_DEVICE'] ?? ($config['WX_TEMPER_DEVICE'] ?? '')),
+                    test_input($_POST['WX_TEMP_GPIO'] ?? ($config['WX_TEMP_GPIO'] ?? '3')),
+                    test_input($_POST['local_wx_type'] ?? ($config['local_wx_type'] ?? '')),
+                    test_input($_POST['local_wx_url'] ?? ($config['local_wx_url'] ?? ''))
                 ];
             }
             break;
@@ -141,9 +140,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_fields = ['ENABLE_HIVE_CAMERA=?', 'CAMERATYPE=?', 'ENABLE_BEECOUNTER=?', 'COUNTERTYPE=?'];
             $update_values = [
                 test_input($_POST['ENABLE_HIVE_CAMERA'] ?? 'no'),
-                test_input($_POST['CAMERATYPE'] ?? $config['CAMERATYPE']),
+                test_input($_POST['CAMERATYPE'] ?? ($config['CAMERATYPE'] ?? '')),
                 test_input($_POST['ENABLE_BEECOUNTER'] ?? 'no'),
-                test_input($_POST['COUNTERTYPE'] ?? $config['COUNTERTYPE'])
+                test_input($_POST['COUNTERTYPE'] ?? ($config['COUNTERTYPE'] ?? ''))
             ];
             break;
 
@@ -154,8 +153,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($enable === 'yes') {
                 $update_fields = array_merge($update_fields, ['AIR_TYPE=?', 'AIR_ID=?']);
                 $update_values = array_merge($update_values, [
-                    test_input($_POST['AIR_TYPE'] ?? $config['AIR_TYPE']),
-                    test_input($_POST['AIR_ID'] ?? $config['AIR_ID'])
+                    test_input($_POST['AIR_TYPE'] ?? ($config['AIR_TYPE'] ?? '')),
+                    test_input($_POST['AIR_ID'] ?? ($config['AIR_ID'] ?? ''))
                 ]);
             }
             break;
@@ -163,21 +162,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($update_fields) && (empty($v->errors()) || $v->validate())) {
         // Increment version
-        $ver = $conn->prepare("SELECT version FROM hiveconfig WHERE id=1");
+        $ver = $conn->prepare("SELECT version FROM hiveconfig");
         $ver->execute();
         $version = $ver->fetchColumn() + 1;
         $update_fields[] = 'version=?';
         $update_values[] = $version;
 
-        $update_values[] = 1; // WHERE id=1
-        $sql = "UPDATE hiveconfig SET " . implode(', ', $update_fields) . " WHERE id=?";
+        $sql = "UPDATE hiveconfig SET " . implode(', ', $update_fields);
         $stmt = $conn->prepare($sql);
         $stmt->execute($update_values);
 
         // Reload config
-        $sth = $conn->prepare("SELECT * FROM hiveconfig WHERE id=1");
+        $sth = $conn->prepare("SELECT * FROM hiveconfig");
         $sth->execute();
         $config = $sth->fetch(PDO::FETCH_ASSOC);
+        if (!$config) { $config = []; }
 
         $saved = true;
         $next_step = $post_step + 1;
@@ -208,13 +207,14 @@ $steps = [
 
 // Determine which steps have been configured
 function stepConfigured($config, $step) {
+    if (empty($config)) return false;
     switch ($step) {
         case 1: return !empty($config['HIVENAME']) && $config['HIVENAME'] !== 'NotSet';
-        case 2: return $config['ENABLE_HIVE_TEMP_CHK'] === 'yes';
-        case 3: return $config['ENABLE_HIVE_WEIGHT_CHK'] === 'yes';
-        case 4: return $config['ENABLE_LUX'] === 'yes';
+        case 2: return ($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') === 'yes';
+        case 3: return ($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes';
+        case 4: return ($config['ENABLE_LUX'] ?? 'no') === 'yes';
         case 5: return !empty($config['WEATHER_LEVEL']);
-        case 6: return $config['ENABLE_HIVE_CAMERA'] === 'yes' || $config['ENABLE_BEECOUNTER'] === 'yes';
+        case 6: return ($config['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes' || ($config['ENABLE_BEECOUNTER'] ?? 'no') === 'yes';
         case 7: return ($config['ENABLE_AIR'] ?? 'no') === 'yes';
         case 8: return false;
         default: return false;
@@ -354,14 +354,8 @@ if ($step === 1): ?>
 
                 <div class="form-group">
                     <label for="HIVENAME">Hive Name <span style="color:#d9534f;">*</span></label>
-                    <input type="text" class="form-control" name="HIVENAME" value="<?php echo htmlspecialchars($config['HIVENAME'] ?? ''); ?>" placeholder="e.g., Hive-01, Backyard-Hive" required>
+                    <input type="text" class="form-control" name="HIVENAME" value="<?php echo htmlspecialchars($config['HIVENAME'] ?? ''); ?>" id="HIVENAME" placeholder="e.g., Hive-01, Backyard-Hive" required>
                     <p class="help-text">A unique name to identify this hive (letters, numbers, dashes, underscores)</p>
-                </div>
-
-                <div class="form-group">
-                    <label for="HIVEAPI">Hive API Key</label>
-                    <input type="text" class="form-control" name="HIVEAPI" value="<?php echo htmlspecialchars($config['HIVEAPI'] ?? ''); ?>" placeholder="Enter your API key from HiveControl.org">
-                    <p class="help-text">Optional. Register at <a href="https://www.hivecontrol.org/" target="_blank">HiveControl.org</a> for cloud sync.</p>
                 </div>
 
                 <div class="row">
@@ -399,7 +393,7 @@ if ($step === 1): ?>
                                     'Pacific/Auckland' => '(UTC+12:00) Auckland',
                                 ];
                                 foreach ($timezones as $tz => $label) {
-                                    $sel = ($config['TIMEZONE'] === $tz) ? "selected" : "";
+                                    $sel = (($config['TIMEZONE'] ?? '') === $tz) ? "selected" : "";
                                     echo "<option value=\"$tz\" $sel>$label</option>";
                                 }
                                 ?>
@@ -428,12 +422,12 @@ elseif ($step === 2): ?>
                 <div class="enable-toggle">
                     <label><i class="fa fa-thermometer-half"></i> Enable Temp/Humidity Sensor</label>
                     <select name="ENABLE_HIVE_TEMP_CHK" id="sensor-enable" class="form-control" style="width:120px;">
-                        <option value="yes" <?php if ($config['ENABLE_HIVE_TEMP_CHK'] === 'yes') echo 'selected'; ?>>Enabled</option>
-                        <option value="no" <?php if ($config['ENABLE_HIVE_TEMP_CHK'] !== 'yes') echo 'selected'; ?>>Disabled</option>
+                        <option value="yes" <?php if (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
+                        <option value="no" <?php if (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
                     </select>
                 </div>
 
-                <div id="sensor-config" style="<?php echo ($config['ENABLE_HIVE_TEMP_CHK'] !== 'yes') ? 'display:none;' : ''; ?>">
+                <div id="sensor-config" style="<?php echo (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
                     <label>Select Your Sensor Type:</label>
                     <?php
                     $temp_types = [
@@ -447,9 +441,9 @@ elseif ($step === 2): ?>
                         'broodminder' => ['BroodMinder T/TH (BLE)', 'Bluetooth brood monitoring sensor'],
                     ];
                     foreach ($temp_types as $val => $info): ?>
-                        <div class="sensor-option <?php echo ($config['TEMPTYPE'] === $val) ? 'selected' : ''; ?>">
+                        <div class="sensor-option <?php echo (($config['TEMPTYPE'] ?? '') === $val) ? 'selected' : ''; ?>">
                             <input type="radio" name="TEMPTYPE" value="<?php echo $val; ?>" id="temp_<?php echo $val; ?>"
-                                <?php echo ($config['TEMPTYPE'] === $val) ? 'checked' : ''; ?>>
+                                <?php echo (($config['TEMPTYPE'] ?? '') === $val) ? 'checked' : ''; ?>>
                             <label for="temp_<?php echo $val; ?>"><strong><?php echo $info[0]; ?></strong> &mdash; <?php echo $info[1]; ?></label>
                         </div>
                     <?php endforeach; ?>
@@ -559,12 +553,12 @@ elseif ($step === 3): ?>
                 <div class="enable-toggle">
                     <label><i class="fa fa-balance-scale"></i> Enable Weight Scale</label>
                     <select name="ENABLE_HIVE_WEIGHT_CHK" id="sensor-enable" class="form-control" style="width:120px;">
-                        <option value="yes" <?php if ($config['ENABLE_HIVE_WEIGHT_CHK'] === 'yes') echo 'selected'; ?>>Enabled</option>
-                        <option value="no" <?php if ($config['ENABLE_HIVE_WEIGHT_CHK'] !== 'yes') echo 'selected'; ?>>Disabled</option>
+                        <option value="yes" <?php if (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
+                        <option value="no" <?php if (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
                     </select>
                 </div>
 
-                <div id="sensor-config" style="<?php echo ($config['ENABLE_HIVE_WEIGHT_CHK'] !== 'yes') ? 'display:none;' : ''; ?>">
+                <div id="sensor-config" style="<?php echo (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
                     <label>Select Your Scale Type:</label>
                     <?php
                     $scale_types = [
@@ -573,9 +567,9 @@ elseif ($step === 3): ?>
                         'cpw200plus' => ['CPW 200 Plus', 'Commercial bench scale with serial output'],
                     ];
                     foreach ($scale_types as $val => $info): ?>
-                        <div class="sensor-option <?php echo ($config['SCALETYPE'] === $val) ? 'selected' : ''; ?>">
+                        <div class="sensor-option <?php echo (($config['SCALETYPE'] ?? '') === $val) ? 'selected' : ''; ?>">
                             <input type="radio" name="SCALETYPE" value="<?php echo $val; ?>" id="scale_<?php echo $val; ?>"
-                                <?php echo ($config['SCALETYPE'] === $val) ? 'checked' : ''; ?>>
+                                <?php echo (($config['SCALETYPE'] ?? '') === $val) ? 'checked' : ''; ?>>
                             <label for="scale_<?php echo $val; ?>"><strong><?php echo $info[0]; ?></strong> &mdash; <?php echo $info[1]; ?></label>
                         </div>
                     <?php endforeach; ?>
@@ -628,12 +622,12 @@ elseif ($step === 4): ?>
                 <div class="enable-toggle">
                     <label><i class="fa fa-sun-o"></i> Enable Light Sensor</label>
                     <select name="ENABLE_LUX" id="sensor-enable" class="form-control" style="width:120px;">
-                        <option value="yes" <?php if ($config['ENABLE_LUX'] === 'yes') echo 'selected'; ?>>Enabled</option>
-                        <option value="no" <?php if ($config['ENABLE_LUX'] !== 'yes') echo 'selected'; ?>>Disabled</option>
+                        <option value="yes" <?php if (($config['ENABLE_LUX'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
+                        <option value="no" <?php if (($config['ENABLE_LUX'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
                     </select>
                 </div>
 
-                <div id="sensor-config" style="<?php echo ($config['ENABLE_LUX'] !== 'yes') ? 'display:none;' : ''; ?>">
+                <div id="sensor-config" style="<?php echo (($config['ENABLE_LUX'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
                     <label>Select Light Source:</label>
                     <?php
                     $lux_types = [
@@ -642,9 +636,9 @@ elseif ($step === 4): ?>
                         'wx' => ['Weather Station', 'Use light data from your weather source'],
                     ];
                     foreach ($lux_types as $val => $info): ?>
-                        <div class="sensor-option <?php echo ($config['LUX_SOURCE'] === $val) ? 'selected' : ''; ?>">
+                        <div class="sensor-option <?php echo (($config['LUX_SOURCE'] ?? '') === $val) ? 'selected' : ''; ?>">
                             <input type="radio" name="LUX_SOURCE" value="<?php echo $val; ?>" id="lux_<?php echo $val; ?>"
-                                <?php echo ($config['LUX_SOURCE'] === $val) ? 'checked' : ''; ?>>
+                                <?php echo (($config['LUX_SOURCE'] ?? '') === $val) ? 'checked' : ''; ?>>
                             <label for="lux_<?php echo $val; ?>"><strong><?php echo $info[0]; ?></strong> &mdash; <?php echo $info[1]; ?></label>
                         </div>
                     <?php endforeach; ?>
@@ -702,9 +696,9 @@ elseif ($step === 5): ?>
                     'wf_tempest_local' => ['WeatherFlow Tempest (UDP)', 'Local UDP broadcast from Tempest station'],
                 ];
                 foreach ($wx_types as $val => $info): ?>
-                    <div class="sensor-option <?php echo ($config['WEATHER_LEVEL'] === $val) ? 'selected' : ''; ?>">
+                    <div class="sensor-option <?php echo (($config['WEATHER_LEVEL'] ?? '') === $val) ? 'selected' : ''; ?>">
                         <input type="radio" name="WEATHER_LEVEL" value="<?php echo $val; ?>" id="wx_<?php echo $val; ?>"
-                            <?php echo ($config['WEATHER_LEVEL'] === $val) ? 'checked' : ''; ?>
+                            <?php echo (($config['WEATHER_LEVEL'] ?? '') === $val) ? 'checked' : ''; ?>
                             onchange="showWxOptions()">
                         <label for="wx_<?php echo $val; ?>"><strong><?php echo $info[0]; ?></strong> &mdash; <?php echo $info[1]; ?></label>
                     </div>
@@ -742,11 +736,11 @@ elseif ($step === 5): ?>
                         <div class="col-md-6">
                             <label>Station Type</label>
                             <div class="sensor-option">
-                                <input type="radio" name="local_wx_type" value="WS1400ip" id="lwx_ws1400" <?php echo ($config['local_wx_type'] === 'WS1400ip') ? 'checked' : ''; ?>>
+                                <input type="radio" name="local_wx_type" value="WS1400ip" id="lwx_ws1400" <?php echo (($config['local_wx_type'] ?? '') === 'WS1400ip') ? 'checked' : ''; ?>>
                                 <label for="lwx_ws1400">WS1400ip</label>
                             </div>
                             <div class="sensor-option">
-                                <input type="radio" name="local_wx_type" value="ourweather" id="lwx_ow" <?php echo ($config['local_wx_type'] === 'ourweather') ? 'checked' : ''; ?>>
+                                <input type="radio" name="local_wx_type" value="ourweather" id="lwx_ow" <?php echo (($config['local_wx_type'] ?? '') === 'ourweather') ? 'checked' : ''; ?>>
                                 <label for="lwx_ow">OurWeather</label>
                             </div>
                         </div>
@@ -767,7 +761,7 @@ elseif ($step === 5): ?>
                     foreach ($wx_sensor_types as $wst): ?>
                         <div class="sensor-option" style="display:inline-block; margin-right:5px;">
                             <input type="radio" name="WXTEMPTYPE" value="<?php echo $wst; ?>" id="wst_<?php echo $wst; ?>"
-                                <?php echo ($config['WXTEMPTYPE'] === $wst) ? 'checked' : ''; ?>>
+                                <?php echo (($config['WXTEMPTYPE'] ?? '') === $wst) ? 'checked' : ''; ?>>
                             <label for="wst_<?php echo $wst; ?>"><?php echo strtoupper($wst); ?></label>
                         </div>
                     <?php endforeach; ?>
@@ -835,17 +829,17 @@ elseif ($step === 6): ?>
                                 <div class="enable-toggle" style="margin-bottom:10px;">
                                     <label>Enable</label>
                                     <select name="ENABLE_HIVE_CAMERA" class="form-control" style="width:120px;" id="cam-enable">
-                                        <option value="yes" <?php if ($config['ENABLE_HIVE_CAMERA'] === 'yes') echo 'selected'; ?>>Yes</option>
-                                        <option value="no" <?php if ($config['ENABLE_HIVE_CAMERA'] !== 'yes') echo 'selected'; ?>>No</option>
+                                        <option value="yes" <?php if (($config['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes') echo 'selected'; ?>>Yes</option>
+                                        <option value="no" <?php if (($config['ENABLE_HIVE_CAMERA'] ?? 'no') !== 'yes') echo 'selected'; ?>>No</option>
                                     </select>
                                 </div>
-                                <div id="cam-config" style="<?php echo ($config['ENABLE_HIVE_CAMERA'] !== 'yes') ? 'display:none;' : ''; ?>">
-                                    <div class="sensor-option <?php echo ($config['CAMERATYPE'] === 'PI') ? 'selected' : ''; ?>">
-                                        <input type="radio" name="CAMERATYPE" value="PI" id="cam_pi" <?php echo ($config['CAMERATYPE'] === 'PI') ? 'checked' : ''; ?>>
+                                <div id="cam-config" style="<?php echo (($config['ENABLE_HIVE_CAMERA'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
+                                    <div class="sensor-option <?php echo (($config['CAMERATYPE'] ?? '') === 'PI') ? 'selected' : ''; ?>">
+                                        <input type="radio" name="CAMERATYPE" value="PI" id="cam_pi" <?php echo (($config['CAMERATYPE'] ?? '') === 'PI') ? 'checked' : ''; ?>>
                                         <label for="cam_pi">Pi Camera</label>
                                     </div>
-                                    <div class="sensor-option <?php echo ($config['CAMERATYPE'] === 'USB') ? 'selected' : ''; ?>">
-                                        <input type="radio" name="CAMERATYPE" value="USB" id="cam_usb" <?php echo ($config['CAMERATYPE'] === 'USB') ? 'checked' : ''; ?>>
+                                    <div class="sensor-option <?php echo (($config['CAMERATYPE'] ?? '') === 'USB') ? 'selected' : ''; ?>">
+                                        <input type="radio" name="CAMERATYPE" value="USB" id="cam_usb" <?php echo (($config['CAMERATYPE'] ?? '') === 'USB') ? 'checked' : ''; ?>>
                                         <label for="cam_usb">USB Camera</label>
                                     </div>
 
@@ -864,17 +858,17 @@ elseif ($step === 6): ?>
                                 <div class="enable-toggle" style="margin-bottom:10px;">
                                     <label>Enable</label>
                                     <select name="ENABLE_BEECOUNTER" class="form-control" style="width:120px;" id="cnt-enable">
-                                        <option value="yes" <?php if ($config['ENABLE_BEECOUNTER'] === 'yes') echo 'selected'; ?>>Yes</option>
-                                        <option value="no" <?php if ($config['ENABLE_BEECOUNTER'] !== 'yes') echo 'selected'; ?>>No</option>
+                                        <option value="yes" <?php if (($config['ENABLE_BEECOUNTER'] ?? 'no') === 'yes') echo 'selected'; ?>>Yes</option>
+                                        <option value="no" <?php if (($config['ENABLE_BEECOUNTER'] ?? 'no') !== 'yes') echo 'selected'; ?>>No</option>
                                     </select>
                                 </div>
-                                <div id="cnt-config" style="<?php echo ($config['ENABLE_BEECOUNTER'] !== 'yes') ? 'display:none;' : ''; ?>">
-                                    <div class="sensor-option <?php echo ($config['COUNTERTYPE'] === 'PICAMERA') ? 'selected' : ''; ?>">
-                                        <input type="radio" name="COUNTERTYPE" value="PICAMERA" id="cnt_picam" <?php echo ($config['COUNTERTYPE'] === 'PICAMERA') ? 'checked' : ''; ?>>
+                                <div id="cnt-config" style="<?php echo (($config['ENABLE_BEECOUNTER'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
+                                    <div class="sensor-option <?php echo (($config['COUNTERTYPE'] ?? '') === 'PICAMERA') ? 'selected' : ''; ?>">
+                                        <input type="radio" name="COUNTERTYPE" value="PICAMERA" id="cnt_picam" <?php echo (($config['COUNTERTYPE'] ?? '') === 'PICAMERA') ? 'checked' : ''; ?>>
                                         <label for="cnt_picam">Pi Camera Counter</label>
                                     </div>
-                                    <div class="sensor-option <?php echo ($config['COUNTERTYPE'] === 'GATES') ? 'selected' : ''; ?>">
-                                        <input type="radio" name="COUNTERTYPE" value="GATES" id="cnt_gates" <?php echo ($config['COUNTERTYPE'] === 'GATES') ? 'checked' : ''; ?>>
+                                    <div class="sensor-option <?php echo (($config['COUNTERTYPE'] ?? '') === 'GATES') ? 'selected' : ''; ?>">
+                                        <input type="radio" name="COUNTERTYPE" value="GATES" id="cnt_gates" <?php echo (($config['COUNTERTYPE'] ?? '') === 'GATES') ? 'checked' : ''; ?>>
                                         <label for="cnt_gates">Gate Sensor</label>
                                     </div>
                                 </div>
@@ -962,29 +956,28 @@ elseif ($step === 8): ?>
             $sections = [
                 1 => ['Basic Info', 'fa-home', [
                     'Hive Name' => $config['HIVENAME'] ?? 'Not set',
-                    'API Key' => !empty($config['HIVEAPI']) ? substr($config['HIVEAPI'], 0, 8) . '...' : 'Not set',
                     'Location' => ($config['CITY'] ?? '') . ', ' . ($config['STATE'] ?? ''),
                     'Timezone' => $config['TIMEZONE'] ?? 'Not set',
                 ]],
                 2 => ['Temp/Humidity', 'fa-thermometer-half', [
-                    'Status' => $config['ENABLE_HIVE_TEMP_CHK'],
-                    'Sensor Type' => ($config['ENABLE_HIVE_TEMP_CHK'] === 'yes') ? strtoupper($config['TEMPTYPE'] ?? '') : 'N/A',
+                    'Status' => $config['ENABLE_HIVE_TEMP_CHK'] ?? 'no',
+                    'Sensor Type' => (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') === 'yes') ? strtoupper($config['TEMPTYPE'] ?? '') : 'N/A',
                 ]],
                 3 => ['Weight Scale', 'fa-balance-scale', [
-                    'Status' => $config['ENABLE_HIVE_WEIGHT_CHK'],
-                    'Scale Type' => ($config['ENABLE_HIVE_WEIGHT_CHK'] === 'yes') ? strtoupper($config['SCALETYPE'] ?? '') : 'N/A',
+                    'Status' => $config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no',
+                    'Scale Type' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes') ? strtoupper($config['SCALETYPE'] ?? '') : 'N/A',
                 ]],
                 4 => ['Light Sensor', 'fa-sun-o', [
-                    'Status' => $config['ENABLE_LUX'],
-                    'Source' => ($config['ENABLE_LUX'] === 'yes') ? strtoupper($config['LUX_SOURCE'] ?? '') : 'N/A',
+                    'Status' => $config['ENABLE_LUX'] ?? 'no',
+                    'Source' => (($config['ENABLE_LUX'] ?? 'no') === 'yes') ? strtoupper($config['LUX_SOURCE'] ?? '') : 'N/A',
                 ]],
                 5 => ['Weather Source', 'fa-cloud', [
                     'Source' => strtoupper($config['WEATHER_LEVEL'] ?? 'Not set'),
                     'Station' => !empty($config['WXSTATION']) ? $config['WXSTATION'] : 'N/A',
                 ]],
                 6 => ['Camera & Counter', 'fa-camera', [
-                    'Camera' => $config['ENABLE_HIVE_CAMERA'] . (($config['ENABLE_HIVE_CAMERA'] === 'yes') ? ' (' . ($config['CAMERATYPE'] ?? '') . ')' : ''),
-                    'Bee Counter' => $config['ENABLE_BEECOUNTER'] . (($config['ENABLE_BEECOUNTER'] === 'yes') ? ' (' . ($config['COUNTERTYPE'] ?? '') . ')' : ''),
+                    'Camera' => ($config['ENABLE_HIVE_CAMERA'] ?? 'no') . ((($config['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes') ? ' (' . ($config['CAMERATYPE'] ?? '') . ')' : ''),
+                    'Bee Counter' => ($config['ENABLE_BEECOUNTER'] ?? 'no') . ((($config['ENABLE_BEECOUNTER'] ?? 'no') === 'yes') ? ' (' . ($config['COUNTERTYPE'] ?? '') . ')' : ''),
                 ]],
                 7 => ['Air Quality', 'fa-leaf', [
                     'Status' => $config['ENABLE_AIR'] ?? 'no',
