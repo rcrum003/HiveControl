@@ -8,7 +8,7 @@
 #
 # Must run under root
 # sudo bash
-# Usage: sudo ./install.sh
+# Usage: ./install-raspberry-pi-5-64bit.sh
 # ==================================================
 
 
@@ -335,69 +335,21 @@ fi
 #cd wiringPI
 #sudo ./build
 
-# Detect Raspberry Pi version and OS architecture for appropriate GPIO library
-PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown")
-PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
+echo "Installing PIGPIO library for DHT and HX711 Sensors"
+#Kill pigpiod just in case it is already running
+sudo killall pigpiod 2>/dev/null || true
 
-# Detect OS architecture (32-bit vs 64-bit)
-OS_ARCH=$(uname -m)
-case "$OS_ARCH" in
-    aarch64|arm64|x86_64|amd64)
-        IS_64BIT=true
-        ;;
-    *)
-        IS_64BIT=false
-        ;;
-esac
+# Python3 setuptools should already be available in modern Raspberry Pi OS
+sudo apt install python3-setuptools -y
 
-echo "Detected: $PI_MODEL"
-echo "OS Architecture: $OS_ARCH (64-bit: $IS_64BIT)"
-
-if [ "$PI_VERSION" -ge 5 ]; then
-    echo "------------------------"
-    echo "Installing lgpio for Raspberry Pi 5+"
-    echo "------------------------"
-    # lgpio is the recommended GPIO library for Pi 5
-    sudo apt install python3-lgpio -y
-
-    # Install smbus2 and spidev for I2C/SPI support
-    sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
-
-    echo "lgpio installation complete"
-else
-    echo "------------------------"
-    echo "Installing PIGPIO library for DHT and HX711 Sensors (Pi 4 and earlier)"
-    echo "------------------------"
-    #Kill pigpiod just in case it is already running
-    sudo killall pigpiod 2>/dev/null || true
-
-    # Python3 setuptools should already be available in modern Raspberry Pi OS
-    sudo apt install python3-setuptools -y
-
-    cd /home/HiveControl/software
-    sudo git clone https://github.com/rcrum003/pigpio
-    cd pigpio/
-    sudo make
-    sudo make install
-    sudo cp /usr/local/bin/pigpiod /usr/bin/
-    sudo apt install python3-pigpio -y
-    sudo pigpiod
-
-    echo "pigpio installation complete"
-fi
-
-####################################################################################
-# Compile architecture-specific binaries
-####################################################################################
-echo "------------------------"
-echo "Compiling TSL2561 light sensor binary for $OS_ARCH"
-echo "------------------------"
-cd /home/HiveControl/software/tsl2561
-gcc -Wall -O2 -o TSL2561.o -c TSL2561.c
-gcc -Wall -O2 -o TSL2561_test.o -c TSL2561_test.c
-gcc -Wall -O2 -o 2561 TSL2561.o TSL2561_test.o
-rm -f *.o
-echo "TSL2561 compilation complete"
+cd /home/HiveControl/software
+sudo git clone https://github.com/rcrum003/pigpio
+cd pigpio/
+sudo make
+sudo make install
+sudo cp /usr/local/bin/pigpiod /usr/bin/
+sudo apt install python3-pigpio -y
+sudo pigpiod
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs
@@ -413,33 +365,14 @@ echo "TSL2561 compilation complete"
 		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
 	fi
 ####################################################################################
-# DHTXXD - DHT11/DHT21/DHT22 Temperature/Humidity Sensors
+# DHTXXD
 ####################################################################################
-echo "------------------------"
-echo "Installing DHT Sensor Support"
-echo "------------------------"
-
-cd /home/HiveControl/software/DHTXXD
-unzip -o DHTXXD.zip
-
-if [ "$PI_VERSION" -ge 5 ]; then
-    echo "Pi 5 detected: Using kernel driver for DHT sensors"
-    echo "The DHT kernel driver reads sensors via /sys/devices/platform/dht11@<gpio>/"
-    echo ""
-    echo "IMPORTANT: To use DHT sensors on Pi 5, you must:"
-    echo "  1. Add 'dtoverlay=dht11,gpiopin=<your_gpio>' to /boot/firmware/config.txt"
-    echo "  2. Reboot the Pi"
-    echo ""
-    echo "Example for GPIO 4: dtoverlay=dht11,gpiopin=4"
-    echo ""
-    # Make the Python script executable
-    chmod +x /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py
-else
-    echo "Pi 4 or earlier: Compiling DHTXXD binary (pigpio)"
-    sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
-    sudo cp DHTXXD /usr/local/bin/
-fi
-echo "DHT sensor support installation complete"
+	#Installing DHTXX Code
+	echo "Installing DHT Code"
+	cd /home/HiveControl/software/DHTXXD
+	unzip -o DHTXXD.zip
+	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
+	sudo cp DHTXXD /usr/local/bin/
 
 ####################################################################################
 # XMLStarlet used to send data to current hivetool.org Perl script
