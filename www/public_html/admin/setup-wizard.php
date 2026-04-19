@@ -1249,6 +1249,12 @@ elseif ($step === 8): ?>
         updateScaleOptions();
     }
 
+    function escHtml(s) {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(s));
+        return d.innerHTML;
+    }
+
     // Calibration Sub-Wizard
     var CalWiz = {
         rawZero: null,
@@ -1323,11 +1329,11 @@ elseif ($step === 8): ?>
                     if (data.success) {
                         self.rawZero = parseFloat(data.raw_value);
                         el.className = 'test-result success';
-                        el.innerHTML = 'Zero reading: <strong>' + data.raw_value + '</strong>';
+                        el.innerHTML = 'Zero reading: <strong>' + escHtml(String(data.raw_value)) + '</strong>';
                         setTimeout(function() { self.showStep(2); }, 800);
                     } else {
                         el.className = 'test-result error';
-                        el.innerHTML = data.error || 'Failed to get reading';
+                        el.textContent = data.error || 'Failed to get reading';
                     }
                 },
                 error: function(xhr, status) {
@@ -1362,12 +1368,12 @@ elseif ($step === 8): ?>
                     if (data.success) {
                         self.rawLoaded = parseFloat(data.raw_value);
                         el.className = 'test-result success';
-                        el.innerHTML = 'Loaded reading: <strong>' + data.raw_value + '</strong>';
+                        el.innerHTML = 'Loaded reading: <strong>' + escHtml(String(data.raw_value)) + '</strong>';
 
                         var result = self.calculate(self.rawZero, self.rawLoaded, knownWeight, scaleType);
                         if (result.error) {
                             el.className = 'test-result error';
-                            el.innerHTML = result.error;
+                            el.textContent = result.error;
                             return;
                         }
 
@@ -1381,7 +1387,7 @@ elseif ($step === 8): ?>
                         setTimeout(function() { self.showStep(3); }, 800);
                     } else {
                         el.className = 'test-result error';
-                        el.innerHTML = data.error || 'Failed to get reading';
+                        el.textContent = data.error || 'Failed to get reading';
                     }
                 },
                 error: function(xhr, status) {
@@ -1409,7 +1415,7 @@ elseif ($step === 8): ?>
                 slope = diff / knownWeight;
             }
             return {
-                slope: parseFloat(slope.toFixed(2)),
+                slope: parseFloat(slope.toFixed(6)),
                 intercept: parseFloat(intercept.toFixed(2))
             };
         },
@@ -1438,7 +1444,7 @@ elseif ($step === 8): ?>
                             self.setButtonLoading('btn-verify', false);
                             if (data && data.trim().length > 0) {
                                 el.className = 'test-result success';
-                                el.innerHTML = '<strong>Verification reading:</strong><br>' + data.replace(/\n/g, '<br>') + '<br><br><em>Compare this to the weight you placed on the scale.</em>';
+                                el.innerHTML = '<strong>Verification reading:</strong><br>' + escHtml(data).replace(/\n/g, '<br>') + '<br><br><em>Compare this to the weight you placed on the scale.</em>';
                             } else {
                                 el.className = 'test-result error';
                                 el.innerHTML = 'No data returned. Check sensor.';
