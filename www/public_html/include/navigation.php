@@ -3,7 +3,7 @@
 <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 #Get Site Orient and Options
-$sth3 = $conn->prepare("SELECT SITE_ORIENT,HIVENAME,SITE_TYPE,SHOW_METRIC,HIVEAPI,HCVersion FROM hiveconfig");
+$sth3 = $conn->prepare("SELECT SITE_ORIENT,HIVENAME,SITE_TYPE,SHOW_METRIC,HCVersion FROM hiveconfig");
 $sth3->execute();
 $result3 = $sth3->fetch(PDO::FETCH_ASSOC);
 
