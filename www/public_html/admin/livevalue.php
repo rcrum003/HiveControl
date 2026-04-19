@@ -24,6 +24,9 @@ $r = $sthlive->fetch(PDO::FETCH_ASSOC);
 $sthlive = null;
 $conn = null;
 
+// Regenerate hiveconfig.inc from the database so sensor scripts use current config
+shell_exec("sudo /home/HiveControl/scripts/data/dump_hiveconfig_inc.sh 2>/dev/null");
+
 switch ($sensor) {
     case "hivetemp":
         $value = shell_exec("/usr/bin/timeout 30 sudo /home/HiveControl/scripts/temp/gettemp.sh 2>/dev/null");
