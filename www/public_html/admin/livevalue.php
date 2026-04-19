@@ -1,79 +1,69 @@
-
 <?PHP
-//Pass variables to determine the type of view
+// Live sensor test endpoint
+// Returns raw sensor readings for the setup wizard and instrument config page
 
-// Functions
-// period - specify what timeperiods you want to see
-
-//Check input for badness
 function test_input($data) {
-  $data = trim($data);
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
 }
 
-
-$sensor = test_input($_GET["sensor"]);
-
-#Check to see if the neccessary variables exist
-
-if(isset($_GET["sensor"])) {
-    // exists
-    if (empty($_GET["sensor"])) {
-        // Default to Day if no period is set or empty
-        $sensor = "all";
-        } else {
-            $sensor = test_input($_GET["sensor"]);
-        }
-    } else {
-    $sensor = "all";
+$sensor = "all";
+if (isset($_GET["sensor"]) && !empty($_GET["sensor"])) {
+    $sensor = test_input($_GET["sensor"]);
 }
 
-
-#Script to get all the values
-
-########################################################
-# Get Config to see what we have setup
-########################################################
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
-require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
- $sthlive = $conn->prepare("SELECT * FROM hiveconfig");
- $sthlive->execute();
- $r = $sthlive->fetch(PDO::FETCH_ASSOC);
-
+$sthlive = $conn->prepare("SELECT * FROM hiveconfig");
+$sthlive->execute();
+$r = $sthlive->fetch(PDO::FETCH_ASSOC);
 
 switch ($sensor) {
     case "hivetemp":
-		########################################################
-		# Hive Temp
-		########################################################
-        $value = shell_exec("sudo /home/HiveControl/scripts/temp/gettemp.sh");
-        $valueheader = " Temp F, Humidity%, Dew F, Temp C  ";
-		break;
-    	
+        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/temp/gettemp.sh 2>&1");
+        $valueheader = "Temp F, Humidity%, Dew F, Temp C";
+        break;
+
     case "hiveweight":
-        ########################################################
-		# Hive Weight
-		########################################################
-        $value = shell_exec("sudo /home/HiveControl/scripts/weight/getweight.sh |awk '{print $1}'");
-        $valueheader = " Gross Weight ";
+        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/weight/getweight.sh 2>&1 | awk '{print $1}'");
+        $valueheader = "Gross Weight (lbs)";
         break;
 
     case "hivelux":
-        ########################################################
-		# LUX
-		########################################################
-        $value = shell_exec("sudo /home/HiveControl/scripts/light/getlux.sh");
-        $valueheader = " LUX  ";
-		break;
-    }
+        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/light/getlux.sh 2>&1");
+        $valueheader = "LUX";
+        break;
 
-echo $valueheader . "<BR>";
-echo $value;
+    case "weather":
+        $value = shell_exec("sudo /usr/bin/timeout 20 /home/HiveControl/scripts/weather/getwx.sh 2>&1 | tail -5");
+        $valueheader = "Weather Data";
+        break;
 
+    case "camera":
+        $value = shell_exec("sudo /usr/bin/timeout 10 /home/HiveControl/scripts/image/takepic.sh 2>&1");
+        if ($value === null || trim($value) === '') {
+            $value = "Camera capture completed. Check /home/HiveControl/www/public_html/images/ for output.";
+        }
+        $valueheader = "Camera Test";
+        break;
 
+    case "airquality":
+        $value = shell_exec("sudo /usr/bin/timeout 15 /home/HiveControl/scripts/air/getair.sh 2>&1 | tail -5");
+        $valueheader = "Air Quality Data";
+        break;
+
+    default:
+        $valueheader = "Unknown sensor type";
+        $value = "Specify a valid sensor: hivetemp, hiveweight, hivelux, weather, camera, airquality";
+        break;
+}
+
+echo $valueheader . "\n";
+if ($value !== null) {
+    echo trim($value);
+} else {
+    echo "No response from sensor. Check connection and configuration.";
+}
 ?>
-
-

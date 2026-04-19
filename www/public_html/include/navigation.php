@@ -136,6 +136,10 @@ echo '
                                 <li>
                                     <a href="/admin/changepassword.php">Change Password</a>
                                 </li>
+                                <li class="divider"></li>
+                                <li>
+                                    <a href="/admin/setup-wizard.php"><i class="fa fa-magic fa-fw"></i> Setup Wizard</a>
+                                </li>
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
@@ -209,6 +213,9 @@ if ($orient == "normal") {
                                 </li>
                                 <li>
                                     <a href="/admin/changepassword.php">Change Password</a>
+                                </li>
+                                <li>
+                                    <a href="/admin/setup-wizard.php"><i class="fa fa-magic fa-fw"></i> Setup Wizard</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->
