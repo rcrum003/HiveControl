@@ -20,6 +20,10 @@ $sthlive = $conn->prepare("SELECT * FROM hiveconfig");
 $sthlive->execute();
 $r = $sthlive->fetch(PDO::FETCH_ASSOC);
 
+// Close database before shell_exec — sensor scripts also access the DB and SQLite locks on concurrent access
+$sthlive = null;
+$conn = null;
+
 switch ($sensor) {
     case "hivetemp":
         $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/temp/gettemp.sh 2>&1");
