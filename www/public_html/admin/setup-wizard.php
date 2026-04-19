@@ -34,6 +34,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = isset($_POST['wizard_action']) ? $_POST['wizard_action'] : 'next';
     $post_step = isset($_POST['wizard_step']) ? (int)$_POST['wizard_step'] : 1;
 
+    $test_sensor_type = isset($_POST['test_sensor_type']) ? $_POST['test_sensor_type'] : '';
+
     if ($action === 'skip') {
         // Skip just advances to next step without saving
         header("Location: setup-wizard.php?step=" . ($post_step + 1));
@@ -179,6 +181,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!$config) { $config = []; }
 
         $saved = true;
+
+        if ($action === 'test' && !empty($test_sensor_type)) {
+            header("Location: setup-wizard.php?step=" . $post_step . "&saved=1&autotest=" . urlencode($test_sensor_type));
+            exit();
+        }
+
         $next_step = $post_step + 1;
         if ($next_step > 8) { $next_step = 8; }
 
@@ -350,7 +358,8 @@ if ($step === 1): ?>
 
             <form method="POST" action="setup-wizard.php?step=1">
                 <input type="hidden" name="wizard_step" value="1">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="form-group">
                     <label for="HIVENAME">Hive Name <span style="color:#d9534f;">*</span></label>
@@ -417,7 +426,8 @@ elseif ($step === 2): ?>
 
             <form method="POST" action="setup-wizard.php?step=2" id="step-form">
                 <input type="hidden" name="wizard_step" value="2">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="enable-toggle">
                     <label><i class="fa fa-thermometer-half"></i> Enable Temp/Humidity Sensor</label>
@@ -548,7 +558,8 @@ elseif ($step === 3): ?>
 
             <form method="POST" action="setup-wizard.php?step=3" id="step-form">
                 <input type="hidden" name="wizard_step" value="3">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="enable-toggle">
                     <label><i class="fa fa-balance-scale"></i> Enable Weight Scale</label>
@@ -617,7 +628,8 @@ elseif ($step === 4): ?>
 
             <form method="POST" action="setup-wizard.php?step=4" id="step-form">
                 <input type="hidden" name="wizard_step" value="4">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="enable-toggle">
                     <label><i class="fa fa-sun-o"></i> Enable Light Sensor</label>
@@ -684,7 +696,8 @@ elseif ($step === 5): ?>
 
             <form method="POST" action="setup-wizard.php?step=5" id="step-form">
                 <input type="hidden" name="wizard_step" value="5">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <label>Select Weather Source:</label>
                 <?php
@@ -819,7 +832,8 @@ elseif ($step === 6): ?>
 
             <form method="POST" action="setup-wizard.php?step=6" id="step-form">
                 <input type="hidden" name="wizard_step" value="6">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="row">
                     <div class="col-md-6">
@@ -904,7 +918,8 @@ elseif ($step === 7): ?>
 
             <form method="POST" action="setup-wizard.php?step=7" id="step-form">
                 <input type="hidden" name="wizard_step" value="7">
-                <input type="hidden" name="wizard_action" value="next">
+                <input type="hidden" name="wizard_action" value="next" id="wizard_action_field">
+                <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="enable-toggle">
                     <label><i class="fa fa-leaf"></i> Enable Air Quality Monitoring</label>
@@ -1068,12 +1083,22 @@ elseif ($step === 8): ?>
         showTempOptions();
     }
 
-    // Sensor test via AJAX
+    // Save form, then test sensor — submits the form with action=test, page reloads and auto-fires AJAX
     function testSensor(type) {
+        var form = document.getElementById('step-form');
+        if (!form) return;
+        document.getElementById('wizard_action_field').value = 'test';
+        document.getElementById('test_sensor_type_field').value = type;
+        form.submit();
+    }
+
+    // Run AJAX sensor test (called after page reload with autotest param)
+    function runSensorTest(type) {
         var resultId = (type === 'camera') ? 'test-result-cam' : 'test-result';
         var el = document.getElementById(resultId);
+        if (!el) return;
         el.className = 'test-result waiting';
-        el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Reading sensor... this may take up to a minute';
+        el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Settings saved. Reading sensor... this may take up to a minute';
 
         var ajaxTimeout = (type === 'hiveweight') ? 90000 : 30000;
         $.ajax({
@@ -1098,6 +1123,15 @@ elseif ($step === 8): ?>
             }
         });
     }
+
+    // Auto-fire test if we came back from a save+test action
+    $(document).ready(function() {
+        var params = new URLSearchParams(window.location.search);
+        var autotest = params.get('autotest');
+        if (autotest) {
+            runSensorTest(autotest);
+        }
+    });
     </script>
 </body>
 </html>
