@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 $slope = isset($_POST['slope']) ? trim($_POST['slope']) : '';
 $intercept = isset($_POST['intercept']) ? trim($_POST['intercept']) : '';
+$scaletype = isset($_POST['scaletype']) ? trim($_POST['scaletype']) : '';
 
 if (!is_numeric($slope) || !is_numeric($intercept)) {
     echo json_encode(['success' => false, 'error' => 'Slope and intercept must be numeric values']);
@@ -23,6 +24,8 @@ if (floatval($slope) == 0) {
     exit();
 }
 
+$allowed_types = ['hx711', 'phidget1046'];
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 $sth = $conn->prepare("SELECT version FROM hiveconfig LIMIT 1");
@@ -30,8 +33,13 @@ $sth->execute();
 $row = $sth->fetch(PDO::FETCH_ASSOC);
 $version = ($row && isset($row['version'])) ? (int)$row['version'] + 1 : 1;
 
-$update = $conn->prepare("UPDATE hiveconfig SET HIVE_WEIGHT_SLOPE=?, HIVE_WEIGHT_INTERCEPT=?, version=?");
-$result = $update->execute([$slope, $intercept, $version]);
+if (!empty($scaletype) && in_array($scaletype, $allowed_types)) {
+    $update = $conn->prepare("UPDATE hiveconfig SET HIVE_WEIGHT_SLOPE=?, HIVE_WEIGHT_INTERCEPT=?, SCALETYPE=?, ENABLE_HIVE_WEIGHT_CHK='yes', version=?");
+    $result = $update->execute([$slope, $intercept, $scaletype, $version]);
+} else {
+    $update = $conn->prepare("UPDATE hiveconfig SET HIVE_WEIGHT_SLOPE=?, HIVE_WEIGHT_INTERCEPT=?, version=?");
+    $result = $update->execute([$slope, $intercept, $version]);
+}
 
 $sth = null;
 $update = null;

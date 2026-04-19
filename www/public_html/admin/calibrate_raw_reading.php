@@ -24,6 +24,14 @@ if (!in_array($scaletype, $allowed_types)) {
     exit();
 }
 
+// Save the scale type and enable flag to the database so hiveconfig.inc stays in sync
+// (user may not have submitted the wizard form yet)
+include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+$upd = $conn->prepare("UPDATE hiveconfig SET SCALETYPE=?, ENABLE_HIVE_WEIGHT_CHK='yes'");
+$upd->execute([$scaletype]);
+$upd = null;
+$conn = null;
+
 // Regenerate hiveconfig.inc so sensor scripts have current config
 shell_exec("sudo /home/HiveControl/scripts/data/dump_hiveconfig_inc.sh 2>/dev/null");
 

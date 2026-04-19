@@ -1435,7 +1435,7 @@ elseif ($step === 8): ?>
             $.ajax({
                 url: 'calibrate_save.php',
                 method: 'POST',
-                data: { slope: self.slope, intercept: self.intercept },
+                data: { slope: self.slope, intercept: self.intercept, scaletype: self.getScaleType() },
                 dataType: 'json',
                 timeout: 15000,
                 success: function() {
@@ -1475,7 +1475,7 @@ elseif ($step === 8): ?>
             $.ajax({
                 url: 'calibrate_save.php',
                 method: 'POST',
-                data: { slope: self.slope, intercept: self.intercept },
+                data: { slope: self.slope, intercept: self.intercept, scaletype: self.getScaleType() },
                 dataType: 'json',
                 timeout: 15000,
                 success: function(data) {
