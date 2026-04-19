@@ -174,6 +174,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $conn->prepare($sql);
         $stmt->execute($update_values);
 
+        // Regenerate hiveconfig.inc so sensor scripts use the updated config immediately
+        shell_exec("sudo /home/HiveControl/scripts/data/dump_hiveconfig_inc.sh 2>/dev/null");
+
         // Reload config
         $sth = $conn->prepare("SELECT * FROM hiveconfig");
         $sth->execute();
