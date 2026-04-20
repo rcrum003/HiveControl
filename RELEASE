@@ -1,6 +1,50 @@
 Release Notes:
 
 --------------------
+2.12 Release
+--------------------
+NEW FEATURES:
+- Multi-Source Weather API Support
+  * Added 5 new weather sources: Open-Meteo, OpenWeatherMap, NWS (weather.gov),
+    WeatherAPI.com, and Visual Crossing
+  * Shared helper library (wx_helpers.inc) for unit conversion and JSON output
+  * All sources output standardized WunderGround-format JSON
+  * NWS auto-discovers nearest station from lat/lon with 24-hour caching
+  * Organized weather dropdown in instrumentconfig.php with optgroups
+
+- Automatic Weight Drift Compensation
+  * Auto-calibration runs weekly at 5am using nighttime readings (midnight-5am)
+  * Simple on/off toggle in both setup wizard and instrument config
+  * No manual SSH calibration required — system self-calibrates from operational data
+  * Requires 50+ nighttime samples with 5°F+ temperature variation
+  * Displays calibration status, R² value, and coefficients in admin UI
+
+GPIO MIGRATION:
+- Migrated from pigpio to lgpio for all Raspberry Pi models
+  * New DHTXXD_lgpio.py reads DHT22/DHT11 sensors using lgpio with busy-wait
+    edge detection and perf_counter_ns() for microsecond-precision timing
+  * Works on Pi 3, 4, 5, and all modern kernels (Bookworm/Trixie)
+  * Fallback chain: kernel IIO driver > lgpio Python > DHTXXD pigpio binary
+  * Updated dht22.sh, dht21.sh, wxdht22.sh, wxdht21.sh
+  * Install scripts no longer compile pigpio or start pigpiod
+  * Upgrade path removes pigpio and pigpiod cron entry
+  * Removed pigpiod @reboot from hivetool.cron
+
+SETUP WIZARD:
+- Added environmental drift compensation toggle to Step 3 (Weight Scale)
+- Added drift compensation status to Step 8 review summary
+- Fixed setup wizard redirect loop (dashboard link now works)
+- Fixed fresh install defaults: Chart Round=on, Chart Smoothing=on,
+  Site Layout=Wide, Site Type=Compact
+
+BUG FIXES:
+- Fixed instrumentconfig.php weather source links pointing to siteconfig.php
+  instead of hiveconfig.php where lat/lon fields actually live
+
+DATABASE CHANGES:
+- Added WEIGHT_LAST_CALIBRATED and WEIGHT_CALIBRATION_R2 columns to hiveconfig
+
+--------------------
 2.11 Release
 --------------------
 NEW FEATURES:

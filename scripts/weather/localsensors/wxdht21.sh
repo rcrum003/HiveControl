@@ -1,26 +1,27 @@
 #!/bin/bash
 # read the DHT21 for weather station
-# Version 2.1
+# Version 2.2
 # Supporting the Hivetool project
 # gets and returns data like the temperhum
 #
-# v2.1 - Added Pi 5 support using kernel driver
-# Detects Pi version and uses:
-# - Pi 4 and earlier: DHTXXD binary (pigpio)
-# - Pi 5 and later: DHTXXD_kernel.py (kernel IIO driver)
+# v2.2 - Use lgpio on all Pi models; kernel driver and pigpio as fallbacks
+# Priority: kernel IIO driver > lgpio Python > DHTXXD pigpio binary
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 
-# Detect Raspberry Pi version
-PI_MODEL=$(tr -d '\0' < /proc/device-tree/model 2>/dev/null || echo "Unknown")
-PI_VERSION=$(echo "$PI_MODEL" | grep -oP 'Raspberry Pi \K\d+' || echo "0")
+DHTXXD_DIR="/home/HiveControl/software/DHTXXD"
 
-# Select appropriate DHT reader based on Pi version
-if [ "$PI_VERSION" -ge 5 ]; then
-    USE_KERNEL_DRIVER=true
+# Detect available DHT reader: kernel > lgpio > pigpio
+if [ -f "$DHTXXD_DIR/DHTXXD_kernel.py" ] && ls /sys/devices/platform/dht11@*/iio:device* >/dev/null 2>&1; then
+    DHT_READER="kernel"
+elif [ -f "$DHTXXD_DIR/DHTXXD_lgpio.py" ] && python3 -c "import lgpio" 2>/dev/null; then
+    DHT_READER="lgpio"
+elif [ -x /usr/local/bin/DHTXXD ]; then
+    DHT_READER="pigpio"
 else
-    USE_KERNEL_DRIVER=false
+    echo "null null null null"
+    exit 1
 fi
 
 
@@ -102,14 +103,17 @@ COUNTER=1
 while [ $COUNTER -lt 6 ] && [ $DATA_GOOD -eq 0 ]
 do
         DATE2=$(TZ=":$TIMEZONE" date '+%F %T')
-        #Run the appropriate code to read the sensor based on Pi version
-        if [ "$USE_KERNEL_DRIVER" = true ]; then
-            # Pi 5+: Use kernel driver via Python script
-            DHT22=$(sudo /usr/bin/python3 /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py -g$GPIO)
-        else
-            # Pi 4 and earlier: Use pigpio-based C binary
-            DHT22=$(sudo /usr/local/bin/DHTXXD -g$GPIO)
-        fi
+        case "$DHT_READER" in
+            kernel)
+                DHT22=$(sudo /usr/bin/python3 "$DHTXXD_DIR/DHTXXD_kernel.py" -g$GPIO)
+                ;;
+            lgpio)
+                DHT22=$(sudo /usr/bin/python3 "$DHTXXD_DIR/DHTXXD_lgpio.py" -g$GPIO)
+                ;;
+            pigpio)
+                DHT22=$(sudo /usr/local/bin/DHTXXD -g$GPIO)
+                ;;
+        esac
           
         #Check for error status, which is included in the C code
           DHT_STATUS=$(echo $DHT22 |awk '{print $1}')

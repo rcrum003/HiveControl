@@ -92,12 +92,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($enable === 'yes') {
                 $v->rule('required', ['SCALETYPE'])->message('Scale type is required');
                 if ($v->validate()) {
-                    $update_fields = array_merge($update_fields, ['SCALETYPE=?', 'HIVE_WEIGHT_GPIO=?', 'HIVE_WEIGHT_SLOPE=?', 'HIVE_WEIGHT_INTERCEPT=?']);
+                    $update_fields = array_merge($update_fields, ['SCALETYPE=?', 'HIVE_WEIGHT_GPIO=?', 'HIVE_WEIGHT_SLOPE=?', 'HIVE_WEIGHT_INTERCEPT=?', 'WEIGHT_COMPENSATION_ENABLED=?']);
                     $update_values = array_merge($update_values, [
                         test_input($_POST['SCALETYPE']),
                         test_input($_POST['HIVE_WEIGHT_GPIO'] ?? ($config['HIVE_WEIGHT_GPIO'] ?? '')),
                         test_input($_POST['HIVE_WEIGHT_SLOPE'] ?? '1'),
-                        test_input($_POST['HIVE_WEIGHT_INTERCEPT'] ?? '0')
+                        test_input($_POST['HIVE_WEIGHT_INTERCEPT'] ?? '0'),
+                        test_input($_POST['WEIGHT_COMPENSATION_ENABLED'] ?? 'no')
                     ]);
                 }
             }
@@ -153,10 +154,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $update_fields = ['ENABLE_AIR=?'];
             $update_values = [$enable];
             if ($enable === 'yes') {
-                $update_fields = array_merge($update_fields, ['AIR_TYPE=?', 'AIR_ID=?']);
+                $airType = test_input($_POST['AIR_TYPE'] ?? ($config['AIR_TYPE'] ?? ''));
+                $update_fields = array_merge($update_fields, ['AIR_TYPE=?', 'AIR_ID=?', 'AIR_API=?', 'AIR_LOCAL_URL=?']);
                 $update_values = array_merge($update_values, [
-                    test_input($_POST['AIR_TYPE'] ?? ($config['AIR_TYPE'] ?? '')),
-                    test_input($_POST['AIR_ID'] ?? ($config['AIR_ID'] ?? ''))
+                    $airType,
+                    test_input($_POST['AIR_ID'] ?? ($config['AIR_ID'] ?? '')),
+                    test_input($_POST['AIR_API'] ?? ($config['AIR_API'] ?? '')),
+                    test_input($_POST['AIR_LOCAL_URL'] ?? ($config['AIR_LOCAL_URL'] ?? ''))
                 ]);
             }
             break;
@@ -654,11 +658,8 @@ elseif ($step === 3): ?>
                                 </table>
 
                                 <div style="margin-bottom:15px;">
-                                    <button type="button" class="btn btn-test" id="btn-verify" onclick="CalWiz.verify()">
-                                        <i class="fa fa-check"></i> Verify Calibration
-                                    </button>
-                                    <button type="button" class="btn btn-primary" id="btn-save-cal" onclick="CalWiz.save()" style="margin-left:8px;">
-                                        <i class="fa fa-floppy-o"></i> Save Calibration
+                                    <button type="button" class="btn btn-primary" id="btn-verify" onclick="CalWiz.verify()">
+                                        <i class="fa fa-check"></i> Save &amp; Verify
                                     </button>
                                     <button type="button" class="btn btn-back" onclick="CalWiz.start()" style="margin-left:8px;">
                                         <i class="fa fa-refresh"></i> Start Over
@@ -706,6 +707,16 @@ elseif ($step === 3): ?>
                             <p class="help-text">Read the scale using the current calibration values. Place a known weight to verify accuracy.</p>
                             <button type="button" class="btn btn-test" onclick="testSensor('hiveweight')"><i class="fa fa-play"></i> Test Now</button>
                             <div class="test-result waiting" id="test-result">Waiting for test...</div>
+                        </div>
+
+                        <!-- Environmental Drift Compensation -->
+                        <div style="margin-top:20px; padding:15px; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:4px;">
+                            <h4 style="margin-top:0;"><i class="fa fa-thermometer-half"></i> Environmental Drift Compensation</h4>
+                            <p class="help-text">Automatically corrects weight readings for temperature and humidity drift. Recalibrates weekly using nighttime data when bees are inactive.</p>
+                            <select name="WEIGHT_COMPENSATION_ENABLED" class="form-control" style="width:120px;">
+                                <option value="yes" <?php if (($config['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
+                                <option value="no" <?php if (($config['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -802,8 +813,13 @@ elseif ($step === 5): ?>
                 <label>Select Weather Source:</label>
                 <?php
                 $wx_types = [
-                    'hive' => ['WX Underground', 'Online weather service &mdash; requires station ID'],
-                    'ambientwx' => ['AmbientWeather.net', 'Ambient Weather network &mdash; requires API key and station ID'],
+                    'openmeteo' => ['Open-Meteo', 'Free, no API key &mdash; uses latitude/longitude (global coverage)'],
+                    'openweathermap' => ['OpenWeatherMap', 'Free tier (1000 calls/day) &mdash; requires API key'],
+                    'nws' => ['NWS (weather.gov)', 'Free, no API key &mdash; US locations only'],
+                    'weatherapi' => ['WeatherAPI.com', 'Free tier (1M calls/month) &mdash; requires API key'],
+                    'visualcrossing' => ['Visual Crossing', 'Free tier (1000 calls/day) &mdash; requires API key, includes solar radiation'],
+                    'ambientwx' => ['AmbientWeather.net', 'Ambient Weather network &mdash; requires API key and station MAC'],
+                    'hive' => ['WX Underground (Legacy)', 'Weather Underground &mdash; requires station ID'],
                     'localws' => ['Local Weather Station', 'IP-connected weather station on your network'],
                     'localsensors' => ['Local Hive Sensors', 'Use locally connected temp/humidity sensors for weather'],
                     'wf_tempest_local' => ['WeatherFlow Tempest (UDP)', 'Local UDP broadcast from Tempest station'],
@@ -817,7 +833,48 @@ elseif ($step === 5): ?>
                     </div>
                 <?php endforeach; ?>
 
-                <!-- WX Underground options -->
+                <!-- Open-Meteo options (no config needed) -->
+                <div id="wx-opt-openmeteo" class="wx-opt" style="display:none; margin-top:15px;">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i> Open-Meteo uses your latitude/longitude from Step 2. No API key required. Data is sourced from ECMWF, DWD, and NOAA weather models.
+                    </div>
+                </div>
+
+                <!-- OpenWeatherMap options -->
+                <div id="wx-opt-openweathermap" class="wx-opt" style="display:none; margin-top:15px;">
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" class="form-control" name="KEY" value="<?php echo htmlspecialchars($config['KEY'] ?? ''); ?>" placeholder="Get free key at openweathermap.org">
+                        <p class="help-block">Sign up at <strong>openweathermap.org</strong> for a free API key (1000 calls/day).</p>
+                    </div>
+                </div>
+
+                <!-- NWS options (no config needed) -->
+                <div id="wx-opt-nws" class="wx-opt" style="display:none; margin-top:15px;">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i> NWS uses your latitude/longitude to find the nearest observation station automatically. No API key required. <strong>US locations only.</strong>
+                    </div>
+                </div>
+
+                <!-- WeatherAPI.com options -->
+                <div id="wx-opt-weatherapi" class="wx-opt" style="display:none; margin-top:15px;">
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" class="form-control" name="KEY" value="<?php echo htmlspecialchars($config['KEY'] ?? ''); ?>" placeholder="Get free key at weatherapi.com">
+                        <p class="help-block">Sign up at <strong>weatherapi.com</strong> for a free API key (1M calls/month).</p>
+                    </div>
+                </div>
+
+                <!-- Visual Crossing options -->
+                <div id="wx-opt-visualcrossing" class="wx-opt" style="display:none; margin-top:15px;">
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" class="form-control" name="KEY" value="<?php echo htmlspecialchars($config['KEY'] ?? ''); ?>" placeholder="Get free key at visualcrossing.com">
+                        <p class="help-block">Sign up at <strong>visualcrossing.com</strong> for a free API key (1000 calls/day). Includes solar radiation data.</p>
+                    </div>
+                </div>
+
+                <!-- WX Underground options (legacy) -->
                 <div id="wx-opt-hive" class="wx-opt" style="display:none; margin-top:15px;">
                     <div class="form-group">
                         <label>Station ID</label>
@@ -1030,17 +1087,44 @@ elseif ($step === 7): ?>
                 </div>
 
                 <div id="sensor-config" style="<?php echo (($config['ENABLE_AIR'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
+                    <?php $airType = $config['AIR_TYPE'] ?? ''; ?>
                     <label>Select Air Quality Source:</label>
-                    <div class="sensor-option <?php echo (($config['AIR_TYPE'] ?? '') === 'purple') ? 'selected' : ''; ?>">
-                        <input type="radio" name="AIR_TYPE" value="purple" id="air_purple"
-                            <?php echo (($config['AIR_TYPE'] ?? '') === 'purple') ? 'checked' : ''; ?>>
-                        <label for="air_purple"><strong>PurpleAir</strong> &mdash; Community air quality sensor network</label>
+                    <div class="sensor-option <?php echo ($airType === 'purpleapi' || $airType === 'purple') ? 'selected' : ''; ?>">
+                        <input type="radio" name="AIR_TYPE" value="purpleapi" id="air_purpleapi"
+                            onchange="updateAirOptions()"
+                            <?php echo ($airType === 'purpleapi' || $airType === 'purple') ? 'checked' : ''; ?>>
+                        <label for="air_purpleapi"><strong>PurpleAir - API</strong> &mdash; Read from PurpleAir cloud API (requires API key)</label>
+                    </div>
+                    <div class="sensor-option <?php echo ($airType === 'purplelocal') ? 'selected' : ''; ?>">
+                        <input type="radio" name="AIR_TYPE" value="purplelocal" id="air_purplelocal"
+                            onchange="updateAirOptions()"
+                            <?php echo ($airType === 'purplelocal') ? 'checked' : ''; ?>>
+                        <label for="air_purplelocal"><strong>PurpleAir - Local</strong> &mdash; Read directly from a PurpleAir sensor on your network</label>
                     </div>
 
-                    <div class="form-group" style="margin-top:15px;">
-                        <label>Station ID</label>
-                        <input type="text" class="form-control" name="AIR_ID" value="<?php echo htmlspecialchars($config['AIR_ID'] ?? ''); ?>" placeholder="Find your sensor at purpleair.com/map">
-                        <p class="help-text">Go to <a href="https://www.purpleair.com/map" target="_blank">purpleair.com/map</a> to find a sensor near your hives and get its ID.</p>
+                    <div id="air-config-api" style="<?php echo ($airType === 'purpleapi' || $airType === 'purple') ? '' : 'display:none;'; ?>">
+                        <div class="form-group" style="margin-top:15px;">
+                            <label>Station ID</label>
+                            <input type="text" class="form-control" name="AIR_ID" id="air-id-api" value="<?php echo htmlspecialchars($config['AIR_ID'] ?? ''); ?>" placeholder="e.g. 7634">
+                            <p class="help-text">Go to <a href="https://www.purpleair.com/map" target="_blank">purpleair.com/map</a> to find a sensor near your hives and get its ID.</p>
+                        </div>
+                        <div class="form-group">
+                            <label>API Read Key</label>
+                            <input type="text" class="form-control" name="AIR_API" value="<?php echo htmlspecialchars($config['AIR_API'] ?? ''); ?>" placeholder="e.g. XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">
+                            <p class="help-text">Get your API key from <a href="https://develop.purpleair.com/keys" target="_blank">develop.purpleair.com/keys</a></p>
+                        </div>
+                    </div>
+
+                    <div id="air-config-local" style="<?php echo ($airType === 'purplelocal') ? '' : 'display:none;'; ?>">
+                        <div class="form-group" style="margin-top:15px;">
+                            <label>Station ID</label>
+                            <input type="text" class="form-control" name="AIR_ID" id="air-id-local" value="<?php echo htmlspecialchars($config['AIR_ID'] ?? ''); ?>" placeholder="e.g. 7634">
+                        </div>
+                        <div class="form-group">
+                            <label>Local Sensor URL</label>
+                            <input type="text" class="form-control" name="AIR_LOCAL_URL" value="<?php echo htmlspecialchars($config['AIR_LOCAL_URL'] ?? ''); ?>" placeholder="http://192.168.1.x/json">
+                            <p class="help-text">The URL of your PurpleAir sensor on your local network. Must include the <strong>/json</strong> path (e.g. http://192.168.1.100/json).</p>
+                        </div>
                     </div>
 
                     <div class="test-panel">
@@ -1084,23 +1168,49 @@ elseif ($step === 8): ?>
                     'Calibration' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes')
                         ? 'Slope: ' . ($config['HIVE_WEIGHT_SLOPE'] ?? '1') . ', Intercept: ' . ($config['HIVE_WEIGHT_INTERCEPT'] ?? '0')
                         : 'N/A',
+                    'Drift Compensation' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes')
+                        ? (($config['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') === 'yes' ? 'Enabled (auto)' : 'Disabled')
+                        : 'N/A',
                 ]],
                 4 => ['Light Sensor', 'fa-sun-o', [
                     'Status' => $config['ENABLE_LUX'] ?? 'no',
                     'Source' => (($config['ENABLE_LUX'] ?? 'no') === 'yes') ? strtoupper($config['LUX_SOURCE'] ?? '') : 'N/A',
                 ]],
-                5 => ['Weather Source', 'fa-cloud', [
-                    'Source' => strtoupper($config['WEATHER_LEVEL'] ?? 'Not set'),
-                    'Station' => !empty($config['WXSTATION']) ? $config['WXSTATION'] : 'N/A',
-                ]],
+                5 => ['Weather Source', 'fa-cloud', (function() use ($config) {
+                    $wx_names = [
+                        'openmeteo' => 'Open-Meteo',
+                        'openweathermap' => 'OpenWeatherMap',
+                        'nws' => 'NWS (weather.gov)',
+                        'weatherapi' => 'WeatherAPI.com',
+                        'visualcrossing' => 'Visual Crossing',
+                        'ambientwx' => 'AmbientWeather.net',
+                        'hive' => 'WX Underground',
+                        'localws' => 'Local Weather Station',
+                        'localsensors' => 'Local Sensors',
+                        'wf_tempest_local' => 'WeatherFlow Tempest',
+                    ];
+                    $level = $config['WEATHER_LEVEL'] ?? '';
+                    $name = $wx_names[$level] ?? strtoupper($level ?: 'Not set');
+                    $details = ['Source' => $name];
+                    if (in_array($level, ['hive', 'ambientwx', 'wf_tempest_local'])) {
+                        $details['Station'] = !empty($config['WXSTATION']) ? $config['WXSTATION'] : 'N/A';
+                    }
+                    if (in_array($level, ['openweathermap', 'weatherapi', 'visualcrossing'])) {
+                        $details['API Key'] = !empty($config['KEY']) ? '****' . substr($config['KEY'], -4) : 'Not set';
+                    }
+                    return $details;
+                })()],
                 6 => ['Camera & Counter', 'fa-camera', [
                     'Camera' => ($config['ENABLE_HIVE_CAMERA'] ?? 'no') . ((($config['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes') ? ' (' . ($config['CAMERATYPE'] ?? '') . ')' : ''),
                     'Bee Counter' => ($config['ENABLE_BEECOUNTER'] ?? 'no') . ((($config['ENABLE_BEECOUNTER'] ?? 'no') === 'yes') ? ' (' . ($config['COUNTERTYPE'] ?? '') . ')' : ''),
                 ]],
-                7 => ['Air Quality', 'fa-leaf', [
-                    'Status' => $config['ENABLE_AIR'] ?? 'no',
-                    'Source' => (($config['ENABLE_AIR'] ?? 'no') === 'yes') ? strtoupper($config['AIR_TYPE'] ?? '') : 'N/A',
-                ]],
+                7 => ['Air Quality', 'fa-leaf', array_merge(
+                    ['Status' => $config['ENABLE_AIR'] ?? 'no'],
+                    (($config['ENABLE_AIR'] ?? 'no') === 'yes') ? [
+                        'Source' => (($config['AIR_TYPE'] ?? '') === 'purplelocal') ? 'PurpleAir (Local)' : 'PurpleAir (API)',
+                        'Station ID' => $config['AIR_ID'] ?? 'Not set',
+                    ] : ['Source' => 'N/A']
+                )],
             ];
             ?>
 
@@ -1252,6 +1362,31 @@ elseif ($step === 8): ?>
         updateScaleOptions();
     }
 
+    function updateAirOptions() {
+        var sel = document.querySelector('input[name="AIR_TYPE"]:checked');
+        var apiDiv = document.getElementById('air-config-api');
+        var localDiv = document.getElementById('air-config-local');
+        if (!apiDiv || !localDiv) return;
+        if (sel && sel.value === 'purplelocal') {
+            apiDiv.style.display = 'none';
+            localDiv.style.display = 'block';
+            apiDiv.querySelectorAll('input[name]').forEach(function(i) { i.disabled = true; });
+            localDiv.querySelectorAll('input[name]').forEach(function(i) { i.disabled = false; });
+        } else {
+            apiDiv.style.display = 'block';
+            localDiv.style.display = 'none';
+            apiDiv.querySelectorAll('input[name]').forEach(function(i) { i.disabled = false; });
+            localDiv.querySelectorAll('input[name]').forEach(function(i) { i.disabled = true; });
+        }
+        document.querySelectorAll('.sensor-option').forEach(function(opt) {
+            var radio = opt.querySelector('input[type="radio"]');
+            if (radio) opt.className = 'sensor-option' + (radio.checked ? ' selected' : '');
+        });
+    }
+    if (document.querySelector('input[name="AIR_TYPE"]')) {
+        updateAirOptions();
+    }
+
     function escHtml(s) {
         var d = document.createElement('div');
         d.appendChild(document.createTextNode(s));
@@ -1320,19 +1455,19 @@ elseif ($step === 8): ?>
             var self = this;
             var el = document.getElementById('cal-zero-result');
             el.className = 'test-result waiting';
-            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking zero reading... this takes a few seconds';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking 5 samples for zero reading &mdash; this may take up to a minute';
             this.setButtonLoading('btn-zero', true);
 
             $.ajax({
-                url: 'calibrate_raw_reading.php?scaletype=' + scaleType,
-                timeout: 60000,
+                url: 'calibrate_raw_reading.php?scaletype=' + scaleType + '&samples=5',
+                timeout: 120000,
                 dataType: 'json',
                 success: function(data) {
                     self.setButtonLoading('btn-zero', false);
                     if (data.success) {
                         self.rawZero = parseFloat(data.raw_value);
                         el.className = 'test-result success';
-                        el.innerHTML = 'Zero reading: <strong>' + escHtml(String(data.raw_value)) + '</strong>';
+                        el.innerHTML = 'Zero reading: <strong>' + escHtml(String(data.raw_value)) + '</strong> (' + data.sample_count + '/' + data.samples_requested + ' samples)';
                         setTimeout(function() { self.showStep(2); }, 800);
                     } else {
                         el.className = 'test-result error';
@@ -1359,19 +1494,19 @@ elseif ($step === 8): ?>
             var self = this;
             var el = document.getElementById('cal-loaded-result');
             el.className = 'test-result waiting';
-            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking loaded reading... this takes a few seconds';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking 5 samples for loaded reading &mdash; this may take up to a minute';
             this.setButtonLoading('btn-loaded', true);
 
             $.ajax({
-                url: 'calibrate_raw_reading.php?scaletype=' + scaleType,
-                timeout: 60000,
+                url: 'calibrate_raw_reading.php?scaletype=' + scaleType + '&samples=5',
+                timeout: 120000,
                 dataType: 'json',
                 success: function(data) {
                     self.setButtonLoading('btn-loaded', false);
                     if (data.success) {
                         self.rawLoaded = parseFloat(data.raw_value);
                         el.className = 'test-result success';
-                        el.innerHTML = 'Loaded reading: <strong>' + escHtml(String(data.raw_value)) + '</strong>';
+                        el.innerHTML = 'Loaded reading: <strong>' + escHtml(String(data.raw_value)) + '</strong> (' + data.sample_count + '/' + data.samples_requested + ' samples)';
 
                         var result = self.calculate(self.rawZero, self.rawLoaded, knownWeight, scaleType);
                         if (result.error) {
@@ -1439,6 +1574,14 @@ elseif ($step === 8): ?>
                 dataType: 'json',
                 timeout: 15000,
                 success: function() {
+                    // Update hidden form fields so wizard form submission has current values
+                    document.getElementById('form-slope').value = self.slope;
+                    document.getElementById('form-intercept').value = self.intercept;
+                    var mi = document.getElementById('manual-intercept');
+                    var ms = document.getElementById('manual-slope');
+                    if (mi) mi.value = self.intercept;
+                    if (ms) ms.value = self.slope;
+
                     // Now read through the normal calibrated endpoint
                     $.ajax({
                         url: 'livevalue.php?sensor=hiveweight',
@@ -1448,6 +1591,7 @@ elseif ($step === 8): ?>
                             if (data && data.trim().length > 0) {
                                 el.className = 'test-result success';
                                 el.innerHTML = '<strong>Verification reading:</strong><br>' + escHtml(data).replace(/\n/g, '<br>') + '<br><br><em>Compare this to the weight you placed on the scale.</em>';
+                                document.getElementById('cal-save-result').style.display = 'block';
                             } else {
                                 el.className = 'test-result error';
                                 el.innerHTML = 'No data returned. Check sensor.';
@@ -1457,6 +1601,7 @@ elseif ($step === 8): ?>
                             self.setButtonLoading('btn-verify', false);
                             el.className = 'test-result error';
                             el.innerHTML = 'Verification read failed. The calibration values were saved — try "Test Scale" below.';
+                            document.getElementById('cal-save-result').style.display = 'block';
                         }
                     });
                 },

@@ -135,27 +135,19 @@ class sensor:
                 return None
             time.sleep(0.001)
 
-        # Read 24 bits
+        # Read 24 bits — no sleep needed; lgpio call overhead (~10-20μs)
+        # provides sufficient pulse width without exceeding 60μs power-down limit
         value = 0
         for _ in range(24):
-            # Clock high
             lgpio.gpio_write(chip, CLOCK, 1)
-            time.sleep(0.000001)  # 1 microsecond
-
-            # Read data bit
             value = (value << 1) | lgpio.gpio_read(chip, DATA)
-
-            # Clock low
             lgpio.gpio_write(chip, CLOCK, 0)
-            time.sleep(0.000001)
 
         # Send additional pulses for gain/channel selection
         extra_pulses = self._pulses - 24
         for _ in range(extra_pulses):
             lgpio.gpio_write(chip, CLOCK, 1)
-            time.sleep(0.000001)
             lgpio.gpio_write(chip, CLOCK, 0)
-            time.sleep(0.000001)
 
         # Convert to signed 24-bit
         if value & 0x800000:

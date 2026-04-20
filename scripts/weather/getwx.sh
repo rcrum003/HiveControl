@@ -144,8 +144,98 @@ elif [ $WEATHER_LEVEL = "wf_tempest_local" ]; then
 			wind_kph="null"
 			wind_mph="null"
 			A_WIND_MPH="null"
-		else 
+		else
 			#Get the data fields that differ from the main set
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+		fi
+
+elif [ $WEATHER_LEVEL = "openmeteo" ]; then
+		GETNOW=$($HOMEDIR/scripts/weather/openmeteo/getopenmeteo.sh)
+
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			wind_degrees="null"; wind_gust_kph="null"; wind_gust_mph="null"
+			wind_kph="null"; wind_mph="null"; A_WIND_MPH="null"
+		else
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+		fi
+
+elif [ $WEATHER_LEVEL = "openweathermap" ]; then
+		GETNOW=$($HOMEDIR/scripts/weather/openweathermap/getopenweathermap.sh)
+
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			wind_degrees="null"; wind_gust_kph="null"; wind_gust_mph="null"
+			wind_kph="null"; wind_mph="null"; A_WIND_MPH="null"
+		else
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+		fi
+
+elif [ $WEATHER_LEVEL = "nws" ]; then
+		GETNOW=$($HOMEDIR/scripts/weather/nws/getnws.sh)
+
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			wind_degrees="null"; wind_gust_kph="null"; wind_gust_mph="null"
+			wind_kph="null"; wind_mph="null"; A_WIND_MPH="null"
+		else
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+		fi
+
+elif [ $WEATHER_LEVEL = "weatherapi" ]; then
+		GETNOW=$($HOMEDIR/scripts/weather/weatherapi/getweatherapi.sh)
+
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			wind_degrees="null"; wind_gust_kph="null"; wind_gust_mph="null"
+			wind_kph="null"; wind_mph="null"; A_WIND_MPH="null"
+		else
+			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
+			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
+			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`
+			OBSERVATIONDATETIME=`/bin/echo $GETNOW | $JSON_PATH -b |grep observation_time |awk -F"\"" '{print $6}'`
+			wind_degrees=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_degrees |awk -F"\"" '{print $6}'`
+			wind_gust_mph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_mph |awk -F"\"" '{print $6}'`
+			wind_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_kph |awk -F"\"" '{print $6}'`
+			wind_gust_kph=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_gust_kph |awk -F"\"" '{print $6}'`
+			weather_dewc=`/bin/echo $GETNOW | $JSON_PATH -b |grep dewpoint_c |awk -F"\"" '{print $6}'`
+		fi
+
+elif [ $WEATHER_LEVEL = "visualcrossing" ]; then
+		GETNOW=$($HOMEDIR/scripts/weather/visualcrossing/getvisualcrossing.sh)
+
+		if [[ -z "$GETNOW" ]] || [[ "$GETNOW" == "" ]];  then
+			wind_degrees="null"; wind_gust_kph="null"; wind_gust_mph="null"
+			wind_kph="null"; wind_mph="null"; A_WIND_MPH="null"
+		else
 			A_TEMP=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_f |awk -F"\"" '{print $6}'`
 			A_TEMP_C=`/bin/echo $GETNOW | $JSON_PATH -b |grep temp_c |awk -F"\"" '{print $6}'`
 			A_WIND_MPH=`/bin/echo $GETNOW | $JSON_PATH -b |grep wind_mph |awk -F"\"" '{print $6}'`

@@ -126,11 +126,31 @@ sqlite3 "$LOCALDATABASE" "INSERT INTO weight_readings (
     0
 );"
 
-# Feed calibration data if calibration is running
-CALIBRATION_FLAG="$HOMEDIR/scripts/weight/.calibrating_compensation"
-if [ -f "$CALIBRATION_FLAG" ]; then
-    "$WEIGHTRUNDIR/calibrate_env_compensation.sh" collect \
-        "$RAWWEIGHT" "$NETWEIGHT" "$AMBIENT_TEMP" "$AMBIENT_HUMIDITY" "$TEMP_SOURCE"
+# Auto-calibration: once daily at 5am when compensation is enabled
+CURRENT_HOUR=$(TZ=":$TIMEZONE" date '+%H')
+if [ "${WEIGHT_COMPENSATION_ENABLED:-no}" = "yes" ] && [ "$CURRENT_HOUR" = "05" ]; then
+    AUTOCAL_FLAG="/tmp/hivecontrol_autocal_$(date '+%Y%m%d')"
+    if [ ! -f "$AUTOCAL_FLAG" ]; then
+        LAST_CAL="${WEIGHT_LAST_CALIBRATED:-}"
+        RUN_CAL=0
+        if [ -z "$LAST_CAL" ]; then
+            RUN_CAL=1
+        else
+            LAST_EPOCH=$(date -d "$LAST_CAL" '+%s' 2>/dev/null || echo 0)
+            NOW_EPOCH=$(date '+%s')
+            DAYS_SINCE=$(( (NOW_EPOCH - LAST_EPOCH) / 86400 ))
+            [ "$DAYS_SINCE" -ge 7 ] && RUN_CAL=1
+        fi
+
+        if [ "$RUN_CAL" -eq 1 ]; then
+            loglocal "$DATE" WEIGHT_MONITOR INFO "Running auto-calibration"
+            python3 "$WEIGHTRUNDIR/compute_compensation.py" --auto "$LOCALDATABASE" 2>&1 | \
+                while IFS= read -r line; do loglocal "$DATE" WEIGHT_MONITOR INFO "$line"; done
+            # Regenerate hiveconfig.inc so new coefficients take effect
+            "$HOMEDIR/scripts/data/dump_hiveconfig_inc.sh" >/dev/null 2>&1
+        fi
+        touch "$AUTOCAL_FLAG"
+    fi
 fi
 
 echo "$DATE | raw=$RAWWEIGHT net=$NETWEIGHT comp=$COMPENSATED_WEIGHT temp=$AMBIENT_TEMP hum=$AMBIENT_HUMIDITY"

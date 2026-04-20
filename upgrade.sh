@@ -506,6 +506,31 @@ if [[ "$Installed_Ver" < "2.11" ]]; then
 	sudo chown root:root /home/HiveControl/logs/weight_monitor.log
 fi
 
+if [[ "$Installed_Ver" < "2.12" ]]; then
+	echo "Migrating from pigpio to lgpio"
+
+	# Install lgpio
+	sudo apt install python3-lgpio -y
+	sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
+
+	# Stop and remove pigpio
+	sudo killall pigpiod 2>/dev/null || true
+	sudo apt remove python3-pigpio -y 2>/dev/null || true
+
+	# Remove pigpiod from cron
+	(sudo crontab -u root -l 2>/dev/null | grep -v "pigpiod") | sudo crontab -u root -
+
+	# Make lgpio DHT reader executable
+	sudo chmod u+x /home/HiveControl/software/DHTXXD/DHTXXD_lgpio.py
+	sudo chmod u+x /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py
+
+	# Make updated DHT scripts executable
+	sudo chmod u+x /home/HiveControl/scripts/temp/dht22.sh
+	sudo chmod u+x /home/HiveControl/scripts/temp/dht21.sh
+
+	echo "lgpio migration complete"
+fi
+
 echo "============================================="
 echo "success"
 #Cleanup and set the flag in the DB

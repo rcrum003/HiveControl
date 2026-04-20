@@ -204,6 +204,8 @@ if($v->validate()) {
     $ENABLE_AIR = test_input($_POST["ENABLE_AIR"]);
     $AIR_TYPE= test_input($_POST["AIR_TYPE"]);
     $AIR_ID = test_input($_POST["AIR_ID"]);
+    $AIR_API = test_input($_POST["AIR_API"] ?? '');
+    $AIR_LOCAL_URL = test_input($_POST["AIR_LOCAL_URL"] ?? '');
     
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -213,8 +215,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY));
     sleep(1);
 
 
@@ -265,8 +267,10 @@ if($v->validate()) {
                             <input type="hidden" name="WXSTATION" value="<?php echo $result['WXSTATION']; ?>">
                             <input type="hidden" name="CAMERATYPE" value="<?php echo $result['CAMERATYPE']; ?>">
                             <input type="hidden" name="COUNTERTYPE" value="<?php echo $result['COUNTERTYPE']; ?>">
-                            <input type="hidden" name="AIR_TYPE" value="<?php echo $result['AIR_TYPE']; ?>">
-                            <input type="hidden" name="AIR_ID" value="<?php echo $result['AIR_ID']; ?>">
+                            <input type="hidden" name="AIR_TYPE" value="<?php echo $result['AIR_TYPE'] ?? ''; ?>">
+                            <input type="hidden" name="AIR_ID" value="<?php echo $result['AIR_ID'] ?? ''; ?>">
+                            <input type="hidden" name="AIR_API" value="<?php echo $result['AIR_API'] ?? ''; ?>">
+                            <input type="hidden" name="AIR_LOCAL_URL" value="<?php echo $result['AIR_LOCAL_URL'] ?? ''; ?>">
                             <input type="hidden" name="TEMPTYPE" value="<?php echo $result['TEMPTYPE']; ?>">
                             <input type="hidden" name="HIVEDEVICE" value="<?php echo $result['HIVEDEVICE']; ?>">
                             <input type="hidden" name="HIVE_TEMP_SUB" value="<?php echo $result['HIVE_TEMP_SUB']; ?>">
@@ -505,43 +509,30 @@ if($v->validate()) {
                                         <?PHP if ($result['ENABLE_HIVE_WEIGHT_CHK'] == "yes") { ?>
                                         <tr class="odd gradeX">
                                             <td>
-                                            <a href="#" title="Weight Drift Compensation" data-toggle="popover" data-placement="bottom" data-content="Environmental compensation corrects for temperature and humidity drift on the load cell. Run the calibration script on the Pi to compute coefficients automatically."><p class="fa fa-question-circle fa-fw"></P></a>
+                                            <a href="#" title="Weight Drift Compensation" data-toggle="popover" data-placement="bottom" data-content="Automatically corrects weight readings for temperature and humidity drift. Coefficients are recalculated weekly from nighttime data when bees are inactive."><p class="fa fa-question-circle fa-fw"></P></a>
                                                  Weight Drift Compensation<br>
 
                                             <select name="WEIGHT_COMPENSATION_ENABLED" onchange="this.form.submit()">
                                             <option value="yes" <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                                             <option value="no" <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "no") {echo "selected='selected'";} ?>>Disabled</option>
                                             </select></td>
-                                            <td colspan="2">
-                                            <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {
-                                                echo '<small>Coefficients are computed by the calibration script.<br>
-                                                Run on the Pi: <code>calibrate_env_compensation.sh start</code></small>';
+                                            <td colspan="4">
+                                            <?php
+                                            $comp_enabled = ($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes";
+                                            if ($comp_enabled) {
+                                                $last_cal = $result['WEIGHT_LAST_CALIBRATED'] ?? null;
+                                                $r2 = $result['WEIGHT_CALIBRATION_R2'] ?? null;
+                                                $tc = $result['WEIGHT_TEMP_COEFF'] ?? 0;
+                                                $hc = $result['WEIGHT_HUMIDITY_COEFF'] ?? 0;
+
+                                                if ($last_cal) {
+                                                    echo '<small><i class="fa fa-check-circle" style="color:green;"></i> <strong>Auto-calibrated:</strong> ' . htmlspecialchars($last_cal) . '</small><br>';
+                                                    echo '<small>R&sup2;=' . number_format((float)$r2, 4) . ' &nbsp;&bull;&nbsp; Temp: ' . number_format((float)$tc, 6) . ' lbs/&deg;F &nbsp;&bull;&nbsp; Humidity: ' . number_format((float)$hc, 6) . ' lbs/%RH</small>';
+                                                } else {
+                                                    echo '<small><i class="fa fa-clock-o" style="color:#e6b800;"></i> <strong>Waiting for data.</strong> Auto-calibration runs weekly at 5am using nighttime readings. Needs 50+ samples over 14 days with 5&deg;F+ temperature variation.</small>';
+                                                }
                                             } else {
-                                                echo '<small>Enable to correct weight drift caused by<br>temperature and humidity changes.</small>';
-                                            } ?>
-                                            </td>
-                                            <td>
-                                            <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {
-                                                echo '<table>
-                                                    <tr><td>Temp Coeff </td><td>
-                                                    <input type="text" name="WEIGHT_TEMP_COEFF" size="10" onchange="this.form.submit()" value="';
-                                                echo $result['WEIGHT_TEMP_COEFF'] ?? '0'; echo '"> lbs/&deg;F</td></tr>
-                                                    <tr><td>Humidity Coeff </td><td>
-                                                    <input type="text" name="WEIGHT_HUMIDITY_COEFF" size="10" onchange="this.form.submit()" value="';
-                                                echo $result['WEIGHT_HUMIDITY_COEFF'] ?? '0'; echo '"> lbs/%RH</td></tr>
-                                                </table>';
-                                            } ?>
-                                            </td>
-                                            <td>
-                                            <?php if (($result['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') == "yes") {
-                                                echo '<table>
-                                                    <tr><td>Ref Temp </td><td>
-                                                    <input type="text" name="WEIGHT_REF_TEMP" size="8" onchange="this.form.submit()" value="';
-                                                echo $result['WEIGHT_REF_TEMP'] ?? ''; echo '"> &deg;F</td></tr>
-                                                    <tr><td>Ref Humidity </td><td>
-                                                    <input type="text" name="WEIGHT_REF_HUMIDITY" size="8" onchange="this.form.submit()" value="';
-                                                echo $result['WEIGHT_REF_HUMIDITY'] ?? ''; echo '"> %RH</td></tr>
-                                                </table>';
+                                                echo '<small>Enable to automatically correct weight drift caused by temperature and humidity changes. Recalibrates weekly from nighttime data.</small>';
                                             } ?>
                                             </td>
                                             <td></td>
@@ -669,34 +660,69 @@ if($v->validate()) {
 
                             
                             <select name="WEATHER_LEVEL" onchange="this.form.submit()">
-                            <!-- <option value="yard" <?php #if ($result['WEATHER_LEVEL'] == "yard") {echo "selected='selected'";} ?>>Yard Controller</option> -->
-                            <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
+                            <optgroup label="Cloud APIs (Free)">
+                            <option value="openmeteo" <?php if ($result['WEATHER_LEVEL'] == "openmeteo") {echo "selected='selected'";} ?>>Open-Meteo (No Key)</option>
+                            <option value="nws" <?php if ($result['WEATHER_LEVEL'] == "nws") {echo "selected='selected'";} ?>>NWS weather.gov (US Only)</option>
+                            </optgroup>
+                            <optgroup label="Cloud APIs (Key Required)">
+                            <option value="openweathermap" <?php if ($result['WEATHER_LEVEL'] == "openweathermap") {echo "selected='selected'";} ?>>OpenWeatherMap</option>
+                            <option value="weatherapi" <?php if ($result['WEATHER_LEVEL'] == "weatherapi") {echo "selected='selected'";} ?>>WeatherAPI.com</option>
+                            <option value="visualcrossing" <?php if ($result['WEATHER_LEVEL'] == "visualcrossing") {echo "selected='selected'";} ?>>Visual Crossing</option>
+                            </optgroup>
+                            <optgroup label="Personal Weather Stations">
                             <option value="ambientwx" <?php if ($result['WEATHER_LEVEL'] == "ambientwx") {echo "selected='selected'";} ?>>AmbientWeather.net</option>
+                            <option value="hive" <?php if ($result['WEATHER_LEVEL'] == "hive") {echo "selected='selected'";} ?>>WX Underground</option>
+                            <option value="wf_tempest_local" <?php if ($result['WEATHER_LEVEL'] == "wf_tempest_local") {echo "selected='selected'";} ?>>WF Tempest UDP</option>
+                            </optgroup>
+                            <optgroup label="Local Hardware">
                             <option value="localws" <?php if ($result['WEATHER_LEVEL'] == "localws") {echo "selected='selected'";} ?>>Local Weather Station</option>
                             <option value="localsensors" <?php if ($result['WEATHER_LEVEL'] == "localsensors") {echo "selected='selected'";} ?>>Local Hive Sensors</option>
-                            <option value="wf_tempest_local" <?php if ($result['WEATHER_LEVEL'] == "wf_tempest_local") {echo "selected='selected'";} ?>>WF Tempest UDP</option>
+                            </optgroup>
                             </select></td>
                             <td>
 
-                                <?php if ($result['WEATHER_LEVEL'] == "hive") {
-                                    // WX Underground settings
-                                    //WEATHER_DETAIL - PWS, CITY
-                                    // KEY
-                                    // WXSTATION
+                                <?php
+                                $wx_lat = htmlspecialchars($result['LATITUDE'] ?? '');
+                                $wx_lon = htmlspecialchars($result['LONGITUDE'] ?? '');
 
-                                    //echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
-                                    echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
- 
+                                if ($result['WEATHER_LEVEL'] == "openmeteo") {
+                                    echo 'Location: <strong>' . $wx_lat . ', ' . $wx_lon . '</strong><br>';
+                                    echo '<small>Free &mdash; no API key needed. Data from ECMWF, DWD, NOAA models.<br>';
+                                    echo 'Change location in <a href="hiveconfig.php">Hive Config</a>.</small>';
                                 }
-                                else {
-                                    //echo '<input type="hidden" name="KEY" value="'; echo $result['KEY']; echo '">';
-                                    //echo '<input type="hidden" name="WXSTATION" value="'; echo $result['WXSTATION']; echo '">';    
+
+                                if ($result['WEATHER_LEVEL'] == "nws") {
+                                    echo 'Location: <strong>' . $wx_lat . ', ' . $wx_lon . '</strong><br>';
+                                    echo '<small>Free &mdash; no API key needed. <strong>US locations only.</strong><br>';
+                                    echo 'Station auto-discovered from lat/lon. Change in <a href="hiveconfig.php">Hive Config</a>.</small>';
                                 }
-                                
+
+                                if ($result['WEATHER_LEVEL'] == "openweathermap") {
+                                    echo 'API KEY <br><input type="text" name="KEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY'] ?? '') . '"><br>';
+                                    echo '<small>Free: 1,000 calls/day. Get a key at <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a></small><br>';
+                                    echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
+                                }
+
+                                if ($result['WEATHER_LEVEL'] == "weatherapi") {
+                                    echo 'API KEY <br><input type="text" name="KEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY'] ?? '') . '"><br>';
+                                    echo '<small>Free: 1M calls/month. Get a key at <a href="https://www.weatherapi.com/signup.aspx" target="_blank">weatherapi.com</a></small><br>';
+                                    echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
+                                }
+
+                                if ($result['WEATHER_LEVEL'] == "visualcrossing") {
+                                    echo 'API KEY <br><input type="text" name="KEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY'] ?? '') . '"><br>';
+                                    echo '<small>Free: 1,000 calls/day. Includes solar radiation. Get a key at <a href="https://www.visualcrossing.com/sign-up" target="_blank">visualcrossing.com</a></small><br>';
+                                    echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
+                                }
+
+                                if ($result['WEATHER_LEVEL'] == "hive") {
+                                    echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';
+                                }
+
                                 if ($result['WEATHER_LEVEL'] == "ambientwx") {
 
                                     echo 'API KEY <br><input type="text" name="KEY" onchange="this.form.submit()" value="'; echo $result['KEY']; echo '"><BR>';
-                                    echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';    
+                                    echo 'STATION MAC <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';
                                 }
 
                                 if ($result['WEATHER_LEVEL'] == "wf_tempest_local") {
@@ -745,25 +771,49 @@ if($v->validate()) {
       ############################################################################################################### ?>
                         <tr class="odd gradeX">
                             <td>
-                                <a href="#" title="Air Quality" data-toggle="popover" data-placement="bottom" data-content="Enable Air Quailty Checks and specify which air sensors you use or one that is within 10 miles of your hives."><p class="fa fa-question-circle fa-fw"></P></a>
-                                Air Quaility<br>
-                            
+                                <a href="#" title="Air Quality" data-toggle="popover" data-placement="bottom" data-content="Enable Air Quality Checks and specify which air sensors you use or one that is within 10 miles of your hives."><p class="fa fa-question-circle fa-fw"></P></a>
+                                Air Quality<br>
+
                             <select name="ENABLE_AIR" onchange="this.form.submit()">
                             <option value="yes" <?php if ($result['ENABLE_AIR'] == "yes") {echo "selected='selected'";} ?>>Enabled</option>
                             <option value="no" <?php if ($result['ENABLE_AIR'] == "no") {echo "selected='selected'";} ?>>Disabled</option>
                             </select></td>
 
                             <td>
-                            <?php if ($result['ENABLE_AIR'] == "yes") {
-                                echo '
-                                <input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purple"'; if ($result['AIR_TYPE'] == "purple") {echo "checked";} echo '> PurpleAir';} #Only one at the moment
-                            ?>
+                            <?php if ($result['ENABLE_AIR'] == "yes"): ?>
+                                <input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purpleapi"
+                                    <?php if ($result['AIR_TYPE'] == "purpleapi" || $result['AIR_TYPE'] == "purple") echo 'checked'; ?>> PurpleAir - API <br>
+                                <input type="radio" name="AIR_TYPE" onchange="this.form.submit()" value="purplelocal"
+                                    <?php if ($result['AIR_TYPE'] == "purplelocal") echo 'checked'; ?>> PurpleAir - Local
+                            <?php endif; ?>
                             </td>
                             <td>
-                            <?PHP if ($result['ENABLE_AIR'] == "yes" && $result['AIR_TYPE'] == "purple") {
-                                echo '<a href="#" title="Air ID" data-toggle="popover" data-placement="bottom" data-content="Go to <a href=\'https://www.purpleair.com/map\' target=\'_blank\' title=\'purpleair\'>Purpleair.com</a> to get an ID."><p class="fa fa-question-circle fa-fw"></P></a>';
-                                    echo 'STATION ID <br><input type="text" name="AIR_ID" onchange="this.form.submit()" value="'; echo $result['AIR_ID']; echo '">';    
-                                } ?>
+                            <?php if ($result['ENABLE_AIR'] == "yes" && ($result['AIR_TYPE'] == "purpleapi" || $result['AIR_TYPE'] == "purple")): ?>
+                              <a href="#" title="Air ID" data-toggle="popover" data-placement="bottom"
+                                 data-content="Go to <a href='https://www.purpleair.com/map' target='_blank' title='purpleair'>Purpleair.com</a> to get an ID.">
+                                 <i class="fa fa-question-circle fa-fw"></i>
+                              </a>
+                              STATION ID <br>
+                              <input type="text" name="AIR_ID" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_ID'], ENT_QUOTES, 'UTF-8'); ?>">
+                              <br>
+                              API READ KEY <br>
+                              <input type="text" name="AIR_API" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_API'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php elseif ($result['ENABLE_AIR'] == "yes" && $result['AIR_TYPE'] == "purplelocal"): ?>
+                              <a href="#" title="Air ID" data-toggle="popover" data-placement="bottom"
+                                 data-content="Go to <a href='https://www.purpleair.com/map' target='_blank' title='purpleair'>Purpleair.com</a> to get an ID.">
+                                 <i class="fa fa-question-circle fa-fw"></i>
+                              </a>
+                              STATION ID <br>
+                              <input type="text" name="AIR_ID" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_ID'], ENT_QUOTES, 'UTF-8'); ?>">
+                              <br>
+                              LOCAL URL <br>
+                              <input type="text" name="AIR_LOCAL_URL" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIR_LOCAL_URL'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                     placeholder="http://192.168.1.x/json" title="Must include /json path">
+                            <?php endif; ?>
                             </td>
                             <td></td>
                             <td></td>

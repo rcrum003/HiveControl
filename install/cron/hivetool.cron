@@ -25,6 +25,4 @@
 #Weight monitor - high frequency weight sampling
 */15 * * * * /home/HiveControl/scripts/weight/weight_monitor.sh >> /home/HiveControl/logs/weight_monitor.log 2>&1
 
-#Restart Our Pi GPIO Library Deamon on restart
-@reboot              /usr/bin/pigpiod
 

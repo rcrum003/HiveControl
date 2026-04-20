@@ -247,6 +247,7 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_30
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_31
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_32
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_33
+sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
 sudo echo 25 > /home/HiveControl/data/DBVERSION
 
 #Setup backup directory
@@ -335,21 +336,17 @@ fi
 #cd wiringPI
 #sudo ./build
 
-echo "Installing PIGPIO library for DHT and HX711 Sensors"
-#Kill pigpiod just in case it is already running
+echo "Installing lgpio GPIO library"
+sudo apt install python3-lgpio -y
+
+# Install smbus2 and spidev for I2C/SPI support
+sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
+
+# Remove pigpio if present — lgpio replaces it on all Pi models
 sudo killall pigpiod 2>/dev/null || true
+sudo apt remove python3-pigpio -y 2>/dev/null || true
 
-# Python3 setuptools should already be available in modern Raspberry Pi OS
-sudo apt install python3-setuptools -y
-
-cd /home/HiveControl/software
-sudo git clone https://github.com/rcrum003/pigpio
-cd pigpio/
-sudo make
-sudo make install
-sudo cp /usr/local/bin/pigpiod /usr/bin/
-sudo apt install python3-pigpio -y
-sudo pigpiod
+echo "lgpio installation complete"
 
 #Allow www-data to run python and other commands
 	#Update SUDOERs
@@ -367,12 +364,12 @@ sudo pigpiod
 ####################################################################################
 # DHTXXD
 ####################################################################################
-	#Installing DHTXX Code
+	#Installing DHT Code
 	echo "Installing DHT Code"
 	cd /home/HiveControl/software/DHTXXD
-	unzip -o DHTXXD.zip
-	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
-	sudo cp DHTXXD /usr/local/bin/
+	chmod +x /home/HiveControl/software/DHTXXD/DHTXXD_lgpio.py
+	chmod +x /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py
+	echo "DHT sensor support installation complete (lgpio)"
 
 ####################################################################################
 # XMLStarlet used to send data to current hivetool.org Perl script
