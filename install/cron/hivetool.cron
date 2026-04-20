@@ -1,7 +1,7 @@
 
 
-#Check Sensors every 60 Minutes
-*/60 * * * * /home/HiveControl/scripts/system/currconditions.sh > /dev/null 2>&1
+#Check Sensors every 15 Minutes
+*/15 * * * * /home/HiveControl/scripts/system/currconditions.sh >> /home/HiveControl/logs/currconditions.log 2>&1
 
 
 #Take a Pic
@@ -22,7 +22,7 @@
 #Get System Status
 */30 * * * * timeout -s KILL 1m /home/HiveControl/scripts/pimonitor/server_status.sh > /home/HiveControl/www/public_html/admin/server_status.txt
 
-#Weight monitor - high frequency weight sampling
-*/15 * * * * /home/HiveControl/scripts/weight/weight_monitor.sh >> /home/HiveControl/logs/weight_monitor.log 2>&1
+#Weight monitor - offset by 5 min to avoid lock contention with currconditions
+5,20,35,50 * * * * /home/HiveControl/scripts/weight/weight_monitor.sh >> /home/HiveControl/logs/weight_monitor.log 2>&1
 
 

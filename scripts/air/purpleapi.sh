@@ -33,17 +33,11 @@ JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 AIR_URL="https://api.purpleair.com/v1/sensors"
 TEMPFILE="/home/HiveControl/scripts/air/output.json"
 
-#Read Key: 251486F2-9B9F-11EB-912F-42010A800259
-#Write Key: 25158438-9B9F-11EB-912F-42010A800259
+PURPLE_API_KEY="${AIR_API:-}"
 
-
-#GET https://api.purpleair.com/v1/sensors/7634  
-#X-API-Key: 251486F2-9B9F-11EB-912F-42010A800259
-
-# SECURITY FIX: API key should be configured in hiveconfig.inc, not hardcoded
-PURPLE_API_KEY="${PURPLE_API_KEY:-}"
 if [ -z "$PURPLE_API_KEY" ]; then
-	echo "ERROR: PURPLE_API_KEY not configured in hiveconfig.inc"
+	loglocal "$DATE" AIR ERROR "No PurpleAir API key configured (AIR_API). Set it in the instrument config."
+	echo "ERROR"
 	exit 1
 fi
 

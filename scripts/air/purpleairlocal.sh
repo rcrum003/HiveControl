@@ -55,6 +55,9 @@ trap 'rm -f "$TEMPFILE"' EXIT
 # "response":201,"response_date":1745278887,"latency":822,"wlstate":"Connected","status_0":2,"status_1":2,"status_2":2,"status_3":2,"status_4":0,"status_5":0,
 # "status_6":2,"status_7":0,"status_8":0,"status_9":0,"ssid":"MURC_AIR"}
 
+TRYCOUNTER="1"
+DATA_GOOD="0"
+
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
 	#https://www.purpleair.com/json?show=7634

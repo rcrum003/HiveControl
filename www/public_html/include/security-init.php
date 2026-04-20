@@ -89,7 +89,6 @@ header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 header("X-XSS-Protection: 1; mode=block");
 header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
-// SECURITY FIX: CSP header uses nonce instead of unsafe-inline for scripts
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-" . get_csp_nonce() . "'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;");
 
 ?>

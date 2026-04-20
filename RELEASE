@@ -1,6 +1,59 @@
 Release Notes:
 
 --------------------
+2.13 Release
+--------------------
+NEW FEATURES:
+- Weather API Fallback System
+  * New WEATHER_FALLBACK config option enables automatic failover
+  * If primary weather source fails, system tries fallback source automatically
+  * Supports any cloud-based weather source as fallback (Open-Meteo, NWS,
+    OpenWeatherMap, WeatherAPI, Visual Crossing)
+  * Fallback attempts logged with WARNING/ERROR levels for troubleshooting
+  * Configurable via Instruments page dropdown
+
+- Refactored Weather Dispatcher (getwx.sh)
+  * Complete rewrite from 316 to 145 lines with modular functions
+  * Extracted init_wx_vars(), call_wx_provider(), parse_wx_json()
+  * Unified JSON parsing with legacy CSV fallback for older scripts
+  * Cleaner provider dispatch via case statement
+
+- Modernized Legacy Weather Scripts
+  * getAmbientAPI.sh: 185 to 135 lines, uses wx_helpers.inc shared library
+  * getWeatherFlowLocal.sh: 219 to 176 lines, uses shared unit conversions
+  * getwxxml.sh: 153 to 108 lines, uses shared direction/output functions
+  * All three scripts now use degrees_to_cardinal(), output_wx_json(), and
+    shared unit conversion functions instead of inline duplicated code
+
+- Increased Data Collection Frequency
+  * Changed currconditions.sh interval from 60 minutes to 15 minutes
+  * Weight monitor offset to 5,20,35,50 to prevent lock contention with
+    currconditions at 0,15,30,45
+  * Captures more granular data for better trend analysis
+
+DASHBOARD IMPROVEMENTS:
+- Added data point markers to all Highcharts line charts
+  * Small circle markers (radius 2) now visible along trend lines
+  * Applied to: temperature, weight, air quality, bee count, GDD,
+    light, all-sensors, and past-week charts
+  * Makes individual readings visible when zoomed in
+
+HELP DOCUMENTATION:
+- Complete rewrite of weather help page (help/weather.php)
+  * Documents all 10 weather sources with setup instructions
+  * Recommends Open-Meteo as default (free, no API key required)
+  * New Weather Fallback section explaining automatic failover
+  * Updated decision tree and troubleshooting guide
+
+BUG FIXES:
+- Fixed uninitialized variables in purpleairlocal.sh
+  * TRYCOUNTER and DATA_GOOD now initialized before while loop
+  * Prevents undefined variable warnings and potential infinite loops
+
+DATABASE CHANGES:
+- DB_PATCH_34: Added WEATHER_FALLBACK column to hiveconfig table
+
+--------------------
 2.12 Release
 --------------------
 NEW FEATURES:

@@ -606,7 +606,74 @@ elseif ($step === 3): ?>
                             <button type="button" class="btn btn-primary" id="btn-start-cal" onclick="CalWiz.start()" style="margin-right:10px;">
                                 <i class="fa fa-sliders"></i> Calibrate Scale
                             </button>
-                            <span class="help-text">Guided calibration: zero the scale, place a known weight, auto-calculate.</span>
+                            <button type="button" class="btn btn-warning" id="btn-start-fieldcal" onclick="FieldCal.start()" style="margin-right:10px;">
+                                <i class="fa fa-refresh"></i> Recalibrate Under Load
+                            </button>
+                            <p class="help-text" style="margin-top:8px;"><strong>Calibrate Scale</strong>: Full calibration (scale must be empty). <strong>Recalibrate Under Load</strong>: Adjust accuracy with hive on the scale using a known weight placed on top.</p>
+                        </div>
+
+                        <!-- Field Recalibration Sub-Wizard (hidden until started) -->
+                        <div id="fieldcal-wizard" style="display:none; background:#fdf8ec; border:1px solid #f0e0b0; border-radius:4px; padding:20px; margin-bottom:15px;">
+                            <div style="margin-bottom:15px; text-align:center;">
+                                <span class="fieldcal-prog" id="fieldcal-prog-1" style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; background:#e6b800; color:white; margin:0 2px;">1. Baseline</span>
+                                <span class="fieldcal-prog" id="fieldcal-prog-2" style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; background:#eee; color:#999; margin:0 2px;">2. Add Weight</span>
+                                <span class="fieldcal-prog" id="fieldcal-prog-3" style="display:inline-block; padding:4px 12px; border-radius:12px; font-size:12px; font-weight:600; background:#eee; color:#999; margin:0 2px;">3. Results</span>
+                            </div>
+
+                            <!-- Step 1: Baseline -->
+                            <div class="fieldcal-step" id="fieldcal-step-1">
+                                <h4 style="margin-top:0;"><i class="fa fa-balance-scale"></i> Step 1: Baseline Reading</h4>
+                                <p>Leave the hive on the scale as-is. <strong>Do not add or remove anything.</strong> We'll take a baseline reading of the current load.</p>
+                                <button type="button" class="btn btn-test" id="btn-fieldcal-baseline" onclick="FieldCal.takeBaseline()">
+                                    <i class="fa fa-play"></i> Take Baseline Reading
+                                </button>
+                                <button type="button" class="btn btn-skip" onclick="FieldCal.cancel()" style="margin-left:8px;">Cancel</button>
+                                <div id="fieldcal-baseline-result" class="test-result waiting" style="margin-top:10px;">Ready when you are...</div>
+                            </div>
+
+                            <!-- Step 2: Add Known Weight -->
+                            <div class="fieldcal-step" id="fieldcal-step-2" style="display:none;">
+                                <h4 style="margin-top:0;"><i class="fa fa-plus-circle"></i> Step 2: Add Known Weight On Top</h4>
+                                <p>Place a <strong>known weight on top of the hive</strong> (e.g. a 10-lb bag of sugar, a dumbbell). Use at least 10 lbs for good accuracy.</p>
+                                <div class="form-group" style="max-width:300px;">
+                                    <label>Known Weight Added (lbs)</label>
+                                    <input type="number" class="form-control" id="fieldcal-known-weight" min="1" max="500" step="0.1" placeholder="e.g. 10">
+                                    <p class="help-text">Enter the exact weight you placed on top</p>
+                                </div>
+                                <button type="button" class="btn btn-test" id="btn-fieldcal-loaded" onclick="FieldCal.takeLoaded()">
+                                    <i class="fa fa-play"></i> Take Loaded Reading
+                                </button>
+                                <button type="button" class="btn btn-back" onclick="FieldCal.showStep(1)" style="margin-left:8px;">
+                                    <i class="fa fa-arrow-left"></i> Back
+                                </button>
+                                <button type="button" class="btn btn-skip" onclick="FieldCal.cancel()" style="margin-left:8px;">Cancel</button>
+                                <div id="fieldcal-loaded-result" class="test-result waiting" style="margin-top:10px;">Place weight and click above...</div>
+                            </div>
+
+                            <!-- Step 3: Results -->
+                            <div class="fieldcal-step" id="fieldcal-step-3" style="display:none;">
+                                <h4 style="margin-top:0;"><i class="fa fa-check-circle" style="color:#5cb85c;"></i> Step 3: Recalibration Results</h4>
+                                <table class="table" style="max-width:500px; margin-bottom:10px;">
+                                    <tr><td style="font-weight:600;">Previous Slope</td><td id="fieldcal-old-slope">--</td></tr>
+                                    <tr><td style="font-weight:600;">New Slope</td><td id="fieldcal-new-slope">--</td></tr>
+                                    <tr><td style="font-weight:600;">Change</td><td id="fieldcal-slope-change">--</td></tr>
+                                    <tr><td style="font-weight:600;">Known Weight Added</td><td id="fieldcal-result-known">--</td></tr>
+                                    <tr><td style="font-weight:600;">Measured Delta</td><td id="fieldcal-result-delta">--</td></tr>
+                                </table>
+                                <div id="fieldcal-warning" style="display:none; padding:10px; background:#fcf8e3; border:1px solid #faebcc; border-radius:4px; color:#8a6d3b; margin-bottom:10px;">
+                                    <i class="fa fa-exclamation-triangle"></i> <span id="fieldcal-warning-text"></span>
+                                </div>
+                                <button type="button" class="btn btn-primary" id="btn-fieldcal-save" onclick="FieldCal.save()">
+                                    <i class="fa fa-check"></i> Save New Calibration
+                                </button>
+                                <button type="button" class="btn btn-back" onclick="FieldCal.start()" style="margin-left:8px;">
+                                    <i class="fa fa-refresh"></i> Start Over
+                                </button>
+                                <button type="button" class="btn btn-skip" onclick="FieldCal.cancel()" style="margin-left:8px;">Cancel</button>
+                                <div id="fieldcal-save-result" style="display:none; padding:10px; background:#dff0d8; border:1px solid #d6e9c6; border-radius:4px; color:#3c763d; margin-top:10px;">
+                                    <i class="fa fa-check-circle"></i> Recalibration saved successfully! Intercept unchanged, slope updated.
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Sub-wizard steps (hidden until started) -->
@@ -1347,11 +1414,13 @@ elseif ($step === 8): ?>
         var cpwNotice = document.getElementById('cpw-notice');
         var calLauncher = document.getElementById('cal-wizard-launcher');
         var calWizard = document.getElementById('cal-wizard');
+        var fieldcalWizard = document.getElementById('fieldcal-wizard');
         if (!cpwNotice) return;
         if (v === 'cpw200plus') {
             cpwNotice.style.display = 'block';
             if (calLauncher) calLauncher.style.display = 'none';
             if (calWizard) calWizard.style.display = 'none';
+            if (fieldcalWizard) fieldcalWizard.style.display = 'none';
         } else {
             cpwNotice.style.display = 'none';
             if (calLauncher) calLauncher.style.display = 'block';
@@ -1645,6 +1714,207 @@ elseif ($step === 8): ?>
                 error: function() {
                     self.setButtonLoading('btn-save-cal', false);
                     alert('Failed to save calibration. Check database permissions.');
+                }
+            });
+        }
+    };
+
+    // Field Recalibration (under load)
+    var FieldCal = {
+        rawBaseline: null,
+        rawLoaded: null,
+        newSlope: null,
+        oldSlope: parseFloat('<?php echo $config['HIVE_WEIGHT_SLOPE'] ?? '1'; ?>'),
+        currentIntercept: parseFloat('<?php echo $config['HIVE_WEIGHT_INTERCEPT'] ?? '0'; ?>'),
+
+        getScaleType: function() {
+            var sel = document.querySelector('input[name="SCALETYPE"]:checked');
+            return sel ? sel.value : '';
+        },
+
+        showStep: function(n) {
+            document.querySelectorAll('.fieldcal-step').forEach(function(el) { el.style.display = 'none'; });
+            var step = document.getElementById('fieldcal-step-' + n);
+            if (step) step.style.display = 'block';
+            for (var i = 1; i <= 3; i++) {
+                var prog = document.getElementById('fieldcal-prog-' + i);
+                if (!prog) continue;
+                if (i < n) { prog.style.background = '#5cb85c'; prog.style.color = 'white'; }
+                else if (i === n) { prog.style.background = '#e6b800'; prog.style.color = 'white'; }
+                else { prog.style.background = '#eee'; prog.style.color = '#999'; }
+            }
+        },
+
+        start: function() {
+            this.rawBaseline = null;
+            this.rawLoaded = null;
+            this.newSlope = null;
+            this.oldSlope = parseFloat(document.getElementById('form-slope').value) || 1;
+            this.currentIntercept = parseFloat(document.getElementById('form-intercept').value) || 0;
+            document.getElementById('fieldcal-wizard').style.display = 'block';
+            document.getElementById('fieldcal-baseline-result').className = 'test-result waiting';
+            document.getElementById('fieldcal-baseline-result').innerHTML = 'Ready when you are...';
+            document.getElementById('fieldcal-save-result').style.display = 'none';
+            document.getElementById('fieldcal-warning').style.display = 'none';
+            this.showStep(1);
+        },
+
+        cancel: function() {
+            document.getElementById('fieldcal-wizard').style.display = 'none';
+        },
+
+        setButtonLoading: function(btnId, loading) {
+            var btn = document.getElementById(btnId);
+            if (!btn) return;
+            btn.disabled = loading;
+            if (loading) {
+                btn.setAttribute('data-orig', btn.innerHTML);
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Reading...';
+            } else {
+                var orig = btn.getAttribute('data-orig');
+                if (orig) btn.innerHTML = orig;
+            }
+        },
+
+        takeBaseline: function() {
+            var scaleType = this.getScaleType();
+            if (!scaleType) { alert('Please select a scale type first.'); return; }
+            var self = this;
+            var el = document.getElementById('fieldcal-baseline-result');
+            el.className = 'test-result waiting';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking 5 baseline samples &mdash; do not touch the hive';
+            this.setButtonLoading('btn-fieldcal-baseline', true);
+
+            $.ajax({
+                url: 'calibrate_raw_reading.php?scaletype=' + scaleType + '&samples=5',
+                timeout: 120000,
+                dataType: 'json',
+                success: function(data) {
+                    self.setButtonLoading('btn-fieldcal-baseline', false);
+                    if (data.success) {
+                        self.rawBaseline = parseFloat(data.raw_value);
+                        el.className = 'test-result success';
+                        el.innerHTML = 'Baseline: <strong>' + escHtml(String(data.raw_value)) + '</strong> (' + data.sample_count + ' samples)';
+                        setTimeout(function() { self.showStep(2); }, 800);
+                    } else {
+                        el.className = 'test-result error';
+                        el.textContent = data.error || 'Failed to get reading';
+                    }
+                },
+                error: function(xhr, status) {
+                    self.setButtonLoading('btn-fieldcal-baseline', false);
+                    el.className = 'test-result error';
+                    el.innerHTML = (status === 'timeout')
+                        ? 'Timeout: sensor did not respond. Check wiring.'
+                        : 'Error communicating with sensor.';
+                }
+            });
+        },
+
+        takeLoaded: function() {
+            var scaleType = this.getScaleType();
+            var knownWeight = parseFloat(document.getElementById('fieldcal-known-weight').value);
+            if (!knownWeight || knownWeight <= 0) {
+                alert('Please enter a valid weight greater than zero.');
+                return;
+            }
+            var self = this;
+            var el = document.getElementById('fieldcal-loaded-result');
+            el.className = 'test-result waiting';
+            el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Taking 5 loaded samples &mdash; do not touch the hive';
+            this.setButtonLoading('btn-fieldcal-loaded', true);
+
+            $.ajax({
+                url: 'calibrate_raw_reading.php?scaletype=' + scaleType + '&samples=5',
+                timeout: 120000,
+                dataType: 'json',
+                success: function(data) {
+                    self.setButtonLoading('btn-fieldcal-loaded', false);
+                    if (data.success) {
+                        self.rawLoaded = parseFloat(data.raw_value);
+                        el.className = 'test-result success';
+                        el.innerHTML = 'Loaded: <strong>' + escHtml(String(data.raw_value)) + '</strong> (' + data.sample_count + ' samples)';
+
+                        var rawDiff = self.rawLoaded - self.rawBaseline;
+                        if (Math.abs(rawDiff) < 1) {
+                            el.className = 'test-result error';
+                            el.textContent = 'No weight change detected. The baseline and loaded readings are nearly identical. Make sure the weight is on the scale.';
+                            return;
+                        }
+
+                        if (scaleType === 'phidget1046') {
+                            self.newSlope = knownWeight / rawDiff;
+                        } else {
+                            self.newSlope = rawDiff / knownWeight;
+                        }
+                        self.newSlope = parseFloat(self.newSlope.toFixed(6));
+
+                        var measuredDelta;
+                        if (scaleType === 'phidget1046') {
+                            measuredDelta = rawDiff * self.newSlope;
+                        } else {
+                            measuredDelta = rawDiff / self.newSlope;
+                        }
+
+                        var pctChange = ((self.newSlope - self.oldSlope) / Math.abs(self.oldSlope) * 100).toFixed(1);
+                        document.getElementById('fieldcal-old-slope').textContent = self.oldSlope;
+                        document.getElementById('fieldcal-new-slope').textContent = self.newSlope;
+                        document.getElementById('fieldcal-slope-change').textContent = pctChange + '%';
+                        document.getElementById('fieldcal-result-known').textContent = knownWeight + ' lbs';
+                        document.getElementById('fieldcal-result-delta').textContent = measuredDelta.toFixed(2) + ' lbs';
+
+                        var warn = document.getElementById('fieldcal-warning');
+                        var warnText = document.getElementById('fieldcal-warning-text');
+                        if (Math.abs(parseFloat(pctChange)) > 20) {
+                            warn.style.display = 'block';
+                            warnText.textContent = 'Slope changed by ' + pctChange + '%. This is a large shift. Double-check your known weight is accurate and the hive was not disturbed.';
+                        } else if (knownWeight < 10) {
+                            warn.style.display = 'block';
+                            warnText.textContent = 'A heavier known weight (10+ lbs) improves accuracy. Results with light weights may be less precise.';
+                        } else {
+                            warn.style.display = 'none';
+                        }
+
+                        setTimeout(function() { self.showStep(3); }, 800);
+                    } else {
+                        el.className = 'test-result error';
+                        el.textContent = data.error || 'Failed to get reading';
+                    }
+                },
+                error: function(xhr, status) {
+                    self.setButtonLoading('btn-fieldcal-loaded', false);
+                    el.className = 'test-result error';
+                    el.innerHTML = (status === 'timeout')
+                        ? 'Timeout: sensor did not respond. Check wiring.'
+                        : 'Error communicating with sensor.';
+                }
+            });
+        },
+
+        save: function() {
+            var self = this;
+            this.setButtonLoading('btn-fieldcal-save', true);
+
+            $.ajax({
+                url: 'calibrate_save.php',
+                method: 'POST',
+                data: { slope: self.newSlope, intercept: self.currentIntercept, scaletype: self.getScaleType() },
+                dataType: 'json',
+                timeout: 15000,
+                success: function(data) {
+                    self.setButtonLoading('btn-fieldcal-save', false);
+                    if (data.success) {
+                        document.getElementById('form-slope').value = self.newSlope;
+                        var ms = document.getElementById('manual-slope');
+                        if (ms) ms.value = self.newSlope;
+                        document.getElementById('fieldcal-save-result').style.display = 'block';
+                    } else {
+                        alert('Save failed: ' + (data.error || 'Unknown error'));
+                    }
+                },
+                error: function() {
+                    self.setButtonLoading('btn-fieldcal-save', false);
+                    alert('Failed to save. Check database permissions.');
                 }
             });
         }

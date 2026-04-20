@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="114"
+Upgrade_ver="117"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -312,6 +312,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_33
 			let DB_ver="25"
 		fi
+		if [[ $DB_ver -eq "25" ]]; then
+			echo "Applying DB Ver 26 Upgrades - Weather fallback support"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_34
+			let DB_ver="26"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -509,20 +514,35 @@ if [[ "$Installed_Ver" < "2.11" ]]; then
 fi
 
 if [[ "$Installed_Ver" < "2.12" ]]; then
-	echo "Migrating from pigpio to lgpio"
+	# Detect OS architecture
+	OS_ARCH=$(uname -m)
+	case "$OS_ARCH" in
+		aarch64|arm64|x86_64|amd64) IS_64BIT=true ;;
+		*) IS_64BIT=false ;;
+	esac
 
-	# Install lgpio
-	sudo apt install python3-lgpio -y
-	sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
+	PI_VERSION=$(grep -oP 'Raspberry Pi \K\d+' /proc/device-tree/model 2>/dev/null || echo "0")
+	echo "Detected: $(cat /proc/device-tree/model 2>/dev/null), OS arch: $OS_ARCH"
 
-	# Stop and remove pigpio
-	sudo killall pigpiod 2>/dev/null || true
-	sudo apt remove python3-pigpio -y 2>/dev/null || true
+	if [ "$IS_64BIT" = true ] || [ "$PI_VERSION" -ge 5 ]; then
+		echo "64-bit OS or Pi 5+ detected — migrating from pigpio to lgpio"
 
-	# Remove pigpiod from cron
-	(sudo crontab -u root -l 2>/dev/null | grep -v "pigpiod") | sudo crontab -u root -
+		# Install lgpio
+		sudo apt install python3-lgpio -y
+		sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
 
-	# Make lgpio DHT reader executable
+		# Stop and remove pigpio
+		sudo killall pigpiod 2>/dev/null || true
+		sudo apt remove python3-pigpio -y 2>/dev/null || true
+
+		# Remove pigpiod from cron
+		(sudo crontab -u root -l 2>/dev/null | grep -v "pigpiod") | sudo crontab -u root -
+	else
+		echo "32-bit OS on Pi 4 or older — keeping pigpio, installing lgpio alongside"
+		sudo apt install python3-lgpio -y 2>/dev/null || true
+	fi
+
+	# Make DHT readers executable regardless of architecture
 	sudo chmod u+x /home/HiveControl/software/DHTXXD/DHTXXD_lgpio.py
 	sudo chmod u+x /home/HiveControl/software/DHTXXD/DHTXXD_kernel.py
 
@@ -530,7 +550,53 @@ if [[ "$Installed_Ver" < "2.12" ]]; then
 	sudo chmod u+x /home/HiveControl/scripts/temp/dht22.sh
 	sudo chmod u+x /home/HiveControl/scripts/temp/dht21.sh
 
+	# Migrate legacy timezone names to canonical IANA names (Trixie removed symlinks)
+	echo "Updating timezone to canonical IANA name"
+	CURRENT_TZ=$(sqlite3 /home/HiveControl/data/hive-data.db "SELECT TIMEZONE FROM hiveconfig WHERE id=1")
+	case "$CURRENT_TZ" in
+		US/Alaska)              NEW_TZ="America/Anchorage" ;;
+		US/Arizona)             NEW_TZ="America/Phoenix" ;;
+		US/Mountain)            NEW_TZ="America/Denver" ;;
+		US/Central)             NEW_TZ="America/Chicago" ;;
+		US/Eastern)             NEW_TZ="America/New_York" ;;
+		US/East-Indiana)        NEW_TZ="America/Indiana/Indianapolis" ;;
+		Canada/Saskatchewan)    NEW_TZ="America/Regina" ;;
+		Canada/Atlantic)        NEW_TZ="America/Halifax" ;;
+		Canada/Newfoundland)    NEW_TZ="America/St_Johns" ;;
+		Pacific/Samoa)          NEW_TZ="Pacific/Pago_Pago" ;;
+		America/Godthab)        NEW_TZ="America/Nuuk" ;;
+		Etc/Greenwich)          NEW_TZ="Etc/GMT" ;;
+		Asia/Calcutta)          NEW_TZ="Asia/Kolkata" ;;
+		Asia/Katmandu)          NEW_TZ="Asia/Kathmandu" ;;
+		Asia/Rangoon)           NEW_TZ="Asia/Yangon" ;;
+		Asia/Chongqing)         NEW_TZ="Asia/Shanghai" ;;
+		Asia/Ulan_Bator)        NEW_TZ="Asia/Ulaanbaatar" ;;
+		*)                      NEW_TZ="" ;;
+	esac
+	if [ -n "$NEW_TZ" ]; then
+		sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET TIMEZONE='$NEW_TZ' WHERE id=1"
+		echo "Timezone updated: $CURRENT_TZ -> $NEW_TZ"
+	fi
+
 	echo "lgpio migration complete"
+fi
+
+if [[ "$Installed_Ver" < "2.13" ]]; then
+	# Increase data collection frequency from 60min to 15min and offset weight_monitor
+	echo "Updating cron intervals"
+	(sudo crontab -u root -l 2>/dev/null \
+		| sed 's|^\*/60 \* \* \* \* .*/currconditions\.sh.*|*/15 * * * * /home/HiveControl/scripts/system/currconditions.sh >> /home/HiveControl/logs/currconditions.log 2>\&1|' \
+		| sed 's|^\*/15 \* \* \* \* .*/weight_monitor\.sh.*|5,20,35,50 * * * * /home/HiveControl/scripts/weight/weight_monitor.sh >> /home/HiveControl/logs/weight_monitor.log 2>\&1|' \
+	) | sudo crontab -u root -
+	echo "Cron intervals updated: currconditions=15min, weight_monitor=offset by 5min"
+
+	# Make new weather scripts executable
+	sudo chmod u+x /home/HiveControl/scripts/weather/getwx.sh
+	sudo chmod u+x /home/HiveControl/scripts/weather/openmeteo/getopenmeteo.sh
+	sudo chmod u+x /home/HiveControl/scripts/weather/nws/getnws.sh
+	sudo chmod u+x /home/HiveControl/scripts/weather/openweathermap/getopenweathermap.sh
+	sudo chmod u+x /home/HiveControl/scripts/weather/weatherapi/getweatherapi.sh
+	sudo chmod u+x /home/HiveControl/scripts/weather/visualcrossing/getvisualcrossing.sh
 fi
 
 echo "============================================="

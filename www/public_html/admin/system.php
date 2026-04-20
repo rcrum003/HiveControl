@@ -87,12 +87,7 @@ $RUN = $sth15->fetchColumn();
 unset($sth15);
 
 #Check to see if the neccessary variables exist
-if(isset($_GET["command"])) {
-    // command exists
-    if (empty($_GET["command"])) {
-        // Default to nothing if no command is set or empty
-        $command = "none";
-        } else {
+if(!empty($command)) {
             // Not empty, so let's run switch
 
         switch ($command) {
@@ -142,23 +137,13 @@ if(isset($_GET["command"])) {
                 // SECURITY FIX: Require CSRF token for destructive operations
                 require_csrf_token();
                 if ($confirm == "yes") {
-                    # well, you confirmed it, deleting all the data
-                    $sth6 = $conn->prepare("DELETE from allhivedata");
-                    $sth6->execute();
-                    $sth7 = $conn->prepare("DELETE from hivedata");
-                    $sth7->execute();
-                    $sth8 = $conn->prepare("DELETE from weather");
-                    $sth8->execute();
-                    $sth9 = $conn->prepare("DELETE from gdd");
-                    $sth9->execute();
-                    $sth10 = $conn->prepare("DELETE from logs");
-                    $sth10->execute();
-                    $sth11 = $conn->prepare("DELETE from msgqueue");
-                    $sth11->execute();
-                    $sth12 = $conn->prepare("DELETE from pollen");
-                    $sth12->execute();
+                    $conn->prepare("DELETE from allhivedata")->execute();
+                    $conn->prepare("DELETE from hivedata")->execute();
+                    $conn->prepare("DELETE from weather")->execute();
+                    $conn->prepare("DELETE from gdd")->execute();
+                    $conn->prepare("DELETE from pollen")->execute();
                     $user_ip = getUserIP();
-                    loglocal($now, "RESET", "INFO", "All Data Erased by Admin from source IP $user_ip");
+                    loglocal($now, "RESET", "INFO", "All readings erased by Admin from source IP $user_ip");
                 }
                     
                 break;
@@ -229,10 +214,9 @@ if(isset($_GET["command"])) {
                   header('Refresh: 1; url=/admin/system.php');
                 break;
         }
-        }
-    } else {
-        $command = "none";
-    }
+} else {
+    $command = "none";
+}
 
 ?>
 <!DOCTYPE html>

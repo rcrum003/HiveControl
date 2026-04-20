@@ -194,6 +194,7 @@ if($v->validate()) {
     $WXTEMPTYPE = test_input($_POST["WXTEMPTYPE"]);
     $WX_TEMPER_DEVICE = test_input_allow_slash($_POST["WX_TEMPER_DEVICE"]);
     $WX_TEMP_GPIO = test_input($_POST["WX_TEMP_GPIO"]);
+    $weather_fallback = test_input($_POST["WEATHER_FALLBACK"] ?? '');
     $local_wx_type = test_input($_POST["local_wx_type"]);
     $local_wx_url = test_input($_POST["local_wx_url"]);
 
@@ -217,8 +218,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback));
     sleep(1);
 
 
@@ -264,6 +265,7 @@ if($v->validate()) {
                             <input type="hidden" name="ENABLE_BEECOUNTER" value="<?php echo $result['ENABLE_BEECOUNTER']; ?>">
                             <input type="hidden" name="ENABLE_AIR" value="<?php echo $result['ENABLE_AIR']; ?>">
                             <input type="hidden" name="WEATHER_LEVEL" value="<?php echo $result['WEATHER_LEVEL']; ?>">
+                            <input type="hidden" name="WEATHER_FALLBACK" value="<?php echo $result['WEATHER_FALLBACK'] ?? ''; ?>">
                             <input type="hidden" name="WEATHER_DETAIL" value="<?php echo $result['WEATHER_DETAIL']; ?>">
                             <input type="hidden" name="KEY" value="<?php echo $result['KEY']; ?>">
                             <input type="hidden" name="WXSTATION" value="<?php echo $result['WXSTATION']; ?>">
@@ -767,6 +769,39 @@ if($v->validate()) {
                                 <td> </td>
                                 <td> </td>
                                 <td></td>
+                        </tr>
+<?PHP ###############################################################################################################
+      # Weather Fallback
+      ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td><a href="#" title="Weather Fallback" data-toggle="popover" data-placement="bottom" data-content="If the primary weather source fails, this backup source will be used automatically. Only cloud APIs can be used as fallback."><p class="fa fa-question-circle fa-fw"></P></a>Weather Fallback<br>
+                            <select name="WEATHER_FALLBACK" onchange="this.form.submit()">
+                            <option value="" <?php if (empty($result['WEATHER_FALLBACK'])) {echo "selected='selected'";} ?>>None (No Fallback)</option>
+                            <optgroup label="Cloud APIs (Free)">
+                            <option value="openmeteo" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "openmeteo") {echo "selected='selected'";} ?>>Open-Meteo (No Key)</option>
+                            <option value="nws" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "nws") {echo "selected='selected'";} ?>>NWS weather.gov (US Only)</option>
+                            </optgroup>
+                            <optgroup label="Cloud APIs (Key Required)">
+                            <option value="openweathermap" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "openweathermap") {echo "selected='selected'";} ?>>OpenWeatherMap</option>
+                            <option value="weatherapi" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "weatherapi") {echo "selected='selected'";} ?>>WeatherAPI.com</option>
+                            <option value="visualcrossing" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "visualcrossing") {echo "selected='selected'";} ?>>Visual Crossing</option>
+                            </optgroup>
+                            </select></td>
+                            <td>
+                                <?php
+                                $fb = $result['WEATHER_FALLBACK'] ?? '';
+                                if (!empty($fb) && $fb == $result['WEATHER_LEVEL']) {
+                                    echo '<span style="color:red"><strong>Warning:</strong> Fallback is the same as primary source.</span>';
+                                } elseif (!empty($fb)) {
+                                    echo '<small>If ' . htmlspecialchars($result['WEATHER_LEVEL']) . ' fails, ' . htmlspecialchars($fb) . ' will be used automatically.</small>';
+                                } else {
+                                    echo '<small>Recommended: Set Open-Meteo or NWS as fallback for reliability.</small>';
+                                }
+                                ?>
+                            </td>
+                            <td> </td>
+                            <td> </td>
+                            <td></td>
                         </tr>
 <?PHP ###############################################################################################################
       # AirQuality

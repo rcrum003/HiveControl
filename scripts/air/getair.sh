@@ -13,8 +13,8 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 # Data Fetchers/Parsers in one
 
 case $AIR_TYPE in
-	purple)
-		GETAIR_DATA=$($HOMEDIR/scripts/air/purpleair.sh)
+	purpleapi|purple)
+		GETAIR_DATA=$($HOMEDIR/scripts/air/purpleapi.sh)
 		;;
 	purplelocal)
 		GETAIR_DATA=$($HOMEDIR/scripts/air/purpleairlocal.sh)

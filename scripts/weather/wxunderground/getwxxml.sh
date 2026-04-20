@@ -3,10 +3,10 @@
 #
 # Script to get output from WX-Underground XML file that matches WUNDERGROUND file format
 #
-# Revision 1
+# Revision 2
 # 2019-07-07
-# 
-# Not sure how this script will last, now that IBM is the evil overlord of WXUnderground 	
+#
+# Not sure how this script will last, now that IBM is the evil overlord of WXUnderground
 
 
 #Get our variables
@@ -14,23 +14,24 @@
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/check.inc
+source /home/HiveControl/scripts/weather/wx_helpers.inc
 
 #set -x
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
 
-TRYCOUNTER="1" 
-DATA_GOOD="0" 
+TRYCOUNTER="1"
+DATA_GOOD="0"
 
 TMPFILE=$(mktemp /tmp/getwxxml_XXXXXX.xml)
 trap 'rm -f "$TMPFILE"' EXIT
 
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
-	
+
 	#GETDATA=$(/usr/bin/curl --silent "$ambient_device_url/$ambient_deviceMAC?apiKey=$ambient_APIKEY&applicationKey=$ambient_APPID&limit=1")
-	/usr/bin/curl --retry 5 "http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID=$WXSTATION" > $TMPFILE
-	
+	/usr/bin/curl --retry 5 --max-time 30 "http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID=$WXSTATION" > $TMPFILE
+
 	CHECKERROR=$?
 
 	if [ "$CHECKERROR" -ne "0"  ]; then
@@ -65,38 +66,12 @@ precip_today_metric=`grep precip_1hr_metric $TMPFILE |  grep  -o "[0-9]*\.[0-9]*
 PRESSURE_IN=`grep pressure_in $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
 
 
-# Convert Wind then DIRECTION Degrees into Text
+# Convert Wind DIRECTION Degrees into Text
+DIRECTION=$(degrees_to_cardinal "$WIND_DIR")
 
-if [ 1 -eq "$(echo "$WIND_DIR >= 0" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 22.5" | bc)" ]; 
-	then 
-		DIRECTION="North" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 22.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 67.5" | bc)" ]; 
-	then 
-		DIRECTION="NE" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 67.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 112.5" | bc)" ]; 
-	then 
-		DIRECTION="East" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 112.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 157.5" | bc)" ]; 
-	then 
-		DIRECTION="SE" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 157.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 202.5" | bc)" ];
-	then 
-		DIRECTION="South" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 202.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 247.5" | bc)" ];
-	then 
-		DIRECTION="SW" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 247.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 292.5" | bc)" ];
-	then 
-		DIRECTION="West" 
-elif [ 1 -eq "$(echo "$WIND_DIR >= 292.5" | bc)" ] && [ 1 -eq "$(echo "$WIND_DIR < 337.5" | bc)" ];
-	then 
-		DIRECTION="NW" 
-else DIRECTION="North"
-fi 
-
-# convert MPH to kph per hour
-wind_kph="$(echo "scale=2; ($WIND_SPEED_MPH * 1.609344)/1" | bc)"
-wind_gust_kph="$(echo "scale=2; ($WIND_GUST_MPH * 1.609344)/1" | bc)"
+# Convert MPH to KPH
+wind_kph=$(mph_to_kph "$WIND_SPEED_MPH")
+wind_gust_kph=$(mph_to_kph "$WIND_GUST_MPH")
 
 
 if [[ -z "$TEMP_F" ]]; then
@@ -105,48 +80,28 @@ if [[ -z "$TEMP_F" ]]; then
 	exit
 fi
 
-	
+
 # Return a JSON file to mimic WUNderground file format
-echo "{"
-echo "\"response\": {"
-echo "\"version\":\"0.1\","
-echo "\"features\": {"
-echo "\"conditions\": 1"
-echo "  }"
-echo "	}"
-echo "  ,	\"current_observation\": {"
-echo "		\"station_id\":\"$WXSTATION\","
-echo "		\"observation_time\":\"$DATEUTC\","
-echo "		\"temperature_string\":\"$TEMP_F F ($temp_c C)\","
-echo "		\"temp_f\":\"$TEMP_F\","
-echo "		\"temp_c\":\"$temp_c\","
-echo "		\"relative_humidity\":\"$HUMIDITY%\","
-echo "		\"wind_string\":\" $DIRECTION at $WIND_SPEED_MPH MPH, Gust to $WIND_GUST_MPH MPH\","
-echo "		\"wind_dir\":\"$DIRECTION\","
-echo "		\"wind_degrees\":\"$WIND_DIR\","
-echo "		\"wind_mph\":\"$WIND_SPEED_MPH\","
-echo "		\"wind_gust_mph\":\"$WIND_GUST_MPH\","
-echo "		\"wind_kph\":\"$wind_kph\","
-echo "		\"wind_gust_kph\":\"$wind_gust_kph\","
-echo "		\"pressure_mb\":\"$pressure_mb\","
-echo "		\"pressure_in\":\"$PRESSURE_IN\","
-echo "		\"pressure_trend\":\"-\","
-echo "		\"dewpoint_f\":$DEWPOINT_F,"
-echo "		\"dewpoint_c\":\"$dewpoint_c\","
-echo "		\"windchill_string\":\"NA\","
-echo "		\"windchill_f\":\"NA\","
-echo "		\"windchill_c\":\"NA\","
-echo "		\"solarradiation\":\"$SOLAR_RADIATION\","
-echo "		\"UV\":\"$UV\","
-echo "		\"precip_1hr_in\":\"$RAIN_HOURLY_IN\","
-echo "		\"precip_1hr_metric\":\"$precip_1hr_metric\","
-echo "		\"precip_today_string\":\"$RAIN_DAILY_IN in ($precip_today_metric mm)\","
-echo "		\"precip_today_in\":\"$RAIN_DAILY_IN\","
-echo "		\"precip_today_metric\":\"$precip_today_metric\""
-echo " }"
-echo "}"
-
-rm -f "$TMPFILE"
-
-
-
+WX_STATION_ID="$WXSTATION"
+WX_OBS_TIME="$DATEUTC"
+WX_TEMP_F="$TEMP_F"
+WX_TEMP_C="$temp_c"
+WX_HUMIDITY="$HUMIDITY"
+WX_WIND_DIR_TEXT="$DIRECTION"
+WX_WIND_DIR_DEG="$WIND_DIR"
+WX_WIND_MPH="$WIND_SPEED_MPH"
+WX_WIND_GUST_MPH="$WIND_GUST_MPH"
+WX_WIND_KPH="$wind_kph"
+WX_WIND_GUST_KPH="$wind_gust_kph"
+WX_PRESSURE_MB="$PRESSURE_MB"
+WX_PRESSURE_IN="$PRESSURE_IN"
+WX_PRESSURE_TREND="-"
+WX_DEWPOINT_F="$DEWPOINT_F"
+WX_DEWPOINT_C="$DEWPOINT_C"
+WX_SOLARRADIATION="$SOLAR_RADIATION"
+WX_UV="$UV"
+WX_PRECIP_1HR_IN="$RAIN_HOURLY_IN"
+WX_PRECIP_1HR_MM="$precip_1hr_metric"
+WX_PRECIP_TODAY_IN="$RAIN_DAILY_IN"
+WX_PRECIP_TODAY_MM="$precip_today_metric"
+output_wx_json

@@ -109,7 +109,8 @@ INSERT INTO hiveconfig (
                            trend_wind,
                            trend_pressure,
                            color_pollen,
-                           trend_pollen
+                           trend_pollen,
+                           WEATHER_FALLBACK
 			)
 
 		VALUES (
@@ -215,8 +216,9 @@ INSERT INTO hiveconfig (
                            '', 
                            '', 
                            '', 
-                           '', 
-                           '' 
+                           '',
+                           '',
+                           ''
 			);
 
 

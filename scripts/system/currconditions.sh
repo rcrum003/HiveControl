@@ -330,8 +330,7 @@ if [ ! -f "$DB_PATH" ]; then
 fi
 
 # Build the INSERT statement with properly escaped values
-# Using printf %q would be ideal but can cause issues with sqlite3, so we use our escape function
-if ! sqlite3 "$DB_PATH" <<EOF
+SQL_INSERT=$(cat <<EOF
 INSERT INTO allhivedata (
 	hiveid, date, date_utc, hivetempf, hivetempc, hiveHum, hiveweight, hiverawweight,
 	yardid, sync, beekeeperid, weather_stationID, observationDateTime, weather_tempf,
@@ -386,7 +385,9 @@ INSERT INTO allhivedata (
 	'$(sql_escape "$AIR_PM10")'
 );
 EOF
-then
+)
+
+if ! sqlite3 "$DB_PATH" "$SQL_INSERT" 2>&1; then
 	echo "ERROR: Failed to insert data into database"
 	exit 1
 fi

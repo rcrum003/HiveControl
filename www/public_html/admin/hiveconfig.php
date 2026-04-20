@@ -253,42 +253,42 @@ if($v->validate()) {
                                             <td>Time Zone</td>
                                             <td><select name="TIMEZONE" onchange="this.form.submit()">
                                             <option value="Pacific/Midway" <?PHP if ($result['TIMEZONE'] == "Pacific/Midway") {echo "selected='selected'";} ?>>(UTC-11:00) Midway Island </option>
-                                        <option value="Pacific/Samoa" <?PHP if ($result['TIMEZONE'] == "Pacific/Samoa") {echo "selected='selected'";} ?>>(UTC-11:00) Samoa </option>
+                                        <option value="Pacific/Pago_Pago" <?PHP if ($result['TIMEZONE'] == "Pacific/Pago_Pago") {echo "selected='selected'";} ?>>(UTC-11:00) Samoa </option>
                                         <option value="Pacific/Honolulu" <?PHP if ($result['TIMEZONE'] == "Pacific/Honolulu") {echo "selected='selected'";} ?>>(UTC-10:00) Hawaii </option>
-                                        <option value="US/Alaska" <?PHP if ($result['TIMEZONE'] == "US/Alaska") {echo "selected='selected'";} ?>>(UTC-09:00) Alaska </option>
+                                        <option value="America/Anchorage" <?PHP if ($result['TIMEZONE'] == "America/Anchorage") {echo "selected='selected'";} ?>>(UTC-09:00) Alaska </option>
                                         <option value="America/Los_Angeles" <?PHP if ($result['TIMEZONE'] == "America/Los_Angeles") {echo "selected='selected'";} ?>>(UTC-08:00) Pacific Time (US &amp; Canada) </option>
                                         <option value="America/Tijuana" <?PHP if ($result['TIMEZONE'] == "America/Tijuana") {echo "selected='selected'";} ?>>(UTC-08:00) Tijuana </option>
-                                        <option value="US/Arizona" <?PHP if ($result['TIMEZONE'] == "US/Arizona") {echo "selected='selected'";} ?>>(UTC-07:00) Arizona </option>
+                                        <option value="America/Phoenix" <?PHP if ($result['TIMEZONE'] == "America/Phoenix") {echo "selected='selected'";} ?>>(UTC-07:00) Arizona </option>
                                         <option value="America/Chihuahua" <?PHP if ($result['TIMEZONE'] == "America/Chihuahua") {echo "selected='selected'";} ?>>(UTC-07:00) Chihuahua </option>
                                         <option value="America/Chihuahua" <?PHP if ($result['TIMEZONE'] == "America/Chihuahua") {echo "selected='selected'";} ?>>(UTC-07:00) La Paz </option>
                                         <option value="America/Mazatlan" <?PHP if ($result['TIMEZONE'] == "America/Mazatlan") {echo "selected='selected'";} ?>>(UTC-07:00) Mazatlan </option>
-                                        <option value="US/Mountain" <?PHP if ($result['TIMEZONE'] == "US/Mountain") {echo "selected='selected'";} ?>>(UTC-07:00) Mountain Time (US &amp; Canada) </option>
+                                        <option value="America/Denver" <?PHP if ($result['TIMEZONE'] == "America/Denver") {echo "selected='selected'";} ?>>(UTC-07:00) Mountain Time (US &amp; Canada) </option>
                                         <option value="America/Managua" <?PHP if ($result['TIMEZONE'] == "America/Managua") {echo "selected='selected'";} ?>>(UTC-06:00) Central America </option>
-                                        <option value="US/Central" <?PHP if ($result['TIMEZONE'] == "US/Central") {echo "selected='selected'";} ?>>(UTC-06:00) Central Time (US &amp; Canada) </option>
+                                        <option value="America/Chicago" <?PHP if ($result['TIMEZONE'] == "America/Chicago") {echo "selected='selected'";} ?>>(UTC-06:00) Central Time (US &amp; Canada) </option>
                                         <option value="America/Mexico_City" <?PHP if ($result['TIMEZONE'] == "America/Mexico_City") {echo "selected='selected'";} ?>>(UTC-06:00) Guadalajara </option>
                                         <option value="America/Mexico_City" <?PHP if ($result['TIMEZONE'] == "America/Mexico_City") {echo "selected='selected'";} ?>>(UTC-06:00) Mexico City </option>
                                         <option value="America/Monterrey" <?PHP if ($result['TIMEZONE'] == "America/Monterrey") {echo "selected='selected'";} ?>>(UTC-06:00) Monterrey </option>
-                                        <option value="Canada/Saskatchewan" <?PHP if ($result['TIMEZONE'] == "Canada/Saskatchewan") {echo "selected='selected'";} ?>>(UTC-06:00) Saskatchewan </option>
+                                        <option value="America/Regina" <?PHP if ($result['TIMEZONE'] == "America/Regina") {echo "selected='selected'";} ?>>(UTC-06:00) Saskatchewan </option>
                                         <option value="America/Bogota" <?PHP if ($result['TIMEZONE'] == "America/Bogota") {echo "selected='selected'";} ?>>(UTC-05:00) Bogota </option>
-                                        <option value="US/Eastern" <?PHP if ($result['TIMEZONE'] == "US/Eastern") {echo "selected='selected'";} ?>>(UTC-05:00) Eastern Time (US &amp; Canada) </option>
-                                        <option value="US/East-Indiana" <?PHP if ($result['TIMEZONE'] == "US/East-Indiana") {echo "selected='selected'";} ?>>(UTC-05:00) Indiana (East) </option>
+                                        <option value="America/New_York" <?PHP if ($result['TIMEZONE'] == "America/New_York") {echo "selected='selected'";} ?>>(UTC-05:00) Eastern Time (US &amp; Canada) </option>
+                                        <option value="America/Indiana/Indianapolis" <?PHP if ($result['TIMEZONE'] == "America/Indiana/Indianapolis") {echo "selected='selected'";} ?>>(UTC-05:00) Indiana (East) </option>
                                         <option value="America/Lima" <?PHP if ($result['TIMEZONE'] == "America/Lima") {echo "selected='selected'";} ?>>(UTC-05:00) Lima </option>
                                         <option value="America/Bogota" <?PHP if ($result['TIMEZONE'] == "America/Bogota") {echo "selected='selected'";} ?>>(UTC-05:00) Quito </option>
-                                        <option value="Canada/Atlantic" <?PHP if ($result['TIMEZONE'] == "Canada/Atlantic") {echo "selected='selected'";} ?>>(UTC-04:00) Atlantic Time (Canada) </option>
+                                        <option value="America/Halifax" <?PHP if ($result['TIMEZONE'] == "America/Halifax") {echo "selected='selected'";} ?>>(UTC-04:00) Atlantic Time (Canada) </option>
                                         <option value="America/Caracas" <?PHP if ($result['TIMEZONE'] == "America/Caracas") {echo "selected='selected'";} ?>>(UTC-04:30) Caracas </option>
                                         <option value="America/La_Paz" <?PHP if ($result['TIMEZONE'] == "America/La_Paz") {echo "selected='selected'";} ?>>(UTC-04:00) La Paz </option>
                                         <option value="America/Santiago" <?PHP if ($result['TIMEZONE'] == "America/Santiago") {echo "selected='selected'";} ?>>(UTC-04:00) Santiago </option>
-                                        <option value="Canada/Newfoundland" <?PHP if ($result['TIMEZONE'] == "Canada/Newfoundland") {echo "selected='selected'";} ?>>(UTC-03:30) Newfoundland </option>
+                                        <option value="America/St_Johns" <?PHP if ($result['TIMEZONE'] == "America/St_Johns") {echo "selected='selected'";} ?>>(UTC-03:30) Newfoundland </option>
                                         <option value="America/Sao_Paulo" <?PHP if ($result['TIMEZONE'] == "America/Sao_Paulo") {echo "selected='selected'";} ?>>(UTC-03:00) Brasilia </option>
                                         <option value="America/Argentina/Buenos_Aires" <?PHP if ($result['TIMEZONE'] == "America/Argentina/Buenos_Aires") {echo "selected='selected'";} ?>>(UTC-03:00) Buenos Aires </option>
                                         <option value="America/Argentina/Buenos_Aires" <?PHP if ($result['TIMEZONE'] == "America/Argentina/Buenos_Aires") {echo "selected='selected'";} ?>>(UTC-03:00) Georgetown </option>
-                                        <option value="America/Godthab" <?PHP if ($result['TIMEZONE'] == "America/Godthab") {echo "selected='selected'";} ?>>(UTC-03:00) Greenland </option>
+                                        <option value="America/Nuuk" <?PHP if ($result['TIMEZONE'] == "America/Nuuk") {echo "selected='selected'";} ?>>(UTC-03:00) Greenland </option>
                                         <option value="America/Noronha" <?PHP if ($result['TIMEZONE'] == "America/Noronha") {echo "selected='selected'";} ?>>(UTC-02:00) Mid-Atlantic </option>
                                         <option value="Atlantic/Azores" <?PHP if ($result['TIMEZONE'] == "Atlantic/Azores") {echo "selected='selected'";} ?>>(UTC-01:00) Azores </option>
                                         <option value="Atlantic/Cape_Verde" <?PHP if ($result['TIMEZONE'] == "Atlantic/Cape_Verde") {echo "selected='selected'";} ?>>(UTC-01:00) Cape Verde Is. </option>
                                         <option value="Africa/Casablanca" <?PHP if ($result['TIMEZONE'] == "Africa/Casablanca") {echo "selected='selected'";} ?>>(UTC+00:00) Casablanca </option>
                                         <option value="Europe/London" <?PHP if ($result['TIMEZONE'] == "Europe/London") {echo "selected='selected'";} ?>>(UTC+00:00) Edinburgh </option>
-                                        <option value="Etc/Greenwich" <?PHP if ($result['TIMEZONE'] == "Etc/Greenwich") {echo "selected='selected'";} ?>>(UTC+00:00) Greenwich Mean Time : Dublin </option>
+                                        <option value="Etc/GMT" <?PHP if ($result['TIMEZONE'] == "Etc/GMT") {echo "selected='selected'";} ?>>(UTC+00:00) Greenwich Mean Time : Dublin </option>
                                         <option value="Europe/Lisbon" <?PHP if ($result['TIMEZONE'] == "Europe/Lisbon") {echo "selected='selected'";} ?>>(UTC+00:00) Lisbon </option>
                                         <option value="Europe/London" <?PHP if ($result['TIMEZONE'] == "Europe/London") {echo "selected='selected'";} ?>>(UTC+00:00) London </option>
                                         <option value="Africa/Monrovia" <?PHP if ($result['TIMEZONE'] == "Africa/Monrovia") {echo "selected='selected'";} ?>>(UTC+00:00) Monrovia </option>
@@ -345,23 +345,23 @@ if($v->validate()) {
                                         <option value="Asia/Karachi" <?PHP if ($result['TIMEZONE'] == "Asia/Karachi") {echo "selected='selected'";} ?>>(UTC+05:00) Islamabad </option>
                                         <option value="Asia/Karachi" <?PHP if ($result['TIMEZONE'] == "Asia/Karachi") {echo "selected='selected'";} ?>>(UTC+05:00) Karachi </option>
                                         <option value="Asia/Tashkent" <?PHP if ($result['TIMEZONE'] == "Asia/Tashkent") {echo "selected='selected'";} ?>>(UTC+05:00) Tashkent </option>
-                                        <option value="Asia/Calcutta" <?PHP if ($result['TIMEZONE'] == "Asia/Calcutta") {echo "selected='selected'";} ?>>(UTC+05:30) Chennai </option>
+                                        <option value="Asia/Kolkata" <?PHP if ($result['TIMEZONE'] == "Asia/Kolkata") {echo "selected='selected'";} ?>>(UTC+05:30) Chennai </option>
                                         <option value="Asia/Kolkata" <?PHP if ($result['TIMEZONE'] == "Asia/Kolkata") {echo "selected='selected'";} ?>>(UTC+05:30) Kolkata </option>
-                                        <option value="Asia/Calcutta" <?PHP if ($result['TIMEZONE'] == "Asia/Calcutta") {echo "selected='selected'";} ?>>(UTC+05:30) Mumbai </option>
-                                        <option value="Asia/Calcutta" <?PHP if ($result['TIMEZONE'] == "Asia/Calcutta") {echo "selected='selected'";} ?>>(UTC+05:30) New Delhi </option>
-                                        <option value="Asia/Calcutta" <?PHP if ($result['TIMEZONE'] == "Asia/Calcutta") {echo "selected='selected'";} ?>>(UTC+05:30) Sri Jayawardenepura </option>
-                                        <option value="Asia/Katmandu" <?PHP if ($result['TIMEZONE'] == "Asia/Katmandu") {echo "selected='selected'";} ?>>(UTC+05:45) Kathmandu </option>
+                                        <option value="Asia/Kolkata" <?PHP if ($result['TIMEZONE'] == "Asia/Kolkata") {echo "selected='selected'";} ?>>(UTC+05:30) Mumbai </option>
+                                        <option value="Asia/Kolkata" <?PHP if ($result['TIMEZONE'] == "Asia/Kolkata") {echo "selected='selected'";} ?>>(UTC+05:30) New Delhi </option>
+                                        <option value="Asia/Kolkata" <?PHP if ($result['TIMEZONE'] == "Asia/Kolkata") {echo "selected='selected'";} ?>>(UTC+05:30) Sri Jayawardenepura </option>
+                                        <option value="Asia/Kathmandu" <?PHP if ($result['TIMEZONE'] == "Asia/Kathmandu") {echo "selected='selected'";} ?>>(UTC+05:45) Kathmandu </option>
                                         <option value="Asia/Almaty" <?PHP if ($result['TIMEZONE'] == "Asia/Almaty") {echo "selected='selected'";} ?>>(UTC+06:00) Almaty </option>
                                         <option value="Asia/Dhaka" <?PHP if ($result['TIMEZONE'] == "Asia/Dhaka") {echo "selected='selected'";} ?>>(UTC+06:00) Astana </option>
                                         <option value="Asia/Dhaka" <?PHP if ($result['TIMEZONE'] == "Asia/Dhaka") {echo "selected='selected'";} ?>>(UTC+06:00) Dhaka </option>
                                         <option value="Asia/Novosibirsk" <?PHP if ($result['TIMEZONE'] == "Asia/Novosibirsk") {echo "selected='selected'";} ?>>(UTC+06:00) Novosibirsk </option>
-                                        <option value="Asia/Rangoon" <?PHP if ($result['TIMEZONE'] == "Asia/Rangoon") {echo "selected='selected'";} ?>>(UTC+06:30) Rangoon </option>
+                                        <option value="Asia/Yangon" <?PHP if ($result['TIMEZONE'] == "Asia/Yangon") {echo "selected='selected'";} ?>>(UTC+06:30) Rangoon </option>
                                         <option value="Asia/Bangkok" <?PHP if ($result['TIMEZONE'] == "Asia/Bangkok") {echo "selected='selected'";} ?>>(UTC+07:00) Bangkok </option>
                                         <option value="Asia/Bangkok" <?PHP if ($result['TIMEZONE'] == "Asia/Bangkok") {echo "selected='selected'";} ?>>(UTC+07:00) Hanoi </option>
                                         <option value="Asia/Jakarta" <?PHP if ($result['TIMEZONE'] == "Asia/Jakarta") {echo "selected='selected'";} ?>>(UTC+07:00) Jakarta </option>
                                         <option value="Asia/Krasnoyarsk" <?PHP if ($result['TIMEZONE'] == "Asia/Krasnoyarsk") {echo "selected='selected'";} ?>>(UTC+07:00) Krasnoyarsk </option>
                                         <option value="Asia/Hong_Kong" <?PHP if ($result['TIMEZONE'] == "Asia/Hong_Kong") {echo "selected='selected'";} ?>>(UTC+08:00) Beijing </option>
-                                        <option value="Asia/Chongqing" <?PHP if ($result['TIMEZONE'] == "Asia/Chongqing") {echo "selected='selected'";} ?>>(UTC+08:00) Chongqing </option>
+                                        <option value="Asia/Shanghai" <?PHP if ($result['TIMEZONE'] == "Asia/Shanghai") {echo "selected='selected'";} ?>>(UTC+08:00) Chongqing </option>
                                         <option value="Asia/Hong_Kong" <?PHP if ($result['TIMEZONE'] == "Asia/Hong_Kong") {echo "selected='selected'";} ?>>(UTC+08:00) Hong Kong </option>
                                         <option value="Asia/Irkutsk" <?PHP if ($result['TIMEZONE'] == "Asia/Irkutsk") {echo "selected='selected'";} ?>>(UTC+08:00) Irkutsk </option>
                                         <option value="Asia/Kuala_Lumpur" <?PHP if ($result['TIMEZONE'] == "Asia/Kuala_Lumpur") {echo "selected='selected'";} ?>>(UTC+08:00) Kuala Lumpur </option>
@@ -369,7 +369,7 @@ if($v->validate()) {
                                         <option value="Australia/Perth" <?PHP if ($result['TIMEZONE'] == "Australia/Perth") {echo "selected='selected'";} ?>>(UTC+08:00) Perth </option>
                                         <option value="Asia/Singapore" <?PHP if ($result['TIMEZONE'] == "Asia/Singapore") {echo "selected='selected'";} ?>>(UTC+08:00) Singapore </option>
                                         <option value="Asia/Taipei" <?PHP if ($result['TIMEZONE'] == "Asia/Taipei") {echo "selected='selected'";} ?>>(UTC+08:00) Taipei </option>
-                                        <option value="Asia/Ulan_Bator" <?PHP if ($result['TIMEZONE'] == "Asia/Ulan_Bator") {echo "selected='selected'";} ?>>(UTC+08:00) Ulaan Bataar </option>
+                                        <option value="Asia/Ulaanbaatar" <?PHP if ($result['TIMEZONE'] == "Asia/Ulaanbaatar") {echo "selected='selected'";} ?>>(UTC+08:00) Ulaan Bataar </option>
                                         <option value="Asia/Urumqi" <?PHP if ($result['TIMEZONE'] == "Asia/Urumqi") {echo "selected='selected'";} ?>>(UTC+08:00) Urumqi </option>
                                         <option value="Asia/Tokyo" <?PHP if ($result['TIMEZONE'] == "Asia/Tokyo") {echo "selected='selected'";} ?>>(UTC+09:00) Osaka </option>
                                         <option value="Asia/Tokyo" <?PHP if ($result['TIMEZONE'] == "Asia/Tokyo") {echo "selected='selected'";} ?>>(UTC+09:00) Sapporo </option>

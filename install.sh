@@ -257,8 +257,9 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_30
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_31
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_32
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_33
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_34
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
-sudo echo 25 > /home/HiveControl/data/DBVERSION
+sudo echo 26 > /home/HiveControl/data/DBVERSION
 
 #Setup backup directory
 mkdir /home/HiveControl/data/backups
@@ -365,18 +366,22 @@ echo "Detected: $PI_MODEL"
 echo "OS Architecture: $OS_ARCH (64-bit: $IS_64BIT)"
 
 echo "------------------------"
-echo "Installing lgpio GPIO library"
+echo "Installing GPIO libraries"
 echo "------------------------"
 sudo apt install python3-lgpio -y
 
 # Install smbus2 and spidev for I2C/SPI support
 sudo pip3 install smbus2 spidev --break-system-packages 2>/dev/null || sudo pip3 install smbus2 spidev
 
-# Remove pigpio if present — lgpio replaces it on all Pi models
-sudo killall pigpiod 2>/dev/null || true
-sudo apt remove python3-pigpio -y 2>/dev/null || true
+if [ "$IS_64BIT" = true ] || [ "$PI_VERSION" -ge 5 ]; then
+    echo "64-bit OS or Pi 5+ — removing pigpio (incompatible)"
+    sudo killall pigpiod 2>/dev/null || true
+    sudo apt remove python3-pigpio -y 2>/dev/null || true
+else
+    echo "32-bit OS on Pi 4 or older — keeping pigpio alongside lgpio"
+fi
 
-echo "lgpio installation complete"
+echo "GPIO library installation complete"
 
 ####################################################################################
 # Compile architecture-specific binaries

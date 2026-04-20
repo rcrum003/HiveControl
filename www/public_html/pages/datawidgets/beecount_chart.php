@@ -115,6 +115,11 @@ $(function () {
         }],
         plotOptions: {
             line: {
+                marker: {
+                    enabled: true,
+                    radius: 2,
+                    symbol: 'circle'
+                },
                 dataLabels: {
                     enabled: false
                 },

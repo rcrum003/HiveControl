@@ -38,10 +38,8 @@ case "$cmd" in
             saveresult=$(/home/HiveControl/upgrade.sh)
             TEMPSAVE="/home/HiveControl/scripts/system/tempsave"
             echo $saveresult > $TEMPSAVE
-            result=$(cat $TEMPSAVE |tail -c 8)
-            #result=$(/home/HiveControl/scripts/system/foo.sh | tail -1)
             #Check to see if we ran
-            if [[ "$result" == "success" ]]; then
+            if grep -q "success" $TEMPSAVE; then
             	sqlite3 $DB "UPDATE msgqueue SET response='Successfully Updated HiveControl', status='complete' WHERE id=$cmdid;"
             else
             	sqlite3 $DB "UPDATE msgqueue SET response='$saveresult', status='error' WHERE id=$cmdid;"
