@@ -22,10 +22,8 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 TRYCOUNTER="1" 
 DATA_GOOD="0" 
 
-TMPFILE="/home/HiveControl/scripts/weather/wxunderground/temp.xml"
-
-#Remove old file
-rm -rf $TMPFILE
+TMPFILE=$(mktemp /tmp/getwxxml_XXXXXX.xml)
+trap 'rm -f "$TMPFILE"' EXIT
 
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
@@ -148,7 +146,7 @@ echo "		\"precip_today_metric\":\"$precip_today_metric\""
 echo " }"
 echo "}"
 
-rm -rf $TMPFILE
+rm -f "$TMPFILE"
 
 
 

@@ -48,8 +48,9 @@ function formatBytes($bytes, $precision = 2) {
 
 // Get command
 $command = test_input($_GET["command"] ?? "");
-$action = test_input($_GET["action"] ?? "");
-$filename = test_input($_GET["file"] ?? "");
+$action = test_input($_GET["action"] ?? $_POST["action"] ?? "");
+// SECURITY FIX: Read file param from POST for restore/delete (CSRF-protected), GET for download
+$filename = test_input($_POST["file"] ?? $_GET["file"] ?? "");
 
 #Get system time
 $shortName = exec('date +%Z');
@@ -135,10 +136,17 @@ if ($action == "create") {
 }
 
 if ($action == "restore" && !empty($filename)) {
+    // SECURITY FIX: Require CSRF token for restore action
+    require_csrf_token();
+
     $backup_path = $backup_dir . basename($filename);
 
-    if (!file_exists($backup_path)) {
-        $message = "Backup file not found: $filename";
+    // SECURITY FIX: Validate filename only contains safe characters
+    if (!preg_match('/^[a-zA-Z0-9_\-\.]+$/', basename($filename))) {
+        $message = "Invalid backup filename.";
+        $message_type = "danger";
+    } elseif (!file_exists($backup_path)) {
+        $message = "Backup file not found: " . htmlspecialchars($filename);
         $message_type = "danger";
     } else {
         try {
@@ -158,13 +166,27 @@ if ($action == "restore" && !empty($filename)) {
             if (pathinfo($filename, PATHINFO_EXTENSION) == 'db') {
                 // Full database restore
                 copy($backup_path, $db_path);
-                $message = "Database restored successfully from: $filename";
+                $message = "Database restored successfully from: " . htmlspecialchars($filename);
                 $message_type = "success";
             } elseif (pathinfo($filename, PATHINFO_EXTENSION) == 'sql') {
-                // SQL file restore (config only)
+                // SECURITY FIX: Validate SQL content before executing
+                // Only allow our known backup format (DELETE FROM hiveconfig + INSERT INTO hiveconfig)
                 $sql = file_get_contents($backup_path);
+                $sql_lines = array_filter(array_map('trim', explode("\n", $sql)), function($line) {
+                    return !empty($line) && strpos($line, '--') !== 0;
+                });
+                $safe = true;
+                foreach ($sql_lines as $line) {
+                    if (!preg_match('/^(DELETE FROM hiveconfig|INSERT INTO hiveconfig\s)/i', $line)) {
+                        $safe = false;
+                        break;
+                    }
+                }
+                if (!$safe) {
+                    throw new Exception("SQL backup file contains unexpected statements. Only hiveconfig backup files are supported.");
+                }
                 $conn->exec($sql);
-                $message = "Configuration restored successfully from: $filename";
+                $message = "Configuration restored successfully from: " . htmlspecialchars($filename);
                 $message_type = "success";
             }
 
@@ -175,7 +197,7 @@ if ($action == "restore" && !empty($filename)) {
 
         } catch (Exception $e) {
             loglocal($now, "RESTORE", "ERROR", "Restore failed: " . $e->getMessage() . " by IP $user_ip");
-            $message = "Restore failed: " . $e->getMessage();
+            $message = "Restore failed: " . htmlspecialchars($e->getMessage());
             $message_type = "danger";
 
             // Try to restore from safety backup
@@ -188,15 +210,18 @@ if ($action == "restore" && !empty($filename)) {
 }
 
 if ($action == "delete" && !empty($filename)) {
+    // SECURITY FIX: Require CSRF token for delete action
+    require_csrf_token();
+
     $backup_path = $backup_dir . basename($filename);
 
     if (file_exists($backup_path)) {
         unlink($backup_path);
         loglocal($now, "BACKUP", "INFO", "Backup deleted: $filename by IP $user_ip");
-        $message = "Backup deleted: $filename";
+        $message = "Backup deleted: " . htmlspecialchars($filename);
         $message_type = "info";
     } else {
-        $message = "Backup file not found: $filename";
+        $message = "Backup file not found: " . htmlspecialchars($filename);
         $message_type = "danger";
     }
 
@@ -487,6 +512,25 @@ $(document).ready(function() {
     }
 });
 
+// Hidden POST forms for CSRF-protected restore and delete actions
+document.addEventListener('DOMContentLoaded', function() {
+    var restoreForm = document.createElement('form');
+    restoreForm.id = 'restore-form';
+    restoreForm.method = 'POST';
+    restoreForm.action = '?action=restore';
+    restoreForm.style.display = 'none';
+    restoreForm.innerHTML = '<?php echo csrf_field(); ?><input type="hidden" name="file" value="">';
+    document.body.appendChild(restoreForm);
+
+    var deleteForm = document.createElement('form');
+    deleteForm.id = 'delete-form';
+    deleteForm.method = 'POST';
+    deleteForm.action = '?action=delete';
+    deleteForm.style.display = 'none';
+    deleteForm.innerHTML = '<?php echo csrf_field(); ?><input type="hidden" name="file" value="">';
+    document.body.appendChild(deleteForm);
+});
+
 // Update backup help text based on selection
 document.getElementById('backup-type-select').addEventListener('change', function() {
     var helpText = document.getElementById('backup-help');
@@ -497,15 +541,20 @@ document.getElementById('backup-type-select').addEventListener('change', functio
     }
 });
 
+// SECURITY FIX: Use POST forms with CSRF tokens instead of GET links
 function confirmRestore(filename) {
     if (confirm('Are you sure you want to restore from backup: ' + filename + '?\n\nThis will replace your current database. A safety backup will be created automatically.\n\nThis action cannot be easily undone.')) {
-        window.location.href = '?action=restore&file=' + encodeURIComponent(filename);
+        var form = document.getElementById('restore-form');
+        form.querySelector('input[name="file"]').value = filename;
+        form.submit();
     }
 }
 
 function confirmDelete(filename) {
     if (confirm('Are you sure you want to delete this backup?\n\nFilename: ' + filename + '\n\nThis action cannot be undone.')) {
-        window.location.href = '?action=delete&file=' + encodeURIComponent(filename) + '&tab=manage';
+        var form = document.getElementById('delete-form');
+        form.querySelector('input[name="file"]').value = filename;
+        form.submit();
     }
 }
 </script>

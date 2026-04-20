@@ -28,8 +28,11 @@ require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 #}
 
 
-$callback = (string)$_GET['callback'];
-if (!$callback) $callback = 'callback';
+// SECURITY FIX: Validate callback parameter to prevent XSS/JSONP injection
+$callback = isset($_GET['callback']) ? (string)$_GET['callback'] : 'callback';
+if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $callback)) {
+    $callback = 'callback';
+}
 
 
 #Check to see if the neccessary variables exist and are safe

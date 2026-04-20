@@ -364,7 +364,9 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 	cd /home/HiveControl/software
 	sudo mkdir DHTXXD
 	cd DHTXXD
-	sudo wget http://abyz.co.uk/rpi/pigpio/code/DHTXXD.zip
+	# SECURITY FIX: Use HTTPS to prevent man-in-the-middle attacks
+	# TODO: Verify checksum of downloaded archive before extracting
+	sudo wget https://abyz.co.uk/rpi/pigpio/code/DHTXXD.zip
 	unzip DHTXXD.zip
 	sudo gcc -Wall -pthread -o DHTXXD test_DHTXXD.c DHTXXD.c -lpigpiod_if2
 	sudo cp DHTXXD /usr/local/bin/

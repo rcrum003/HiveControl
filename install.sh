@@ -225,7 +225,17 @@ sudo chown www-data:www-data /home/HiveControl/data
 #Ensure www-data owns all of our public_html files
 sudo chown -R www-data:www-data /home/HiveControl/www/public_html/
 #Install Composer
-curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+# SECURITY FIX: Download installer first, verify checksum, then execute
+curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+EXPECTED_CHECKSUM="$(curl -sS https://composer.github.io/installer.sig)"
+ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', '/tmp/composer-setup.php');")"
+if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+    echo 'ERROR: Invalid installer checksum'
+    rm /tmp/composer-setup.php
+    exit 1
+fi
+sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+rm /tmp/composer-setup.php
 
 
 echo "========================================================================"

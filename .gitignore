@@ -1,3 +1,10 @@
 foo.sh
 TODO
 scripts/hiveconfig.inc
+data/
+*.db
+.htpasswd
+.env
+*.key
+*.pem
+vendor/

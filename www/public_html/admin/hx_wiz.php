@@ -102,7 +102,9 @@ switch ($step) {
 				<table width="100%">
                 <tr class="odd gradeX">';
 				echo "<td>Zero Value</td><td>$zero</td></tr>";
-				$testweight_val = shell_exec("/usr/bin/timeout 5 /usr/bin/sudo /usr/local/bin/hx711 $zero | tail -1");
+				// SECURITY FIX: Use escapeshellarg() to prevent command injection via $zero
+			$safe_zero = escapeshellarg($zero);
+			$testweight_val = shell_exec("/usr/bin/timeout 5 /usr/bin/sudo /usr/local/bin/hx711 $safe_zero | tail -1");
 				echo "<tr><td>Known Weight</td><td>$testweight</td></tr>";
 				echo "<tr><td>Value for Known Weight (we removed zero already):</td><td>$testweight_val</td></tr>";
 				echo "<tr><td>Solving for calibration value</td><td></td></tr>";

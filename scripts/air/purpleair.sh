@@ -50,8 +50,8 @@ JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
 #####################
 
 
-TEMPFILE="/home/HiveControl/scripts/air/output.json"
-#TEMPFILE="/home/pi/purpleair/output.json"
+TEMPFILE=$(mktemp /tmp/purpleair_XXXXXX.json)
+trap 'rm -f "$TEMPFILE"' EXIT
 
 #Get all sensors
 #https://www.purpleair.com/json 
@@ -116,7 +116,7 @@ fi
 #https://en.wikipedia.org/wiki/Air_quality_index
 
 #Remove tempfile
-rm -rf $TEMPFILE
+rm -f "$TEMPFILE"
 
 #Return output for main script
 

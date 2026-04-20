@@ -1,6 +1,8 @@
 <?PHP
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
+// SECURITY FIX: Include security-init for CSRF protection and security headers
+include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
 
@@ -47,36 +49,22 @@ switch ($command) {
 function loglocal($date, $program, $type, $message) {
   #Stores log entries locally
 # This script takes 4 inputs and puts them into the DB
-# 1 - Date - 
+# 1 - Date -
 # 2 - Program
 # 3 - Type (Error, Success, Warning)
 # 4 - Message (Optional)
 
         include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
-        $sth = $conn->prepare("insert into logs (date,program,type,message) values (\"$date\",\"$program\",\"$type\",\"$message\")");
-        $sth->execute();
+        // SECURITY FIX: Use parameterized query to prevent SQL injection
+        $sth = $conn->prepare("INSERT INTO logs (date,program,type,message) VALUES (?,?,?,?)");
+        $sth->execute([$date, $program, $type, $message]);
 }
 
 function getUserIP()
 {
-    $client  = @$_SERVER['HTTP_CLIENT_IP'];
-    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
-    $remote  = $_SERVER['REMOTE_ADDR'];
-
-    if(filter_var($client, FILTER_VALIDATE_IP))
-    {
-        $ip = $client;
-    }
-    elseif(filter_var($forward, FILTER_VALIDATE_IP))
-    {
-        $ip = $forward;
-    }
-    else
-    {
-        $ip = $remote;
-    }
-
-    return $ip;
+    // SECURITY: Only trust REMOTE_ADDR to prevent IP spoofing
+    // HTTP_CLIENT_IP and HTTP_X_FORWARDED_FOR can be easily forged by attackers
+    return $_SERVER['REMOTE_ADDR'];
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
@@ -124,10 +112,11 @@ $result = $sth->fetchall(PDO::FETCH_ASSOC);
                                     </thead>
                                     <tbody>
                                     <?PHP foreach($result as $r){
-                                        echo '<tr><td>'.$r['date'].'</td>';
-                                        echo '<td>'.$r['program'].'</td>';
-                                        echo '<td>'.$r['type'].'</td>';
-                                        echo '<td>'.$r['message'].'</td></tr>';
+                                        // SECURITY FIX: Escape output to prevent stored XSS
+                                        echo '<tr><td>'.htmlspecialchars($r['date']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['program']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['type']).'</td>';
+                                        echo '<td>'.htmlspecialchars($r['message']).'</td></tr>';
                                     }
                                     ?>
                                     </tbody>

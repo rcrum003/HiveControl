@@ -33,8 +33,9 @@ if(isset($_GET["id"])) {
             $id = test_input($_GET["id"]);
             // Not empty, so let's check it's input and run switch
 
-        	$sth = $conn->prepare("SELECT * FROM msgqueue WHERE id=$id");
-            $sth->execute();
+        	// SECURITY FIX: Use parameterized query to prevent SQL injection
+        	$sth = $conn->prepare("SELECT * FROM msgqueue WHERE id=?");
+            $sth->execute([$id]);
             $result = $sth->fetch(PDO::FETCH_ASSOC);
             $status = $result['status'];
             $message = $result['message'];
