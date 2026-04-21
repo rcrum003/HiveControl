@@ -1,6 +1,48 @@
 Release Notes:
 
 --------------------
+2.17 Release
+--------------------
+SETUP WIZARD IMPROVEMENTS:
+- Geocoding & Interactive Map in Setup Wizard Step 1
+  * Type city/state and click "Look Up" to auto-fill latitude/longitude
+  * Leaflet.js + OpenStreetMap interactive map shows pin at geocoded location
+  * Drag pin to fine-tune coordinates — lat/lon fields update automatically
+  * Server-side geocoding proxy (geocode.php) handles Nominatim API calls
+    (avoids CORS issues and works without PHP curl module)
+  * Custom yellow circle marker matching HiveControl theme
+
+- AirNow as Standalone Air Quality Source (Setup Wizard Step 7)
+  * Users without PurpleAir can get PM2.5 and PM10 AQI from nearest EPA monitor
+  * Configurable: enable/disable, API key, search distance (miles)
+  * Test button validates API key and displays nearest monitor data
+
+DASHBOARD IMPROVEMENTS:
+- EPA PM2.5 AQI and PM10 AQI backup series on Air Quality chart
+  * Falls back to EPA data when PurpleAir data is unavailable
+  * EPA series shown alongside PurpleAir data for cross-validation
+
+- Alert Banner Alignment Fix
+  * Alert banner now properly centered in wide layout mode using Bootstrap
+    row/col wrapper
+
+BUG FIXES:
+- Fixed alert_engine.php crash on pre-2.16 databases
+  * Changed specific column SELECT to SELECT * for backward compatibility
+  * Added isset() guards for air quality threshold config fields
+  * Wrapped EPA table query in try-catch for databases without airquality_epa
+  * Prevents "no such column" PDOException on hives upgrading from pre-2.16
+
+- Fixed sudoers installation to use /etc/sudoers.d/ drop-in approach
+  * install.sh and upgrade.sh no longer modify /etc/sudoers directly
+  * Eliminates "too many levels of includes" recursive inclusion error
+  * Drop-in validated with visudo -c before activation
+
+- Fixed install.sh interactive prompt not pausing
+  * dpkg-reconfigure tzdata was corrupting stdin for subsequent select/read
+  * Bee counter prompt and reboot prompt now use < /dev/tty for clean input
+
+--------------------
 2.16 Release
 --------------------
 NEW FEATURES:
