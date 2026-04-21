@@ -1,0 +1,18 @@
+-- Per-provider API key storage: switching providers no longer loses keys
+
+ALTER TABLE hiveconfig ADD COLUMN KEY_OPENWEATHERMAP TEXT DEFAULT '';
+ALTER TABLE hiveconfig ADD COLUMN KEY_WEATHERAPI TEXT DEFAULT '';
+ALTER TABLE hiveconfig ADD COLUMN KEY_VISUALCROSSING TEXT DEFAULT '';
+ALTER TABLE hiveconfig ADD COLUMN KEY_PIRATEWEATHER TEXT DEFAULT '';
+
+-- Migrate existing KEY to the correct provider-specific column
+UPDATE hiveconfig SET KEY_OPENWEATHERMAP = KEY WHERE WEATHER_LEVEL = 'openweathermap' AND KEY != '';
+UPDATE hiveconfig SET KEY_WEATHERAPI = KEY WHERE WEATHER_LEVEL = 'weatherapi' AND KEY != '';
+UPDATE hiveconfig SET KEY_VISUALCROSSING = KEY WHERE WEATHER_LEVEL = 'visualcrossing' AND KEY != '';
+UPDATE hiveconfig SET KEY_PIRATEWEATHER = KEY WHERE WEATHER_LEVEL = 'pirateweather' AND KEY != '';
+
+-- Also migrate if the provider is used as a fallback
+UPDATE hiveconfig SET KEY_OPENWEATHERMAP = KEY WHERE KEY_OPENWEATHERMAP = '' AND WEATHER_FALLBACK = 'openweathermap' AND KEY != '';
+UPDATE hiveconfig SET KEY_WEATHERAPI = KEY WHERE KEY_WEATHERAPI = '' AND WEATHER_FALLBACK = 'weatherapi' AND KEY != '';
+UPDATE hiveconfig SET KEY_VISUALCROSSING = KEY WHERE KEY_VISUALCROSSING = '' AND WEATHER_FALLBACK = 'visualcrossing' AND KEY != '';
+UPDATE hiveconfig SET KEY_PIRATEWEATHER = KEY WHERE KEY_PIRATEWEATHER = '' AND WEATHER_FALLBACK = 'pirateweather' AND KEY != '';

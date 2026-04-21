@@ -1,12 +1,13 @@
-/*
- Highcharts JS v4.2.3 (2016-02-08)
- Plugin for displaying a message when there is no data visible in chart.
-
- (c) 2010-2016 Highsoft AS
- Author: Oystein Moseng
-
- License: www.highcharts.com/license
-*/
-(function(a){typeof module==="object"&&module.exports?module.exports=a:a(Highcharts)})(function(a){function h(){return!!this.points.length}function d(){this.hasData()?this.hideNoData():this.showNoData()}var e=a.seriesTypes,c=a.Chart.prototype,f=a.getOptions(),g=a.extend,i=a.each;g(f.lang,{noData:"No data to display"});f.noData={position:{x:0,y:0,align:"center",verticalAlign:"middle"},attr:{},style:{fontWeight:"bold",fontSize:"12px",color:"#60606a"}};i(["pie","gauge","waterfall","bubble"],function(b){if(e[b])e[b].prototype.hasData=
-h});a.Series.prototype.hasData=function(){return this.visible&&this.dataMax!==void 0&&this.dataMin!==void 0};c.showNoData=function(b){var a=this.options,b=b||a.lang.noData,a=a.noData;if(!this.noDataLabel)this.noDataLabel=this.renderer.label(b,0,0,null,null,null,a.useHTML,null,"no-data").attr(a.attr).css(a.style).add(),this.noDataLabel.align(g(this.noDataLabel.getBBox(),a.position),!1,"plotBox")};c.hideNoData=function(){if(this.noDataLabel)this.noDataLabel=this.noDataLabel.destroy()};c.hasData=function(){for(var a=
-this.series,c=a.length;c--;)if(a[c].hasData()&&!a[c].options.isInternal)return!0;return!1};c.callbacks.push(function(b){a.addEvent(b,"load",d);a.addEvent(b,"redraw",d)})});
+!/**
+ * Highcharts JS v12.6.0 (2026-04-13)
+ * @module highcharts/modules/no-data-to-display
+ * @requires highcharts
+ *
+ * Plugin for displaying a message when there is no data visible in chart.
+ *
+ * (c) 2010-2026 Highsoft AS
+ * Author: Øystein Moseng
+ *
+ * A commercial license may be required depending on use.
+ * See www.highcharts.com/license
+ */function(t,e){"object"==typeof exports&&"object"==typeof module?module.exports=e(t._Highcharts,t._Highcharts.AST):"function"==typeof define&&define.amd?define("highcharts/modules/no-data-to-display",["highcharts/highcharts"],function(t){return e(t,t.AST)}):"object"==typeof exports?exports["highcharts/modules/no-data-to-display"]=e(t._Highcharts,t._Highcharts.AST):t.Highcharts=e(t.Highcharts,t.Highcharts.AST)}("u"<typeof window?this:window,(t,e)=>(()=>{"use strict";var o={660:t=>{t.exports=e},944:e=>{e.exports=t}},r={};function a(t){var e=r[t];if(void 0!==e)return e.exports;var n=r[t]={exports:{}};return o[t](n,n.exports,a),n.exports}a.n=t=>{var e=t&&t.__esModule?()=>t.default:()=>t;return a.d(e,{a:e}),e},a.d=(t,e)=>{for(var o in e)a.o(e,o)&&!a.o(t,o)&&Object.defineProperty(t,o,{enumerable:!0,get:e[o]})},a.o=(t,e)=>Object.prototype.hasOwnProperty.call(t,e);var n={};a.d(n,{default:()=>x});var i=a(944),s=a.n(i),l=a(660),c=a.n(l);let h={lang:{noData:"No data to display"},noData:{attr:{zIndex:1},position:{x:0,y:0,align:"center",verticalAlign:"middle"},style:{fontWeight:"bold",fontSize:"0.8em",color:"#666666"}}},{doc:d,win:p}=s();function u(t){return f(t)&&"number"==typeof t.nodeType}function f(t,e){let o;return!!t&&"object"==typeof t&&(!e||"[object Array]"!==(o=Object.prototype.toString.call(t))&&"[object Array Iterator]"!==o)}Array.prototype.find;function y(){let t=this.series||[],e=t.length;for(;e--;)if(t[e].hasData()&&!t[e].options.isInternal)return!0;return this.loadingShown}function b(){this.noDataLabel&&(this.noDataLabel=this.noDataLabel.destroy())}function g(t){let e=this.options,o=t||e&&e.lang.noData||"",r=e&&(e.noData||{});this.renderer&&(this.noDataLabel||(this.noDataLabel=this.renderer.label(o,0,0,void 0,void 0,void 0,r.useHTML,void 0,"no-data").add()),this.styledMode||this.noDataLabel.attr(c().filterUserAttributes(r.attr||{})).css(r.style||{}),this.noDataLabel.align(function(t,e){let o;for(o in t||(t={}),e)t[o]=e[o];return t}(this.noDataLabel.getBBox(),r.position||{}),!1,"plotBox"))}function v(){this.hasData()?this.hideNoData():this.showNoData()}let D=s();({compose:function(t,e){let o=t.prototype;o.showNoData||(o.hasData=y,o.hideNoData=b,o.showNoData=g,function(t,e,o,r={}){let a="function"==typeof t&&t.prototype||t;Object.hasOwnProperty.call(a,"hcEvents")||(a.hcEvents={});let n=a.hcEvents;s().Point&&t instanceof s().Point&&t.series&&t.series.chart&&(t.series.chart.runTrackerClick=!0);let i=t.addEventListener;i&&i.call(t,e,o,!!s().supportsPassiveEvents&&{passive:void 0===r.passive?-1!==e.indexOf("touch"):r.passive,capture:!1}),n[e]||(n[e]=[]);let l={fn:o,order:"number"==typeof r.order?r.order:1/0};n[e].push(l),n[e].sort((t,e)=>t.order-e.order)}(t,"render",v),function(t,...e){let o,r=[t,...e],a={},n=function(t,e){return"object"!=typeof t&&(t={}),function(t,e,o){for(let o in t)Object.hasOwnProperty.call(t,o)&&e.call((0,t[o]),t[o],o,t)}(e,function(o,r){if("__proto__"!==r&&"constructor"!==r){let a;!f(o,!0)||(a=o?.constructor,f(o,!0)&&!u(o)&&a?.name&&"Object"!==a.name)||u(o)?t[r]=e[r]:t[r]=n(t[r]||{},o)}}),t};!0===t&&(a=r[1],r=Array.prototype.slice.call(r,2));let i=r.length;for(o=0;o<i;o++)a=n(a,r[o])}(!0,e,h))}}).compose(D.Chart,D.defaultOptions);let x=s();return n.default})());

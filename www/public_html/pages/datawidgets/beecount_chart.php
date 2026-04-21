@@ -52,16 +52,14 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
         chart: {
             zoomType: 'xy'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -74,15 +72,8 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-    yAxis: [{ // In yAxis
+        yAxis: [{
             labels: {
                 format: '{value}',
                 style: {
@@ -94,8 +85,9 @@ $(function () {
                 style: {
                     color: '"; echo "$color_beecount_in"; echo "'
                 }
-            }
-        }, { // Rain yAxis
+            },
+            minRange: 20
+        }, {
             gridLineWidth: 1,
             title: {
                 text: 'Rain',
@@ -104,14 +96,13 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
             },
             showEmpty: false,
             opposite: true
-
         }],
         plotOptions: {
             line: {
@@ -129,23 +120,31 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/beecount.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [{
             type: 'line',
             name: 'Bees In',
             yAxis: 0,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['IN_COUNT']) && $r['IN_COUNT'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['IN_COUNT'])."], ";
                 } else {
@@ -160,7 +159,6 @@ $(function () {
             name: 'Bees Out',
             yAxis: 0,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['OUT_COUNT']) && $r['OUT_COUNT'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['OUT_COUNT'])."], ";
                 } else {
@@ -175,7 +173,6 @@ $(function () {
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['precip_1hr_in'])."], ";
                 } else {
@@ -186,16 +183,7 @@ $(function () {
             visible: "; echo "$trend_rain"; echo "
         }
         ]
-        });
-
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/beecount.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
-    
+    });
 });
 </script>";
 

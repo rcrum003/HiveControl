@@ -1,0 +1,22 @@
+-- Weather reliability improvements: cascading fallback, health tracking, staleness config
+
+-- Second fallback weather source
+ALTER TABLE hiveconfig ADD COLUMN WEATHER_FALLBACK_2 TEXT DEFAULT '';
+
+-- Max observation age before triggering fallback (minutes)
+ALTER TABLE hiveconfig ADD COLUMN WX_MAX_STALE_MINUTES INTEGER DEFAULT 120;
+
+-- Weather provider health tracking
+CREATE TABLE IF NOT EXISTS weather_health (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    provider TEXT NOT NULL,
+    role TEXT NOT NULL,
+    success INTEGER NOT NULL,
+    response_ms INTEGER,
+    error_reason TEXT,
+    observation_age_minutes INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_weather_health_ts ON weather_health(timestamp);
+CREATE INDEX IF NOT EXISTS idx_weather_health_provider ON weather_health(provider);

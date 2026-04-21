@@ -11,10 +11,40 @@ $result2 = $sth2->fetch(PDO::FETCH_ASSOC);
 
 $theme = $result2['www_chart_theme'];
 
-if (!empty($theme)) {
-    #Theme is set, so set it
-echo "<script src='/js/highcharts/themes/";echo $theme; echo ".js'></script>";    
+if (!empty($theme) && preg_match('/^[a-zA-Z0-9_-]+$/', $theme)) {
+    echo "<script src='/js/highcharts/themes/" . htmlspecialchars($theme, ENT_QUOTES) . ".js'></script>";
 }
+
+echo "<script>
+Highcharts.setOptions({
+    chart: {
+        style: {
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontSize: '16px'
+        }
+    },
+    title: {
+        style: { fontSize: '20px' }
+    },
+    subtitle: {
+        style: { fontSize: '16px' }
+    },
+    xAxis: {
+        labels: { style: { fontSize: '14px' } },
+        title: { style: { fontSize: '15px' } }
+    },
+    yAxis: {
+        labels: { style: { fontSize: '14px' } },
+        title: { style: { fontSize: '15px' } }
+    },
+    legend: {
+        itemStyle: { fontSize: '15px' }
+    },
+    tooltip: {
+        style: { fontSize: '15px' }
+    }
+});
+</script>";
 
 #Set default colors, since every chart pulls from this file
 

@@ -1,6 +1,93 @@
 Release Notes:
 
 --------------------
+2.15 Release
+--------------------
+NEW FEATURES:
+- Modern Pollen Data Provider Chain
+  * Complete rewrite of getpollen.sh (v2.0) replacing 2016-era web scraping
+  * Primary provider: pollen.com API (US/ZIP-based, returns 0-12 index)
+  * Fallback #1: Tomorrow.io (global, requires API key, 0-5 scale mapped to 0-12)
+  * Fallback #2: Open-Meteo Air Quality (Europe only, species-based pollen counts)
+  * Fallback #3: Ambee (global, requires API key)
+  * Automatic backfill: fills gaps from pollen.com historical and Open-Meteo
+  * Health logging to weather_health table for provider diagnostics
+  * Old claritin-based scripts archived to deprecated/ directory
+
+- Pollen API Key Management
+  * Added Tomorrow.io (KEY_TOMORROW) and Ambee (KEY_AMBEE) API key fields
+  * Configurable via Instruments admin page under new "Pollen Data" section
+  * Keys synced to hivecontrol.org via cloud sync (hiveconfig.sh)
+
+DASHBOARD IMPROVEMENTS:
+- Added Pollen Card to Dashboard
+  * New 5th card in top row showing current pollen level (0-12 scale)
+  * Dynamic color coding: green (low), gold (moderate), red (high)
+  * Shows pollen severity label and predominant pollen types
+  * Custom pollen.png icon
+  * Custom col-lg-fifth CSS class for 5-column equal-width layout
+
+BUG FIXES:
+- Fixed pollen chart series in gdd_chart.php rendering GDD data instead of
+  pollen data (was iterating $result instead of $result3)
+- Fixed pollen axis labels showing pressure units (mb/in) instead of plain values
+- Fixed XSS vulnerability in 9 chart popup calls across 7 chart widget files
+  (beecount_chart, temp_chart, weight_chart, air_chart, light_chart,
+  all_chart, gdd_chart) — all now use htmlspecialchars()
+
+DATABASE CHANGES:
+- DB_PATCH_38: Added KEY_TOMORROW and KEY_AMBEE columns to hiveconfig table
+  (DB version 29 -> 30)
+
+--------------------
+2.14 Release
+--------------------
+NEW FEATURES:
+- Weather Reliability System
+  * Cascading fallback with per-provider health tracking
+  * weather_health table logs success/failure per provider per day
+  * Providers automatically deprioritized after repeated failures
+  * Configurable per-provider API keys (KEY_OPENWEATHERMAP, KEY_WEATHERAPI,
+    KEY_VISUALCROSSING, KEY_WEATHERFLOW)
+
+- GDD (Growing Degree Days) Refactoring
+  * Improved calculation accuracy and data pipeline
+  * Better seasonal accumulation tracking
+
+- Alert System
+  * Hive alert engine detects high/low temperature, robbing, swarming,
+    and honey flow conditions
+  * Alert banner on dashboard shows active alerts with severity levels
+  * Dashboard cards change color based on alert state (temp card turns
+    red/yellow, weight card turns red for robbing, green for honey flow)
+  * 1-hour trend deltas shown on temperature and humidity cards
+
+- Setup Wizard
+  * New first-run setup wizard guides users through initial configuration
+  * Dashboard auto-redirects to wizard if hive name/location not configured
+  * Streamlined onboarding for new installations
+
+- Split/Combined Chart View
+  * Dashboard charts can be viewed as 3 focused panels (Climate, Weight,
+    Environment) or 1 combined all-in-one chart
+  * View preference saved to localStorage
+  * Toggle buttons in chart toolbar
+
+DASHBOARD IMPROVEMENTS:
+- Added trend indicators (arrows) on temperature and humidity cards
+  showing 1-hour rate of change
+- Weight card shows trend text (Rapid loss, Possible swarm, Honey flow)
+- Alert-aware card coloring reflects current hive conditions
+
+DATABASE CHANGES:
+- DB_PATCH_35: Alert system tables
+- DB_PATCH_36: Weather health tracking (weather_health table, cascading
+  fallback columns)
+- DB_PATCH_37: Per-provider API key columns (KEY_OPENWEATHERMAP,
+  KEY_WEATHERAPI, KEY_VISUALCROSSING, KEY_WEATHERFLOW)
+  (DB version 26 -> 29)
+
+--------------------
 2.13 Release
 --------------------
 NEW FEATURES:

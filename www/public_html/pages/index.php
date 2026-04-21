@@ -75,7 +75,9 @@ header("Refresh: $sec; url=$page");
 
 
 <?php include "datawidgets/currentconditions.php"; ?>
-        
+
+<?php include "datawidgets/alert_banner.php"; ?>
+
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Dashboard - <?PHP echo "$recorddate"; ?></h1>
@@ -85,8 +87,8 @@ header("Refresh: $sec; url=$page");
             <!-- /.row -->
             <!-- Top Row -->
             <div class="row">
-                <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-green">
+                <div class="col-lg-fifth col-md-6">
+                    <div class="panel panel-<?php echo $temp_card_class; ?>">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
@@ -94,25 +96,25 @@ header("Refresh: $sec; url=$page");
                                 </div>
                                 <div class="col-xs-9 text-right">
                                     <div class="h4">
-                                    <?php 
-                                    
+                                    <?php
+
                                     if ($hivetempf == "null" ) {
-                                        $hivetempf="NA"; 
+                                        $hivetempf="NA";
                                     }
                                     echo "$hivetempf ";
 
                                     if ($SHOW_METRIC == "on") {
-                                        echo " C"; $i = "C"; 
-                                        } 
-                                    else { 
+                                        echo " C"; $i = "C";
+                                        }
+                                    else {
                                          echo "F"; $i = "F";
-                                     } 
+                                     }
                                 if ($wxtempf == "null" ) {
-                                        $wxtempf="NA"; 
+                                        $wxtempf="NA";
                                     }
-                                        echo " / "."$wxtempf"." $i"; 
+                                        echo " / "."$wxtempf"." $i";
                                         ?> </div>
-                                    <div>Temp - Hive / Ambient</div>
+                                    <div>Temp - Hive / Ambient<?php if (!empty($temp_delta)) { echo " <small>({$temp_delta}&deg;/hr)</small>"; } ?></div>
                                 </div>
                             </div>
                         </div>
@@ -125,17 +127,17 @@ header("Refresh: $sec; url=$page");
                         </a>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-hiveyellow">
+                <div class="col-lg-fifth col-md-6">
+                    <div class="panel panel-<?php echo $weight_card_class; ?>">
                         <div class="panel-heading">
                             <div class="row">
                                 <div class="col-xs-3">
                                      <img src="/images/scalesm.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-            
+
                                     <div class="h4"><?php echo "$hiveweight "; if ($SHOW_METRIC == "on") { echo " kg"; $i = "kg"; } else {echo "lb"; $i = "lb";} echo " / "."$changeweight"." $i"; ?> </div>
-                                    <div>Weight / Trend </div>
+                                    <div>Weight / Trend<?php if (!empty($weight_trend_text)) { echo " <small>({$weight_trend_text})</small>"; } ?></div>
                                 </div>
                             </div>
                         </div>
@@ -148,7 +150,7 @@ header("Refresh: $sec; url=$page");
                         </a>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-fifth col-md-6">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
                             <div class="row">
@@ -156,16 +158,16 @@ header("Refresh: $sec; url=$page");
                                      <img src="../images/hum.png" width="75" height="75">
                                 </div>
                                 <div class="col-xs-9 text-right">
-                                    <div class="h4"><?php 
+                                    <div class="h4"><?php
                                     if ($hivehumi == "null" ) {
-                                        $hivehumi="NA"; 
+                                        $hivehumi="NA";
                                     }
                                     if ($wxhumi == "null" ) {
-                                        $wxhumi="NA"; 
+                                        $wxhumi="NA";
                                     }
 
                                     echo "$hivehumi"." / "."$wxhumi"; ?>%</div>
-                                    <div>Humidity - Hive / Ambient</div>
+                                    <div>Humidity - Hive / Ambient<?php if (!empty($hum_delta)) { echo " <small>({$hum_delta}/hr)</small>"; } ?></div>
                                 </div>
                             </div>
                         </div>
@@ -178,7 +180,7 @@ header("Refresh: $sec; url=$page");
                         </a>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-fifth col-md-6">
                     <div class="panel panel-hivebrown">
                         <div class="panel-heading">
                             <div class="row">
@@ -200,6 +202,28 @@ header("Refresh: $sec; url=$page");
                         </a>
                     </div>
                 </div>
+                <div class="col-lg-fifth col-md-6">
+                    <div class="panel panel-<?php echo $pollen_card_class; ?>">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <img src="../images/pollen.png" width="75" height="75">
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="h4"><?php echo "$pollenlevel / 12"; ?></div>
+                                    <div>Pollen - <?php echo htmlspecialchars($pollen_label); ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="/pages/gdd.php?chart=line&period=week">
+                            <div class="panel-footer">
+                                <span class="pull-left"><?php echo htmlspecialchars($pollentypes); ?></span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
             </div>
             <!-- /.Top Row -->
             <!-- New Row 1 -->
@@ -213,13 +237,18 @@ header("Refresh: $sec; url=$page");
             <a href="/pages/index.php?period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
             <a href="/pages/index.php?period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
             <a href="/pages/index.php?period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
+
+            <span style="margin-left: 20px;">
+                <button type="button" class="btn btn-sm btn-info" id="btn-split-view" onclick="toggleChartView('split')">Split View</button>
+                <button type="button" class="btn btn-sm btn-default" id="btn-combined-view" onclick="toggleChartView('combined')">Combined View</button>
+            </span>
             <br>
                 </div>
                 <!-- /.col-lg-12 -->
                         </div>
             <div class="row">
-            
-            <?PHP 
+
+            <?PHP
             if ($SITE_TYPE == "normal") {
                 echo '<div class="col-lg-8">';
             }
@@ -227,14 +256,47 @@ header("Refresh: $sec; url=$page");
                 echo '<div class="col-lg-12">';
             }
             ?>
+
+                <!-- Split View: 3 Focused Charts -->
+                <div id="split-view">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Hive Charts 
+                            Hive Climate
+                        </div>
+                        <div class="panel-body">
+                            <div class="pull-center" id="climatecontainer"></div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Weight & Stores
+                        </div>
+                        <div class="panel-body">
+                            <div class="pull-center" id="weightcontainer"></div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Environment & Foraging
+                        </div>
+                        <div class="panel-body">
+                            <div class="pull-center" id="envcontainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combined View: Original All-in-One Chart -->
+                <div id="combined-view" style="display:none;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Hive Charts
                         </div>
                         <div class="panel-body">
                             <div class="pull-center" id="allcontainer"></div>
                         </div>
                     </div>
+                </div>
+
                 </div>
                 <!-- /.col-lg-6 -->
             <?PHP 
@@ -305,19 +367,46 @@ header("Refresh: $sec; url=$page");
 
     
     <script src="/js/highcharts/highcharts.js"></script>
+    <script src="/js/highcharts/highcharts-more.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
 
   <!-- Full Screen Popups -->
     <script src="/js/popup.js"></script>    
 
-  <?php 
+  <?php
 
-  
-  include "datawidgets/all_chart.php"; 
+  include "datawidgets/climate_chart.php";
+  include "datawidgets/weight_overview_chart.php";
+  include "datawidgets/environment_chart.php";
+  include "datawidgets/all_chart.php";
 
-  include "datawidgets/weightguage-hc.php"; 
+  include "datawidgets/weightguage-hc.php";
 
-  ?> 
+  ?>
+
+  <script>
+  function toggleChartView(view) {
+      if (view === 'split') {
+          document.getElementById('split-view').style.display = 'block';
+          document.getElementById('combined-view').style.display = 'none';
+          document.getElementById('btn-split-view').className = 'btn btn-sm btn-info';
+          document.getElementById('btn-combined-view').className = 'btn btn-sm btn-default';
+          localStorage.setItem('hc_chart_view', 'split');
+      } else {
+          document.getElementById('split-view').style.display = 'none';
+          document.getElementById('combined-view').style.display = 'block';
+          document.getElementById('btn-split-view').className = 'btn btn-sm btn-default';
+          document.getElementById('btn-combined-view').className = 'btn btn-sm btn-info';
+          localStorage.setItem('hc_chart_view', 'combined');
+      }
+  }
+  (function() {
+      var saved = localStorage.getItem('hc_chart_view');
+      if (saved === 'combined') {
+          toggleChartView('combined');
+      }
+  })();
+  </script>
   
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>

@@ -1,0 +1,4 @@
+-- Pollen fallback provider API keys
+
+ALTER TABLE hiveconfig ADD COLUMN KEY_TOMORROW TEXT DEFAULT '';
+ALTER TABLE hiveconfig ADD COLUMN KEY_AMBEE TEXT DEFAULT '';

@@ -117,6 +117,7 @@ if(isset($_GET["chart"])) {
 
     <!-- High Charts -->
     <script src="/js/highcharts/highcharts.js"></script>
+    <script src="/js/highcharts/highcharts-more.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
     
 

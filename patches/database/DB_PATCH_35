@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS hive_alerts (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    alert_type      TEXT NOT NULL,
+    severity        TEXT NOT NULL,
+    message         TEXT NOT NULL,
+    sensor_value    REAL,
+    threshold_value REAL,
+    triggered_at    TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    dismissed       INTEGER NOT NULL DEFAULT 0
+);
+
+ALTER TABLE hiveconfig ADD COLUMN alert_weight_loss_threshold REAL DEFAULT 1.0;
+ALTER TABLE hiveconfig ADD COLUMN alert_weight_loss_hours INTEGER DEFAULT 6;
+ALTER TABLE hiveconfig ADD COLUMN alert_swarm_threshold REAL DEFAULT 3.0;
+ALTER TABLE hiveconfig ADD COLUMN alert_high_temp REAL DEFAULT 100.0;
+ALTER TABLE hiveconfig ADD COLUMN alert_low_temp REAL DEFAULT 40.0;
+ALTER TABLE hiveconfig ADD COLUMN alert_stale_minutes INTEGER DEFAULT 30;
+ALTER TABLE hiveconfig ADD COLUMN alert_flow_daily_gain REAL DEFAULT 0.5;
+ALTER TABLE hiveconfig ADD COLUMN alert_flow_days INTEGER DEFAULT 3;
+ALTER TABLE hiveconfig ADD COLUMN alerts_enabled TEXT DEFAULT 'on';

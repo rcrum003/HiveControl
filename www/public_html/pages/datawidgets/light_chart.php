@@ -49,12 +49,12 @@ echo "
 <!-- Chart Code -->
 <script>
 $(function () {
-    $('#lightcontainer').highcharts({
+    Highcharts.chart('lightcontainer', {
         chart: {
             zoomType: 'xy'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -67,16 +67,9 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-    yAxis: [
-        { // Solarradiation yAxis
+        yAxis: [
+        {
             gridLineWidth: 0,
             title: {
                 text: 'Solar',
@@ -90,10 +83,10 @@ $(function () {
                     color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
+            minRange: 100,
             opposite: false
-
         },
-        { // Lux yAxis
+        {
             gridLineWidth: 0,
             title: {
                 text: 'Lux',
@@ -107,8 +100,8 @@ $(function () {
                     color: '"; echo "$color_lux"; echo "'
                 }
             },
+            minRange: 100,
             opposite: true
-
         }
         ],
         plotOptions: {
@@ -127,16 +120,25 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/light.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [
         {
@@ -144,7 +146,6 @@ $(function () {
             name: 'Solar (wm/2)',
             yAxis: 0,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['solarradiation']) && $r['solarradiation'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['solarradiation'])."], ";
                 } else {
@@ -159,7 +160,6 @@ $(function () {
             name: 'Lux (lx)',
             yAxis: 1,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['lux']) && $r['lux'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['lux'])."], ";
                 } else {
@@ -171,14 +171,6 @@ $(function () {
         }
         ]
     });
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/light.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
-
 });
 </script>";
 

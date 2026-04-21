@@ -194,8 +194,6 @@ if(isset($_GET["chart"])) {
     <script src="/js/highcharts/highcharts.js"></script>
     <script src="/js/highcharts/highcharts-more.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/stock/highstock.js"></script>
-    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>    
 
     
     <!-- Full Screen Popups -->

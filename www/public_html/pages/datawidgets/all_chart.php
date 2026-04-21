@@ -1,6 +1,7 @@
 
 
 
+
 <!-- Chart Code -->
 
 
@@ -11,31 +12,33 @@
 switch ($period) {
     case "today":
         $sqlperiod = "start of day";
+        $gdd_sqlperiod = "-7 days";
         $groupby="";
         break;
     case "day":
         $sqlperiod = "-24 hours";
+        $gdd_sqlperiod = "-7 days";
         break;
     case "week":
         $sqlperiod = "-7 days";
+        $gdd_sqlperiod = "-7 days";
         break;
     case "month":
         $sqlperiod = "-1 months";
+        $gdd_sqlperiod = "-1 months";
         break;
     case "year":
         $sqlperiod =  "-1 years";
+        $gdd_sqlperiod = "-1 years";
         break;
     case "all":
         $sqlperiod =  "-20 years";
+        $gdd_sqlperiod = "-20 years";
         break;
     }
 
-#Useful when summary by month is needed:
-    #select strftime("%Y-%m-%d", date) as observerd, min(hivetempf) as low, max(hivetempf) from allhivedata where hivetempf != "" AND hivetempf != "null" GROUP BY strftime("%Y-%m-%d", date);
-    
-
 # Echo back the Javascript code
- 
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
@@ -49,7 +52,7 @@ $sth = $conn->prepare("SELECT hiveweight, hiverawweight, hivetempf, hiveHum, wea
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-$sth1 = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
+$sth1 = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',gdddate)*1000 AS datetime FROM gdd WHERE gdddate > datetime('now', 'localtime', '$gdd_sqlperiod') ORDER by datetime ASC");
 $sth1->execute();
 $result1 = $sth1->fetchAll(PDO::FETCH_ASSOC);
 
@@ -62,22 +65,17 @@ $result3 = $sth3->fetchAll(PDO::FETCH_ASSOC);
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 
-
-
-
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
-    $('#allcontainer').highcharts({
+    var chart = Highcharts.chart('allcontainer', {
         chart: {
             zoomType: 'xy',
             alignTicks: false
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -90,15 +88,8 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-    yAxis: [{ // Temp yAxis
+        yAxis: [{
             gridLineWidth: 0,
             labels: {
                 format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
@@ -106,7 +97,6 @@ $(function () {
                     color: '"; echo "$color_hivetemp"; echo "'
                 },
                 padding: 1
-
             },
             showEmpty: false,
             title: {
@@ -114,9 +104,9 @@ $(function () {
                 style: {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
-            }
-
-        }, { // Rain yAxis
+            },
+            minRange: 20
+        }, {
             gridLineWidth: 1,
             title: {
                 text: 'Rain',
@@ -125,16 +115,15 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
                 style: {
                     color: '"; echo "$color_rain"; echo "'
                 }
             },
             showEmpty: false,
             opposite: true
-
         },
-        { // Weight yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Weight',
@@ -148,11 +137,11 @@ $(function () {
                     color: '"; echo "$color_netweight"; echo "'
                 }
             },
+            minRange: 10,
             showEmpty: false,
             opposite: false
-
         },
-        { // Humidity yAxis
+        {
             gridLineWidth: 1,
             ceiling: 100,
             floor: 0,
@@ -168,11 +157,11 @@ $(function () {
                     color: '"; echo "$color_hivehum"; echo "'
                 }
             },
+            minRange: 20,
             showEmpty: false,
             opposite: true
-
         },
-        { // Solarradiation yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Solar',
@@ -186,11 +175,11 @@ $(function () {
                     color: '"; echo "$color_solarradiation"; echo "'
                 }
             },
+            minRange: 100,
             showEmpty: false,
             opposite: true
-
         },
-        { // Lux yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Lux',
@@ -204,11 +193,11 @@ $(function () {
                     color: '"; echo "$color_lux"; echo "'
                 }
             },
+            minRange: 100,
             showEmpty: false,
             opposite: true
-
         },
-        { // GDD yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'GDD',
@@ -222,11 +211,11 @@ $(function () {
                     color: '"; echo "$color_gdd"; echo "'
                 }
             },
+            minRange: 100,
             showEmpty: false,
             opposite: false
-
         },
-         { // Flight yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Flights Out',
@@ -240,11 +229,11 @@ $(function () {
                     color: '"; echo "$color_beecount_out"; echo "'
                 }
             },
+            minRange: 20,
             showEmpty: false,
             opposite: false
-
         },
-        { // Wind yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Wind',
@@ -260,9 +249,8 @@ $(function () {
             },
             showEmpty: false,
             opposite: false
-
         },
-        { // Pressure yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Pressure',
@@ -276,11 +264,11 @@ $(function () {
                     color: '"; echo "$color_pressure"; echo "'
                 }
             },
+            minRange: "; if ( $SHOW_METRIC == "on" ) { echo "10";} else {echo "1";} echo ",
             showEmpty: false,
             opposite: false
-
         },
-        { // Pollen yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Pollen',
@@ -289,18 +277,17 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mb";} else {echo "in";} echo "',
+                format: '{value}',
                 style: {
                     color: '"; echo "$color_pollen"; echo "'
                 }
             },
             showEmpty: false,
             opposite: false
-
         }
         ],
         plotOptions: {";
-             if ( $chart_smoothing == "on" ) { 
+             if ( $chart_smoothing == "on" ) {
                 echo "series: {
                     connectNulls:true
                 },";
@@ -320,23 +307,31 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/all.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [{
             type: 'line',
             name: 'Hive Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['hivetempf'])) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['hivetempf'])."], ";
@@ -355,7 +350,6 @@ $(function () {
             name: 'Outside Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             yAxis: 0,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['weather_tempf'])) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['weather_tempf'])."], ";
@@ -371,10 +365,9 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'Hive Humidty (%)',
+            name: 'Hive Humidity (%)',
             yAxis: 3,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['hiveHum'])."], ";
@@ -390,10 +383,9 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'Outside Humidty (%)',
+            name: 'Outside Humidity (%)',
             yAxis: 3,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['weather_humidity'])."], ";
@@ -412,7 +404,6 @@ $(function () {
             yAxis: 1,
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['precip_1hr_in'])."], ";
                 } else {
@@ -427,7 +418,6 @@ $(function () {
             yAxis: 2,
             name: 'Hive Weight Net ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['hiveweight'])."], ";
@@ -446,7 +436,6 @@ $(function () {
            yAxis: 2,
            name: 'Hive Weight Gross ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
            data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) {
                     if ($chart_rounding == "on") {
                         echo "[".$r['datetime'].", ".ceil($r['hiverawweight'])."], ";
@@ -465,7 +454,6 @@ $(function () {
             name: 'Solar (wm/2)',
             yAxis: 4,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['solarradiation']) && $r['solarradiation'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['solarradiation'])."], ";
                 } else {
@@ -480,7 +468,6 @@ $(function () {
             name: 'Lux (lx)',
             yAxis: 5,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['lux']) && $r['lux'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['lux'])."], ";
                 } else {
@@ -494,8 +481,7 @@ $(function () {
             type: 'line',
             name: 'GDD',
             yAxis: 6,
-            data: ["; foreach($result as $r){
-                // Validate numeric value
+            data: ["; foreach($result1 as $r){
                 if (is_numeric($r['gdd']) && $r['gdd'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['gdd'])."], ";
                 } else {
@@ -510,7 +496,6 @@ $(function () {
             name: 'Flight Activity',
             yAxis: 7,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['OUT_COUNT']) && $r['OUT_COUNT'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['OUT_COUNT'])."], ";
                 } else {
@@ -519,13 +504,12 @@ $(function () {
             } echo "],
             color: '"; echo "$color_beecount_out"; echo "',
             visible: "; echo "$trend_beecount_out"; echo "
-        },        
+        },
         {
             type: 'line',
             name: 'Wind',
             yAxis: 8,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['wind']) && $r['wind'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['wind'])."], ";
                 } else {
@@ -540,7 +524,6 @@ $(function () {
             name: 'Pressure',
             yAxis: 9,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['pressure']) && $r['pressure'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['pressure'])."], ";
                 } else {
@@ -554,8 +537,7 @@ $(function () {
             type: 'line',
             name: 'Pollen',
             yAxis: 10,
-            data: ["; foreach($result as $r){
-                // Validate numeric value
+            data: ["; foreach($result3 as $r){
                 if (is_numeric($r['pollenlevel']) && $r['pollenlevel'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['pollenlevel'])."], ";
                 } else {
@@ -567,37 +549,12 @@ $(function () {
         }
         ]
     });
-
-     $(\"#b\").click(function(){
-            chart.yAxis[0].update({
-                labels: {
-                    enabled: false
-                },
-                title: {
-                    text: null
-                }
-            });
-
-        });
-
-
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/all.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
-
 });
 </script>";
 
 
 
 ?>
-
-
- 
 
 
 

@@ -1,7 +1,7 @@
 
 <script>
 $(function () {
-    $('#weightgauge-container').highcharts({
+    Highcharts.chart('weightgauge-container', {
         chart: {
             type: 'column'
         },
@@ -35,7 +35,7 @@ $(function () {
                 stacking: 'normal',
                 dataLabels: {
                     enabled: true,
-                    color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                    color: 'white',
                     formatter: function() {return this.series.name + ': ' + this.y + ' <?PHP if ( $SHOW_METRIC == "on" ) { echo "kgs";} else {echo "lbs";} ?>'},
                     inside: true,
                     style: {

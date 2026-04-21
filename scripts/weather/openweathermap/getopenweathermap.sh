@@ -8,10 +8,10 @@ source /home/HiveControl/scripts/weather/wx_helpers.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-OWM_KEY="$KEY"
+OWM_KEY="${KEY_OPENWEATHERMAP:-$KEY}"
 
 if [ -z "$OWM_KEY" ]; then
-	loglocal "$DATE" WEATHER ERROR "OpenWeatherMap requires an API key. Set it in instrument config (KEY field)."
+	loglocal "$DATE" WEATHER ERROR "OpenWeatherMap requires an API key. Set it in instrument config."
 	exit 1
 fi
 

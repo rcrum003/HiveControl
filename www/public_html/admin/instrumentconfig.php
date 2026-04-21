@@ -52,6 +52,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT','WEIGHT_TEMP_COEFF','WEIGHT_HUMIDITY_COEFF','WEIGHT_REF_TEMP','WEIGHT_REF_HUMIDITY'], 1)->message('{field} must be numeric');
     $v->rule('in', ['WEIGHT_COMPENSATION_ENABLED'], ['no', 'yes']);
     $v->rule('alphaNum', ['SCALETYPE', 'TEMPTYPE', 'LUX_SOURCE', 'COUNTERTYPE', 'CAMERATYPE', 'local_wx_type', 'AIR_ID', 'AIR_TYPE'], 1)->message('{field} must be alphaNum only');
+    $v->rule('integer', ['WX_MAX_STALE_MINUTES']);
+    $v->rule('min', ['WX_MAX_STALE_MINUTES'], 30);
+    $v->rule('max', ['WX_MAX_STALE_MINUTES'], 360);
     $v->rule('lengthmax', ['WX_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO'], 2);
 
 }
@@ -186,15 +189,23 @@ if($v->validate()) {
     $COUNTERTYPE = test_input($_POST["COUNTERTYPE"]);
     
 
-    #Weather 
+    #Weather
     $weather_level = test_input($_POST["WEATHER_LEVEL"]);
     $weather_detail = test_input($_POST["WEATHER_DETAIL"]);
     $key = test_input($_POST["KEY"]);
+    $key_openweathermap = test_input($_POST["KEY_OPENWEATHERMAP"] ?? '');
+    $key_weatherapi = test_input($_POST["KEY_WEATHERAPI"] ?? '');
+    $key_visualcrossing = test_input($_POST["KEY_VISUALCROSSING"] ?? '');
+    $key_pirateweather = test_input($_POST["KEY_PIRATEWEATHER"] ?? '');
+    $key_tomorrow = test_input($_POST["KEY_TOMORROW"] ?? '');
+    $key_ambee = test_input($_POST["KEY_AMBEE"] ?? '');
     $wxstation = test_input($_POST["WXSTATION"]);
     $WXTEMPTYPE = test_input($_POST["WXTEMPTYPE"]);
     $WX_TEMPER_DEVICE = test_input_allow_slash($_POST["WX_TEMPER_DEVICE"]);
     $WX_TEMP_GPIO = test_input($_POST["WX_TEMP_GPIO"]);
     $weather_fallback = test_input($_POST["WEATHER_FALLBACK"] ?? '');
+    $weather_fallback_2 = test_input($_POST["WEATHER_FALLBACK_2"] ?? '');
+    $wx_max_stale_minutes = test_input($_POST["WX_MAX_STALE_MINUTES"] ?? '120');
     $local_wx_type = test_input($_POST["local_wx_type"]);
     $local_wx_url = test_input($_POST["local_wx_url"]);
 
@@ -218,8 +229,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback, $weather_fallback_2, $wx_max_stale_minutes, $key_openweathermap, $key_weatherapi, $key_visualcrossing, $key_pirateweather, $key_tomorrow, $key_ambee));
     sleep(1);
 
 
@@ -265,9 +276,17 @@ if($v->validate()) {
                             <input type="hidden" name="ENABLE_BEECOUNTER" value="<?php echo $result['ENABLE_BEECOUNTER']; ?>">
                             <input type="hidden" name="ENABLE_AIR" value="<?php echo $result['ENABLE_AIR']; ?>">
                             <input type="hidden" name="WEATHER_LEVEL" value="<?php echo $result['WEATHER_LEVEL']; ?>">
-                            <input type="hidden" name="WEATHER_FALLBACK" value="<?php echo $result['WEATHER_FALLBACK'] ?? ''; ?>">
+                            <input type="hidden" name="WEATHER_FALLBACK" value="<?php echo htmlspecialchars($result['WEATHER_FALLBACK'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WEATHER_FALLBACK_2" value="<?php echo htmlspecialchars($result['WEATHER_FALLBACK_2'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WX_MAX_STALE_MINUTES" value="<?php echo htmlspecialchars($result['WX_MAX_STALE_MINUTES'] ?? '120', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="WEATHER_DETAIL" value="<?php echo $result['WEATHER_DETAIL']; ?>">
-                            <input type="hidden" name="KEY" value="<?php echo $result['KEY']; ?>">
+                            <input type="hidden" name="KEY" value="<?php echo htmlspecialchars($result['KEY'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="KEY_OPENWEATHERMAP" value="<?php echo htmlspecialchars($result['KEY_OPENWEATHERMAP'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="KEY_WEATHERAPI" value="<?php echo htmlspecialchars($result['KEY_WEATHERAPI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="KEY_VISUALCROSSING" value="<?php echo htmlspecialchars($result['KEY_VISUALCROSSING'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="KEY_PIRATEWEATHER" value="<?php echo htmlspecialchars($result['KEY_PIRATEWEATHER'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="KEY_TOMORROW" value="<?php echo htmlspecialchars($result['KEY_TOMORROW'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="KEY_AMBEE" value="<?php echo htmlspecialchars($result['KEY_AMBEE'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="WXSTATION" value="<?php echo $result['WXSTATION']; ?>">
                             <input type="hidden" name="CAMERATYPE" value="<?php echo $result['CAMERATYPE']; ?>">
                             <input type="hidden" name="COUNTERTYPE" value="<?php echo $result['COUNTERTYPE']; ?>">
@@ -672,6 +691,7 @@ if($v->validate()) {
                             <option value="openweathermap" <?php if ($result['WEATHER_LEVEL'] == "openweathermap") {echo "selected='selected'";} ?>>OpenWeatherMap</option>
                             <option value="weatherapi" <?php if ($result['WEATHER_LEVEL'] == "weatherapi") {echo "selected='selected'";} ?>>WeatherAPI.com</option>
                             <option value="visualcrossing" <?php if ($result['WEATHER_LEVEL'] == "visualcrossing") {echo "selected='selected'";} ?>>Visual Crossing</option>
+                            <option value="pirateweather" <?php if ($result['WEATHER_LEVEL'] == "pirateweather") {echo "selected='selected'";} ?>>Pirate Weather</option>
                             </optgroup>
                             <optgroup label="Personal Weather Stations">
                             <option value="ambientwx" <?php if ($result['WEATHER_LEVEL'] == "ambientwx") {echo "selected='selected'";} ?>>AmbientWeather.net</option>
@@ -702,20 +722,26 @@ if($v->validate()) {
                                 }
 
                                 if ($result['WEATHER_LEVEL'] == "openweathermap") {
-                                    echo 'API KEY <br><input type="text" name="KEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY'] ?? '') . '"><br>';
+                                    echo 'API KEY <br><input type="text" name="KEY_OPENWEATHERMAP" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY_OPENWEATHERMAP'] ?? $result['KEY'] ?? '') . '"><br>';
                                     echo '<small>Free: 1,000 calls/day. Get a key at <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a></small><br>';
                                     echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
                                 }
 
                                 if ($result['WEATHER_LEVEL'] == "weatherapi") {
-                                    echo 'API KEY <br><input type="text" name="KEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY'] ?? '') . '"><br>';
+                                    echo 'API KEY <br><input type="text" name="KEY_WEATHERAPI" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY_WEATHERAPI'] ?? $result['KEY'] ?? '') . '"><br>';
                                     echo '<small>Free: 1M calls/month. Get a key at <a href="https://www.weatherapi.com/signup.aspx" target="_blank">weatherapi.com</a></small><br>';
                                     echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
                                 }
 
                                 if ($result['WEATHER_LEVEL'] == "visualcrossing") {
-                                    echo 'API KEY <br><input type="text" name="KEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY'] ?? '') . '"><br>';
+                                    echo 'API KEY <br><input type="text" name="KEY_VISUALCROSSING" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY_VISUALCROSSING'] ?? $result['KEY'] ?? '') . '"><br>';
                                     echo '<small>Free: 1,000 calls/day. Includes solar radiation. Get a key at <a href="https://www.visualcrossing.com/sign-up" target="_blank">visualcrossing.com</a></small><br>';
+                                    echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
+                                }
+
+                                if ($result['WEATHER_LEVEL'] == "pirateweather") {
+                                    echo 'API KEY <br><input type="text" name="KEY_PIRATEWEATHER" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['KEY_PIRATEWEATHER'] ?? $result['KEY'] ?? '') . '"><br>';
+                                    echo '<small>Free: 20,000 calls/day. Dark Sky compatible. Get a key at <a href="https://pirateweather.net" target="_blank">pirateweather.net</a></small><br>';
                                     echo '<small>Location: ' . $wx_lat . ', ' . $wx_lon . '</small>';
                                 }
 
@@ -785,6 +811,7 @@ if($v->validate()) {
                             <option value="openweathermap" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "openweathermap") {echo "selected='selected'";} ?>>OpenWeatherMap</option>
                             <option value="weatherapi" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "weatherapi") {echo "selected='selected'";} ?>>WeatherAPI.com</option>
                             <option value="visualcrossing" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "visualcrossing") {echo "selected='selected'";} ?>>Visual Crossing</option>
+                            <option value="pirateweather" <?php if (($result['WEATHER_FALLBACK'] ?? '') == "pirateweather") {echo "selected='selected'";} ?>>Pirate Weather</option>
                             </optgroup>
                             </select></td>
                             <td>
@@ -797,10 +824,99 @@ if($v->validate()) {
                                 } else {
                                     echo '<small>Recommended: Set Open-Meteo or NWS as fallback for reliability.</small>';
                                 }
+                                $keyed_providers = ['openweathermap' => 'KEY_OPENWEATHERMAP', 'weatherapi' => 'KEY_WEATHERAPI', 'visualcrossing' => 'KEY_VISUALCROSSING', 'pirateweather' => 'KEY_PIRATEWEATHER'];
+                                if (!empty($fb) && isset($keyed_providers[$fb])) {
+                                    $fb_key_col = $keyed_providers[$fb];
+                                    echo '<br>API KEY: <input type="text" name="' . $fb_key_col . '" size="30" onchange="this.form.submit()" value="' . htmlspecialchars($result[$fb_key_col] ?? '', ENT_QUOTES, 'UTF-8') . '">';
+                                }
                                 ?>
                             </td>
                             <td> </td>
                             <td> </td>
+                            <td></td>
+                        </tr>
+<?PHP ###############################################################################################################
+      # Weather Fallback 2
+      ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td><a href="#" title="Weather Fallback 2" data-toggle="popover" data-placement="bottom" data-content="Third-tier weather source. Used if both primary and first fallback fail."><p class="fa fa-question-circle fa-fw"></P></a>Weather Fallback 2<br>
+                            <select name="WEATHER_FALLBACK_2" onchange="this.form.submit()">
+                            <option value="" <?php if (empty($result['WEATHER_FALLBACK_2'] ?? '')) {echo "selected='selected'";} ?>>None</option>
+                            <optgroup label="Cloud APIs (Free)">
+                            <option value="openmeteo" <?php if (($result['WEATHER_FALLBACK_2'] ?? '') == "openmeteo") {echo "selected='selected'";} ?>>Open-Meteo (No Key)</option>
+                            <option value="nws" <?php if (($result['WEATHER_FALLBACK_2'] ?? '') == "nws") {echo "selected='selected'";} ?>>NWS weather.gov (US Only)</option>
+                            </optgroup>
+                            <optgroup label="Cloud APIs (Key Required)">
+                            <option value="openweathermap" <?php if (($result['WEATHER_FALLBACK_2'] ?? '') == "openweathermap") {echo "selected='selected'";} ?>>OpenWeatherMap</option>
+                            <option value="weatherapi" <?php if (($result['WEATHER_FALLBACK_2'] ?? '') == "weatherapi") {echo "selected='selected'";} ?>>WeatherAPI.com</option>
+                            <option value="visualcrossing" <?php if (($result['WEATHER_FALLBACK_2'] ?? '') == "visualcrossing") {echo "selected='selected'";} ?>>Visual Crossing</option>
+                            <option value="pirateweather" <?php if (($result['WEATHER_FALLBACK_2'] ?? '') == "pirateweather") {echo "selected='selected'";} ?>>Pirate Weather</option>
+                            </optgroup>
+                            </select></td>
+                            <td>
+                                <?php
+                                $fb2 = $result['WEATHER_FALLBACK_2'] ?? '';
+                                $fb1 = $result['WEATHER_FALLBACK'] ?? '';
+                                if (!empty($fb2) && ($fb2 == $result['WEATHER_LEVEL'] || $fb2 == $fb1)) {
+                                    echo '<span style="color:red"><strong>Warning:</strong> Duplicate provider in chain.</span>';
+                                } elseif (!empty($fb2)) {
+                                    echo '<small>Last resort if both primary and fallback 1 fail.</small>';
+                                } else {
+                                    echo '<small>Optional third-tier source for maximum reliability.</small>';
+                                }
+                                if (!empty($fb2) && isset($keyed_providers[$fb2])) {
+                                    $fb2_key_col = $keyed_providers[$fb2];
+                                    echo '<br>API KEY: <input type="text" name="' . $fb2_key_col . '" size="30" onchange="this.form.submit()" value="' . htmlspecialchars($result[$fb2_key_col] ?? '', ENT_QUOTES, 'UTF-8') . '">';
+                                }
+                                ?>
+                            </td>
+                            <td> </td>
+                            <td> </td>
+                            <td></td>
+                        </tr>
+<?PHP ###############################################################################################################
+      # Weather Staleness Threshold
+      ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td><a href="#" title="Stale Data Threshold" data-toggle="popover" data-placement="bottom" data-content="Maximum age (in minutes) of a weather observation before it is considered stale and the next provider in the chain is tried. Default: 120 minutes."><p class="fa fa-question-circle fa-fw"></P></a>Stale Data Threshold<br>
+                            </td>
+                            <td>
+                                <input type="number" name="WX_MAX_STALE_MINUTES" min="30" max="360" value="<?php echo htmlspecialchars($result['WX_MAX_STALE_MINUTES'] ?? '120', ENT_QUOTES, 'UTF-8'); ?>"> minutes
+                                <br><small>Reject observations older than this and try the next weather source. Default: 120 min.</small>
+                            </td>
+                            <td> </td>
+                            <td> </td>
+                            <td></td>
+                        </tr>
+<?PHP ###############################################################################################################
+      # Weather Health Inline
+      ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td><a href="#" title="Weather Health" data-toggle="popover" data-placement="bottom" data-content="Quick health summary for configured weather providers. Click the link for the full dashboard."><p class="fa fa-question-circle fa-fw"></P></a>Weather Health</td>
+                            <td colspan="3">
+<?PHP
+try {
+    $health_check = $conn->prepare("SELECT provider, COUNT(*) as total, SUM(success) as ok, ROUND(AVG(success)*100,0) as rate FROM weather_health WHERE timestamp >= datetime('now', '-1 day', 'localtime') GROUP BY provider ORDER BY total DESC");
+    $health_check->execute();
+    $health_rows = $health_check->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $health_rows = [];
+}
+if (empty($health_rows)) {
+    echo '<small class="text-muted">No health data yet.</small> ';
+} else {
+    foreach ($health_rows as $hr) {
+        $r = intval($hr['rate']);
+        if ($r >= 95) { $cls = 'success'; }
+        elseif ($r >= 80) { $cls = 'warning'; }
+        else { $cls = 'danger'; }
+        echo '<span class="label label-' . $cls . '">' . htmlspecialchars($hr['provider']) . ': ' . $r . '%</span> ';
+    }
+    echo '<br>';
+}
+?>
+                                <small><a href="/admin/weather_health.php"><i class="fa fa-bar-chart"></i> Full Weather Health Dashboard</a></small>
+                            </td>
                             <td></td>
                         </tr>
 <?PHP ###############################################################################################################
@@ -851,6 +967,33 @@ if($v->validate()) {
                                      value="<?php echo htmlspecialchars($result['AIR_LOCAL_URL'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                      placeholder="http://192.168.1.x/json" title="Must include /json path">
                             <?php endif; ?>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+<?PHP ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td>
+                                <a href="#" title="Pollen Data" data-toggle="popover" data-placement="bottom" data-content="Pollen data is fetched daily from Pollen.com (US, free). Optional fallback providers require API keys."><p class="fa fa-question-circle fa-fw"></P></a>
+                                Pollen Data<br>
+                                <small class="text-muted">Primary: Pollen.com (US)</small>
+                            </td>
+                            <td>
+                                <small>Optional fallback providers:</small><br>
+                                <a href="https://www.tomorrow.io/weather-api/" target="_blank">Tomorrow.io</a><br>
+                                <a href="https://www.getambee.com/" target="_blank">Ambee</a>
+                            </td>
+                            <td>
+                              Tomorrow.io API Key<br>
+                              <input type="text" name="KEY_TOMORROW" size="40" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['KEY_TOMORROW'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                     placeholder="Optional">
+                              <br><br>
+                              Ambee API Key<br>
+                              <input type="text" name="KEY_AMBEE" size="40" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['KEY_AMBEE'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                     placeholder="Optional">
                             </td>
                             <td></td>
                             <td></td>

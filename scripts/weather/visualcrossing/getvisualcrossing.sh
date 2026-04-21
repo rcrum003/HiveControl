@@ -9,10 +9,10 @@ source /home/HiveControl/scripts/weather/wx_helpers.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-VC_KEY="$KEY"
+VC_KEY="${KEY_VISUALCROSSING:-$KEY}"
 
 if [ -z "$VC_KEY" ]; then
-	loglocal "$DATE" WEATHER ERROR "Visual Crossing requires an API key. Set it in instrument config (KEY field)."
+	loglocal "$DATE" WEATHER ERROR "Visual Crossing requires an API key. Set it in instrument config."
 	exit 1
 fi
 

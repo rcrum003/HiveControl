@@ -13,10 +13,8 @@
 
 switch ($period) {
     case "today":
-        $sqlperiod = "start of day";
-        break;
     case "day":
-        $sqlperiod = "-1 days";
+        $sqlperiod = "-7 days";
         break;
     case "week":
         $sqlperiod = "-7 days";
@@ -39,7 +37,7 @@ if ($chart == 'line') {
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get GDD Data First
-$sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',calcdate)*1000 AS datetime FROM gdd WHERE calcdate > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
+$sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',gdddate)*1000 AS datetime FROM gdd WHERE gdddate > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -54,12 +52,12 @@ echo "
 <!-- Chart Code -->
 <script>
 $(function () {
-    $('#container').highcharts({
+    Highcharts.chart('container', {
         chart: {
             zoomType: 'xy'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -72,16 +70,9 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-    yAxis: [
-        { //GDD yAxis
+        yAxis: [
+        {
             gridLineWidth: 0,
             title: {
                 text: 'GDD',
@@ -95,10 +86,10 @@ $(function () {
                     color: '"; echo "$color_gdd"; echo "'
                 }
             },
+            minRange: 100,
             opposite: false
-
         },
-        { // Pollen yAxis
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Pollen',
@@ -107,14 +98,13 @@ $(function () {
                 }
             },
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mb";} else {echo "in";} echo "',
+                format: '{value}',
                 style: {
                     color: '"; echo "$color_pollen"; echo "'
                 }
             },
             showEmpty: false,
             opposite: false
-
         }
         ],
         plotOptions: {
@@ -133,16 +123,25 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/gdd.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [
         {
@@ -150,7 +149,6 @@ $(function () {
             name: 'GDD',
             yAxis: 0,
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['gdd']) && $r['gdd'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['gdd'])."], ";
                 } else {
@@ -160,12 +158,11 @@ $(function () {
             color: '"; echo "$color_gdd"; echo "',
             visible: true
         },
-         {
+        {
             type: 'area',
             name: 'Pollen',
             yAxis: 1,
-            data: ["; foreach($result as $r){
-                // Validate numeric value
+            data: ["; foreach($result3 as $r){
                 if (is_numeric($r['pollenlevel']) && $r['pollenlevel'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['pollenlevel'])."], ";
                 } else {
@@ -177,14 +174,6 @@ $(function () {
         }
         ]
     });
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/gdd.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
-
 });
 </script>";
 

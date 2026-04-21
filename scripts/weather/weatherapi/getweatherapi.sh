@@ -9,10 +9,10 @@ source /home/HiveControl/scripts/weather/wx_helpers.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-WAPI_KEY="$KEY"
+WAPI_KEY="${KEY_WEATHERAPI:-$KEY}"
 
 if [ -z "$WAPI_KEY" ]; then
-	loglocal "$DATE" WEATHER ERROR "WeatherAPI.com requires an API key. Set it in instrument config (KEY field)."
+	loglocal "$DATE" WEATHER ERROR "WeatherAPI.com requires an API key. Set it in instrument config."
 	exit 1
 fi
 

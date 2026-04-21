@@ -18,13 +18,13 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
 $(function () {
-    $('#pastweekcontainer').highcharts({
+    Highcharts.chart('pastweekcontainer', {
         chart: {
             type: 'line',
             zoomType: 'x'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -37,18 +37,12 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
         yAxis: {
             title: {
                 text: 'Values'
-            }
+            },
+            minRange: 20
         },
         plotOptions: {
             line: {
@@ -66,16 +60,12 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
         },
         series: [{
             name: 'Temp (°F)',
@@ -90,11 +80,10 @@ $(function () {
             color: '#e6b800'
         },
         {
-            name: 'Humidty (%)',
+            name: 'Humidity (%)',
             color: '#87CEFA',
-           data: [<?php foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} ?>],
-        }
-        ]
+            data: [<?php foreach($result as $r){echo "[".$r['datetime'].", ".$r['hiveHum']."]".", ";} ?>]
+        }]
     });
 });
 </script>

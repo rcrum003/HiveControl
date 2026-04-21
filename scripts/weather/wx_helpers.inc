@@ -61,6 +61,49 @@ calc_dewpoint_f() {
 	safe_bc "scale=2;(${temp_f} - (9 * (100 - ${humidity})) / 25)"
 }
 
+# Check if an observation timestamp is too old (stale)
+# Args: $1 = observation time string, $2 = max age in minutes (default 120)
+# Returns: 0 if fresh, 1 if stale or unparseable
+validate_observation_time() {
+	local obs_time="$1"
+	local max_age="${2:-120}"
+
+	if [ -z "$obs_time" ]; then
+		return 1
+	fi
+
+	local obs_epoch
+	obs_epoch=$(date -d "$obs_time" +%s 2>/dev/null)
+	if [ -z "$obs_epoch" ]; then
+		obs_epoch=$(date --date="$obs_time" +%s 2>/dev/null)
+	fi
+	if [ -z "$obs_epoch" ]; then
+		return 1
+	fi
+
+	local now_epoch
+	now_epoch=$(date +%s)
+	local age_minutes=$(( (now_epoch - obs_epoch) / 60 ))
+
+	if ! [[ "$age_minutes" =~ ^-?[0-9]+$ ]]; then
+		echo "0"
+		return 1
+	fi
+
+	# Negative age means future timestamp — treat as 0 age (accept)
+	if [ "$age_minutes" -lt 0 ]; then
+		age_minutes=0
+	fi
+
+	if [ "$age_minutes" -gt "$max_age" ]; then
+		echo "$age_minutes"
+		return 1
+	fi
+
+	echo "$age_minutes"
+	return 0
+}
+
 # Output WunderGround-format JSON
 # Set these variables before calling:
 #   WX_STATION_ID, WX_OBS_TIME, WX_TEMP_F, WX_TEMP_C, WX_HUMIDITY,

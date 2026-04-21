@@ -1,16 +1,20 @@
 #!/bin/bash
-# Weather data collection dispatcher with automatic fallback
-# Calls the configured weather provider, parses standardized JSON output
+# Weather data collection dispatcher with cascading fallback and health tracking
+# Calls configured weather providers in order: primary → fallback 1 → fallback 2
+# Validates observation freshness and logs provider health metrics
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/check.inc
+source /home/HiveControl/scripts/weather/wx_helpers.inc
 
 PATH=/usr/local/sbin:/usr/local/bin:/bin:/sbin:/usr/sbin:/usr/bin:/home/HiveControl/scripts/weather:/home/HiveControl/scripts/system
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 WEATHER_STATIONID="$WXSTATION"
 JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
+DATASOURCE="$HOMEDIR/data/hive-data.db"
+MAX_STALE="${WX_MAX_STALE_MINUTES:-120}"
 
 # Initialize all weather variables to null
 init_wx_vars() {
@@ -26,8 +30,6 @@ init_wx_vars() {
 }
 
 # Call the appropriate weather provider script
-# Args: $1 = weather level (e.g. openmeteo, nws, hive, etc.)
-# Sets: GETNOW with JSON output
 call_wx_provider() {
 	local level="$1"
 	case "$level" in
@@ -46,12 +48,12 @@ call_wx_provider() {
 		nws)              GETNOW=$($HOMEDIR/scripts/weather/nws/getnws.sh) ;;
 		weatherapi)       GETNOW=$($HOMEDIR/scripts/weather/weatherapi/getweatherapi.sh) ;;
 		visualcrossing)   GETNOW=$($HOMEDIR/scripts/weather/visualcrossing/getvisualcrossing.sh) ;;
+		pirateweather)    GETNOW=$($HOMEDIR/scripts/weather/pirateweather/getpirateweather.sh) ;;
 		*)                GETNOW="" ;;
 	esac
 }
 
 # Parse JSON output from any provider into standard variables
-# All modern providers output quoted JSON values; legacy ones may not quote temp_f/temp_c
 parse_wx_json() {
 	if [[ -z "$GETNOW" ]]; then
 		return 1
@@ -96,26 +98,88 @@ parse_wx_json() {
 	return 0
 }
 
+# Log provider health to database (non-blocking)
+log_health() {
+	local provider="$1"
+	local role="$2"
+	local success="$3"
+	local response_ms="$4"
+	local error_reason="$5"
+	local obs_age="$6"
+
+	local p_safe="${provider//\'/\'\'}"
+	local r_safe="${role//\'/\'\'}"
+	local e_safe="${error_reason//\'/\'\'}"
+	local err_val="NULL"
+	[ -n "$error_reason" ] && err_val="'${e_safe}'"
+
+	sqlite3 "$DATASOURCE" "INSERT INTO weather_health (timestamp, provider, role, success, response_ms, error_reason, observation_age_minutes) VALUES ('$DATE', '${p_safe}', '${r_safe}', $success, ${response_ms:-0}, ${err_val}, ${obs_age:-0});" 2>/dev/null
+
+	# Prune old health records (>30 days)
+	sqlite3 "$DATASOURCE" "DELETE FROM weather_health WHERE timestamp < datetime('now', '-30 days');" 2>/dev/null
+}
+
+# Build provider chain: primary, fallback 1, fallback 2 (skip empties and duplicates)
+build_provider_chain() {
+	local seen=""
+	for provider in "$WEATHER_LEVEL" "$WEATHER_FALLBACK" "$WEATHER_FALLBACK_2"; do
+		if [ -n "$provider" ]; then
+			case "$seen" in
+				*"|${provider}|"*) continue ;;
+			esac
+			seen="${seen}|${provider}|"
+			printf '%s\n' "$provider"
+		fi
+	done
+}
+
 # Main execution
 init_wx_vars
 
-# Try primary weather source
-call_wx_provider "$WEATHER_LEVEL"
+mapfile -t PROVIDER_CHAIN < <(build_provider_chain)
+WX_SUCCESS=0
+ROLE_NAMES=("primary" "fallback_1" "fallback_2")
 
-if ! parse_wx_json; then
-	# Primary failed — try fallback if configured
-	if [[ -n "$WEATHER_FALLBACK" && "$WEATHER_FALLBACK" != "" && "$WEATHER_FALLBACK" != "$WEATHER_LEVEL" ]]; then
-		loglocal "$DATE" WXFallback WARNING "Primary weather source '$WEATHER_LEVEL' failed, trying fallback '$WEATHER_FALLBACK'"
-		GETNOW=""
-		call_wx_provider "$WEATHER_FALLBACK"
-		if ! parse_wx_json; then
-			loglocal "$DATE" WXFallback ERROR "Fallback weather source '$WEATHER_FALLBACK' also failed, skipping collection"
-		else
-			loglocal "$DATE" WXFallback INFO "Fallback weather source '$WEATHER_FALLBACK' succeeded"
-		fi
-	else
-		loglocal "$DATE" WXAmbient ERROR "Error connecting to Weather Source, skipping collection..."
+for i in "${!PROVIDER_CHAIN[@]}"; do
+	provider="${PROVIDER_CHAIN[$i]}"
+	role="${ROLE_NAMES[$i]}"
+
+	GETNOW=""
+	START_TIME=$(date +%s%3N 2>/dev/null || echo $((SECONDS * 1000)))
+
+	call_wx_provider "$provider"
+	END_TIME=$(date +%s%3N 2>/dev/null || echo $((SECONDS * 1000)))
+	ELAPSED_MS=$(( END_TIME - START_TIME ))
+
+	if ! parse_wx_json; then
+		loglocal "$DATE" WXFallback WARNING "Weather source '$provider' ($role) failed to return data"
+		log_health "$provider" "$role" 0 "$ELAPSED_MS" "no_data" 0
+		continue
 	fi
+
+	# Check observation freshness
+	OBS_AGE=$(validate_observation_time "$OBSERVATIONDATETIME" "$MAX_STALE")
+	STALE_RC=$?
+
+	if [ $STALE_RC -ne 0 ] && [ -n "$OBSERVATIONDATETIME" ]; then
+		loglocal "$DATE" WXFallback WARNING "Weather source '$provider' ($role) returned stale data (${OBS_AGE:-unknown} min old, max $MAX_STALE)"
+		log_health "$provider" "$role" 0 "$ELAPSED_MS" "stale_${OBS_AGE}min" "${OBS_AGE:-0}"
+		init_wx_vars
+		continue
+	fi
+
+	# Success
+	WX_SUCCESS=1
+	log_health "$provider" "$role" 1 "$ELAPSED_MS" "" "${OBS_AGE:-0}"
+
+	if [ "$role" != "primary" ]; then
+		loglocal "$DATE" WXFallback INFO "Weather $role source '$provider' succeeded"
+	fi
+	break
+done
+
+if [ $WX_SUCCESS -eq 0 ]; then
+	loglocal "$DATE" WXAmbient ERROR "All weather sources failed (tried: ${PROVIDER_CHAIN[*]})"
 fi
 
 # Validate all values

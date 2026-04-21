@@ -1,6 +1,7 @@
 
 
 
+
 <!-- Chart Code -->
 
 
@@ -10,13 +11,13 @@
 
 if ( $SHOW_METRIC == "on") {
     # Abstracted this code so we don't have to specify this every freakin time
-    $HIVETEMP = "hivetempc"; 
-    $WEATHER_TEMP = "weather_tempc";  
+    $HIVETEMP = "hivetempc";
+    $WEATHER_TEMP = "weather_tempc";
     $PRECIP_1HR = "precip_1hr_metric";
 }
 else {
-    $HIVETEMP = "hivetempf"; 
-    $WEATHER_TEMP = "weather_tempf";  
+    $HIVETEMP = "hivetempf";
+    $WEATHER_TEMP = "weather_tempf";
     $PRECIP_1HR = "precip_1hr_in";
 }
 
@@ -28,15 +29,15 @@ switch ($period) {
         break;
     case "day":
         $sqlperiod = "-1 days";
-        $sth = $conn->prepare("SELECT $HIVETEMP as hivetemp, hiveHum, $WEATHER_TEMP as weather_temp, weather_humidity, $PRECIP_1HR as precip_1hr, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");        
+        $sth = $conn->prepare("SELECT $HIVETEMP as hivetemp, hiveHum, $WEATHER_TEMP as weather_temp, weather_humidity, $PRECIP_1HR as precip_1hr, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
         break;
     case "week":
         $sqlperiod = "-7 days";
-        $sth = $conn->prepare("SELECT $HIVETEMP as hivetemp, hiveHum, $WEATHER_TEMP as weather_temp, weather_humidity, $PRECIP_1HR as precip_1hr, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");        
+        $sth = $conn->prepare("SELECT $HIVETEMP as hivetemp, hiveHum, $WEATHER_TEMP as weather_temp, weather_humidity, $PRECIP_1HR as precip_1hr, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
         break;
     case "month":
         $sqlperiod = "-1 months";
-        $sth = $conn->prepare("SELECT $HIVETEMP as hivetemp, hiveHum, $WEATHER_TEMP as weather_temp, weather_humidity, $PRECIP_1HR as precip_1hr, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");        
+        $sth = $conn->prepare("SELECT $HIVETEMP as hivetemp, hiveHum, $WEATHER_TEMP as weather_temp, weather_humidity, $PRECIP_1HR as precip_1hr, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
         break;
     case "year":
         $sqlperiod =  "-1 years";
@@ -51,7 +52,7 @@ switch ($period) {
 
 if ($chart == 'line') {
     # Echo back the Javascript code
- 
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
@@ -65,16 +66,14 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
-    $('#tempcontainer').highcharts({
+    Highcharts.chart('tempcontainer', {
         chart: {
             zoomType: 'xy'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -87,15 +86,8 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-    yAxis: [{ // Temp yAxis
+        yAxis: [{
             labels: {
                 format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {
@@ -108,9 +100,10 @@ $(function () {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
             },
+            minRange: 20,
             showEmpty: false
         },
-        { // Humidity yAxis
+        {
             gridLineWidth: 0,
             ceiling: 100,
             floor: 0,
@@ -126,11 +119,11 @@ $(function () {
                     color: '"; echo "$color_hivehum"; echo "'
                 }
             },
+            minRange: 20,
             showEmpty: false,
             opposite: false
-
-        }, 
-        { // Rain yAxis
+        },
+        {
             gridLineWidth: 0,
             title: {
                 text: 'Rain',
@@ -146,7 +139,6 @@ $(function () {
             },
             showEmpty: false,
             opposite: true
-
         }],
         plotOptions: {
             line: {
@@ -164,16 +156,25 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/temp.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [{
             type: 'line',
@@ -181,7 +182,6 @@ $(function () {
             yAxis: 0,
             data: [";
             foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['hivetemp']) && $r['hivetemp'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['hivetemp'])."], ";
                 } else {
@@ -198,7 +198,6 @@ $(function () {
             yAxis: 0,
             data: [";
             foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['weather_temp']) && $r['weather_temp'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['weather_temp'])."], ";
                 } else {
@@ -211,11 +210,10 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'Hive Humidty (%)',
+            name: 'Hive Humidity (%)',
             yAxis: 1,
             data: [";
             foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['hiveHum'])."], ";
                 } else {
@@ -228,11 +226,10 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'Outside Humidty (%)',
+            name: 'Outside Humidity (%)',
             yAxis: 1,
             data: [";
             foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['weather_humidity'])."], ";
                 } else {
@@ -249,7 +246,6 @@ $(function () {
             name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo ")',
             data: [";
             foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['precip_1hr']) && $r['precip_1hr'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['precip_1hr'])."], ";
                 } else {
@@ -261,16 +257,7 @@ $(function () {
             visible: "; echo "$trend_rain"; echo "
         }
         ]
-        });
-
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/temp.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
-    
+    });
 });
 </script>";
 
@@ -293,17 +280,15 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
-    $('#tempcontainer').highcharts({
+    Highcharts.chart('tempcontainer', {
         chart: {
             type: 'arearange',
             zoomType: 'xy'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -316,15 +301,8 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-    yAxis: [{ // Temp yAxis
+        yAxis: [{
             labels: {
                 format: '{value}"; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {
@@ -337,59 +315,31 @@ $(function () {
                     color: '"; echo "$color_hivetemp"; echo "'
                 }
             },
+            minRange: 20,
             showEmpty: false
-        },
-        { // Humidity yAxis
-            gridLineWidth: 0,
-            ceiling: 100,
-            floor: 0,
-            title: {
-                text: 'Humidity',
-                style: {
-                    color: '"; echo "$color_hivehum"; echo "'
-                }
-            },
-            labels: {
-                format: '{value} %',
-                style: {
-                    color: '"; echo "$color_hivehum"; echo "'
-                }
-            },
-            showEmpty: false,
-            opposite: false
-
-        }, 
-        { // Rain yAxis
-            gridLineWidth: 0,
-            title: {
-                text: 'Rain',
-                style: {
-                    color: '"; echo "$color_rain"; echo "'
-                }
-            },
-            labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "in";} echo "',
-                style: {
-                    color: '"; echo "$color_rain"; echo "'
-                }
-            },
-            showEmpty: false,
-            opposite: true
-
         }],
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/temp.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [{
             type: 'arearange',
@@ -397,7 +347,6 @@ $(function () {
             yAxis: 0,
             data: [";
             foreach($result as $r){
-                // Validate numeric values
                 $minval = (is_numeric($r['minhivetemp']) && $r['minhivetemp'] != 0) ? floatval($r['minhivetemp']) : null;
                 $maxval = (is_numeric($r['maxhivetemp']) && $r['maxhivetemp'] != 0) ? floatval($r['maxhivetemp']) : null;
                 if ($minval !== null && $maxval !== null) {
@@ -411,16 +360,7 @@ $(function () {
             visible: "; echo "$trend_hivetemp"; echo "
         }
         ]
-        });
-
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/temp.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
-    
+    });
 });
 </script>";
 }
@@ -428,7 +368,7 @@ $(function () {
 ?>
 
 
- 
+
 
 
 

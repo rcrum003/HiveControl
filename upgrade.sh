@@ -317,6 +317,26 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_34
 			let DB_ver="26"
 		fi
+		if [[ $DB_ver -eq "26" ]]; then
+			echo "Applying DB Ver 27 Upgrades - Alert system"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_35
+			let DB_ver="27"
+		fi
+		if [[ $DB_ver -eq "27" ]]; then
+			echo "Applying DB Ver 28 Upgrades - Weather reliability (cascading fallback, health tracking)"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_36
+			let DB_ver="28"
+		fi
+		if [[ $DB_ver -eq "28" ]]; then
+			echo "Applying DB Ver 29 Upgrades - Per-provider API key storage"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_37
+			let DB_ver="29"
+		fi
+		if [[ $DB_ver -eq "29" ]]; then
+			echo "Applying DB Ver 30 Upgrades - Pollen fallback provider keys"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_38
+			let DB_ver="30"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -597,6 +617,18 @@ if [[ "$Installed_Ver" < "2.13" ]]; then
 	sudo chmod u+x /home/HiveControl/scripts/weather/openweathermap/getopenweathermap.sh
 	sudo chmod u+x /home/HiveControl/scripts/weather/weatherapi/getweatherapi.sh
 	sudo chmod u+x /home/HiveControl/scripts/weather/visualcrossing/getvisualcrossing.sh
+fi
+
+if [[ "$Installed_Ver" < "2.15" ]]; then
+	# Pollen provider chain refactor — make new pollen scripts executable
+	echo "Setting up pollen provider chain scripts"
+	sudo chmod u+x /home/HiveControl/scripts/weather/pollen/getpollen.sh
+
+	# Copy new pollen icon to web images
+	sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/pollen.png /home/HiveControl/www/public_html/images/
+
+	# Copy new CSS (includes col-lg-fifth for 5-column dashboard)
+	sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/dist/css/sb-admin-2.css /home/HiveControl/www/public_html/dist/css/sb-admin-2.css
 fi
 
 echo "============================================="

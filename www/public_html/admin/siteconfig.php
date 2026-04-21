@@ -16,7 +16,7 @@ $result = $sth->fetch(PDO::FETCH_ASSOC);
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 // Ensure checkbox fields exist in POST data with empty string if unchecked
-$checkbox_fields = ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'trend_wind', 'trend_pressure', 'trend_pollen', 'chart_rounding', 'chart_smoothing', 'SHOW_METRIC'];
+$checkbox_fields = ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'trend_wind', 'trend_pressure', 'trend_pollen', 'chart_rounding', 'chart_smoothing', 'SHOW_METRIC', 'alerts_enabled'];
 foreach ($checkbox_fields as $field) {
     if (!isset($_POST[$field])) {
         $_POST[$field] = '';
@@ -28,7 +28,15 @@ $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
 $v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
 $v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
 $v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen'], 2);
-$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen'], ['on', '']);
+$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen', 'alerts_enabled'], ['on', '']);
+$v->rule('numeric', ['alert_weight_loss_threshold', 'alert_swarm_threshold', 'alert_high_temp', 'alert_low_temp', 'alert_flow_daily_gain']);
+$v->rule('integer', ['alert_weight_loss_hours', 'alert_stale_minutes', 'alert_flow_days']);
+$v->rule('min', ['alert_weight_loss_threshold', 'alert_swarm_threshold', 'alert_flow_daily_gain'], 0.1);
+$v->rule('min', ['alert_weight_loss_hours', 'alert_stale_minutes', 'alert_flow_days'], 1);
+$v->rule('min', ['alert_high_temp'], 50);
+$v->rule('max', ['alert_high_temp'], 150);
+$v->rule('min', ['alert_low_temp'], -20);
+$v->rule('max', ['alert_low_temp'], 80);
 
 }
 //Check input for badness
@@ -113,7 +121,15 @@ if($v->validate()) {
 
     $SHOW_METRIC = test_input($_POST["SHOW_METRIC"]);
 
-
+    $alerts_enabled = test_input($_POST["alerts_enabled"]);
+    $alert_weight_loss_threshold = test_input($_POST["alert_weight_loss_threshold"]);
+    $alert_weight_loss_hours = test_input($_POST["alert_weight_loss_hours"]);
+    $alert_swarm_threshold = test_input($_POST["alert_swarm_threshold"]);
+    $alert_high_temp = test_input($_POST["alert_high_temp"]);
+    $alert_low_temp = test_input($_POST["alert_low_temp"]);
+    $alert_stale_minutes = test_input($_POST["alert_stale_minutes"]);
+    $alert_flow_daily_gain = test_input($_POST["alert_flow_daily_gain"]);
+    $alert_flow_days = test_input($_POST["alert_flow_days"]);
 
   // Get current version    
   //  $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -123,8 +139,8 @@ if($v->validate()) {
    // $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=?,color_wind=?,color_pressure=?,color_pollen=?,trend_wind=?,trend_pressure=?,trend_pollen=? WHERE id=1");
-    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC,$color_wind,$color_pressure,$color_pollen,$trend_wind,$trend_pressure,$trend_pollen));
+    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=?,color_wind=?,color_pressure=?,color_pollen=?,trend_wind=?,trend_pressure=?,trend_pollen=?,alerts_enabled=?,alert_weight_loss_threshold=?,alert_weight_loss_hours=?,alert_swarm_threshold=?,alert_high_temp=?,alert_low_temp=?,alert_stale_minutes=?,alert_flow_daily_gain=?,alert_flow_days=? WHERE id=1");
+    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC,$color_wind,$color_pressure,$color_pollen,$trend_wind,$trend_pressure,$trend_pollen,$alerts_enabled,$alert_weight_loss_threshold,$alert_weight_loss_hours,$alert_swarm_threshold,$alert_high_temp,$alert_low_temp,$alert_stale_minutes,$alert_flow_daily_gain,$alert_flow_days));
     sleep(1);
 
 
@@ -158,9 +174,9 @@ if($v->validate()) {
             <!-- /.row -->
            <div class="row">
                 <div class="col-lg-12">
+                    <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
                     <div class="panel panel-default">
                         <!-- /.panel-heading -->
-                        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
                         <div class="panel-body">
                             <div class="dataTable_wrapper">
                                 <table class="table table-striped table-bordered table-hover" id="dataTables-example">
@@ -356,6 +372,81 @@ if($v->validate()) {
                             <!-- /.table-responsive -->
                         </div>
                         <!-- /.panel-body -->
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Dashboard Alerts</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="dataTable_wrapper">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Setting</th>
+                                            <th>Value</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="odd gradeX">
+                                        <td style="width:200px">Enable Alerts</td>
+                                        <td style="width:300px"><input type="checkbox" name="alerts_enabled" value="on" <?php if ($result['alerts_enabled'] == "on") {echo "checked='checked'";} ?> ></td>
+                                        <td>Master switch to enable or disable all dashboard alerts.</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>High Hive Temp (&deg;F)</td>
+                                        <td><input type="number" step="0.1" name="alert_high_temp" value="<?php echo htmlspecialchars($result['alert_high_temp']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Alert when hive temperature exceeds this value. Default: 100&deg;F</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Low Hive Temp (&deg;F)</td>
+                                        <td><input type="number" step="0.1" name="alert_low_temp" value="<?php echo htmlspecialchars($result['alert_low_temp']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Alert when hive temperature drops below this value. Default: 40&deg;F</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Robbing - Weight Loss (lb)</td>
+                                        <td><input type="number" step="0.1" name="alert_weight_loss_threshold" value="<?php echo htmlspecialchars($result['alert_weight_loss_threshold']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Weight loss in pounds that triggers a robbing alert (when combined with warm temps). Default: 1.0 lb</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Robbing - Time Window (hours)</td>
+                                        <td><input type="number" step="1" name="alert_weight_loss_hours" value="<?php echo htmlspecialchars($result['alert_weight_loss_hours']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Number of hours over which weight loss is measured for robbing detection. Default: 6 hours</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Swarm - Weight Drop (lb)</td>
+                                        <td><input type="number" step="0.1" name="alert_swarm_threshold" value="<?php echo htmlspecialchars($result['alert_swarm_threshold']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Sudden weight drop in pounds that triggers a swarm alert. Default: 3.0 lb</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Stale Data (minutes)</td>
+                                        <td><input type="number" step="1" name="alert_stale_minutes" value="<?php echo htmlspecialchars($result['alert_stale_minutes']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Alert when no new sensor readings for this many minutes. Default: 30 minutes</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Honey Flow - Daily Gain (lb)</td>
+                                        <td><input type="number" step="0.1" name="alert_flow_daily_gain" value="<?php echo htmlspecialchars($result['alert_flow_daily_gain']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Minimum daily weight gain to count as a flow day. Default: 0.5 lb/day</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Honey Flow - Consecutive Days</td>
+                                        <td><input type="number" step="1" name="alert_flow_days" value="<?php echo htmlspecialchars($result['alert_flow_days']); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Number of consecutive gain days needed to trigger a honey flow alert. Default: 3 days</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <button type="submit" class="btn btn-primary btn-lg">Save Settings</button>
+                        </div>
+                    </div>
+                    </form>
+                        </div>
                     </div>
                     <!-- /.panel -->
                 </div>

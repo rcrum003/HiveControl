@@ -1,15 +1,13 @@
 
 
 
+
 <!-- Chart Code -->
 
 
 <?php
 # We are going to use variables passed from the main page,
 # Specifically - Period and Chart
-
-#echo "Second Chart is $chart";
-#echo "Second Period is "; 
 
 switch ($period) {
     case "today":
@@ -36,19 +34,12 @@ switch ($period) {
 
 if ($chart == 'line') {
     # Echo back the Javascript code
- 
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
 // Get Hive Data First
 
-if ( $SHOW_METRIC == "on" ) {
-
-$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, air_aqi, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
-} else {
-
-//Show normal
-$sth = $conn->prepare("SELECT air_pm1, air_pm2_5,weather_tempf, air_aqi, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
-}
+$sth = $conn->prepare("SELECT air_pm1, air_pm2_5, weather_tempf, air_aqi, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
 
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
@@ -57,17 +48,14 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
-    $('#container').highcharts({
+    var chart = Highcharts.chart('container', {
         chart: {
-            
             zoomType: 'x'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -80,15 +68,8 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-        yAxis: [{ // Primary yAxis
+        yAxis: [{
             labels: {
                 style: {
                     color: '#000000'
@@ -98,13 +79,12 @@ $(function () {
                 text: 'AIR ug/m3',
                 style: {
                     color: '#000000'
-                },
+                }
+            },
+            minRange: 50,
             ceiling: 500,
             floor: 0
-            }
-            
-
-        }, { // Secondary yAxis
+        }, {
             gridLineWidth: 0,
             title: {
                 text: 'Temp',
@@ -113,13 +93,13 @@ $(function () {
                 }
             },
             labels: {
-                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
+                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo "',
                 style: {
                     color: '"; echo "$color_outtemp"; echo "'
                 }
             },
+            minRange: 20,
             opposite: true
-
         }],
         plotOptions: {
             line: {
@@ -137,35 +117,42 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/weight.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [{
             type: 'line',
-            name: 'PM1("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
+            name: 'PM1 (ug/m3)',
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['air_pm1']) && $r['air_pm1'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['air_pm1'])."], ";
                 } else {
                     echo "[".$r['datetime'].", null], ";
                 }
-            } echo "], 
+            } echo "],
             color: '"; echo "$color_pm1"; echo "'
         },
         {
            type: 'line',
-           name: 'PM2.5 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
+           name: 'PM2.5 (ug/m3)',
            data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['air_pm2_5']) && $r['air_pm2_5'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['air_pm2_5'])."], ";
                 } else {
@@ -177,53 +164,32 @@ $(function () {
         },
         {
             type: 'line',
-            name: 'AQI("; if ( $SHOW_METRIC == "on" ) { echo "um";} else {echo "um";} echo ")',
+            name: 'AQI',
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['air_aqi']) && $r['air_aqi'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['air_aqi'])."], ";
                 } else {
                     echo "[".$r['datetime'].", null], ";
                 }
-            } echo "], 
+            } echo "],
             color: '"; echo "$color_aqi"; echo "'
         },
         {
             type: 'line',
             yAxis: 1,
-            name: 'Rain ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
+            name: 'Temp ("; if ( $SHOW_METRIC == "on" ) { echo "°C";} else {echo "°F";} echo ")',
             data: ["; foreach($result as $r){
-                // Validate numeric value
-                if (is_numeric($r['weather_rain']) && $r['weather_rain'] != 0) {
-                    echo "[".$r['datetime'].", ".floatval($r['weather_rain'])."], ";
+                if (is_numeric($r['weather_tempf']) && $r['weather_tempf'] != 0) {
+                    echo "[".$r['datetime'].", ".floatval($r['weather_tempf'])."], ";
                 } else {
                     echo "[".$r['datetime'].", null], ";
                 }
             } echo "],
-            color: '"; echo "$color_rain"; echo "',
+            color: '"; echo "$color_outtemp"; echo "',
             visible: true
         }
         ]
     });
-
-    $(\"#b\").click(function(){
-            chart.yAxis[0].update({
-                labels: {
-                    enabled: false
-                },
-                title: {
-                    text: null
-                }
-            });
-        });
-
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/weight.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
 });
 </script>";
 
@@ -249,17 +215,14 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
 <!-- Chart Code -->
-
-
 <script>
 $(function () {
-    $('#container').highcharts({
+    var chart = Highcharts.chart('container', {
         chart: {
-            
             zoomType: 'x'
         },
         title: {
-            text: '', 
+            text: ''
         },
         xAxis: {
             type: 'datetime',
@@ -272,32 +235,24 @@ $(function () {
                 month: '%Y-%m',
                 year: '%Y'
             }
-
         },
-
-        rangeSelector: {
-                allButtonsEnabled: true,
-                selected: 2
-            },
-           
-        yAxis: [{ // Primary yAxis
+        yAxis: [{
             labels: {
-                format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "ppm";} else {echo "ppm";} echo "',
+                format: '{value} ppm',
                 style: {
                     color: '"; echo "$color_pm1"; echo "'
                 }
             },
             title: {
-                text: 'Weight',
+                text: 'Air Quality',
                 style: {
                     color: '"; echo "$color_pm1"; echo "'
-                },
+                }
+            },
+            minRange: 50,
             ceiling: 500,
             floor: 0
-            }
-            
-
-        }, { // Secondary yAxis
+        }, {
             gridLineWidth: 0,
             title: {
                 text: 'AQI',
@@ -306,15 +261,14 @@ $(function () {
                 }
             },
             labels: {
-                 format: '{value} "; if ( $SHOW_METRIC == "on" ) { echo "mm";} else {echo "°in";} echo "',
+                format: '{value}',
                 style: {
                     color: '"; echo "$color_aqi"; echo "'
                 }
             },
             opposite: true
-
-        }, 
-         { // Wind yAxis
+        },
+        {
             gridLineWidth: 1,
             title: {
                 text: 'Wind',
@@ -330,7 +284,6 @@ $(function () {
             },
             showEmpty: false,
             opposite: false
-
         }],
         plotOptions: {
             line: {
@@ -348,35 +301,42 @@ $(function () {
         tooltip: {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-
-                $.each(this.points, function () {
-                    s += '<br/>' + this.series.name + ': ' +
-                        this.y;
+                this.points.forEach(function (point) {
+                    s += '<br/>' + point.series.name + ': ' + point.y;
                 });
-
                 return s;
             },
             shared: true
-
+        },
+        exporting: {
+            buttons: {
+                contextButton: {
+                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG', 'separator', {
+                        text: 'Enlarge Chart',
+                        onclick: function () {
+                            centeredPopup('/pages/fullscreen/air.php?chart=line&period="; echo htmlspecialchars($period, ENT_QUOTES); echo "','HiveControl','1200','500','yes');
+                            return false;
+                        }
+                    }]
+                }
+            }
         },
         series: [{
             type: 'line',
-            name: 'Air PM1 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
+            name: 'Air PM1 (ug/m3)',
             data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['air_pm1']) && $r['air_pm1'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['air_pm1'])."], ";
                 } else {
                     echo "[".$r['datetime'].", null], ";
                 }
-            } echo "], 
+            } echo "],
             color: '"; echo "$color_pm1"; echo "'
         },
         {
            type: 'line',
-           name: 'Air PM2 ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
+           name: 'Air PM2.5 (ug/m3)',
            data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['air_pm2_5']) && $r['air_pm2_5'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['air_pm2_5'])."], ";
                 } else {
@@ -388,9 +348,8 @@ $(function () {
         },
         {
            type: 'line',
-           name: 'Air TempF ("; if ( $SHOW_METRIC == "on" ) { echo "kg";} else {echo "lb";} echo ")',
+           name: 'AQI',
            data: ["; foreach($result as $r){
-                // Validate numeric value
                 if (is_numeric($r['air_aqi']) && $r['air_aqi'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['air_aqi'])."], ";
                 } else {
@@ -399,44 +358,9 @@ $(function () {
             } echo "],
            color: '"; echo "$color_aqi"; echo "',
            visible: true
-        },
-        }, 
-        {
-            type: 'line',
-            name: 'Wind',
-            yAxis: 2,
-            data: ["; foreach($result as $r){
-                // Validate numeric value
-                if (is_numeric($r['wind']) && $r['wind'] != 0) {
-                    echo "[".$r['datetime'].", ".floatval($r['wind'])."], ";
-                } else {
-                    echo "[".$r['datetime'].", null], ";
-                }
-            } echo "],
-            color: '"; echo "$color_wind"; echo "',
-            visible: "; echo "$trend_wind"; echo "
         }
         ]
     });
-
-    $(\"#b\").click(function(){
-            chart.yAxis[0].update({
-                labels: {
-                    enabled: false
-                },
-                title: {
-                    text: null
-                }
-            });
-        });
-
-        Highcharts.getOptions().exporting.buttons.contextButton.menuItems.push({
-            text: 'Enlarge Chart',
-            onclick: function () {
-                centeredPopup('/pages/fullscreen/air.php?chart=line&period=";echo $period; echo"','HiveControl','1200','500','yes')
-                return false;
-            }
-        });
 });
 </script>";
 }
@@ -446,7 +370,7 @@ $(function () {
 ?>
 
 
- 
+
 
 
 

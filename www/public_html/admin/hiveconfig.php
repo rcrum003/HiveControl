@@ -21,18 +21,6 @@ $sth = $conn->prepare("SELECT * FROM hiveconfig");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
-$dateme=strtotime($result['GDD_START_DATE']);
-$futuredate = strtotime('-1 year');
-$isit = (strtotime($dateme) < strtotime('-1 year'));
-#echo $dateme."\r";
-#echo $futuredate."\r";
-
-if (strtotime($result['GDD_START_DATE']) > strtotime('-1 year')) {
-    // echo "score";
-} else {
-      $GDDSTATUS = "invalid";
-
-}
 
 }
 ###################################################
@@ -56,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v->rule('lengthmax', ['HIVEAPI'], 70);
     $v->rule('alphaNum', ['HIVEAPI']);
     $v->rule('regex', ['CITY', 'STATE', 'COUNTRY'], $regex1);
-    $v->rule('numeric', ['GDD_BASE_TEMP', 'ZIP']);
+    $v->rule('numeric', ['ZIP']);
 
 }
 ###################################################
@@ -129,8 +117,6 @@ if($v->validate()) {
     $HT_USERNAME = test_input($_POST["HT_USERNAME"]);
     $HT_PASSWORD_INPUT = test_input($_POST["HT_PASSWORD"]);
     $HT_URL = test_input($_POST["HT_URL"]);
-    $GDD_BASE_TEMP = test_input($_POST["GDD_BASE_TEMP"]);
-    $GDD_START_DATE = test_input_allow_slash($_POST["GDD_START_DATE"]);
     #$NASA_HONEYBEE_NET_ID = test_input($_POST["NASA_HONEYBEE_NET_ID"]);
     $POWER = test_input($_POST["POWER"]);
     $INTERNET = test_input($_POST["INTERNET"]);
@@ -150,8 +136,8 @@ if($v->validate()) {
     $HT_PASSWORD = !empty($HT_PASSWORD_INPUT) ? $HT_PASSWORD_INPUT : $current_pwd;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveapi=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,version=?,timezone=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,GDD_BASE_TEMP=?,GDD_START_DATE=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,ZIP=? WHERE id=1");
-    $doit->execute(array($hivename,$HIVEAPI,$yardid,$city,$state,$country,$latitude,$longitude,$version,$timezone,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$GDD_BASE_TEMP,$GDD_START_DATE,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$ZIP));
+    $doit = $conn->prepare("UPDATE hiveconfig SET hivename=?,hiveapi=?,yardid=?,city=?,state=?,country=?,latitude=?,longitude=?,version=?,timezone=?,share_hivetool=?,HT_USERNAME=?,HT_PASSWORD=?,HT_URL=?,POWER=?,INTERNET=?,STATUS=?,COMPUTER=?,START_DATE=?,ZIP=? WHERE id=1");
+    $doit->execute(array($hivename,$HIVEAPI,$yardid,$city,$state,$country,$latitude,$longitude,$version,$timezone,$share_hivetool,$HT_USERNAME,$HT_PASSWORD,$HT_URL,$POWER,$INTERNET,$STATUS,$COMPUTER,$START_DATE,$ZIP));
     sleep(3);
 
     // Refresh the fields in the form
@@ -400,17 +386,6 @@ if($v->validate()) {
                                         </td>
                                             <td>Timezone where Hive is located</td>
                                         </tr>
-                                       <tr class="odd gradeX">
-                                        <td>GDD Base Temp</td>
-                                        <td><input type="text" name="GDD_BASE_TEMP" value="<?PHP echo $result['GDD_BASE_TEMP'];?>" onchange="this.form.submit()"></td> 
-                                        <td>Base Temperature to start calculating GDD at. - Recommend 50</td>
-                                       </tr> 
-                                    </tr>
-                                       <tr class="odd gradeX">
-                                        <td>GDD Start Date</td>
-                                        <td><input type="text" name="GDD_START_DATE" value="<?PHP echo $result['GDD_START_DATE'];?>" onchange="this.form.submit()"></td> 
-                                        <td>Beginning date to start calculating GDD each year. - year, month, day (format 20150301) - Recommend the last freezing day. Most people recommend March 1, and most GDD plant values are based on a 3/1 start date. </td>
-                                       </tr>
 
                                    <! ***************************************************** -->
 
