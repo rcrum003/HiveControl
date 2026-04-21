@@ -61,9 +61,14 @@ switch ($sensor) {
         $valueheader = "Air Quality Data";
         break;
 
+    case "airnow":
+        $value = shell_exec("/usr/bin/timeout 60 sudo /home/HiveControl/scripts/air/getairnow.sh 2>/dev/null | tail -10");
+        $valueheader = "EPA AirNow Data";
+        break;
+
     default:
         $valueheader = "Unknown sensor type";
-        $value = "Specify a valid sensor: hivetemp, hiveweight, hivelux, weather, camera, airquality";
+        $value = "Specify a valid sensor: hivetemp, hiveweight, hivelux, weather, camera, airquality, airnow";
         break;
 }
 

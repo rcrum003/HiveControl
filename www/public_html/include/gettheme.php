@@ -77,8 +77,15 @@ Highcharts.setOptions({
     $color_pressure = $result2['color_pressure'];
     $color_pollen = $result2['color_pollen'];
 
+    $color_pm2_5 = isset($result2['color_pm2_5']) ? $result2['color_pm2_5'] : '#FF6347';
+    $color_pm10 = isset($result2['color_pm10']) ? $result2['color_pm10'] : '#FF8C00';
+    $color_pm1 = isset($result2['color_pm1']) ? $result2['color_pm1'] : '#32CD32';
+    $color_pm2_5_aqi = isset($result2['color_pm2_5_aqi']) ? $result2['color_pm2_5_aqi'] : '#CC3333';
+    $color_pm10_aqi = isset($result2['color_pm10_aqi']) ? $result2['color_pm10_aqi'] : '#CC6600';
+    $color_o3 = isset($result2['color_o3']) ? $result2['color_o3'] : '#9370DB';
+    $color_no2 = isset($result2['color_no2']) ? $result2['color_no2'] : '#20B2AA';
 
-    
+
     if ($result2['trend_hivetemp'] == "on") {$trend_hivetemp = "true";} else { $trend_hivetemp = "false"; }
     if ($result2['trend_hivehum'] == "on") {$trend_hivehum = "true";} else { $trend_hivehum = "false"; }
     if ($result2['trend_outtemp'] == "on") {$trend_outtemp = "true";} else { $trend_outtemp = "false"; }
@@ -95,6 +102,14 @@ Highcharts.setOptions({
     if ($result2['trend_wind'] == "on") {$trend_wind = "true";} else { $trend_wind = "false"; }
     if ($result2['trend_pressure'] == "on") {$trend_pressure = "true";} else { $trend_pressure = "false"; }
     if ($result2['trend_pollen'] == "on") {$trend_pollen = "true";} else { $trend_pollen = "false"; }
+
+    if (isset($result2['trend_pm2_5']) && $result2['trend_pm2_5'] == "on") {$trend_pm2_5 = "true";} else { $trend_pm2_5 = "false"; }
+    if (isset($result2['trend_pm10']) && $result2['trend_pm10'] == "on") {$trend_pm10 = "true";} else { $trend_pm10 = "false"; }
+    if (isset($result2['trend_pm1']) && $result2['trend_pm1'] == "on") {$trend_pm1 = "true";} else { $trend_pm1 = "false"; }
+    if (isset($result2['trend_pm2_5_aqi']) && $result2['trend_pm2_5_aqi'] == "on") {$trend_pm2_5_aqi = "true";} else { $trend_pm2_5_aqi = "false"; }
+    if (isset($result2['trend_pm10_aqi']) && $result2['trend_pm10_aqi'] == "on") {$trend_pm10_aqi = "true";} else { $trend_pm10_aqi = "false"; }
+    if (isset($result2['trend_o3']) && $result2['trend_o3'] == "on") {$trend_o3 = "true";} else { $trend_o3 = "false"; }
+    if (isset($result2['trend_no2']) && $result2['trend_no2'] == "on") {$trend_no2 = "true";} else { $trend_no2 = "false"; }
 
     $chart_rounding = $result2['chart_rounding'];
     $chart_smoothing = $result2['chart_smoothing'];

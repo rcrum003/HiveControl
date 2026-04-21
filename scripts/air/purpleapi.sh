@@ -1,37 +1,20 @@
 
 #!/bin/bash
 ###################################
-# Purple Air
+# Purple Air — Cloud API (api.purpleair.com)
 #
-# Script to pull air quality reports from a Purple Air sensor api.purpleair.com
-#
-# You can pull using one hive, but any more and PurpleAir may block you.
-# Alternatively, setup a main/sub structure
+# Pulls air quality data from PurpleAir v1 API
+# Outputs expanded CSV: DATE,AIR_TEMP,AIR_HUMIDITY,PM1_0,PM2_5,PM10,PM2_5_AQI,PM10_AQI,PM1_RAW,PM2_5_RAW,PM10_RAW,PRESSURE
 
-# v 2022080101
+# v 2026042001
 
-#Pull configs and logger library
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
-#source /home/HiveControl/scripts/data/curl.inc
+source /home/HiveControl/scripts/air/air_helpers.inc
 
-#Store date in a variable
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
-JSON_PATH="/home/HiveControl/scripts/weather/JSON.sh"
-
-
-#Instructions
-#Documentation here:
-#api.purpleair.com
-
-
-#####################
-# Main
-#####################
-
 AIR_URL="https://api.purpleair.com/v1/sensors"
-TEMPFILE="/home/HiveControl/scripts/air/output.json"
 
 PURPLE_API_KEY="${AIR_API:-}"
 
@@ -41,42 +24,30 @@ if [ -z "$PURPLE_API_KEY" ]; then
 	exit 1
 fi
 
-#TEMPFILE="/home/pi/purpleair/output.json"
+TRYCOUNTER="1"
+DATA_GOOD="0"
 
-#Get all sensors
-#https://www.purpleair.com/json 
-
-#If PurpleSensorID is set, then use that one
-#IF not, Find Air Quality Closet to you by latitude/longitude
-
-#Pull Sensor Data
-#https://www.purpleair.com/json?show=<ID>
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
-	#https://www.purpleair.com/json?show=7634
 	API_RESULT=$(/usr/bin/curl -s "$AIR_URL/$AIR_ID" --header "X-API-Key: $PURPLE_API_KEY")
-		
-	#Get Stats:
-	PM2_5=$(jq --raw-output '.sensor."pm2.5"' <<<  "$API_RESULT")
-	PM1_0=$(jq --raw-output '.sensor."pm1.0"' <<<  "$API_RESULT")
-	PM10=$(jq --raw-output '.sensor."pm10.0"' <<<  "$API_RESULT")
-	AIR_TEMP=$(jq --raw-output '.sensor.temperature' <<<  "$API_RESULT")
-	AIR_HUMIDITY=$(jq --raw-output '.sensor.humidity' <<<  "$API_RESULT")
-	AIR_PRESURE=$(jq --raw-output '.sensor.pressure' <<<  "$API_RESULT")
 
-#New Factors:
-#http://vista.cira.colostate.edu/Improve/visibility-basics/
-	SCAT_COEFF=$(jq --raw-output '.sensor.scattering_coefficient' <<<  "$API_RESULT")
-	DECIVIEWS=$(jq --raw-output '.sensor.deciviews' <<<  "$API_RESULT")
-	VISUAL_RANGE=$(jq --raw-output '.sensor.visual_range' <<<  "$API_RESULT")
+	# Mass concentrations from API (ug/m3)
+	PM2_5=$(jq --raw-output '.sensor."pm2.5" // empty' <<< "$API_RESULT")
+	PM1_0=$(jq --raw-output '.sensor."pm1.0" // empty' <<< "$API_RESULT")
+	PM10=$(jq --raw-output '.sensor."pm10.0" // empty' <<< "$API_RESULT")
 
-#Stats
-	PM2_5_10M=$(jq --raw-output '.sensor.stats."pm2.5_10minute"' <<<  "$API_RESULT")
-	PM2_5_30M=$(jq --raw-output '.sensor.stats."pm2.5_30minute"' <<<  "$API_RESULT")
-	PM2_5_60M=$(jq --raw-output '.sensor.stats."pm2.5_60minute"' <<<  "$API_RESULT")
+	# These are the same values on the cloud API (ATM-corrected)
+	PM2_5_RAW="${PM2_5}"
+	PM10_RAW="${PM10}"
+	PM1_RAW="${PM1_0}"
 
-if [ -z "$PM2_5"  ]; then
-		loglocal "$DATE" AIR INFO "Did not get a proper response from PurpleAir, trying again"
+	# Environmental readings
+	AIR_TEMP=$(jq --raw-output '.sensor.temperature // empty' <<< "$API_RESULT")
+	AIR_HUMIDITY=$(jq --raw-output '.sensor.humidity // empty' <<< "$API_RESULT")
+	PRESSURE=$(jq --raw-output '.sensor.pressure // empty' <<< "$API_RESULT")
+
+	if [ -z "$PM2_5" ]; then
+		loglocal "$DATE" AIR INFO "Did not get a proper response from PurpleAir API, trying again"
 		let TRYCOUNTER+=1
 	else
 		DATA_GOOD=1
@@ -84,54 +55,21 @@ if [ -z "$PM2_5"  ]; then
 done
 
 if [ $DATA_GOOD = "0" ]; then
-	loglocal "$DATE" AIR ERROR "Did not get a proper response from PurpleAir, stopping. $RESULT"
+	loglocal "$DATE" AIR ERROR "Did not get a proper response from PurpleAir API"
 	echo "ERROR"
 	exit
 fi
 
-#Do Conversion to AQI for US Market
-#https://en.wikipedia.org/wiki/Air_quality_index
+# Compute EPA AQI
+PM2_5_AQI=$(pm25_to_aqi "${PM2_5_RAW:-0}")
+PM10_AQI=$(pm10_to_aqi "${PM10_RAW:-0}")
 
-#Remove tempfile
-rm -rf $TEMPFILE
+# Default any empty values to null
+PM1_RAW="${PM1_RAW:-null}"
+PM2_5_RAW="${PM2_5_RAW:-null}"
+PM10_RAW="${PM10_RAW:-null}"
+PRESSURE="${PRESSURE:-null}"
+PM2_5_AQI="${PM2_5_AQI:-null}"
+PM10_AQI="${PM10_AQI:-null}"
 
-#Return output for main script
-
-#Note: last value is the derived 
-#echo "DATE,AIR_TEMP,AIR_HUMIDITY,PM1_0,PM2_5,PM10,AQI"
-echo "$DATE,$AIR_TEMP,$AIR_HUMIDITY,$PM1_0,$PM2_5,$PM10,0,$PM2_5_10M,$PM2_5_30M,$PM2_5_60M,$SCAT_COEFF,$DECIVIEWS,$VISUAL_RANGE"
-
-
-
-#         _
-#        /_/_      .'''.
-#     =O(_)))) ...'     `.
-#        \_\              `.    .'''
-#                           `..'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+echo "$DATE,$AIR_TEMP,$AIR_HUMIDITY,$PM1_0,$PM2_5,$PM10,$PM2_5_AQI,$PM10_AQI,$PM1_RAW,$PM2_5_RAW,$PM10_RAW,$PRESSURE"

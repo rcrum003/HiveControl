@@ -1,32 +1,6 @@
-
-#
-# This file MUST be edited with the 'visudo' command as root.
-#
-# Please consider adding local content in /etc/sudoers.d/ instead of
-# directly modifying this file.
-#
-# See the man page for details on how to write a sudoers file.
-#
-Defaults	env_reset
-Defaults	mail_badpass
-Defaults	secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-# Host alias specification
-
-# User alias specification
-
-# Cmnd alias specification
-
-# User privilege specification
-root	ALL=(ALL:ALL) ALL
-
-# Allow members of group sudo to execute any command
-%sudo	ALL=(ALL:ALL) ALL
-
-# See sudoers(5) for more information on "#include" directives:
-
-#includedir /etc/sudoers.d
+# HiveControl sudoers drop-in for /etc/sudoers.d/
+# Do NOT include Defaults or #includedir here — those belong in /etc/sudoers
 
 pi ALL=(ALL) NOPASSWD: ALL
 
-www-data ALL = NOPASSWD: /home/HiveControl/scripts/temp/gettemp.sh, /home/HiveControl/scripts/weight/getweight.sh, /home/HiveControl/scripts/weight/getrawreading.sh, /home/HiveControl/scripts/data/hiveconfig.sh, /home/HiveControl/scripts/data/dump_hiveconfig_inc.sh, /home/HiveControl/scripts/light/getlux.sh, /home/HiveControl/scripts/weather/getwx.sh, /home/HiveControl/scripts/image/takepic.sh, /home/HiveControl/scripts/air/getair.sh, /bin/sed, /usr/bin/awk, /usr/bin/bc, /home/HiveControl/scripts/weight/getweight.sh, /usr/local/bin/hx711, /usr/local/bin/2591, /usr/bin/nice, /usr/local/bin/Seeed_DHT21, /usr/local/bin/DHTXXD, /home/HiveControl/scripts/dht22.sh, /usr/bin/python, /usr/bin/python3, /usr/local/bin/tempered
+www-data ALL = NOPASSWD: /home/HiveControl/scripts/temp/gettemp.sh, /home/HiveControl/scripts/weight/getweight.sh, /home/HiveControl/scripts/weight/getrawreading.sh, /home/HiveControl/scripts/data/hiveconfig.sh, /home/HiveControl/scripts/data/dump_hiveconfig_inc.sh, /home/HiveControl/scripts/light/getlux.sh, /home/HiveControl/scripts/weather/getwx.sh, /home/HiveControl/scripts/image/takepic.sh, /home/HiveControl/scripts/air/getair.sh, /home/HiveControl/scripts/air/getairnow.sh, /bin/sed, /usr/bin/awk, /usr/bin/bc, /home/HiveControl/scripts/weight/getweight.sh, /usr/local/bin/hx711, /usr/local/bin/2591, /usr/bin/nice, /usr/local/bin/Seeed_DHT21, /usr/local/bin/DHTXXD, /home/HiveControl/scripts/dht22.sh, /usr/bin/python, /usr/bin/python3, /usr/local/bin/tempered

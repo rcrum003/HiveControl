@@ -16,7 +16,7 @@ $result = $sth->fetch(PDO::FETCH_ASSOC);
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Set Error Fields
 // Ensure checkbox fields exist in POST data with empty string if unchecked
-$checkbox_fields = ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'trend_wind', 'trend_pressure', 'trend_pollen', 'chart_rounding', 'chart_smoothing', 'SHOW_METRIC', 'alerts_enabled'];
+$checkbox_fields = ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'trend_wind', 'trend_pressure', 'trend_pollen', 'trend_pm2_5', 'trend_pm10', 'trend_pm1', 'trend_pm2_5_aqi', 'trend_pm10_aqi', 'trend_o3', 'trend_no2', 'chart_rounding', 'chart_smoothing', 'SHOW_METRIC', 'alerts_enabled'];
 foreach ($checkbox_fields as $field) {
     if (!isset($_POST[$field])) {
         $_POST[$field] = '';
@@ -25,10 +25,11 @@ foreach ($checkbox_fields as $field) {
 
 $v = new Valitron\Validator($_POST);
 $v->rule('slug', ['SITE_CONFIG', 'www_chart_theme', 'SITE_TYPE']);
-$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
-$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen'], 7);
-$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen'], 2);
-$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen', 'alerts_enabled'], ['on', '']);
+$v->rule('lengthmax', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen','color_pm2_5','color_pm10','color_pm1','color_pm2_5_aqi','color_pm10_aqi','color_o3','color_no2'], 7);
+$v->rule('lengthmin', ['color_hivetemp', 'color_hivehum', 'color_outtemp', 'color_outhum', 'color_grossweight', 'color_netweight', 'color_lux', 'color_solarradiation', 'color_rain', 'color_gdd', 'color_beecount_in', 'color_beecount_out', 'color_wind','color_pressure','color_pollen','color_pm2_5','color_pm10','color_pm1','color_pm2_5_aqi','color_pm10_aqi','color_o3','color_no2'], 7);
+$v->rule('lengthmax', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen', 'trend_pm2_5', 'trend_pm10', 'trend_pm1', 'trend_pm2_5_aqi', 'trend_pm10_aqi', 'trend_o3', 'trend_no2'], 2);
+$v->rule('in', ['trend_hivetemp', 'trend_hivehum', 'trend_outtemp', 'trend_outhum', 'trend_grossweight', 'trend_netweight', 'trend_lux', 'trend_solarradiation', 'trend_rain', 'trend_gdd', 'chart_rounding', 'chart_smoothing', 'trend_beecount_in', 'trend_beecount_out', 'SHOW_METRIC', 'trend_wind', 'trend_pressure', 'trend_pollen', 'trend_pm2_5', 'trend_pm10', 'trend_pm1', 'trend_pm2_5_aqi', 'trend_pm10_aqi', 'trend_o3', 'trend_no2', 'alerts_enabled'], ['on', '']);
+$v->rule('numeric', ['alert_pm25_threshold', 'alert_o3_threshold', 'alert_smoke_aqi_threshold']);
 $v->rule('numeric', ['alert_weight_loss_threshold', 'alert_swarm_threshold', 'alert_high_temp', 'alert_low_temp', 'alert_flow_daily_gain']);
 $v->rule('integer', ['alert_weight_loss_hours', 'alert_stale_minutes', 'alert_flow_days']);
 $v->rule('min', ['alert_weight_loss_threshold', 'alert_swarm_threshold', 'alert_flow_daily_gain'], 0.1);
@@ -99,6 +100,13 @@ if($v->validate()) {
     $color_wind = test_input($_POST["color_wind"]);
     $color_pressure = test_input($_POST["color_pressure"]);
     $color_pollen = test_input($_POST["color_pollen"]);
+    $color_pm2_5 = test_input($_POST["color_pm2_5"]);
+    $color_pm10 = test_input($_POST["color_pm10"]);
+    $color_pm1 = test_input($_POST["color_pm1"]);
+    $color_pm2_5_aqi = test_input($_POST["color_pm2_5_aqi"]);
+    $color_pm10_aqi = test_input($_POST["color_pm10_aqi"]);
+    $color_o3 = test_input($_POST["color_o3"]);
+    $color_no2 = test_input($_POST["color_no2"]);
 
     $trend_hivetemp = test_input($_POST["trend_hivetemp"]);
     $trend_hivehum = test_input($_POST["trend_hivehum"]);
@@ -115,6 +123,13 @@ if($v->validate()) {
     $trend_wind = test_input($_POST["trend_wind"]);
     $trend_pressure = test_input($_POST["trend_pressure"]);
     $trend_pollen = test_input($_POST["trend_pollen"]);
+    $trend_pm2_5 = test_input($_POST["trend_pm2_5"]);
+    $trend_pm10 = test_input($_POST["trend_pm10"]);
+    $trend_pm1 = test_input($_POST["trend_pm1"]);
+    $trend_pm2_5_aqi = test_input($_POST["trend_pm2_5_aqi"]);
+    $trend_pm10_aqi = test_input($_POST["trend_pm10_aqi"]);
+    $trend_o3 = test_input($_POST["trend_o3"]);
+    $trend_no2 = test_input($_POST["trend_no2"]);
 
     $chart_rounding = test_input($_POST["chart_rounding"]);
     $chart_smoothing = test_input($_POST["chart_smoothing"]);
@@ -130,6 +145,9 @@ if($v->validate()) {
     $alert_stale_minutes = test_input($_POST["alert_stale_minutes"]);
     $alert_flow_daily_gain = test_input($_POST["alert_flow_daily_gain"]);
     $alert_flow_days = test_input($_POST["alert_flow_days"]);
+    $alert_pm25_threshold = test_input($_POST["alert_pm25_threshold"]);
+    $alert_o3_threshold = test_input($_POST["alert_o3_threshold"]);
+    $alert_smoke_aqi_threshold = test_input($_POST["alert_smoke_aqi_threshold"]);
 
   // Get current version    
   //  $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -139,8 +157,8 @@ if($v->validate()) {
    // $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=?,color_wind=?,color_pressure=?,color_pollen=?,trend_wind=?,trend_pressure=?,trend_pollen=?,alerts_enabled=?,alert_weight_loss_threshold=?,alert_weight_loss_hours=?,alert_swarm_threshold=?,alert_high_temp=?,alert_low_temp=?,alert_stale_minutes=?,alert_flow_daily_gain=?,alert_flow_days=? WHERE id=1");
-    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC,$color_wind,$color_pressure,$color_pollen,$trend_wind,$trend_pressure,$trend_pollen,$alerts_enabled,$alert_weight_loss_threshold,$alert_weight_loss_hours,$alert_swarm_threshold,$alert_high_temp,$alert_low_temp,$alert_stale_minutes,$alert_flow_daily_gain,$alert_flow_days));
+    $doit = $conn->prepare("UPDATE hiveconfig SET SITE_ORIENT=?,SITE_TYPE=?,www_chart_theme=?,color_hivetemp=?,trend_hivetemp=?,color_hivehum=?,color_outtemp=?,color_outhum=?,color_grossweight=?,color_netweight=?,color_lux=?,color_solarradiation=?,color_rain=?,color_gdd=?,trend_hivehum=?,trend_outtemp=?,trend_outhum=?,trend_grossweight=?,trend_netweight=?,trend_lux=?,trend_solarradiation=?,trend_rain=?,trend_gdd=?,chart_rounding=?,chart_smoothing=?,color_beecount_in=?,color_beecount_out=?,trend_beecount_in=?,trend_beecount_out=?,SHOW_METRIC=?,color_wind=?,color_pressure=?,color_pollen=?,trend_wind=?,trend_pressure=?,trend_pollen=?,color_pm2_5=?,color_pm10=?,color_pm1=?,color_pm2_5_aqi=?,color_pm10_aqi=?,color_o3=?,color_no2=?,trend_pm2_5=?,trend_pm10=?,trend_pm1=?,trend_pm2_5_aqi=?,trend_pm10_aqi=?,trend_o3=?,trend_no2=?,alerts_enabled=?,alert_weight_loss_threshold=?,alert_weight_loss_hours=?,alert_swarm_threshold=?,alert_high_temp=?,alert_low_temp=?,alert_stale_minutes=?,alert_flow_daily_gain=?,alert_flow_days=?,alert_pm25_threshold=?,alert_o3_threshold=?,alert_smoke_aqi_threshold=? WHERE id=1");
+    $doit->execute(array($SITE_ORIENT,$SITE_TYPE,$www_chart_theme,$color_hivetemp,$trend_hivetemp,$color_hivehum,$color_outtemp,$color_outhum,$color_grossweight,$color_netweight,$color_lux,$color_solarradiation,$color_rain,$color_gdd,$trend_hivehum,$trend_outtemp,$trend_outhum,$trend_grossweight,$trend_netweight,$trend_lux,$trend_solarradiation,$trend_rain,$trend_gdd,$chart_rounding,$chart_smoothing,$color_beecount_in,$color_beecount_out,$trend_beecount_in,$trend_beecount_out,$SHOW_METRIC,$color_wind,$color_pressure,$color_pollen,$trend_wind,$trend_pressure,$trend_pollen,$color_pm2_5,$color_pm10,$color_pm1,$color_pm2_5_aqi,$color_pm10_aqi,$color_o3,$color_no2,$trend_pm2_5,$trend_pm10,$trend_pm1,$trend_pm2_5_aqi,$trend_pm10_aqi,$trend_o3,$trend_no2,$alerts_enabled,$alert_weight_loss_threshold,$alert_weight_loss_hours,$alert_swarm_threshold,$alert_high_temp,$alert_low_temp,$alert_stale_minutes,$alert_flow_daily_gain,$alert_flow_days,$alert_pm25_threshold,$alert_o3_threshold,$alert_smoke_aqi_threshold));
     sleep(1);
 
 
@@ -352,9 +370,51 @@ if($v->validate()) {
                                         </td>
                                         </tr>
                                         <tr class="odd gradeX">
-                                            <td>Pollen </td> 
+                                            <td>Pollen </td>
                                             <td><input type="checkbox" onchange="this.form.submit()" name="trend_pollen" value="on" <?php if ($result['trend_pollen'] == "on") {echo "checked='checked'";} ?> > </td>
                                             <td><input type='color' onchange="this.form.submit()" name='color_pollen' value="<?php echo $result['color_pollen']; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>PM2.5 (ug/m3) </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm2_5" value="on" <?php if (isset($result['trend_pm2_5']) && $result['trend_pm2_5'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm2_5' value="<?php echo isset($result['color_pm2_5']) ? $result['color_pm2_5'] : '#FF6347'; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>PM10 (ug/m3) </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm10" value="on" <?php if (isset($result['trend_pm10']) && $result['trend_pm10'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm10' value="<?php echo isset($result['color_pm10']) ? $result['color_pm10'] : '#FF8C00'; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>PM1 (ug/m3) </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm1" value="on" <?php if (isset($result['trend_pm1']) && $result['trend_pm1'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm1' value="<?php echo isset($result['color_pm1']) ? $result['color_pm1'] : '#32CD32'; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>PM2.5 AQI </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm2_5_aqi" value="on" <?php if (isset($result['trend_pm2_5_aqi']) && $result['trend_pm2_5_aqi'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm2_5_aqi' value="<?php echo isset($result['color_pm2_5_aqi']) ? $result['color_pm2_5_aqi'] : '#CC3333'; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>PM10 AQI </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_pm10_aqi" value="on" <?php if (isset($result['trend_pm10_aqi']) && $result['trend_pm10_aqi'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_pm10_aqi' value="<?php echo isset($result['color_pm10_aqi']) ? $result['color_pm10_aqi'] : '#CC6600'; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>Ozone (O3) </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_o3" value="on" <?php if (isset($result['trend_o3']) && $result['trend_o3'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_o3' value="<?php echo isset($result['color_o3']) ? $result['color_o3'] : '#9370DB'; ?>" /> </td>
+                                        </td>
+                                        </tr>
+                                        <tr class="odd gradeX">
+                                            <td>Nitrogen Dioxide (NO2) </td>
+                                            <td><input type="checkbox" onchange="this.form.submit()" name="trend_no2" value="on" <?php if (isset($result['trend_no2']) && $result['trend_no2'] == "on") {echo "checked='checked'";} ?> > </td>
+                                            <td><input type='color' onchange="this.form.submit()" name='color_no2' value="<?php echo isset($result['color_no2']) ? $result['color_no2'] : '#20B2AA'; ?>" /> </td>
                                         </td>
                                         </tr>
                                     </tbody>
@@ -433,6 +493,21 @@ if($v->validate()) {
                                         <td>Honey Flow - Consecutive Days</td>
                                         <td><input type="number" step="1" name="alert_flow_days" value="<?php echo htmlspecialchars($result['alert_flow_days']); ?>" class="form-control" style="width:120px;display:inline"></td>
                                         <td>Number of consecutive gain days needed to trigger a honey flow alert. Default: 3 days</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>High PM2.5 (ug/m3)</td>
+                                        <td><input type="number" step="0.1" name="alert_pm25_threshold" value="<?php echo htmlspecialchars($result['alert_pm25_threshold'] ?? '35.5'); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Alert when PM2.5 concentration exceeds this value. EPA "Unhealthy for Sensitive Groups" starts at 35.5. Default: 35.5 ug/m3</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>High Ozone AQI</td>
+                                        <td><input type="number" step="1" name="alert_o3_threshold" value="<?php echo htmlspecialchars($result['alert_o3_threshold'] ?? '100'); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Alert when O3 AQI exceeds this value. Ozone degrades floral scents and impairs bee navigation. Default: 100</td>
+                                    </tr>
+                                    <tr class="odd gradeX">
+                                        <td>Smoke / Wildfire AQI</td>
+                                        <td><input type="number" step="1" name="alert_smoke_aqi_threshold" value="<?php echo htmlspecialchars($result['alert_smoke_aqi_threshold'] ?? '150'); ?>" class="form-control" style="width:120px;display:inline"></td>
+                                        <td>Alert when PM2.5 AQI exceeds this level, indicating possible wildfire smoke. Consider restricting hive entrance. Default: 150</td>
                                     </tr>
                                     </tbody>
                                 </table>

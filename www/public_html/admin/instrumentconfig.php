@@ -220,6 +220,9 @@ if($v->validate()) {
     $AIR_ID = test_input($_POST["AIR_ID"]);
     $AIR_API = test_input($_POST["AIR_API"] ?? '');
     $AIR_LOCAL_URL = test_input($_POST["AIR_LOCAL_URL"] ?? '');
+    $ENABLE_AIRNOW = test_input($_POST["ENABLE_AIRNOW"] ?? 'no');
+    $KEY_AIRNOW = test_input($_POST["KEY_AIRNOW"] ?? '');
+    $AIRNOW_DISTANCE = test_input($_POST["AIRNOW_DISTANCE"] ?? '25');
     
   // Get current version    
     $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -229,8 +232,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback, $weather_fallback_2, $wx_max_stale_minutes, $key_openweathermap, $key_weatherapi, $key_visualcrossing, $key_pirateweather, $key_tomorrow, $key_ambee));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback, $weather_fallback_2, $wx_max_stale_minutes, $key_openweathermap, $key_weatherapi, $key_visualcrossing, $key_pirateweather, $key_tomorrow, $key_ambee, $ENABLE_AIRNOW, $KEY_AIRNOW, $AIRNOW_DISTANCE));
     sleep(1);
 
 
@@ -294,6 +297,9 @@ if($v->validate()) {
                             <input type="hidden" name="AIR_ID" value="<?php echo $result['AIR_ID'] ?? ''; ?>">
                             <input type="hidden" name="AIR_API" value="<?php echo $result['AIR_API'] ?? ''; ?>">
                             <input type="hidden" name="AIR_LOCAL_URL" value="<?php echo $result['AIR_LOCAL_URL'] ?? ''; ?>">
+                            <input type="hidden" name="ENABLE_AIRNOW" value="<?php echo $result['ENABLE_AIRNOW'] ?? 'no'; ?>">
+                            <input type="hidden" name="KEY_AIRNOW" value="<?php echo $result['KEY_AIRNOW'] ?? ''; ?>">
+                            <input type="hidden" name="AIRNOW_DISTANCE" value="<?php echo $result['AIRNOW_DISTANCE'] ?? '25'; ?>">
                             <input type="hidden" name="TEMPTYPE" value="<?php echo $result['TEMPTYPE']; ?>">
                             <input type="hidden" name="HIVEDEVICE" value="<?php echo $result['HIVEDEVICE']; ?>">
                             <input type="hidden" name="HIVE_TEMP_SUB" value="<?php echo $result['HIVE_TEMP_SUB']; ?>">
@@ -966,6 +972,35 @@ if (empty($health_rows)) {
                               <input type="text" name="AIR_LOCAL_URL" onchange="this.form.submit()"
                                      value="<?php echo htmlspecialchars($result['AIR_LOCAL_URL'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                                      placeholder="http://192.168.1.x/json" title="Must include /json path">
+                            <?php endif; ?>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+<?PHP ############################################################################################################### ?>
+                        <tr class="odd gradeX">
+                            <td>
+                                <a href="#" title="EPA AirNow" data-toggle="popover" data-placement="bottom" data-content="Pulls hourly O3 (ozone) and NO2 data from the nearest EPA regulatory monitor via AirNow API. Free, 500 requests/day."><p class="fa fa-question-circle fa-fw"></P></a>
+                                EPA AirNow<br>
+                                <small class="text-muted">Ozone &amp; NO2</small>
+                            </td>
+                            <td>
+                            <select name="ENABLE_AIRNOW" onchange="this.form.submit()">
+                            <option value="yes" <?php if (($result['ENABLE_AIRNOW'] ?? 'no') == "yes") {echo "selected='selected'";} ?>>Enabled</option>
+                            <option value="no" <?php if (($result['ENABLE_AIRNOW'] ?? 'no') == "no") {echo "selected='selected'";} ?>>Disabled</option>
+                            </select>
+                            </td>
+                            <td>
+                            <?php if (($result['ENABLE_AIRNOW'] ?? 'no') == "yes"): ?>
+                              AirNow API Key (<a href="https://docs.airnowapi.org/account/request/" target="_blank">Get free key</a>)<br>
+                              <input type="text" name="KEY_AIRNOW" size="40" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['KEY_AIRNOW'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                     placeholder="AirNow API Key">
+                              <br><br>
+                              Search Radius (miles)<br>
+                              <input type="number" name="AIRNOW_DISTANCE" min="5" max="100" onchange="this.form.submit()"
+                                     value="<?php echo htmlspecialchars($result['AIRNOW_DISTANCE'] ?? '25', ENT_QUOTES, 'UTF-8'); ?>">
                             <?php endif; ?>
                             </td>
                             <td></td>

@@ -1,0 +1,29 @@
+-- DB_PATCH_39: Expanded air quality columns for PM concentrations and EPA AQI
+-- Adds raw ug/m3 concentrations, EPA AQI conversions, and AirNow config
+
+-- allhivedata: expanded air quality fields
+ALTER TABLE allhivedata ADD COLUMN air_pm2_5_aqi NUMERIC DEFAULT NULL;
+ALTER TABLE allhivedata ADD COLUMN air_pm10_aqi NUMERIC DEFAULT NULL;
+ALTER TABLE allhivedata ADD COLUMN air_pm2_5_raw NUMERIC DEFAULT NULL;
+ALTER TABLE allhivedata ADD COLUMN air_pm10_raw NUMERIC DEFAULT NULL;
+ALTER TABLE allhivedata ADD COLUMN air_pm1_raw NUMERIC DEFAULT NULL;
+ALTER TABLE allhivedata ADD COLUMN air_pressure NUMERIC DEFAULT NULL;
+ALTER TABLE allhivedata ADD COLUMN air_source TEXT DEFAULT NULL;
+
+-- hiveconfig: AirNow API configuration
+ALTER TABLE hiveconfig ADD COLUMN KEY_AIRNOW TEXT DEFAULT '';
+ALTER TABLE hiveconfig ADD COLUMN AIRNOW_DISTANCE INTEGER DEFAULT 25;
+ALTER TABLE hiveconfig ADD COLUMN ENABLE_AIRNOW TEXT DEFAULT 'no';
+
+-- hiveconfig: air quality alert thresholds
+ALTER TABLE hiveconfig ADD COLUMN alert_pm25_threshold NUMERIC DEFAULT 35.5;
+ALTER TABLE hiveconfig ADD COLUMN alert_o3_threshold NUMERIC DEFAULT 100;
+ALTER TABLE hiveconfig ADD COLUMN alert_smoke_aqi_threshold INTEGER DEFAULT 150;
+
+-- hiveconfig: chart colors for new air series
+ALTER TABLE hiveconfig ADD COLUMN color_pm10 TEXT DEFAULT '#FF8C00';
+ALTER TABLE hiveconfig ADD COLUMN color_o3 TEXT DEFAULT '#9370DB';
+ALTER TABLE hiveconfig ADD COLUMN color_no2 TEXT DEFAULT '#20B2AA';
+ALTER TABLE hiveconfig ADD COLUMN trend_pm10 TEXT DEFAULT 'off';
+ALTER TABLE hiveconfig ADD COLUMN trend_o3 TEXT DEFAULT 'off';
+ALTER TABLE hiveconfig ADD COLUMN trend_no2 TEXT DEFAULT 'off';

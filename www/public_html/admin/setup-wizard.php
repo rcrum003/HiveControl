@@ -8,6 +8,9 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 include($_SERVER["DOCUMENT_ROOT"] . "/include/security-init.php");
 require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
 
+// Override CSP to allow Leaflet CDN and OpenStreetMap tiles for the location map
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://*.tile.openstreetmap.org; connect-src 'self';");
+
 function test_input($data) {
     $data = trim($data);
     $data = stripslashes($data);
@@ -54,13 +57,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $v->rule('required', ['HIVENAME', 'CITY', 'STATE'])->message('{field} is required');
             $v->rule('regex', 'HIVENAME', '/^[a-zA-Z0-9_-]+$/')->message('Hive Name can only contain letters, numbers, dashes, and underscores');
             $v->rule('lengthMax', ['HIVENAME', 'CITY', 'STATE'], 40);
+            $v->rule('lengthMax', ['LATITUDE', 'LONGITUDE'], 20);
             if ($v->validate()) {
-                $update_fields = ['HIVENAME=?', 'CITY=?', 'STATE=?', 'TIMEZONE=?'];
+                $update_fields = ['HIVENAME=?', 'CITY=?', 'STATE=?', 'TIMEZONE=?', 'LATITUDE=?', 'LONGITUDE=?'];
                 $update_values = [
                     test_input($_POST['HIVENAME']),
                     test_input($_POST['CITY']),
                     test_input($_POST['STATE']),
-                    test_input_allow_slash($_POST['TIMEZONE'] ?? ($config['TIMEZONE'] ?? 'America/New_York'))
+                    test_input_allow_slash($_POST['TIMEZONE'] ?? ($config['TIMEZONE'] ?? 'America/New_York')),
+                    test_input($_POST['LATITUDE'] ?? ($config['LATITUDE'] ?? '')),
+                    test_input($_POST['LONGITUDE'] ?? ($config['LONGITUDE'] ?? ''))
                 ];
             }
             break;
@@ -153,8 +159,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         case 7: // Air Quality
             $enable = test_input($_POST['ENABLE_AIR'] ?? 'no');
-            $update_fields = ['ENABLE_AIR=?'];
-            $update_values = [$enable];
+            $enableAirnow = test_input($_POST['ENABLE_AIRNOW'] ?? 'no');
+            $update_fields = ['ENABLE_AIR=?', 'ENABLE_AIRNOW=?'];
+            $update_values = [$enable, $enableAirnow];
             if ($enable === 'yes') {
                 $airType = test_input($_POST['AIR_TYPE'] ?? ($config['AIR_TYPE'] ?? ''));
                 $update_fields = array_merge($update_fields, ['AIR_TYPE=?', 'AIR_ID=?', 'AIR_API=?', 'AIR_LOCAL_URL=?']);
@@ -163,6 +170,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     test_input($_POST['AIR_ID'] ?? ($config['AIR_ID'] ?? '')),
                     test_input($_POST['AIR_API'] ?? ($config['AIR_API'] ?? '')),
                     test_input($_POST['AIR_LOCAL_URL'] ?? ($config['AIR_LOCAL_URL'] ?? ''))
+                ]);
+            }
+            if ($enableAirnow === 'yes') {
+                $update_fields = array_merge($update_fields, ['KEY_AIRNOW=?', 'AIRNOW_DISTANCE=?']);
+                $update_values = array_merge($update_values, [
+                    test_input($_POST['KEY_AIRNOW'] ?? ($config['KEY_AIRNOW'] ?? '')),
+                    test_input($_POST['AIRNOW_DISTANCE'] ?? ($config['AIRNOW_DISTANCE'] ?? '25'))
                 ]);
             }
             break;
@@ -232,7 +246,7 @@ function stepConfigured($config, $step) {
         case 4: return ($config['ENABLE_LUX'] ?? 'no') === 'yes';
         case 5: return !empty($config['WEATHER_LEVEL']);
         case 6: return ($config['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes' || ($config['ENABLE_BEECOUNTER'] ?? 'no') === 'yes';
-        case 7: return ($config['ENABLE_AIR'] ?? 'no') === 'yes';
+        case 7: return ($config['ENABLE_AIR'] ?? 'no') === 'yes' || ($config['ENABLE_AIRNOW'] ?? 'no') === 'yes';
         case 8: return false;
         default: return false;
     }
@@ -250,6 +264,7 @@ function stepConfigured($config, $step) {
     <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
     <style>
         body { background-color: #f8f8f8 !important; background-image: none !important; min-height: 100vh; padding: 20px 0; }
@@ -418,6 +433,30 @@ if ($step === 1): ?>
                             </select>
                         </div>
                     </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <label><i class="fa fa-map-marker"></i> Hive Location</label>
+                    <p class="help-text">Enter your city and state above, then click "Look Up" to find your coordinates. Drag the marker to fine-tune the location.</p>
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div class="col-md-3">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label for="LATITUDE">Latitude</label>
+                                <input type="text" class="form-control" name="LATITUDE" id="LATITUDE" value="<?php echo htmlspecialchars($config['LATITUDE'] ?? ''); ?>" placeholder="e.g., 41.1400">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <label for="LONGITUDE">Longitude</label>
+                                <input type="text" class="form-control" name="LONGITUDE" id="LONGITUDE" value="<?php echo htmlspecialchars($config['LONGITUDE'] ?? ''); ?>" placeholder="e.g., -73.2600">
+                            </div>
+                        </div>
+                        <div class="col-md-3" style="padding-top: 25px;">
+                            <button type="button" class="btn btn-test" id="btn-geocode" onclick="geocodeLocation()"><i class="fa fa-search"></i> Look Up</button>
+                        </div>
+                    </div>
+                    <div id="geocode-status" style="margin-bottom: 8px; font-size: 13px; color: #737373;"></div>
+                    <div id="location-map" style="height: 300px; border: 1px solid #ccc; border-radius: 4px;"></div>
                 </div>
 
                 <div class="wizard-buttons">
@@ -1204,6 +1243,43 @@ elseif ($step === 7): ?>
                     </div>
                 </div>
 
+                <hr style="margin: 25px 0; border-color: #e7e7e7;">
+
+                <div class="enable-toggle">
+                    <label><i class="fa fa-institution"></i> EPA AirNow (O3, NO2, PM2.5, PM10)</label>
+                    <select name="ENABLE_AIRNOW" id="airnow-enable" class="form-control" style="width:120px;">
+                        <option value="yes" <?php if (($config['ENABLE_AIRNOW'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
+                        <option value="no" <?php if (($config['ENABLE_AIRNOW'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
+                    </select>
+                </div>
+
+                <div id="airnow-config" style="<?php echo (($config['ENABLE_AIRNOW'] ?? 'no') !== 'yes') ? 'display:none;' : ''; ?>">
+                    <p class="help-text" style="margin-bottom: 15px;">
+                        EPA AirNow provides hourly O3, NO2, PM2.5, and PM10 AQI data from the nearest government air quality monitor.
+                        <strong>No local sensor needed</strong> &mdash; works as a standalone source or as a backup if you don't have PurpleAir.
+                        Data is free; you just need an API key.
+                    </p>
+
+                    <div class="form-group">
+                        <label>AirNow API Key</label>
+                        <input type="text" class="form-control" name="KEY_AIRNOW" value="<?php echo htmlspecialchars($config['KEY_AIRNOW'] ?? ''); ?>" placeholder="e.g., XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX">
+                        <p class="help-text">Get a free API key at <a href="https://docs.airnowapi.org/account/request/" target="_blank">docs.airnowapi.org</a>. Uses your hive's latitude/longitude from Step 1 to find the nearest monitor.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Search Distance (miles)</label>
+                        <input type="text" class="form-control" name="AIRNOW_DISTANCE" value="<?php echo htmlspecialchars($config['AIRNOW_DISTANCE'] ?? '25'); ?>" placeholder="25" style="width: 120px;">
+                        <p class="help-text">How far to search for an EPA monitor from your hive location. Default: 25 miles.</p>
+                    </div>
+
+                    <div class="test-panel">
+                        <h4><i class="fa fa-bolt"></i> Test EPA AirNow</h4>
+                        <p class="help-text">Save settings first, then test to verify EPA data is arriving.</p>
+                        <button type="button" class="btn btn-test" onclick="testSensor('airnow')"><i class="fa fa-play"></i> Test Now</button>
+                        <div class="test-result waiting" id="test-result-airnow">Waiting for test...</div>
+                    </div>
+                </div>
+
                 <div class="wizard-buttons">
                     <a href="setup-wizard.php?step=6" class="btn btn-back"><i class="fa fa-arrow-left"></i> Back</a>
                     <div>
@@ -1225,6 +1301,9 @@ elseif ($step === 8): ?>
                 1 => ['Basic Info', 'fa-home', [
                     'Hive Name' => $config['HIVENAME'] ?? 'Not set',
                     'Location' => ($config['CITY'] ?? '') . ', ' . ($config['STATE'] ?? ''),
+                    'Coordinates' => (!empty($config['LATITUDE']) && !empty($config['LONGITUDE']))
+                        ? $config['LATITUDE'] . ', ' . $config['LONGITUDE']
+                        : 'Not set',
                     'Timezone' => $config['TIMEZONE'] ?? 'Not set',
                 ]],
                 2 => ['Temp/Humidity', 'fa-thermometer-half', [
@@ -1274,11 +1353,16 @@ elseif ($step === 8): ?>
                     'Bee Counter' => ($config['ENABLE_BEECOUNTER'] ?? 'no') . ((($config['ENABLE_BEECOUNTER'] ?? 'no') === 'yes') ? ' (' . ($config['COUNTERTYPE'] ?? '') . ')' : ''),
                 ]],
                 7 => ['Air Quality', 'fa-leaf', array_merge(
-                    ['Status' => $config['ENABLE_AIR'] ?? 'no'],
+                    ['PurpleAir' => $config['ENABLE_AIR'] ?? 'no'],
                     (($config['ENABLE_AIR'] ?? 'no') === 'yes') ? [
-                        'Source' => (($config['AIR_TYPE'] ?? '') === 'purplelocal') ? 'PurpleAir (Local)' : 'PurpleAir (API)',
+                        'PA Source' => (($config['AIR_TYPE'] ?? '') === 'purplelocal') ? 'PurpleAir (Local)' : 'PurpleAir (API)',
                         'Station ID' => $config['AIR_ID'] ?? 'Not set',
-                    ] : ['Source' => 'N/A']
+                    ] : [],
+                    ['EPA AirNow' => $config['ENABLE_AIRNOW'] ?? 'no'],
+                    (($config['ENABLE_AIRNOW'] ?? 'no') === 'yes') ? [
+                        'Search Distance' => ($config['AIRNOW_DISTANCE'] ?? '25') . ' miles',
+                        'API Key' => !empty($config['KEY_AIRNOW']) ? '****' . substr($config['KEY_AIRNOW'], -4) : 'Not set',
+                    ] : []
                 )],
             ];
             ?>
@@ -1325,6 +1409,114 @@ elseif ($step === 8): ?>
 
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+    // Location map for Step 1
+    var locationMap = null;
+    var locationMarker = null;
+    var hiveIcon = L.divIcon({
+        className: '',
+        html: '<div style="width:28px;height:28px;background:#e6b800;border:3px solid #333;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4);cursor:grab;"></div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+
+    function initLocationMap() {
+        var mapEl = document.getElementById('location-map');
+        if (!mapEl) return;
+
+        var lat = parseFloat(document.getElementById('LATITUDE').value) || 39.8283;
+        var lng = parseFloat(document.getElementById('LONGITUDE').value) || -98.5795;
+        var hasCoords = document.getElementById('LATITUDE').value !== '' && document.getElementById('LONGITUDE').value !== '';
+        var zoom = hasCoords ? 13 : 4;
+
+        locationMap = L.map('location-map').setView([lat, lng], zoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(locationMap);
+
+        if (hasCoords) {
+            locationMarker = L.marker([lat, lng], { draggable: true, icon: hiveIcon }).addTo(locationMap);
+            locationMarker.on('dragend', function(e) {
+                var pos = e.target.getLatLng();
+                document.getElementById('LATITUDE').value = pos.lat.toFixed(6);
+                document.getElementById('LONGITUDE').value = pos.lng.toFixed(6);
+                document.getElementById('geocode-status').innerHTML = '<i class="fa fa-arrows"></i> Marker moved to ' + pos.lat.toFixed(6) + ', ' + pos.lng.toFixed(6);
+            });
+        }
+    }
+
+    function geocodeLocation() {
+        var city = document.querySelector('input[name="CITY"]').value.trim();
+        var state = document.querySelector('input[name="STATE"]').value.trim();
+        if (!city || !state) {
+            document.getElementById('geocode-status').innerHTML = '<span style="color:#d9534f;">Please enter a city and state first.</span>';
+            return;
+        }
+
+        var btn = document.getElementById('btn-geocode');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Looking up...';
+        document.getElementById('geocode-status').innerHTML = '';
+
+        $.ajax({
+            url: 'geocode.php?city=' + encodeURIComponent(city) + '&state=' + encodeURIComponent(state),
+            timeout: 15000,
+            dataType: 'json',
+            success: function(data) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-search"></i> Look Up';
+                if (data && data.length > 0) {
+                    var lat = parseFloat(data[0].lat);
+                    var lng = parseFloat(data[0].lon);
+                    document.getElementById('LATITUDE').value = lat.toFixed(6);
+                    document.getElementById('LONGITUDE').value = lng.toFixed(6);
+                    document.getElementById('geocode-status').innerHTML = '<span style="color:#5cb85c;"><i class="fa fa-check"></i> Found: ' + escHtml(data[0].display_name) + '</span>';
+                    placeMarker(lat, lng);
+                } else {
+                    document.getElementById('geocode-status').innerHTML = '<span style="color:#d9534f;"><i class="fa fa-exclamation-triangle"></i> Location not found. Try a different city name or enter coordinates manually.</span>';
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-search"></i> Look Up';
+                document.getElementById('geocode-status').innerHTML = '<span style="color:#d9534f;"><i class="fa fa-exclamation-triangle"></i> Geocoding service unavailable. Enter coordinates manually.</span>';
+            }
+        });
+    }
+
+    function placeMarker(lat, lng) {
+        if (!locationMap) return;
+        locationMap.setView([lat, lng], 13);
+        if (locationMarker) {
+            locationMarker.setLatLng([lat, lng]);
+        } else {
+            locationMarker = L.marker([lat, lng], { draggable: true, icon: hiveIcon }).addTo(locationMap);
+            locationMarker.on('dragend', function(e) {
+                var pos = e.target.getLatLng();
+                document.getElementById('LATITUDE').value = pos.lat.toFixed(6);
+                document.getElementById('LONGITUDE').value = pos.lng.toFixed(6);
+                document.getElementById('geocode-status').innerHTML = '<i class="fa fa-arrows"></i> Marker moved to ' + pos.lat.toFixed(6) + ', ' + pos.lng.toFixed(6);
+            });
+        }
+    }
+
+    // Allow manual lat/lon entry to update the map
+    function updateMapFromInputs() {
+        var lat = parseFloat(document.getElementById('LATITUDE') ? document.getElementById('LATITUDE').value : '');
+        var lng = parseFloat(document.getElementById('LONGITUDE') ? document.getElementById('LONGITUDE').value : '');
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            placeMarker(lat, lng);
+        }
+    }
+
+    $(document).ready(function() {
+        initLocationMap();
+        $('#LATITUDE, #LONGITUDE').on('change', updateMapFromInputs);
+    });
+    </script>
 
     <script>
     // Enable/disable toggle for sensor config sections
@@ -1376,13 +1568,13 @@ elseif ($step === 8): ?>
 
     // Run AJAX sensor test (called after page reload with autotest param)
     function runSensorTest(type) {
-        var resultId = (type === 'camera') ? 'test-result-cam' : 'test-result';
+        var resultId = (type === 'camera') ? 'test-result-cam' : (type === 'airnow') ? 'test-result-airnow' : 'test-result';
         var el = document.getElementById(resultId);
         if (!el) return;
         el.className = 'test-result waiting';
         el.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Settings saved. Reading sensor... this may take up to a minute';
 
-        var ajaxTimeout = (type === 'hiveweight') ? 90000 : 30000;
+        var ajaxTimeout = (type === 'hiveweight' || type === 'airnow') ? 90000 : 30000;
         $.ajax({
             url: 'livevalue.php?sensor=' + type,
             timeout: ajaxTimeout,
@@ -1456,6 +1648,15 @@ elseif ($step === 8): ?>
     }
     if (document.querySelector('input[name="AIR_TYPE"]')) {
         updateAirOptions();
+    }
+
+    // AirNow enable/disable toggle
+    var airnowSel = document.getElementById('airnow-enable');
+    if (airnowSel) {
+        airnowSel.addEventListener('change', function() {
+            var cfg = document.getElementById('airnow-config');
+            if (cfg) cfg.style.display = (this.value === 'yes') ? 'block' : 'none';
+        });
     }
 
     function escHtml(s) {

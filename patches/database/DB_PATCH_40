@@ -1,0 +1,20 @@
+-- DB_PATCH_40: EPA AirNow gaseous pollutant time series table
+-- Stores hourly O3 and NO2 data from nearest EPA regulatory monitor
+
+CREATE TABLE IF NOT EXISTS airquality_epa (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    date_utc TEXT,
+    o3_ppm NUMERIC DEFAULT NULL,
+    o3_aqi INTEGER DEFAULT NULL,
+    no2_ppb NUMERIC DEFAULT NULL,
+    no2_aqi INTEGER DEFAULT NULL,
+    pm25_aqi INTEGER DEFAULT NULL,
+    pm10_aqi INTEGER DEFAULT NULL,
+    reporting_area TEXT DEFAULT NULL,
+    source TEXT DEFAULT 'airnow',
+    UNIQUE(date, source)
+);
+
+CREATE INDEX IF NOT EXISTS idx_epa_date ON airquality_epa(date);
+CREATE INDEX IF NOT EXISTS idx_epa_date_source ON airquality_epa(date, source);

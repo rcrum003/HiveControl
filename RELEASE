@@ -1,6 +1,69 @@
 Release Notes:
 
 --------------------
+2.16 Release
+--------------------
+NEW FEATURES:
+- Expanded Air Quality Data Pipeline
+  * PurpleAir scripts now extract ATM-corrected mass concentrations
+    (pm2_5_atm, pm10_0_atm, pm1_0_atm) and barometric pressure from BME280
+  * EPA AQI computation for PM2.5 and PM10 using standard breakpoint tables
+  * 12-field CSV output from all air provider scripts (was 6 fields)
+  * air_helpers.inc: shared AQI breakpoint functions (compute_aqi, pm25_to_aqi,
+    pm10_to_aqi, o3_to_aqi, no2_to_aqi, aqi_to_category, aqi_to_color)
+
+- EPA AirNow Integration (O3 & NO2)
+  * New getairnow.sh script fetches hourly O3, NO2, PM2.5, PM10 AQI from
+    EPA AirNow API (free, 500 req/day)
+  * Back-calculates approximate O3 ppm and NO2 ppb from AQI breakpoints
+  * Stored in new airquality_epa table with automatic deduplication
+  * Configurable via Instrument Config admin page (enable/disable, API key,
+    search radius)
+  * Runs hourly via cron at minute 30
+
+- Air Quality Correlation Charts
+  * New Bee Impact Correlations page (air_correlation.php) with period selection
+  * Foraging Activity vs Air Quality chart: bee count (IN+OUT) overlaid with
+    PM2.5 AQI and O3 AQI, EPA color-banded y-axis
+  * Daily Weight Change vs Average AQI: column chart with configurable smoke
+    threshold line
+  * EPA Pollutant Detail chart: O3 ppm, NO2 ppb, and AQI series with
+    reporting area label
+
+- Enhanced Air Quality Chart
+  * Main air chart now shows PM2.5, PM10, PM1 concentrations on primary axis
+  * AQI on secondary axis with EPA color-banded plotBands
+    (Good/Moderate/USG/Unhealthy/Very Unhealthy/Hazardous)
+  * O3 and NO2 AQI series from EPA data when available
+  * Backward compatible with pre-upgrade data (falls back to legacy air_aqi)
+
+- Air Quality Stats Panel
+  * Expanded stats sidebar: PM2.5 stats (avg, max/min, AQI), PM10 stats,
+    EPA O3/NO2 AQI stats (shown conditionally when data available)
+
+- Air Quality Alerts
+  * High PM2.5 alert when concentration exceeds threshold (default 35.5 ug/m3)
+  * Wildfire smoke detection when PM2.5 AQI exceeds smoke threshold (default 150)
+  * High ozone alert when O3 AQI exceeds threshold (default 100)
+  * All thresholds configurable in hiveconfig
+
+- Cloud Sync for Air Quality
+  * 7 new air data fields synced to hivecontrol.org (pm2_5_aqi, pm10_aqi,
+    pm2_5_raw, pm10_raw, pm1_raw, pressure, source)
+  * AirNow config (KEY_AIRNOW, ENABLE_AIRNOW, AIRNOW_DISTANCE) synced in
+    all 3 cloud locations (POST vars, UPDATE SQL, SEND config)
+
+DATABASE CHANGES:
+- DB_PATCH_39: 7 new columns on allhivedata (air_pm2_5_aqi, air_pm10_aqi,
+  air_pm2_5_raw, air_pm10_raw, air_pm1_raw, air_pressure, air_source) and
+  12 new columns on hiveconfig (KEY_AIRNOW, AIRNOW_DISTANCE, ENABLE_AIRNOW,
+  alert thresholds, chart colors, trend toggles)
+  (DB version 30 -> 31)
+- DB_PATCH_40: New airquality_epa table for EPA gaseous pollutant data
+  with indexes on date and (date, source)
+  (DB version 31 -> 32)
+
+--------------------
 2.15 Release
 --------------------
 NEW FEATURES:

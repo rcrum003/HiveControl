@@ -1,0 +1,8 @@
+ALTER TABLE hiveconfig ADD COLUMN color_pm2_5 TEXT DEFAULT '#FF6347';
+ALTER TABLE hiveconfig ADD COLUMN color_pm1 TEXT DEFAULT '#32CD32';
+ALTER TABLE hiveconfig ADD COLUMN color_pm2_5_aqi TEXT DEFAULT '#CC3333';
+ALTER TABLE hiveconfig ADD COLUMN color_pm10_aqi TEXT DEFAULT '#CC6600';
+ALTER TABLE hiveconfig ADD COLUMN trend_pm2_5 TEXT DEFAULT 'off';
+ALTER TABLE hiveconfig ADD COLUMN trend_pm1 TEXT DEFAULT 'off';
+ALTER TABLE hiveconfig ADD COLUMN trend_pm2_5_aqi TEXT DEFAULT 'off';
+ALTER TABLE hiveconfig ADD COLUMN trend_pm10_aqi TEXT DEFAULT 'off';

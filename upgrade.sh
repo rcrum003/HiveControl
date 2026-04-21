@@ -248,17 +248,16 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_22
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_23
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_24
-			#Update SUDOERs
-			sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
-			sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
-			CHECKSUDO=$(sudo visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
-				if [[ $CHECKSUDO == "OK" ]]; then
-					#Copy over SUDOERs file
-					echo "SUCCESS"
+			#Update SUDOERs drop-in
+			sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+			sudo chown root:root /etc/sudoers.d/hivecontrol
+			sudo chmod 440 /etc/sudoers.d/hivecontrol
+			CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
+				if [[ $CHECKSUDO -gt 0 ]]; then
+					echo "Sudoers update SUCCESS"
 				else
-					echo "Something went wrong with our SUDOERS file, so I didn't change anything"
-					echo $CHECKSUDO >> /home/HiveControl/sudoerror
-					sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+					echo "Something went wrong with our SUDOERS file, removing it"
+					sudo rm -f /etc/sudoers.d/hivecontrol
 				fi
 			let DB_ver="16"
 		fi
@@ -337,6 +336,21 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_38
 			let DB_ver="30"
 		fi
+		if [[ $DB_ver -eq "30" ]]; then
+			echo "Applying DB Ver 31 Upgrades - Expanded air quality"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_39
+			let DB_ver="31"
+		fi
+		if [[ $DB_ver -eq "31" ]]; then
+			echo "Applying DB Ver 32 Upgrades - EPA air quality table"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_40
+			let DB_ver="32"
+		fi
+		if [[ $DB_ver -eq "32" ]]; then
+			echo "Applying DB Ver 33 Upgrades - Air quality trend line configs"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_41
+			let DB_ver="33"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -371,18 +385,18 @@ if [[ "$Installed_Ver" < "1.68" ]]; then
 	make -j4
 	sudo make install
 
-	#sudo apt-get install python-pigpio python3-pigpio -y 
-	#Update SUDOERs
-	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
-	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
-	CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
+	#sudo apt-get install python-pigpio python3-pigpio -y
+	#Update SUDOERs drop-in
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+	sudo chown root:root /etc/sudoers.d/hivecontrol
+	sudo chmod 440 /etc/sudoers.d/hivecontrol
+	CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
 
-	if [[ $CHECKSUDO == "OK" ]]; then
-		#Copy over SUDOERs file
-		echo "SUCCESS"
+	if [[ $CHECKSUDO -gt 0 ]]; then
+		echo "Sudoers update SUCCESS"
 	else
-		echo "Something went wrong with our SUDOERS file, so I didn't change anything"
-		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+		echo "Something went wrong with our SUDOERS file, removing it"
+		sudo rm -f /etc/sudoers.d/hivecontrol
 	fi
 
 	#Installing DHTXX Code
@@ -629,6 +643,25 @@ if [[ "$Installed_Ver" < "2.15" ]]; then
 
 	# Copy new CSS (includes col-lg-fifth for 5-column dashboard)
 	sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/dist/css/sb-admin-2.css /home/HiveControl/www/public_html/dist/css/sb-admin-2.css
+fi
+
+if [[ "$Installed_Ver" < "2.16" ]]; then
+	# Air quality overhaul — AirNow EPA integration, expanded PurpleAir data
+	echo "Setting up expanded air quality scripts"
+	sudo chmod u+x /home/HiveControl/scripts/air/getairnow.sh
+	sudo chmod u+x /home/HiveControl/scripts/air/air_helpers.inc
+
+	# Update sudoers to allow www-data to run getairnow.sh (for wizard test button)
+	echo "Updating sudoers for air quality scripts..."
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+	sudo chown root:root /etc/sudoers.d/hivecontrol
+	sudo chmod 440 /etc/sudoers.d/hivecontrol
+
+	# Add hourly AirNow cron job (runs at minute 30 to avoid overlap with currconditions)
+	AIRNOW_CRON="30 * * * * /home/HiveControl/scripts/air/getairnow.sh >> /home/HiveControl/logs/airnow.log 2>&1"
+	(sudo crontab -u root -l 2>/dev/null | grep -v "getairnow.sh"; echo "$AIRNOW_CRON") | sudo crontab -u root -
+	sudo touch /home/HiveControl/logs/airnow.log
+	sudo chown root:root /home/HiveControl/logs/airnow.log
 fi
 
 echo "============================================="

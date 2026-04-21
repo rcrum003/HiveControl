@@ -277,19 +277,32 @@ function get_air_quality() {
 			AIR_PM1="null"
 			AIR_PM2_5="null"
 			AIR_PM10="null"
+			AIR_PM2_5_AQI="null"
+			AIR_PM10_AQI="null"
+			AIR_PM1_RAW="null"
+			AIR_PM2_5_RAW="null"
+			AIR_PM10_RAW="null"
+			AIR_PRESSURE="null"
 			return 1
 		fi
 
-		# Parse once using IFS
-		IFS=',' read -r AIR_DATE AIR_TEMP AIR_HUMIDITY AIR_PM1 AIR_PM2_5 AIR_PM10 <<< "$air_output"
+		# Parse expanded 12-field CSV output
+		IFS=',' read -r AIR_DATE AIR_TEMP AIR_HUMIDITY AIR_PM1 AIR_PM2_5 AIR_PM10 AIR_PM2_5_AQI AIR_PM10_AQI AIR_PM1_RAW AIR_PM2_5_RAW AIR_PM10_RAW AIR_PRESSURE <<< "$air_output"
 
 		check AIR_TEMP
 		check AIR_HUMIDITY
 		check AIR_PM1
 		check AIR_PM2_5
 		check AIR_PM10
+		check AIR_PM2_5_AQI
+		check AIR_PM10_AQI
+		check AIR_PM1_RAW
+		check AIR_PM2_5_RAW
+		check AIR_PM10_RAW
+		check AIR_PRESSURE
 
-		echo "AIR: $AIR_DATE,$AIR_TEMP, $AIR_HUMIDITY, $AIR_PM1, $AIR_PM2_5, $AIR_PM10"
+		echo "AIR: PM2.5=$AIR_PM2_5_RAW ug/m3 (AQI=$AIR_PM2_5_AQI), PM10=$AIR_PM10_RAW ug/m3 (AQI=$AIR_PM10_AQI), PM1=$AIR_PM1_RAW ug/m3, Pressure=$AIR_PRESSURE"
+		AIR_SOURCE="${AIR_TYPE:-}"
 	else
 		echo "--- AIR QUALITY CHECK DISABLED ---"
 		AIR_DATE="null"
@@ -298,6 +311,12 @@ function get_air_quality() {
 		AIR_PM1="null"
 		AIR_PM2_5="null"
 		AIR_PM10="null"
+		AIR_PM2_5_AQI="null"
+		AIR_PM10_AQI="null"
+		AIR_PM1_RAW="null"
+		AIR_PM2_5_RAW="null"
+		AIR_PM10_RAW="null"
+		AIR_PRESSURE="null"
 	fi
 	echo ""
 	print_separator
@@ -338,7 +357,8 @@ INSERT INTO allhivedata (
 	wind_gust_mph, wind_kph, wind_gust_kph, pressure_mb, pressure_in, pressure_trend,
 	weather_dewc, solarradiation, UV, precip_1hr_in, precip_1hr_metric,
 	precip_today_string, precip_today_in, precip_today_metric, lux, IN_COUNT, OUT_COUNT,
-	air_datetime, air_temp, air_humidity, air_pm1, air_pm2_5, air_pm10
+	air_datetime, air_temp, air_humidity, air_pm1, air_pm2_5, air_pm10,
+	air_pm2_5_aqi, air_pm10_aqi, air_pm2_5_raw, air_pm10_raw, air_pm1_raw, air_pressure, air_source
 ) VALUES (
 	'$(sql_escape "$HIVEID")',
 	'$(sql_escape "$DATE")',
@@ -382,7 +402,14 @@ INSERT INTO allhivedata (
 	'$(sql_escape "$AIR_HUMIDITY")',
 	'$(sql_escape "$AIR_PM1")',
 	'$(sql_escape "$AIR_PM2_5")',
-	'$(sql_escape "$AIR_PM10")'
+	'$(sql_escape "$AIR_PM10")',
+	'$(sql_escape "$AIR_PM2_5_AQI")',
+	'$(sql_escape "$AIR_PM10_AQI")',
+	'$(sql_escape "$AIR_PM2_5_RAW")',
+	'$(sql_escape "$AIR_PM10_RAW")',
+	'$(sql_escape "$AIR_PM1_RAW")',
+	'$(sql_escape "$AIR_PRESSURE")',
+	'$(sql_escape "$AIR_TYPE")'
 );
 EOF
 )

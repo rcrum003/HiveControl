@@ -76,6 +76,10 @@ if(isset($_GET["chart"])) {
             <a href="/pages/air.php?chart=line&period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
             <a href="/pages/air.php?chart=line&period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
             <a href="/pages/air.php?chart=line&period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
+
+            <span style="margin-left: 20px;">
+                <a href="/pages/air_correlation.php?period=week"><button type="button" class="btn btn-sm btn-info"><i class="fa fa-bar-chart"></i> Bee Impact Correlations</button></a>
+            </span>
             <br>
                 </div>
                 <!-- /.col-lg-12 -->
@@ -93,65 +97,113 @@ if(isset($_GET["chart"])) {
                     </div>
                 </div>
                 <div class="col-lg-3">
+                    <?PHP include "datawidgets/air_stats.php"; ?>
+
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Stats - ( PM 2.5 )
+                            Stats &mdash; PM 2.5
                         </div>
-                                                <div class="panel-body">
+                        <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table">
-                                    <?PHP include "datawidgets/air_stats.php"; 
-                                    ?>
-
-
+                                <table class="table table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td>Avg PM2.5 (<?PHP if ( $SHOW_METRIC == "on" ) { echo "ug/m3";} else {echo "ug/m3";} ?>)</td>
+                                            <td>Avg (ug/m3)</td>
                                             <td><?PHP echo "$avgair_pm2_5"; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Start/End (<?PHP if ( $SHOW_METRIC == "on" ) { echo "ug/m3";} else {echo "ug/m3";} ?>)</td>
-                                            <td><?PHP echo "$startair  / $endair"; ?></td>
-                                           
+                                            <td>Start / End</td>
+                                            <td><?PHP echo "$startair / $endair"; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Max (<?PHP if ( $SHOW_METRIC == "on" ) { echo "ug/m3";} else {echo "ug/m3";} ?>)</td>
-                                            <td><?PHP echo "$maxair_pm2_5"; ?></td>
+                                            <td>Max / Min</td>
+                                            <td><?PHP echo "$maxair_pm2_5 / $minair_pm2_5"; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Min (<?PHP if ( $SHOW_METRIC == "on" ) { echo "ug/m3";} else {echo "ug/m3";} ?>)</td>
-                                            <td><?PHP echo "$minair_pm2_5"; ?></td>
+                                            <td>Avg AQI</td>
+                                            <td><?PHP echo "$avgair_pm2_5_aqi"; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Max AQI</td>
+                                            <td><?PHP echo "$maxair_pm2_5_aqi"; ?></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.table-responsive -->
                         </div>
                     </div>
 
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Download Raw Data
-                        </div> 
-                           <div class="panel-body">
+                            Stats &mdash; PM 10
+                        </div>
+                        <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table">
-                                    <?PHP include "datawidgets/air_stats.php"; 
-                                    ?>
-
+                                <table class="table table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=air_data&period=<?PHP echo $period;?>&output=csv">CSV</a></td>
+                                            <td>Avg (ug/m3)</td>
+                                            <td><?PHP echo "$avgair_pm10_raw"; ?></td>
                                         </tr>
                                         <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=air_data&period=<?PHP echo $period;?>&output=json">JSON</a></td>
-                                            <td></td>
-                                           
+                                            <td>Max / Min</td>
+                                            <td><?PHP echo "$maxair_pm10_raw / $minair_pm10_raw"; ?></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.table-responsive -->
+                        </div>
+                    </div>
+
+                    <?PHP if (!empty($avg_o3_aqi) || !empty($avg_no2_aqi)) { ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Stats &mdash; EPA (O3 / NO2)
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        <tr>
+                                            <td>Avg O3 AQI</td>
+                                            <td><?PHP echo "$avg_o3_aqi"; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Max O3 AQI</td>
+                                            <td><?PHP echo "$max_o3_aqi"; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Avg NO2 AQI</td>
+                                            <td><?PHP echo "$avg_no2_aqi"; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Max NO2 AQI</td>
+                                            <td><?PHP echo "$max_no2_aqi"; ?></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <?PHP } ?>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Download Raw Data
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td><a href="/pages/datawidgets/datajob.php?type=air_data&period=<?PHP echo htmlspecialchars($period, ENT_QUOTES);?>&output=csv">CSV</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td><a href="/pages/datawidgets/datajob.php?type=air_data&period=<?PHP echo htmlspecialchars($period, ENT_QUOTES);?>&output=json">JSON</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 

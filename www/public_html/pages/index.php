@@ -76,7 +76,11 @@ header("Refresh: $sec; url=$page");
 
 <?php include "datawidgets/currentconditions.php"; ?>
 
-<?php include "datawidgets/alert_banner.php"; ?>
+            <div class="row">
+                <div class="col-lg-12">
+                    <?php include "datawidgets/alert_banner.php"; ?>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-lg-12">
@@ -283,6 +287,15 @@ header("Refresh: $sec; url=$page");
                             <div class="pull-center" id="envcontainer"></div>
                         </div>
                     </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Air Quality
+                            <span class="pull-right"><a href="/pages/air.php?chart=line&period=week" class="btn btn-xs btn-default">Detail</a></span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="pull-center" id="aqcontainer"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Combined View: Original All-in-One Chart -->
@@ -378,6 +391,7 @@ header("Refresh: $sec; url=$page");
   include "datawidgets/climate_chart.php";
   include "datawidgets/weight_overview_chart.php";
   include "datawidgets/environment_chart.php";
+  include "datawidgets/airquality_dashboard_chart.php";
   include "datawidgets/all_chart.php";
 
   include "datawidgets/weightguage-hc.php";

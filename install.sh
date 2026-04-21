@@ -262,8 +262,11 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_35
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_36
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_37
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_38
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_39
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_40
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_41
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
-sudo echo 30 > /home/HiveControl/data/DBVERSION
+sudo echo 33 > /home/HiveControl/data/DBVERSION
 
 #Setup backup directory
 mkdir /home/HiveControl/data/backups
@@ -401,17 +404,18 @@ rm -f *.o
 echo "TSL2561 compilation complete"
 
 #Allow www-data to run python and other commands
-	#Update SUDOERs
-	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
-	sudo cp /home/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers
-	CHECKSUDO=$(visudo -c -f /etc/sudoers |grep "/etc/sudoers:" |awk '{print $3}')
+	#Install sudoers drop-in to /etc/sudoers.d/
+	echo "Installing sudoers rules for www-data..."
+	sudo cp /home/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+	sudo chown root:root /etc/sudoers.d/hivecontrol
+	sudo chmod 440 /etc/sudoers.d/hivecontrol
+	CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
 
-	if [[ $CHECKSUDO == "OK" ]]; then
-		#Copy over SUDOERs file
-		echo "SUCCESS"
+	if [[ $CHECKSUDO -gt 0 ]]; then
+		echo "Sudoers install SUCCESS"
 	else
-		echo "Something went wrong with our SUDOERS file, so I didn't change anything"
-		sudo cp /home/HiveControl/install/sudoers.org /etc/sudoers
+		echo "Something went wrong with our SUDOERS file, removing it"
+		sudo rm -f /etc/sudoers.d/hivecontrol
 	fi
 ####################################################################################
 # DHTXXD - DHT11/DHT21/DHT22 Temperature/Humidity Sensors
@@ -550,7 +554,7 @@ else
 		        Yes ) installBeeCount; break;;
 		        No ) break;;
 		    esac
-		done
+		done < /dev/tty
 fi
 
 echo "Installing EEPROM updates"
@@ -562,7 +566,7 @@ echo "Completed Setup of HiveControl"
 echo "========================================================"
 echo "A REBOOT IS REQUIRED NOW!"
 echo "Press ENTER to reboot : \c"
-read aok
+read aok < /dev/tty
 echo "REBOOTING...."
 /bin/sync
 /sbin/reboot

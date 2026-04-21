@@ -6,7 +6,7 @@ function get_active_alerts($conn) {
 
     $alerts = [];
 
-    $cfg = $conn->prepare("SELECT alerts_enabled, alert_weight_loss_threshold, alert_weight_loss_hours, alert_swarm_threshold, alert_high_temp, alert_low_temp, alert_stale_minutes, alert_flow_daily_gain, alert_flow_days, SHOW_METRIC FROM hiveconfig WHERE id=1");
+    $cfg = $conn->prepare("SELECT alerts_enabled, alert_weight_loss_threshold, alert_weight_loss_hours, alert_swarm_threshold, alert_high_temp, alert_low_temp, alert_stale_minutes, alert_flow_daily_gain, alert_flow_days, alert_pm25_threshold, alert_o3_threshold, alert_smoke_aqi_threshold, SHOW_METRIC FROM hiveconfig WHERE id=1");
     $cfg->execute();
     $config = $cfg->fetch(PDO::FETCH_ASSOC);
 
@@ -190,6 +190,58 @@ function get_active_alerts($conn) {
                     'icon' => 'fa-arrow-up'
                 ];
             }
+        }
+    }
+
+    // --- Air Quality: High PM2.5 ---
+    $pm25_threshold = floatval($config['alert_pm25_threshold'] ?: 35.5);
+    $air_latest = $conn->prepare("SELECT air_pm2_5_raw, air_pm2_5_aqi, air_pm2_5 FROM allhivedata WHERE (air_pm2_5_raw IS NOT NULL OR air_pm2_5 IS NOT NULL) ORDER BY datetime(date) DESC LIMIT 1");
+    $air_latest->execute();
+    $air_row = $air_latest->fetch(PDO::FETCH_ASSOC);
+
+    if ($air_row) {
+        $pm25_val = is_numeric($air_row['air_pm2_5_raw']) ? floatval($air_row['air_pm2_5_raw']) : (is_numeric($air_row['air_pm2_5']) ? floatval($air_row['air_pm2_5']) : null);
+        $pm25_aqi = is_numeric($air_row['air_pm2_5_aqi']) ? intval($air_row['air_pm2_5_aqi']) : null;
+
+        if ($pm25_val !== null && $pm25_val > $pm25_threshold) {
+            $alerts[] = [
+                'type' => 'high_pm25',
+                'severity' => 'warning',
+                'title' => 'High PM2.5',
+                'message' => "PM2.5 is {$pm25_val} ug/m3 (threshold: {$pm25_threshold})." . ($pm25_aqi !== null ? " AQI: {$pm25_aqi}." : ""),
+                'icon' => 'fa-cloud'
+            ];
+        }
+
+        // --- Wildfire Smoke Detection (AQI-based) ---
+        $smoke_threshold = intval($config['alert_smoke_aqi_threshold'] ?: 150);
+        if ($pm25_aqi !== null && $pm25_aqi >= $smoke_threshold) {
+            $alerts[] = [
+                'type' => 'smoke',
+                'severity' => 'danger',
+                'title' => 'Possible Wildfire Smoke',
+                'message' => "PM2.5 AQI is {$pm25_aqi} (smoke threshold: {$smoke_threshold}). Consider restricting hive entrance.",
+                'icon' => 'fa-fire'
+            ];
+        }
+    }
+
+    // --- Air Quality: High O3 AQI (EPA) ---
+    $o3_threshold = intval($config['alert_o3_threshold'] ?: 100);
+    $o3_latest = $conn->prepare("SELECT o3_aqi FROM airquality_epa ORDER BY datetime(date) DESC LIMIT 1");
+    $o3_latest->execute();
+    $o3_row = $o3_latest->fetch(PDO::FETCH_ASSOC);
+
+    if ($o3_row && is_numeric($o3_row['o3_aqi'])) {
+        $o3_aqi = intval($o3_row['o3_aqi']);
+        if ($o3_aqi > $o3_threshold) {
+            $alerts[] = [
+                'type' => 'high_o3',
+                'severity' => 'warning',
+                'title' => 'High Ozone',
+                'message' => "O3 AQI is {$o3_aqi} (threshold: {$o3_threshold}). Ozone degrades floral scents and impairs bee navigation.",
+                'icon' => 'fa-cloud'
+            ];
         }
     }
 
