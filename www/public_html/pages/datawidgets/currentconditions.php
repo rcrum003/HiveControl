@@ -44,9 +44,9 @@ if (!$pollendata) {
 $pollenlevel = $pollendata['pollenlevel'];
 $pollentypes = $pollendata['pollentypes'];
 
-if ($pollenlevel <= 0) { $pollen_label = 'None'; $pollen_card_class = 'green'; }
-elseif ($pollenlevel <= 4) { $pollen_label = 'Low'; $pollen_card_class = 'green'; }
-elseif ($pollenlevel <= 8) { $pollen_label = 'Moderate'; $pollen_card_class = 'hiveyellow'; }
+if ($pollenlevel <= 0) { $pollen_label = 'None'; $pollen_card_class = 'hivebrown'; }
+elseif ($pollenlevel <= 4) { $pollen_label = 'Low'; $pollen_card_class = 'hiveyellow'; }
+elseif ($pollenlevel <= 8) { $pollen_label = 'Moderate'; $pollen_card_class = 'yellow'; }
 else { $pollen_label = 'High'; $pollen_card_class = 'red'; }
 
 #$getdate = $alldata['datetime'];

@@ -1,6 +1,50 @@
 Release Notes:
 
 --------------------
+2.18 Release
+--------------------
+BROODMINDER BLE INTEGRATION:
+- Migrated from bluepy (Python 2.7) to bleak (Python 3) async BLE library
+  * New BM_Scan_bleak.py replaces legacy BM_Scan.py
+  * Fixed byte offset bug: bleak strips 2-byte company ID, all indices shifted by -2
+  * Model-aware temperature decoding: model >= 47 (T2/TH2) uses (raw-5000)/100
+    formula instead of legacy SHT3x/HDC1080 formula
+  * Supports all BroodMinder models: T, TH, W, T2/T2SM, W2/XLR, TH2/TH2SM
+  * broodminder.sh updated to call BM_Scan_bleak.py via python3
+
+- New BLE debugging tool (ble_debug.py)
+  * Subcommands: scan, listen, info, read, bm
+  * BroodMinder-specific scan with auto-decode of manufacturer data
+  * Model name lookup, firmware version, realtime temperature for SwarmMinder devices
+
+CRON & LOGGING RELIABILITY:
+- Fixed silent cron failure when /home/HiveControl/logs/ directory missing
+  * Bash aborts entire command when >> redirect target dir doesn't exist
+  * Cron entries now include mkdir -p guard before script execution
+  * install.sh creates logs directory during fresh install
+  * upgrade.sh creates logs directory unconditionally (not version-gated)
+  * currconditions.sh creates logs directory at startup as defense-in-depth
+
+DETAIL PAGE STATS FIX:
+- Fixed empty Stats panels on all detail pages (temp, weight, air, GDD,
+  beecount, light)
+  * Stats PHP files were in datawidgets/stats/ but includes pointed to
+    datawidgets/ (missing stats/ subdirectory)
+  * PHP include silently failed, leaving all stat variables empty
+  * Corrected include paths in 6 detail pages; pollen.php was already correct
+
+DASHBOARD IMPROVEMENTS:
+- Pollen card now links to dedicated pollen analysis page (was linking to GDD)
+  * New pollen.php with period buttons, area chart, and severity-banded plotBands
+  * Stats sidebar with current level, severity, period avg/max/min
+  * Fullscreen popup support
+
+- Pollen card color scheme differentiated from temperature card
+  * None=hivebrown, Low=hiveyellow, Moderate=yellow, High=red
+
+- Added Pollen link to navigation menu (both dropdown and sidebar layouts)
+
+--------------------
 2.17 Release
 --------------------
 SETUP WIZARD IMPROVEMENTS:

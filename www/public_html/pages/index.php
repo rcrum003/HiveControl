@@ -219,7 +219,7 @@ header("Refresh: $sec; url=$page");
                                 </div>
                             </div>
                         </div>
-                        <a href="/pages/gdd.php?chart=line&period=week">
+                        <a href="/pages/pollen.php?chart=line&period=week">
                             <div class="panel-footer">
                                 <span class="pull-left"><?php echo htmlspecialchars($pollentypes); ?></span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>

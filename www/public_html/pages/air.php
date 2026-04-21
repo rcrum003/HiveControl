@@ -97,7 +97,7 @@ if(isset($_GET["chart"])) {
                     </div>
                 </div>
                 <div class="col-lg-3">
-                    <?PHP include "datawidgets/air_stats.php"; ?>
+                    <?PHP include "datawidgets/stats/air_stats.php"; ?>
 
                     <div class="panel panel-default">
                         <div class="panel-heading">

@@ -35,6 +35,9 @@ SHELL=/bin/bash
 # Determine HOMEDIR if not set (for initial config loading)
 HOMEDIR="${HOMEDIR:-/home/HiveControl}"
 
+# Ensure logs directory exists (cron redirect fails silently without it)
+mkdir -p "$HOMEDIR/logs"
+
 # Check if hiveconfig.sh exists before running
 if [ ! -f "$HOMEDIR/scripts/data/hiveconfig.sh" ]; then
 	echo "ERROR: Cannot find $HOMEDIR/scripts/data/hiveconfig.sh"

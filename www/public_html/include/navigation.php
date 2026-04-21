@@ -99,6 +99,9 @@ echo '
                             <a href="/pages/gdd.php?chart=line&period=week">GDD</a>
                         </li>
                         <li>
+                            <a href="/pages/pollen.php?chart=line&period=week">Pollen</a>
+                        </li>
+                        <li>
                             <a href="/pages/beecount.php?chart=line&period=week">Flights</a>
                         </li>
                         <li>
@@ -181,6 +184,9 @@ if ($orient == "normal") {
                                 </li>
                                 <li>
                                     <a href="/pages/gdd.php?chart=line&period=week">GDD</a>
+                                </li>
+                                <li>
+                                    <a href="/pages/pollen.php?chart=line&period=week">Pollen</a>
                                 </li>
                                 <li>
                                      <a href="/pages/beecount.php?chart=line&period=week">flights</a>

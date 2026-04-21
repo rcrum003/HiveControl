@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="118"
+Upgrade_ver="119"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -56,7 +56,9 @@ echo "Backing up Database to hive-data.bckup"
 cp /home/HiveControl/data/hive-data.db /home/HiveControl/data/hive-data.bckup
 echo "============================================="
 
-
+# Ensure required directories exist (every upgrade, not version-gated)
+mkdir -p /home/HiveControl/logs
+mkdir -p /home/HiveControl/data/backups
 
 # Get the latest code from github into a temporary repository
 echo "Getting Latest Code"
@@ -653,6 +655,21 @@ if [[ "$Installed_Ver" < "2.16" ]]; then
 	(sudo crontab -u root -l 2>/dev/null | grep -v "getairnow.sh"; echo "$AIRNOW_CRON") | sudo crontab -u root -
 	sudo touch /home/HiveControl/logs/airnow.log
 	sudo chown root:root /home/HiveControl/logs/airnow.log
+fi
+
+if [[ "$Installed_Ver" < "2.17" ]]; then
+	# Ensure logs directory exists (was missing from earlier installs)
+	sudo mkdir -p /home/HiveControl/logs
+
+	# Add mkdir guard to cron entries so they self-heal if logs dir is removed
+	(sudo crontab -u root -l 2>/dev/null \
+		| sed 's|^\*/15 \* \* \* \* /home/HiveControl/scripts/system/currconditions\.sh|*/15 * * * * mkdir -p /home/HiveControl/logs \&\& /home/HiveControl/scripts/system/currconditions.sh|' \
+		| sed 's|^5,20,35,50 \* \* \* \* /home/HiveControl/scripts/weight/weight_monitor\.sh|5,20,35,50 * * * * mkdir -p /home/HiveControl/logs \&\& /home/HiveControl/scripts/weight/weight_monitor.sh|' \
+	) | sudo crontab -u root -
+
+	# BroodMinder: migrate from bluepy (Python 2) to bleak (Python 3)
+	sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null
+	sudo chmod u+x /home/HiveControl/scripts/temp/broodminder.sh
 fi
 
 echo "============================================="

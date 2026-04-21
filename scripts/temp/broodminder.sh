@@ -40,7 +40,7 @@ do
         
         #Get the varialble on which device they want
 
-        broodminder_out=$(sudo python /home/HiveControl/software/broodminder/BM_Scan.py |grep -i $HIVEDEVICE | tail -1 2>&1)
+        broodminder_out=$(sudo python3 /home/HiveControl/software/broodminder/BM_Scan_bleak.py |grep -i $HIVEDEVICE | tail -1 2>&1)
         #echo " Output was $broodminder_out"
 
         #Check for Error or Empty by checking to see if first field contains our hivedevice

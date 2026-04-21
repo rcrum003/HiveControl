@@ -269,9 +269,12 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/dat
 sudo echo 33 > /home/HiveControl/data/DBVERSION
 
 #Setup backup directory
-mkdir /home/HiveControl/data/backups
+mkdir -p /home/HiveControl/data/backups
 #Make www-data the owner
 chown www-data:www-data /home/HiveControl/data/backups
+
+#Setup logs directory
+mkdir -p /home/HiveControl/logs
 
 VER=$(cat /home/HiveControl/VERSION)
 sudo sqlite3 /home/HiveControl/data/hive-data.db "UPDATE hiveconfig SET HCVersion='$VER' WHERE id=\"1\";"

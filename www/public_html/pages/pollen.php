@@ -5,7 +5,7 @@
 //Pass variables to determine the type of view
 // Make just one page that can show day/month/year, etc
 // Functions
-// period 
+// period
 
 //Check input for badness
 function test_input($data) {
@@ -27,7 +27,6 @@ if(isset($_GET["period"])) {
         $error = "ERROR: Period can't be empty";
         } else {
             $period = test_input($_GET["period"]);
-            #echo "The Period is $period";
         }
     } else {
     $error = "ERROR: Must specify a period";
@@ -39,7 +38,6 @@ if(isset($_GET["chart"])) {
         $error = "ERROR: Chart can't be empty";
         } else {
             $chart = test_input($_GET["chart"]);
-            #echo "The Period is $period";
         }
     } else {
     $error =  "ERROR: Must specify chart";
@@ -57,101 +55,100 @@ if(isset($_GET["chart"])) {
     <!-- /Navigation -->
 
     <div id="wrapper">
-    
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Light Analysis</h1>
-            <?PHP if(isset($error)){ 
+                    <h1 class="page-header">Pollen Analysis</h1>
+            <?PHP if(isset($error)){
                 echo '<div class="alert alert-danger">'; echo $error; echo'</div>';} ?>
                 </div>
                 <!-- /.col-lg-12 -->
                         </div>
             <div class="row">
                 <div class="col-lg-12">
-        
+
         <!-- Button Bar -->
-            <a href="/pages/light.php?chart=line&period=today"><button type="button" class="btn btn btn-<?PHP if ($period == "today"){echo "primary";} else {echo "default";}?>">Today</button></a>
-            <a href="/pages/light.php?chart=line&period=day"><button type="button" class="btn btn btn-<?PHP if ($period == "day"){echo "primary";} else {echo "default";}?>">24 hr</button></a>
-            <a href="/pages/light.php?chart=line&period=week"><button type="button" class="btn btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
-            <a href="/pages/light.php?chart=line&period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
-            <a href="/pages/light.php?chart=line&period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
-            <a href="/pages/light.php?chart=line&period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
+            <a href="/pages/pollen.php?chart=line&period=week"><button type="button" class="btn btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
+            <a href="/pages/pollen.php?chart=line&period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
+            <a href="/pages/pollen.php?chart=line&period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
+            <a href="/pages/pollen.php?chart=line&period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
             <br>
                 </div>
                 <!-- /.col-lg-12 -->
                         </div>
-            
+
             <!-- /.row -->
 
             <!-- /.row -->
             <div class="row">
-                <div class="col-lg-9">
+                <div class="col-lg-8">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Light Analysis
+                            Pollen Index History
                         </div>
                         <div class="panel-body">
-                            <div class="pull-center" id="lightcontainer"></div>
+                            <div class="pull-center" id="container"></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3">
+                <div class="col-lg-4">
+
+                    <?PHP include "datawidgets/stats/pollen_stats.php"; ?>
+
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Stats - ( wm/2 / lx )
+                            Current Pollen
                         </div>
-                                                <div class="panel-body">
+                        <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table">
-                                    <?PHP include "datawidgets/stats/light_stats.php"; 
-                                    ?>
-
+                                <table class="table table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td>Avg Light</td>
-                                            <td><?PHP echo "$avgsolarradiation  / $avglux"; ?></td>
+                                            <td>Level</td>
+                                            <td><strong><?PHP echo "$latest_level"; ?> / 12</strong></td>
                                         </tr>
                                         <tr>
-                                            <td>Max Light</td>
-                                            <td><?PHP echo "$maxsolarradiation  / $maxlux "; ?></td>
+                                            <td>Severity</td>
+                                            <td><?PHP echo is_numeric($latest_level) ? pollen_severity($latest_level) : 'N/A'; ?></td>
                                         </tr>
                                         <tr>
-                                            <td>Min Light</td>
-                                            <td><?PHP echo "$minsolarradiation  / $minlux "; ?></td>
+                                            <td>Types</td>
+                                            <td><?PHP echo htmlspecialchars($latest_types); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Reading</td>
+                                            <td><?PHP echo htmlspecialchars($latest_date); ?></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.table-responsive -->
                         </div>
                     </div>
 
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Download Raw Data
-                        </div> 
-                           <div class="panel-body">
+                            Period Statistics
+                        </div>
+                        <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table">
-                                    <?PHP include "datawidgets/stats/light_stats.php"; 
-                                    ?>
-
+                                <table class="table table-condensed">
                                     <tbody>
                                         <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=light_data&period=<?PHP echo $period;?>&output=csv">CSV</a></td>
+                                            <td>Average</td>
+                                            <td><?PHP echo "$avgpollen"; ?></td>
                                         </tr>
                                         <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=light_data&period=<?PHP echo $period;?>&output=json">JSON</a></td>
-                                            <td></td>
-                                           
+                                            <td>Max / Min</td>
+                                            <td><?PHP echo "$maxpollen / $minpollen"; ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Readings</td>
+                                            <td><?PHP echo "$readings"; ?></td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- /.table-responsive -->
                         </div>
                     </div>
-
 
                 </div>
 
@@ -184,22 +181,18 @@ if(isset($_GET["chart"])) {
     <!-- High Charts -->
     <script src="/js/highcharts/highcharts.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
-    
-    <!-- Full Screen Popups -->
-    <script src="/js/popup.js"></script>   
-     
-    <?php 
-        #Since this document already has variables, we can pass variables by just including it.
-        # Period and chart variables will be used in the charts.
-    #echo "Period is $period";
-    #echo "Chart is $chart";
 
-    include "datawidgets/light_chart.php"; ?>
-    
-    
+    <!-- Full Screen Popups -->
+    <script src="/js/popup.js"></script>
+
+    <?php
+    include "datawidgets/pollen_chart.php"; ?>
+
+
     <!-- Custom Theme JavaScript -->
-<!-- Footer -->
+    <!-- Footer -->
          <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
+
 </body>
 
 </html>

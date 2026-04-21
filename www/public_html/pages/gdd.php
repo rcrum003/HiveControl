@@ -101,7 +101,7 @@ if(isset($_GET["chart"])) {
                            <div class="panel-body">
                             <div class="table-responsive">
                                 <table class="table">
-                                    <?PHP include "datawidgets/gdd_stats.php"; 
+                                    <?PHP include "datawidgets/stats/gdd_stats.php"; 
                                     ?>
 
                                     <tbody>
