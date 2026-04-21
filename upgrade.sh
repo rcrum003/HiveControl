@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="117"
+Upgrade_ver="118"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -42,7 +42,7 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 #Check to see if we are latest version
 Installed_Ver=$(cat /home/HiveControl/VERSION)
-Latest_Ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
+Latest_Ver=$(curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
 
 if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
 		echo "Nothing to do, you are at the latest version"
@@ -86,41 +86,13 @@ rm -rf $WWWTempRepo/data/*
 echo "============================================="
 
 
-#Upgrade www
-echo "Upgrading WWW pages"
-cp -Rp $WWWTempRepo/pages/* $DestWWWRepo/pages/
-cp -Rp $WWWTempRepo/admin/* $DestWWWRepo/admin/
-cp -Rp $WWWTempRepo/include/* $DestWWWRepo/include/
-cp -Rp $WWWTempRepo/errors/* $DestWWWRepo/errors/
-echo "============================================="
-
-#Upgrade our code
-
-echo "Upgrading our shell scripts"
-#cp -R /home/HiveControl/scripts/
-rm -rf $scriptsource/hiveconfig.inc
-cp -Rp $scriptsource/* $scriptDest/
-cd $scriptDest
-find . -name '*.sh' -exec chmod u+x {} +
-
-echo "============================================="
-
-
-echo "Upgrading our binaries"
-cp -Rp $softwareSource/* $softwareDest/
-#cd $scriptDest
-#find . -name '*.sh' -exec chmod u+x {} +
-
-echo "============================================="
-
-
-#Upgrade our DB
+#Upgrade our DB FIRST — schema must be ready before new scripts land
+#(cron may fire currconditions.sh between file copy and patch application)
 #Get DBVersion
-#Get the latest upgrade script
 DB_ver=$(cat /home/HiveControl/data/DBVERSION)
 DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 	#Get the version available
-	DB_latest_ver=$(curl -s https://raw.githubusercontent.com/rcrum003/HiveControl/master/data/DBVERSION)
+	DB_latest_ver=$(curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/data/DBVERSION)
 
 	#if [[ "$DB_ver" -lt "$DB_latest_ver" ]]; then
 		echo "Checking for DB Upgrades"
@@ -356,6 +328,25 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 	#	echo "Skipping DB, no new database upgrades available"
 	#fi
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
+
+#Now that DB schema is up to date, copy new scripts and web files
+echo "Upgrading WWW pages"
+cp -Rp $WWWTempRepo/pages/* $DestWWWRepo/pages/
+cp -Rp $WWWTempRepo/admin/* $DestWWWRepo/admin/
+cp -Rp $WWWTempRepo/include/* $DestWWWRepo/include/
+cp -Rp $WWWTempRepo/errors/* $DestWWWRepo/errors/
+echo "============================================="
+
+echo "Upgrading our shell scripts"
+rm -rf $scriptsource/hiveconfig.inc
+cp -Rp $scriptsource/* $scriptDest/
+cd $scriptDest
+find . -name '*.sh' -exec chmod u+x {} +
+echo "============================================="
+
+echo "Upgrading our binaries"
+cp -Rp $softwareSource/* $softwareDest/
+echo "============================================="
 
 #Update install stuff
 sudo cp -Rp /home/HiveControl/upgrade/HiveControl/install/* /home/HiveControl/install/
