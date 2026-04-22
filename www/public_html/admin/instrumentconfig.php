@@ -925,7 +925,7 @@ if (empty($health_rows)) {
     echo '<br>';
 }
 ?>
-                                <small><a href="/admin/weather_health.php"><i class="fa fa-bar-chart"></i> Full Weather Health Dashboard</a></small>
+                                <small><a href="/admin/sensor_health.php"><i class="fa fa-bar-chart"></i> Full Sensor Health Dashboard</a></small>
                             </td>
                             <td></td>
                         </tr>

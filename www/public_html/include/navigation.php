@@ -131,7 +131,7 @@ echo '
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
                                 <li>
-                                    <a href="/admin/weather_health.php">Weather Health</a>
+                                    <a href="/admin/sensor_health.php">Sensor Health</a>
                                 </li>
                                 <li>
                                     <a href="/admin/system.php">System Commands</a>
@@ -215,7 +215,7 @@ if ($orient == "normal") {
                                     <a href="/admin/siteconfig.php">Site Preferences</a>
                                 </li>
                                 <li>
-                                    <a href="/admin/weather_health.php">Weather Health</a>
+                                    <a href="/admin/sensor_health.php">Sensor Health</a>
                                 </li>
                                 <li>
                                     <a href="/admin/system.php">System Commands</a>
