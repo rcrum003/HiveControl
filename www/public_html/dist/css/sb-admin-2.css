@@ -390,14 +390,24 @@ table.dataTable thead .sorting:after {
     color: #df8a13;
 }
 
+.col-lg-fifth {
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+    width: 100%;
+    float: left;
+}
+
+@media (min-width: 768px) {
+    .col-lg-fifth {
+        width: 50%;
+    }
+}
+
 @media (min-width: 992px) {
     .col-lg-fifth {
         width: 20%;
-        float: left;
-        position: relative;
-        min-height: 1px;
-        padding-right: 15px;
-        padding-left: 15px;
     }
 }
 
