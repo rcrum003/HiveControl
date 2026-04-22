@@ -9,10 +9,13 @@ $sth1 = $conn->prepare("SELECT seasongdd, daygdd FROM gdd ORDER BY datetime(\"ca
 $sth1->execute();
 $gdddata = $sth1->fetch(PDO::FETCH_ASSOC);
 
-$pollen_cfg = $conn->prepare("SELECT ENABLE_POLLEN FROM hiveconfig WHERE id=1");
-$pollen_cfg->execute();
-$pollen_cfg_row = $pollen_cfg->fetch(PDO::FETCH_ASSOC);
-$enable_pollen = (($pollen_cfg_row['ENABLE_POLLEN'] ?? 'yes') === 'yes');
+$enable_pollen = true;
+try {
+    $pollen_cfg = $conn->prepare("SELECT ENABLE_POLLEN FROM hiveconfig WHERE id=1");
+    $pollen_cfg->execute();
+    $pollen_cfg_row = $pollen_cfg->fetch(PDO::FETCH_ASSOC);
+    $enable_pollen = (($pollen_cfg_row['ENABLE_POLLEN'] ?? 'yes') === 'yes');
+} catch (Exception $e) {}
 
 $pollensth = $conn->prepare("SELECT pollenlevel, pollentypes FROM pollen ORDER BY date DESC LIMIT 1;");
 $pollensth->execute();
