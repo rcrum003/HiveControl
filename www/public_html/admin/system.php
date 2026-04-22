@@ -251,6 +251,7 @@ if(!empty($command)) {
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">System Commands</h1>
+                    <p style="margin-top:-15px;color:#555"><i class="fa fa-clock-o"></i> System Time: <strong><?php echo date('Y-m-d g:i:s A'); ?></strong> (<?php echo date('T'); ?>)</p>
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
