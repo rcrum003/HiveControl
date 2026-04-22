@@ -19,8 +19,7 @@ sqlite3 $HOMEDIR/data/hive-data.db "insert into logs (date,program,type,message)
 
 #Also logs to the Cloud
 if [ -z "$HIVEAPI" ]; then
-	#Not doing anything
-	echo "No API Set, not sharing log data" >&2
+	:
 else
 	LOGURL="https://www.hivecontrol.org/api/v1/hive/log"
 	STATUS=$(/usr/bin/curl --silent --retry 3 --connect-timeout 30 -X POST -H "Content-Type: multipart/form-data" -H "X-Requested-With: XMLHttpRequest" -F "api_token=$HIVEAPI" -F "hive_id=$HIVEID" -F "program=$2" -F "type=$3" -F "message=$4" $LOGURL)

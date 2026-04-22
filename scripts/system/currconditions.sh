@@ -86,6 +86,16 @@ function sql_escape() {
 	echo "${1//\'/\'\'}"
 }
 
+# Sanitize a variable: if it's not numeric (or "null"), replace with "null"
+function sanitize_numeric() {
+	local val="$1"
+	if [[ "$val" == "null" ]] || [[ "$val" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+		echo "$val"
+	else
+		echo "null"
+	fi
+}
+
 # Escape XML special characters
 function xml_escape() {
 	local str="$1"
@@ -342,6 +352,17 @@ get_air_quality || true
 # Storing Data in our database
 ######################################################################
 echo "--- Storing in the Database ---"
+
+# Sanitize all numeric sensor values before DB insertion
+HIVETEMPF=$(sanitize_numeric "$HIVETEMPF")
+HIVETEMPC=$(sanitize_numeric "$HIVETEMPC")
+HIVEHUMIDITY=$(sanitize_numeric "$HIVEHUMIDITY")
+HIVEWEIGHT=$(sanitize_numeric "$HIVEWEIGHT")
+HIVERAWWEIGHT=$(sanitize_numeric "$HIVERAWWEIGHT")
+A_TEMP=$(sanitize_numeric "$A_TEMP")
+B_HUMIDITY=$(sanitize_numeric "$B_HUMIDITY")
+IN_COUNT=$(sanitize_numeric "$IN_COUNT")
+OUT_COUNT=$(sanitize_numeric "$OUT_COUNT")
 
 # Use proper SQL escaping to prevent injection
 DB_PATH="$HOMEDIR/data/hive-data.db"

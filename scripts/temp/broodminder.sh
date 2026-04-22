@@ -47,8 +47,8 @@ do
         CHECK_DEVICE_STATUS=$(echo $broodminder_out |awk -F, '{print $1}')
 
 
-        #Check for error status
-          if [[ $CHECK_DEVICE_STATUS = $HIVEDEVICE ]]; then
+        #Check for error status (case-insensitive — BLE scan returns lowercase MACs)
+          if [[ "${CHECK_DEVICE_STATUS,,}" = "${HIVEDEVICE,,}" ]]; then
            #Must have been good
             #IF we had a good value, then run the conversions and such
                   

@@ -1,6 +1,22 @@
 Release Notes:
 
 --------------------
+2.22 Release
+--------------------
+BUG FIXES:
+- Fixed BroodMinder not collecting temperature data
+  * Case-sensitive MAC address comparison in broodminder.sh failed because
+    bleak BLE scan returns lowercase MACs but hiveconfig stores uppercase
+  * Changed to case-insensitive comparison using ${var,,} lowercase conversion
+- Fixed non-numeric text being stored in database sensor fields
+  * logger.inc loglocal() printed "No API Set, not sharing log data" to stderr
+  * currconditions.sh captured stderr via 2>&1, contaminating sensor output
+  * "No" stored as hivetempf, "API" stored as hiveHum
+  * Removed the noisy stderr echo from loglocal (local DB logging still works)
+  * Added sanitize_numeric() function in currconditions.sh that validates all
+    sensor values before database INSERT — non-numeric values replaced with null
+
+--------------------
 2.21 Release
 --------------------
 BUG FIXES:
