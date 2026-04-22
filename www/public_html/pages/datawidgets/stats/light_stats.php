@@ -22,12 +22,12 @@ $result = $sth->fetch(PDO::FETCH_ASSOC);
 
 // Calculate the gainloss difference for the specifified period
 
-$avgsolarradiation = $result['solarradiation'];
-$maxsolarradiation = $result['maxsolarradiation'];
-$minsolarradiation = $result['minsolarradiation'];
-$avglux = $result['lux'];
-$maxlux = $result['maxlux'];
-$minlux = $result['minlux'];
+$avgsolarradiation = is_numeric($result['solarradiation']) ? $result['solarradiation'] : '--';
+$maxsolarradiation = is_numeric($result['maxsolarradiation']) ? $result['maxsolarradiation'] : '--';
+$minsolarradiation = is_numeric($result['minsolarradiation']) ? $result['minsolarradiation'] : '--';
+$avglux = is_numeric($result['lux']) ? $result['lux'] : '--';
+$maxlux = is_numeric($result['maxlux']) ? $result['maxlux'] : '--';
+$minlux = is_numeric($result['minlux']) ? $result['minlux'] : '--';
 
 
 

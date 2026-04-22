@@ -31,14 +31,14 @@ $sth2->execute([':p' => $sqlperiod]);
 $result2 = $sth2->fetch(PDO::FETCH_ASSOC);
 
 
-$avghivetempf = $result['avghivetempf'];
-$avghivehum  = $result['avghivehum'];
-$avgweather_tempf = $result2['weather_tempf'];
-$avgweather_humidity = $result2['weather_humidity'];
-$maxhivetempf = $result['maxhivetempf'];
-$minhivetempf = $result['minhivetempf'];
-$maxweathertempf = $result2['maxweather_tempf'];
-$minweathertempf = $result2['minweather_tempf'];
+$avghivetempf = is_numeric($result['avghivetempf']) ? $result['avghivetempf'] : '--';
+$avghivehum  = is_numeric($result['avghivehum']) ? $result['avghivehum'] : '--';
+$avgweather_tempf = is_numeric($result2['weather_tempf']) ? $result2['weather_tempf'] : '--';
+$avgweather_humidity = is_numeric($result2['weather_humidity']) ? $result2['weather_humidity'] : '--';
+$maxhivetempf = is_numeric($result['maxhivetempf']) ? $result['maxhivetempf'] : '--';
+$minhivetempf = is_numeric($result['minhivetempf']) ? $result['minhivetempf'] : '--';
+$maxweathertempf = is_numeric($result2['maxweather_tempf']) ? $result2['maxweather_tempf'] : '--';
+$minweathertempf = is_numeric($result2['minweather_tempf']) ? $result2['minweather_tempf'] : '--';
 
 ?>
 

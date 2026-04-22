@@ -27,15 +27,15 @@ $result = $sth->fetch(PDO::FETCH_ASSOC);
 
 // Calculate the gainloss difference for the specifified period
 
-$avghiveweight = $result['hiveweight'];
-$maxhiveweight = $result['maxhiveweight'];
-$minhiveweight = $result['minhiveweight'];
-$avghiverawweight = $result['hiverawweight'];
-$maxhiverawweight = $result['maxhiverawweight'];
-$minhiverawweight = $result['minhiverawweight'];
-$startweight = $result['startweight'];
-$endweight = $result['endweight'];
-$diffweight = round(($endweight - $startweight), 2);
+$avghiveweight = is_numeric($result['hiveweight']) ? $result['hiveweight'] : '--';
+$maxhiveweight = is_numeric($result['maxhiveweight']) ? $result['maxhiveweight'] : '--';
+$minhiveweight = is_numeric($result['minhiveweight']) ? $result['minhiveweight'] : '--';
+$avghiverawweight = is_numeric($result['hiverawweight']) ? $result['hiverawweight'] : '--';
+$maxhiverawweight = is_numeric($result['maxhiverawweight']) ? $result['maxhiverawweight'] : '--';
+$minhiverawweight = is_numeric($result['minhiverawweight']) ? $result['minhiverawweight'] : '--';
+$startweight = is_numeric($result['startweight']) ? $result['startweight'] : null;
+$endweight = is_numeric($result['endweight']) ? $result['endweight'] : null;
+$diffweight = ($startweight !== null && $endweight !== null) ? round(($endweight - $startweight), 2) : '--';
 
 
 ?>

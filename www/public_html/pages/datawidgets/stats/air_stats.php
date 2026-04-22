@@ -20,19 +20,19 @@ $sth = $conn->prepare("SELECT ROUND(AVG(air_pm2_5), 2) as avgair_pm2_5, MAX(air_
 $sth->execute([':p1' => $sqlperiod, ':p2' => $sqlperiod, ':p3' => $sqlperiod]);
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
-$avgair_pm2_5 = $result['avgair_pm2_5'];
-$maxair_pm2_5 = $result['maxair_pm2_5'];
-$minair_pm2_5 = $result['minair_pm2_5'];
-$startair = $result['startair'];
-$endair = $result['endair'];
-$diffair = round(($endair - $startair), 2);
+$avgair_pm2_5 = is_numeric($result['avgair_pm2_5']) ? $result['avgair_pm2_5'] : '--';
+$maxair_pm2_5 = is_numeric($result['maxair_pm2_5']) ? $result['maxair_pm2_5'] : '--';
+$minair_pm2_5 = is_numeric($result['minair_pm2_5']) ? $result['minair_pm2_5'] : '--';
+$startair = is_numeric($result['startair']) ? $result['startair'] : null;
+$endair = is_numeric($result['endair']) ? $result['endair'] : null;
+$diffair = ($startair !== null && $endair !== null) ? round(($endair - $startair), 2) : '--';
 
-$avgair_pm2_5_raw = $result['avgair_pm2_5_raw'];
-$avgair_pm10_raw = $result['avgair_pm10_raw'];
-$maxair_pm10_raw = $result['maxair_pm10_raw'];
-$minair_pm10_raw = $result['minair_pm10_raw'];
-$avgair_pm2_5_aqi = $result['avgair_pm2_5_aqi'];
-$maxair_pm2_5_aqi = $result['maxair_pm2_5_aqi'];
+$avgair_pm2_5_raw = is_numeric($result['avgair_pm2_5_raw']) ? $result['avgair_pm2_5_raw'] : '--';
+$avgair_pm10_raw = is_numeric($result['avgair_pm10_raw']) ? $result['avgair_pm10_raw'] : '--';
+$maxair_pm10_raw = is_numeric($result['maxair_pm10_raw']) ? $result['maxair_pm10_raw'] : '--';
+$minair_pm10_raw = is_numeric($result['minair_pm10_raw']) ? $result['minair_pm10_raw'] : '--';
+$avgair_pm2_5_aqi = is_numeric($result['avgair_pm2_5_aqi']) ? $result['avgair_pm2_5_aqi'] : '--';
+$maxair_pm2_5_aqi = is_numeric($result['maxair_pm2_5_aqi']) ? $result['maxair_pm2_5_aqi'] : '--';
 
 $avg_o3_aqi = null; $max_o3_aqi = null; $avg_no2_aqi = null; $max_no2_aqi = null;
 try {

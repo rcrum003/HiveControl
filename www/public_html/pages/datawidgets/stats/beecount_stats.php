@@ -21,8 +21,8 @@ $sth->execute([':p' => $sqlperiod]);
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
 
-$total_in = $result['total_in'];
-$total_out = $result['total_out'];
+$total_in = is_numeric($result['total_in']) ? $result['total_in'] : '--';
+$total_out = is_numeric($result['total_out']) ? $result['total_out'] : '--';
 
 ?>
 

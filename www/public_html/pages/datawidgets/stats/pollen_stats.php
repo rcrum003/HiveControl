@@ -13,10 +13,10 @@ $sth = $conn->prepare("SELECT ROUND(AVG(pollenlevel), 1) as avgpollen, MAX(polle
 $sth->execute([':p' => $sqlperiod]);
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
-$avgpollen = $result['avgpollen'];
-$maxpollen = $result['maxpollen'];
-$minpollen = $result['minpollen'];
-$readings = $result['readings'];
+$avgpollen = is_numeric($result['avgpollen']) ? $result['avgpollen'] : '--';
+$maxpollen = is_numeric($result['maxpollen']) ? $result['maxpollen'] : '--';
+$minpollen = is_numeric($result['minpollen']) ? $result['minpollen'] : '--';
+$readings = is_numeric($result['readings']) ? $result['readings'] : 0;
 
 $sth2 = $conn->prepare("SELECT pollenlevel, pollentypes, date FROM pollen WHERE date >= datetime('now', 'localtime', :p) ORDER BY datetime(date) DESC LIMIT 1");
 $sth2->execute([':p' => $sqlperiod]);
