@@ -1,6 +1,18 @@
 Release Notes:
 
 --------------------
+2.21 Release
+--------------------
+BUG FIXES:
+- Fixed GDD backfill producing seasongdd=0 when database is locked
+  * backfill_from_openmeteo() running_total query used 2>/dev/null which
+    silently swallowed DB lock errors from concurrent currconditions.sh
+  * Empty result defaulted to 0 via ${running_total:-0}, causing inserted
+    rows to have seasongdd=0 instead of the actual cumulative total
+  * Replaced with 3-attempt retry loop (2s sleep between attempts) that
+    aborts with a log message if all retries fail
+
+--------------------
 2.20 Release
 --------------------
 DASHBOARD CHART OVERHAUL:
