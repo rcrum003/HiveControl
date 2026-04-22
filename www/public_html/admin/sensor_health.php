@@ -151,10 +151,12 @@ foreach ($sensors as $key => $s) {
         if ($k === 'Source' || $k === 'Types') continue;
         $vals .= htmlspecialchars($v) . ' ';
     }
+    $gray_style = ($s['status'] === 'gray') ? ' style="background-color:#d5d5d5; border-color:#bbb;"' : '';
+    $gray_head = ($s['status'] === 'gray') ? ' style="background-color:#aaa; border-color:#999; color:#fff;"' : '';
     echo '
-                <div class="col-lg-4 col-md-6">
-                    <div class="panel ' . $panel_class . '">
-                        <div class="panel-heading">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel ' . $panel_class . '"' . $gray_style . '>
+                        <div class="panel-heading"' . $gray_head . '>
                             <div class="row">
                                 <div class="col-xs-3"><i class="fa ' . $s['icon'] . ' fa-4x"></i></div>
                                 <div class="col-xs-9 text-right">
