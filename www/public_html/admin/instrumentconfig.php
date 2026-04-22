@@ -330,7 +330,7 @@ if($v->validate()) {
                             <input type="hidden" name="WX_TEMP_INTERCEPT" value="<?php echo $result['WX_TEMP_INTERCEPT']; ?>">
                             <input type="hidden" name="WX_HUMIDITY_SLOPE" value="<?php echo $result['WX_HUMIDITY_SLOPE']; ?>">
                             <input type="hidden" name="WX_HUMIDITY_INTERCEPT" value="<?php echo $result['WX_HUMIDITY_INTERCEPT']; ?>">
-                            <div class="dataTable_wrapper">
+                            <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-hover" id="dataTables-example">
                                     <thead>
                                         <tr>
