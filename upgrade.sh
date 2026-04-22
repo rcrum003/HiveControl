@@ -330,6 +330,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_42
 			let DB_ver="34"
 		fi
+		if [[ $DB_ver -eq "34" ]]; then
+			echo "Applying DB Ver 35 Upgrades - WX Underground API key"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_43
+			let DB_ver="35"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"

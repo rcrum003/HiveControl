@@ -1,6 +1,28 @@
 Release Notes:
 
 --------------------
+2.24 Release
+--------------------
+WX UNDERGROUND API MIGRATION:
+- Migrated from dead XML endpoint (api.wunderground.com) to new PWS API
+  * Old endpoint killed by IBM — returns "Service Unavailable"
+  * New endpoint: api.weather.com/v2/pws/observations/current (JSON)
+  * Requires API key — free for PWS owners who upload data
+- Rewrote getwxxml.sh to use JSON API with jq parsing
+  * Validates JSON response before extracting data
+  * Uses shared wx_helpers.inc for unit conversions (f_to_c, in_to_mb, etc.)
+  * Outputs standardized WunderGround-format JSON via output_wx_json()
+- Updated Instrument Config page for WX Underground selection
+  * API KEY field now required when WX Underground is selected
+  * Link to wunderground.com/member/api-keys for key retrieval
+  * Station ID and API Key both shown with required indicators
+  * API key stored securely in hiveconfig database
+
+DATABASE CHANGES:
+- DB_PATCH_43: Added WXAPIKEY column to hiveconfig
+  (DB version 34 -> 35)
+
+--------------------
 2.23 Release
 --------------------
 HIVE BODY CONFIGURATION REDESIGN:

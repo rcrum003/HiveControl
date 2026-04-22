@@ -1,0 +1,4 @@
+-- DB_PATCH_43: Add WX Underground API key column
+-- The old WXUnderground XML endpoint is dead (IBM killed it).
+-- PWS owners can now use the api.weather.com PWS API, which requires an API key.
+ALTER TABLE hiveconfig ADD COLUMN WXAPIKEY TEXT DEFAULT '';

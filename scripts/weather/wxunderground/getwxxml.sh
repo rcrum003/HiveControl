@@ -1,89 +1,102 @@
-
 #!/bin/bash
 #
-# Script to get output from WX-Underground XML file that matches WUNDERGROUND file format
+# Script to get weather data from Weather Underground PWS API
+# Uses the api.weather.com/v2/pws/observations/current endpoint
 #
-# Revision 2
-# 2019-07-07
+# Revision 3
+# 2026-04-22
 #
-# Not sure how this script will last, now that IBM is the evil overlord of WXUnderground
-
-
-#Get our variables
+# The old XML endpoint (api.wunderground.com) was killed by IBM.
+# PWS owners who upload data get a free API key for the new JSON endpoint.
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
 source /home/HiveControl/scripts/data/check.inc
 source /home/HiveControl/scripts/weather/wx_helpers.inc
 
-#set -x
 DATE=$(TZ=":$TIMEZONE" date '+%F %R')
 
+if [ -z "$WXAPIKEY" ]; then
+	loglocal "$DATE" WEATHER ERROR "WXAPIKEY not configured — cannot fetch from WX Underground PWS API"
+	exit 1
+fi
+
+if [ -z "$WXSTATION" ]; then
+	loglocal "$DATE" WEATHER ERROR "WXSTATION not configured"
+	exit 1
+fi
 
 TRYCOUNTER="1"
 DATA_GOOD="0"
 
-TMPFILE=$(mktemp /tmp/getwxxml_XXXXXX.xml)
-trap 'rm -f "$TMPFILE"' EXIT
+TMPFILE=$(mktemp /tmp/getwxxml_XXXXXX.json)
+CURLCFG=$(mktemp /tmp/curlcfg_XXXXXX)
+chmod 600 "$CURLCFG"
+trap 'rm -f "$TMPFILE" "$CURLCFG"' EXIT
+
+printf 'url = "https://api.weather.com/v2/pws/observations/current?stationId=%s&format=json&units=e&apiKey=%s&numericPrecision=decimal"\n' \
+	"$WXSTATION" "$WXAPIKEY" > "$CURLCFG"
 
 while [[ $TRYCOUNTER -lt 3 && $DATA_GOOD -eq 0 ]];
 do
-
-	#GETDATA=$(/usr/bin/curl --silent "$ambient_device_url/$ambient_deviceMAC?apiKey=$ambient_APIKEY&applicationKey=$ambient_APPID&limit=1")
-	/usr/bin/curl --retry 5 --max-time 30 "http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID=$WXSTATION" > $TMPFILE
+	/usr/bin/curl --retry 3 --max-time 30 --silent --config "$CURLCFG" \
+		> "$TMPFILE"
 
 	CHECKERROR=$?
 
-	if [ "$CHECKERROR" -ne "0"  ]; then
-		loglocal "$DATE" WEATHER INFO "Did not get a proper response from WUNDERGROUND, trying again"
+	if [ "$CHECKERROR" -ne "0" ]; then
+		loglocal "$DATE" WEATHER INFO "Did not get a proper response from WX Underground PWS API, trying again"
 		let TRYCOUNTER+=1
 	else
-		DATA_GOOD=1
+		# Verify we got valid JSON with observations
+		if jq -e '.observations[0]' "$TMPFILE" > /dev/null 2>&1; then
+			DATA_GOOD=1
+		else
+			loglocal "$DATE" WEATHER INFO "WX Underground PWS API returned invalid data, trying again"
+			let TRYCOUNTER+=1
+		fi
 	fi
 done
 
 if [ $DATA_GOOD = "0" ]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper response from Wunderground -$CHECKERROR"
-
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper response from WX Underground PWS API after retries"
+	exit 1
 fi
 
-DATEUTC=$DATE
-TEMP_F=`grep temp_f $TMPFILE | grep  -o "[0-9]*\.[0-9]*"`
-temp_c=`grep temp_c $TMPFILE | grep  -o "[0-9]*\.[0-9]*"`
-HUMIDITY=`grep relative_humidity $TMPFILE | grep  -o "[0-9]*"`
-WIND_DIR=`grep wind_degrees $TMPFILE | grep -o "[0-9]*"`
-WIND_SPEED_MPH=`grep wind_mph $TMPFILE | grep  -o "[0-9]*\.[0-9]*"`
-WIND_GUST_MPH=`grep wind_gust_mph $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-PRESSURE_MB=`grep pressure_mb $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-DEWPOINT_F=`grep dewpoint_f $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-DEWPOINT_C=`grep dewpoint_c $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-RAIN_HOURLY_IN=`grep precip_1hr_in $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-RAIN_DAILY_IN=`grep precip_today_in $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-SOLAR_RADIATION=`grep solar_radiation $TMPFILE |  grep  -o "[0-9]*"`
-UV=`grep UV $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-precip_1hr_metric=`grep precip_1hr_metric $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-precip_today_metric=`grep precip_1hr_metric $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
-PRESSURE_IN=`grep pressure_in $TMPFILE |  grep  -o "[0-9]*\.[0-9]*"`
+# Parse JSON response using jq
+OBS=$(cat "$TMPFILE")
 
+DATEUTC=$(echo "$OBS" | jq -r '.observations[0].obsTimeUtc // empty')
+TEMP_F=$(echo "$OBS" | jq -r '.observations[0].imperial.temp // empty')
+HUMIDITY=$(echo "$OBS" | jq -r '.observations[0].humidity // empty')
+WIND_DIR=$(echo "$OBS" | jq -r '.observations[0].winddir // empty')
+WIND_SPEED_MPH=$(echo "$OBS" | jq -r '.observations[0].imperial.windSpeed // empty')
+WIND_GUST_MPH=$(echo "$OBS" | jq -r '.observations[0].imperial.windGust // empty')
+PRESSURE_IN=$(echo "$OBS" | jq -r '.observations[0].imperial.pressure // empty')
+DEWPOINT_F=$(echo "$OBS" | jq -r '.observations[0].imperial.dewpt // empty')
+RAIN_HOURLY_IN=$(echo "$OBS" | jq -r '.observations[0].imperial.precipRate // empty')
+RAIN_DAILY_IN=$(echo "$OBS" | jq -r '.observations[0].imperial.precipTotal // empty')
+SOLAR_RADIATION=$(echo "$OBS" | jq -r '.observations[0].solarRadiation // empty')
+UV=$(echo "$OBS" | jq -r '.observations[0].uv // empty')
 
-# Convert Wind DIRECTION Degrees into Text
+if [ -z "$TEMP_F" ]; then
+	loglocal "$DATE" WEATHER ERROR "Did not get a proper Temp from WX Underground PWS API"
+	exit 1
+fi
+
+# Derived values
+temp_c=$(f_to_c "$TEMP_F")
+DEWPOINT_C=$(f_to_c "$DEWPOINT_F")
+PRESSURE_MB=$(in_to_mb "$PRESSURE_IN")
 DIRECTION=$(degrees_to_cardinal "$WIND_DIR")
-
-# Convert MPH to KPH
 wind_kph=$(mph_to_kph "$WIND_SPEED_MPH")
 wind_gust_kph=$(mph_to_kph "$WIND_GUST_MPH")
+precip_1hr_metric=$(in_to_mm "$RAIN_HOURLY_IN")
+precip_today_metric=$(in_to_mm "$RAIN_DAILY_IN")
 
-
-if [[ -z "$TEMP_F" ]]; then
-	loglocal "$DATE" WEATHER ERROR "Did not get a proper Temp from WXUnderground, even after counter, $GETDATA"
-	#Since we didn't get a proper file, we should assume the whole thing is borked
-	exit
-fi
-
-
-# Return a JSON file to mimic WUNderground file format
+# Output standardized WunderGround-format JSON
 WX_STATION_ID="$WXSTATION"
-WX_OBS_TIME="$DATEUTC"
+WX_OBS_TIME="${DATEUTC:-$DATE}"
 WX_TEMP_F="$TEMP_F"
 WX_TEMP_C="$temp_c"
 WX_HUMIDITY="$HUMIDITY"

@@ -200,6 +200,7 @@ if($v->validate()) {
     $key_tomorrow = test_input($_POST["KEY_TOMORROW"] ?? '');
     $key_ambee = test_input($_POST["KEY_AMBEE"] ?? '');
     $wxstation = test_input($_POST["WXSTATION"]);
+    $wxapikey = trim(strip_tags($_POST["WXAPIKEY"] ?? ''));
     $WXTEMPTYPE = test_input($_POST["WXTEMPTYPE"]);
     $WX_TEMPER_DEVICE = test_input_allow_slash($_POST["WX_TEMPER_DEVICE"]);
     $WX_TEMP_GPIO = test_input($_POST["WX_TEMP_GPIO"]);
@@ -232,8 +233,8 @@ if($v->validate()) {
     $version = ++$ver;
 
     // Update into the DB
-    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=? WHERE id=1");
-    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback, $weather_fallback_2, $wx_max_stale_minutes, $key_openweathermap, $key_weatherapi, $key_visualcrossing, $key_pirateweather, $key_tomorrow, $key_ambee, $ENABLE_AIRNOW, $KEY_AIRNOW, $AIRNOW_DISTANCE));
+    $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=?,WXAPIKEY=? WHERE id=1");
+    $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE, $HIVE_LUX_INTERCEPT, $HIVE_TEMP_SLOPE, $HIVE_TEMP_INTERCEPT, $WX_TEMP_SLOPE, $WX_TEMP_INTERCEPT, $HIVE_HUMIDITY_SLOPE, $HIVE_HUMIDITY_INTERCEPT, $WX_HUMIDITY_SLOPE, $WX_HUMIDITY_INTERCEPT, $HIVE_LUX_GPIO, $HIVE_WEIGHT_GPIO, $HIVE_TEMP_SUB, $ENABLE_AIR, $AIR_TYPE, $AIR_ID, $AIR_API, $AIR_LOCAL_URL, $WEIGHT_COMPENSATION_ENABLED, $WEIGHT_TEMP_COEFF, $WEIGHT_HUMIDITY_COEFF, $WEIGHT_REF_TEMP, $WEIGHT_REF_HUMIDITY, $weather_fallback, $weather_fallback_2, $wx_max_stale_minutes, $key_openweathermap, $key_weatherapi, $key_visualcrossing, $key_pirateweather, $key_tomorrow, $key_ambee, $ENABLE_AIRNOW, $KEY_AIRNOW, $AIRNOW_DISTANCE, $wxapikey));
     sleep(1);
 
 
@@ -282,7 +283,7 @@ if($v->validate()) {
                             <input type="hidden" name="WEATHER_FALLBACK" value="<?php echo htmlspecialchars($result['WEATHER_FALLBACK'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="WEATHER_FALLBACK_2" value="<?php echo htmlspecialchars($result['WEATHER_FALLBACK_2'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="WX_MAX_STALE_MINUTES" value="<?php echo htmlspecialchars($result['WX_MAX_STALE_MINUTES'] ?? '120', ENT_QUOTES, 'UTF-8'); ?>">
-                            <input type="hidden" name="WEATHER_DETAIL" value="<?php echo $result['WEATHER_DETAIL']; ?>">
+                            <input type="hidden" name="WEATHER_DETAIL" value="<?php echo htmlspecialchars($result['WEATHER_DETAIL'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="KEY" value="<?php echo htmlspecialchars($result['KEY'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="KEY_OPENWEATHERMAP" value="<?php echo htmlspecialchars($result['KEY_OPENWEATHERMAP'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="KEY_WEATHERAPI" value="<?php echo htmlspecialchars($result['KEY_WEATHERAPI'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
@@ -290,7 +291,8 @@ if($v->validate()) {
                             <input type="hidden" name="KEY_PIRATEWEATHER" value="<?php echo htmlspecialchars($result['KEY_PIRATEWEATHER'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="KEY_TOMORROW" value="<?php echo htmlspecialchars($result['KEY_TOMORROW'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="KEY_AMBEE" value="<?php echo htmlspecialchars($result['KEY_AMBEE'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                            <input type="hidden" name="WXSTATION" value="<?php echo $result['WXSTATION']; ?>">
+                            <input type="hidden" name="WXSTATION" value="<?php echo htmlspecialchars($result['WXSTATION'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="WXAPIKEY" value="<?php echo htmlspecialchars($result['WXAPIKEY'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="CAMERATYPE" value="<?php echo $result['CAMERATYPE']; ?>">
                             <input type="hidden" name="COUNTERTYPE" value="<?php echo $result['COUNTERTYPE']; ?>">
                             <input type="hidden" name="AIR_TYPE" value="<?php echo $result['AIR_TYPE'] ?? ''; ?>">
@@ -752,7 +754,9 @@ if($v->validate()) {
                                 }
 
                                 if ($result['WEATHER_LEVEL'] == "hive") {
-                                    echo 'STATION ID <br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="'; echo $result['WXSTATION']; echo '">';
+                                    echo 'API KEY <span style="color:red">*</span><br><input type="text" name="WXAPIKEY" size="40" onchange="this.form.submit()" value="' . htmlspecialchars($result['WXAPIKEY'] ?? '', ENT_QUOTES, 'UTF-8') . '" required><br>';
+                                    echo 'STATION ID <span style="color:red">*</span><br><input type="text" name="WXSTATION" onchange="this.form.submit()" value="' . htmlspecialchars($result['WXSTATION'] ?? '', ENT_QUOTES, 'UTF-8') . '" required><br>';
+                                    echo '<small>PWS owners get a free API key. Get yours at <a href="https://www.wunderground.com/member/api-keys" target="_blank">wunderground.com/member/api-keys</a></small>';
                                 }
 
                                 if ($result['WEATHER_LEVEL'] == "ambientwx") {
