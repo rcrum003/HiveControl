@@ -650,11 +650,9 @@ if [[ "$Installed_Ver" < "2.16" ]]; then
 	sudo chown root:root /etc/sudoers.d/hivecontrol
 	sudo chmod 440 /etc/sudoers.d/hivecontrol
 
-	# Add hourly AirNow cron job (runs at minute 30 to avoid overlap with currconditions)
-	AIRNOW_CRON="30 * * * * /home/HiveControl/scripts/air/getairnow.sh >> /home/HiveControl/logs/airnow.log 2>&1"
+	# Add hourly AirNow cron job (runs at minute 7 to avoid overlap with currconditions)
+	AIRNOW_CRON="7 * * * * mkdir -p /home/HiveControl/logs && /home/HiveControl/scripts/air/getairnow.sh >> /home/HiveControl/logs/airnow.log 2>&1"
 	(sudo crontab -u root -l 2>/dev/null | grep -v "getairnow.sh"; echo "$AIRNOW_CRON") | sudo crontab -u root -
-	sudo touch /home/HiveControl/logs/airnow.log
-	sudo chown root:root /home/HiveControl/logs/airnow.log
 fi
 
 if [[ "$Installed_Ver" < "2.17" ]]; then
@@ -667,9 +665,28 @@ if [[ "$Installed_Ver" < "2.17" ]]; then
 		| sed 's|^5,20,35,50 \* \* \* \* /home/HiveControl/scripts/weight/weight_monitor\.sh|5,20,35,50 * * * * mkdir -p /home/HiveControl/logs \&\& /home/HiveControl/scripts/weight/weight_monitor.sh|' \
 	) | sudo crontab -u root -
 
-	# BroodMinder: migrate from bluepy (Python 2) to bleak (Python 3)
-	sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null
 	sudo chmod u+x /home/HiveControl/scripts/temp/broodminder.sh
+fi
+
+if [[ "$Installed_Ver" < "2.18" ]]; then
+	# Enable Bluetooth for BroodMinder BLE scanning
+	sudo systemctl enable --now bluetooth 2>/dev/null
+	sudo rfkill unblock bluetooth 2>/dev/null
+
+	# BroodMinder: migrate from bluepy (Python 2) to bleak (Python 3)
+	sudo pip3 install bleak --break-system-packages 2>/dev/null || sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null
+
+	# Add mkdir guard to AirNow cron entry (was missing in 2.16 upgrade)
+	(sudo crontab -u root -l 2>/dev/null \
+		| sed 's|^\([0-9]* \* \* \* \*\) /home/HiveControl/scripts/air/getairnow\.sh|7 * * * * mkdir -p /home/HiveControl/logs \&\& /home/HiveControl/scripts/air/getairnow.sh|' \
+	) | sudo crontab -u root -
+fi
+
+if [[ "$Installed_Ver" < "2.19" ]]; then
+	# Ensure Bluetooth enabled and bleak installed (was missed in 2.18 upgrades)
+	sudo systemctl enable --now bluetooth 2>/dev/null
+	sudo rfkill unblock bluetooth 2>/dev/null
+	sudo pip3 install bleak --break-system-packages 2>/dev/null || sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null
 fi
 
 echo "============================================="

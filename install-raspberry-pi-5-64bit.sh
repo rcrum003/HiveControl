@@ -426,17 +426,14 @@ echo "Installing Bluetooth Support for BroodMinder Devices"
 echo "-------------------------------"
 sudo apt-get install python3-pip -y
 
-# Install glib development files required for bluepy compilation
-echo "Installing glib development files for bluepy..."
-sudo apt-get install libglib2.0-dev -y
+# Enable Bluetooth for BroodMinder BLE scanning
+echo "Enabling Bluetooth..."
+sudo systemctl enable --now bluetooth 2>/dev/null
+sudo rfkill unblock bluetooth 2>/dev/null
 
-#Install bluepy - Fixed for PEP 668 externally managed environment
-echo "Installing bluepy Python package..."
-sudo pip install bluepy --break-system-packages || {
-	echo "Warning: bluepy installation failed. Trying alternative method..."
-	# Alternative: try to install from system packages if available
-	sudo apt-get install python3-bluepy -y || echo "Warning: Could not install bluepy - BroodMinder support may not work"
-}
+# Install bleak — async BLE library for BroodMinder (replaces legacy bluepy)
+echo "Installing bleak Python BLE package..."
+sudo pip3 install bleak --break-system-packages 2>/dev/null || sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null || echo "Warning: Could not install bleak - BroodMinder support may not work"
 ####################################################################################
 
 if [[ $KEYBOARD = "true" ]]; then

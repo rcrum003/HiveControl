@@ -1,6 +1,59 @@
 Release Notes:
 
 --------------------
+2.19 Release
+--------------------
+SECURITY FIXES:
+- Fixed CRITICAL SQL injection in all stats files (light_stats, gdd_stats,
+  pollen_stats, air_stats, temp_stats, weight_stats, beecount_stats)
+  * Switch statements with no default case allowed uninitialized $sqlperiod
+    to be interpolated directly into SQL queries
+  * Replaced with $period_map whitelist + PDO bound parameters (:p)
+- Fixed SQL injection in air_chart.php — converted to bound parameters
+- Added try/catch around EPA table queries in air_chart.php for pre-2.16
+  database compatibility
+
+BLUETOOTH / BROODMINDER FIXES:
+- Fixed bleak (BLE library) not installed on fresh installs
+  * install.sh and install-raspberry-pi-5-64bit.sh still referenced legacy
+    bluepy — replaced with bleak install chain
+- Fixed bleak not installed on upgrades from 2.17 to 2.18
+  * bleak install was in the < 2.17 upgrade block — moved to < 2.18 block
+- Added Bluetooth enable to install and upgrade scripts
+  * systemctl enable --now bluetooth ensures service starts and persists
+  * rfkill unblock bluetooth clears soft-block on Raspberry Pi
+- Added --break-system-packages flag for PEP 668 compatibility on newer
+  Debian/Raspberry Pi OS versions
+
+UI/UX DETAIL PAGE REDESIGN:
+- Redesigned all detail pages with col-lg-8/col-lg-4 layout
+  * Charts in main column (col-lg-8), stats/controls in sidebar (col-lg-4)
+  * Applied to: air, temp, weight, beecount, light, gdd
+- Split air chart into two synchronized Highcharts
+  * Top chart: PM2.5, PM10, PM1 concentrations (ug/m3)
+  * Bottom chart: AQI index with EPA color-banded plotBands
+  * Synchronized crosshairs and zoom between charts
+- Added contextual alert banners on detail pages
+  * air.php: high PM2.5, smoke, high ozone alerts
+  * temp.php: high/low temperature alerts
+  * weight.php: swarm, robbing, honey flow alerts
+  * beecount.php: swarm, robbing alerts
+- Added current reading cards on detail pages
+  * Air: large AQI badge with EPA color coding and category label
+  * Weight: net/gross weight with gain/loss trend indicator
+- Fixed fullscreen/air.php "Enlarge Chart" recursion — suppressed when
+  already in fullscreen mode via $is_fullscreen flag
+
+BUG FIXES:
+- Fixed $current_pm25 uninitialized variable warning in air.php
+- Fixed get_page_alerts() returning sparse array — wrapped in array_values()
+- Fixed crosshair sync this binding in air_chart.php — replaced .bind(this)
+  with local triggerChart variable
+- Fixed GDD page mislabeled as "Light Analysis" (copy-paste from template)
+- Fixed NULL comparison in temp_stats.php — changed hivetempf!='null' to
+  hivetempf IS NOT NULL
+
+--------------------
 2.18 Release
 --------------------
 BROODMINDER BLE INTEGRATION:

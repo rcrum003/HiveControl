@@ -7,47 +7,27 @@
 # Specifically - Period and Chart
 
 
-switch ($period) {
-    case "today":
-        $sqlperiod = "start of day";
-        break;
+$period_map = [
+    'today' => 'start of day', 'day' => '-1 days',
+    'week'  => '-7 days',      'month' => '-1 months',
+    'year'  => '-1 years',     'all'   => '-20 years',
+];
+$sqlperiod = isset($period_map[$period]) ? $period_map[$period] : 'start of day';
 
-    case "day":
-        $sqlperiod = "-1 days";
-        break;
-    case "week":
-        $sqlperiod = "-7 days";
-        break;
-    case "month":
-        $sqlperiod = "-1 months";
-        break;
-    case "year":
-        $sqlperiod =  "-1 years";
-        break;
-    case "all":
-        $sqlperiod =  "-20 years";
-        break;
-    }
-
-    # Echo back the Javascript code
- 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-// Get Hive Data First
-
-
 if ( $SHOW_METRIC == "on" ) {
-$sth = $conn->prepare("SELECT ROUND(AVG(hivetempc), 1) as avghivetempf, MAX(hivetempc) as maxhivetempf, MIN(hivetempc) as minhivetempf, ROUND(AVG(hiveHum), 1) as avghivehum, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') AND hivetempf!='null'");
-$sth2 = $conn->prepare("SELECT ROUND(AVG(weather_tempc),1) as weather_tempf, MAX(weather_tempc) as maxweather_tempf, MIN(weather_tempc) as minweather_tempf, ROUND(AVG(weather_humidity),1) as weather_humidity, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') AND hivetempf!='null'");
+$sth = $conn->prepare("SELECT ROUND(AVG(hivetempc), 1) as avghivetempf, MAX(hivetempc) as maxhivetempf, MIN(hivetempc) as minhivetempf, ROUND(AVG(hiveHum), 1) as avghivehum, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', :p) AND hivetempf IS NOT NULL");
+$sth2 = $conn->prepare("SELECT ROUND(AVG(weather_tempc),1) as weather_tempf, MAX(weather_tempc) as maxweather_tempf, MIN(weather_tempc) as minweather_tempf, ROUND(AVG(weather_humidity),1) as weather_humidity, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', :p) AND hivetempc IS NOT NULL");
 } else {
-$sth = $conn->prepare("SELECT ROUND(AVG(hivetempf), 1) as avghivetempf, MAX(hivetempf) as maxhivetempf, MIN(hivetempf) as minhivetempf, ROUND(AVG(hiveHum), 1) as avghivehum, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') AND hivetempf!='null'");
-$sth2 = $conn->prepare("SELECT ROUND(AVG(weather_tempf),1) as weather_tempf, MAX(weather_tempf) as maxweather_tempf, MIN(weather_tempf) as minweather_tempf, ROUND(AVG(weather_humidity),1) as weather_humidity, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', '$sqlperiod') AND weather_tempf!='null'");
+$sth = $conn->prepare("SELECT ROUND(AVG(hivetempf), 1) as avghivetempf, MAX(hivetempf) as maxhivetempf, MIN(hivetempf) as minhivetempf, ROUND(AVG(hiveHum), 1) as avghivehum, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', :p) AND hivetempf IS NOT NULL");
+$sth2 = $conn->prepare("SELECT ROUND(AVG(weather_tempf),1) as weather_tempf, MAX(weather_tempf) as maxweather_tempf, MIN(weather_tempf) as minweather_tempf, ROUND(AVG(weather_humidity),1) as weather_humidity, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', :p) AND weather_tempf IS NOT NULL");
 }
 
-$sth->execute();
+$sth->execute([':p' => $sqlperiod]);
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
-$sth2->execute();
+$sth2->execute([':p' => $sqlperiod]);
 $result2 = $sth2->fetch(PDO::FETCH_ASSOC);
 
 

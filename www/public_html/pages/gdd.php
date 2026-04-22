@@ -2,12 +2,6 @@
 
 <?PHP
 
-//Pass variables to determine the type of view
-// Make just one page that can show day/month/year, etc
-// Functions
-// period 
-
-//Check input for badness
 function test_input($data) {
   $data = trim($data);
   $data = stripslashes($data);
@@ -15,39 +9,22 @@ function test_input($data) {
   return $data;
 }
 
+$period = "";
+$chart = "";
 
-$period = test_input($_GET["period"]);
-$chart = test_input($_GET["chart"]);
-
-#Check to see if the neccessary variables exist
-
-if(isset($_GET["period"])) {
-    // type exists
-    if (empty($_GET["period"])) {
-        $error = "ERROR: Period can't be empty";
-        } else {
-            $period = test_input($_GET["period"]);
-            #echo "The Period is $period";
-        }
-    } else {
-    $error = "ERROR: Must specify a period";
+if(isset($_GET["period"]) && !empty($_GET["period"])) {
+    $period = test_input($_GET["period"]);
+} else {
+    $period = "week";
 }
 
-if(isset($_GET["chart"])) {
-    // type exists
-    if (empty($_GET["chart"])) {
-        $error = "ERROR: Chart can't be empty";
-        } else {
-            $chart = test_input($_GET["chart"]);
-            #echo "The Period is $period";
-        }
-    } else {
-    $error =  "ERROR: Must specify chart";
+if(isset($_GET["chart"]) && !empty($_GET["chart"])) {
+    $chart = test_input($_GET["chart"]);
+} else {
+    $chart = "line";
 }
 
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -57,35 +34,30 @@ if(isset($_GET["chart"])) {
     <!-- /Navigation -->
 
     <div id="wrapper">
+
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header">Growing Degree Days Analysis</h1>
-            <?PHP if(isset($error)){ 
-                echo '<div class="alert alert-danger">'; echo $error; echo'</div>';} ?>
                 </div>
-                <!-- /.col-lg-12 -->
-                        </div>
+            </div>
+
+            <!-- Button Bar -->
             <div class="row">
                 <div class="col-lg-12">
-        
-        <!-- Button Bar -->
-            <a href="/pages/gdd.php?chart=line&period=week"><button type="button" class="btn btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
-            <a href="/pages/gdd.php?chart=line&period=month"><button type="button" class="btn btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
-            <a href="/pages/gdd.php?chart=line&period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
-            <a href="/pages/gdd.php?chart=line&period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
+            <a href="/pages/gdd.php?chart=line&period=week"><button type="button" class="btn btn-<?PHP if ($period == "week"){echo "primary";} else {echo "default";}?>">Week</button></a>
+            <a href="/pages/gdd.php?chart=line&period=month"><button type="button" class="btn btn-<?PHP if ($period == "month"){echo "primary";} else {echo "default";}?>">Month</button></a>
+            <a href="/pages/gdd.php?chart=line&period=year"><button type="button" class="btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
+            <a href="/pages/gdd.php?chart=line&period=all"><button type="button" class="btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
             <br>
                 </div>
-                <!-- /.col-lg-12 -->
-                        </div>
-            
-            <!-- /.row -->
+            </div>
 
-            <!-- /.row -->
-            <div class="row">
+            <!-- Main Content: Chart + Sidebar -->
+            <div class="row" style="margin-top: 10px;">
                 <div class="col-lg-8">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Light Analysis
+                            Growing Degree Days
                         </div>
                         <div class="panel-body">
                             <div class="pull-center" id="container"></div>
@@ -93,47 +65,19 @@ if(isset($_GET["chart"])) {
                     </div>
                 </div>
                 <div class="col-lg-4">
-                
-                <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Download Raw Data
-                        </div> 
-                           <div class="panel-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <?PHP include "datawidgets/stats/gdd_stats.php"; 
-                                    ?>
+                    <?PHP include "datawidgets/stats/gdd_stats.php"; ?>
 
-                                    <tbody>
-                                        <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=gdd_data&period=<?PHP echo $period;?>&output=csv">CSV</a></td>
-                                        </tr>
-                                        <tr>
-                                            <td><a href="/pages/datawidgets/datajob.php?type=gdd_data&period=<?PHP echo $period;?>&output=json">JSON</a></td>
-                                            <td></td>
-                                           
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!-- /.table-responsive -->
+                    <!-- Download -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Download Raw Data</div>
+                        <div class="panel-body">
+                            <a href="/pages/datawidgets/datajob.php?type=gdd_data&period=<?PHP echo htmlspecialchars($period, ENT_QUOTES);?>&output=csv" class="btn btn-default btn-sm"><i class="fa fa-download"></i> CSV</a>
+                            <a href="/pages/datawidgets/datajob.php?type=gdd_data&period=<?PHP echo htmlspecialchars($period, ENT_QUOTES);?>&output=json" class="btn btn-default btn-sm"><i class="fa fa-download"></i> JSON</a>
                         </div>
                     </div>
 
-
                 </div>
-
             </div>
-                        </div>
-                        <!-- /.panel-footer -->
-                    </div>
-                    <!-- /.panel .chat-panel -->
-                </div>
-                <!-- /.col-lg-4 -->
-            </div>
-            <!-- /.row -->
-        </div>
-        <!-- /#page-wrapper -->
 
     </div>
     <!-- /#wrapper -->
@@ -152,19 +96,12 @@ if(isset($_GET["chart"])) {
     <!-- High Charts -->
     <script src="/js/highcharts/highcharts.js"></script>
     <script src="/js/highcharts/modules/exporting.js"></script>
-    
-    <!-- Full Screen Popups -->
-    <script src="/js/popup.js"></script>   
-     
-    <?php 
-        #Since this document already has variables, we can pass variables by just including it.
-        # Period and chart variables will be used in the charts.
-    #echo "Period is $period";
-    #echo "Chart is $chart";
 
-    include "datawidgets/gdd_chart.php"; ?>
-    
-    
+    <!-- Full Screen Popups -->
+    <script src="/js/popup.js"></script>
+
+    <?php include "datawidgets/gdd_chart.php"; ?>
+
     <!-- Custom Theme JavaScript -->
     <!-- Footer -->
          <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>

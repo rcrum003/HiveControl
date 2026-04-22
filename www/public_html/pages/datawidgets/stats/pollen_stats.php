@@ -1,30 +1,16 @@
 <?php
 
-switch ($period) {
-    case "today":
-        $sqlperiod = "start of day";
-        break;
-    case "day":
-        $sqlperiod = "-1 days";
-        break;
-    case "week":
-        $sqlperiod = "-7 days";
-        break;
-    case "month":
-        $sqlperiod = "-1 months";
-        break;
-    case "year":
-        $sqlperiod =  "-1 years";
-        break;
-    case "all":
-        $sqlperiod =  "-20 years";
-        break;
-    }
+$period_map = [
+    'today' => 'start of day', 'day' => '-1 days',
+    'week'  => '-7 days',      'month' => '-1 months',
+    'year'  => '-1 years',     'all'   => '-20 years',
+];
+$sqlperiod = isset($period_map[$period]) ? $period_map[$period] : 'start of day';
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-$sth = $conn->prepare("SELECT ROUND(AVG(pollenlevel), 1) as avgpollen, MAX(pollenlevel) as maxpollen, MIN(pollenlevel) as minpollen, COUNT(*) as readings FROM pollen WHERE date >= datetime('now', 'localtime', '$sqlperiod') AND pollenlevel > 0");
-$sth->execute();
+$sth = $conn->prepare("SELECT ROUND(AVG(pollenlevel), 1) as avgpollen, MAX(pollenlevel) as maxpollen, MIN(pollenlevel) as minpollen, COUNT(*) as readings FROM pollen WHERE date >= datetime('now', 'localtime', :p) AND pollenlevel > 0");
+$sth->execute([':p' => $sqlperiod]);
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
 $avgpollen = $result['avgpollen'];
@@ -32,8 +18,8 @@ $maxpollen = $result['maxpollen'];
 $minpollen = $result['minpollen'];
 $readings = $result['readings'];
 
-$sth2 = $conn->prepare("SELECT pollenlevel, pollentypes, date FROM pollen WHERE date >= datetime('now', 'localtime', '$sqlperiod') ORDER BY datetime(date) DESC LIMIT 1");
-$sth2->execute();
+$sth2 = $conn->prepare("SELECT pollenlevel, pollentypes, date FROM pollen WHERE date >= datetime('now', 'localtime', :p) ORDER BY datetime(date) DESC LIMIT 1");
+$sth2->execute([':p' => $sqlperiod]);
 $latest = $sth2->fetch(PDO::FETCH_ASSOC);
 
 $latest_level = $latest ? $latest['pollenlevel'] : 'N/A';

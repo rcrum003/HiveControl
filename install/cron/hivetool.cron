@@ -16,6 +16,9 @@
 #Get Pollen Count Daily
 00 12 * * * /home/HiveControl/scripts/weather/pollen/getpollen.sh > /dev/null 2>&1
 
+#Get EPA AirNow O3/NO2 data hourly (minute 7 avoids overlap with other cron jobs)
+7 * * * * mkdir -p /home/HiveControl/logs && /home/HiveControl/scripts/air/getairnow.sh >> /home/HiveControl/logs/airnow.log 2>&1
+
 #Check Message queue once a minute
 */1 * * * * /home/HiveControl/scripts/system/msgqueue.sh > /dev/null 2>&1
 

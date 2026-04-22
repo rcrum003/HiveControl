@@ -253,4 +253,18 @@ function get_active_alerts($conn) {
     return $alerts;
 }
 
+function get_page_alerts($conn, $page_type) {
+    $all = get_active_alerts($conn);
+    $page_map = [
+        'temp'    => ['high_temp', 'low_temp'],
+        'weight'  => ['swarm', 'robbing', 'honey_flow'],
+        'air'     => ['high_pm25', 'smoke', 'high_o3'],
+        'beecount'=> ['swarm', 'robbing'],
+    ];
+    $types = isset($page_map[$page_type]) ? $page_map[$page_type] : [];
+    return array_values(array_filter($all, function($a) use ($types) {
+        return in_array($a['type'], $types);
+    }));
+}
+
 ?>
