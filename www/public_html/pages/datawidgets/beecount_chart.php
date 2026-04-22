@@ -55,7 +55,7 @@ foreach ($result as $r) {
     }
 }
 if (!$has_valid) {
-    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No bee count data available</strong> for the selected time period. Data will appear here once the bee counter begins recording.</div>';
+    echo '<script>document.getElementById("container").parentElement.innerHTML = \'<div class="alert alert-info" style="margin:0"><i class="fa fa-info-circle"></i> <strong>No bee count data available</strong> for the selected time period. Data will appear here once the bee counter begins recording.</div>\';</script>';
     return;
 }
 

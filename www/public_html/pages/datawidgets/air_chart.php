@@ -23,7 +23,7 @@ foreach ($result as $r) {
     }
 }
 if (!$has_valid) {
-    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No air quality data available</strong> for the selected time period. Data will appear here once an air quality sensor is configured and recording.</div>';
+    echo '<script>document.getElementById("pm-chart").parentElement.innerHTML = \'<div class="alert alert-info" style="margin:0"><i class="fa fa-info-circle"></i> <strong>No air quality data available</strong> for the selected time period. Data will appear here once an air quality sensor is configured and recording.</div>\'; var aqiPanel = document.getElementById("aqi-chart"); if (aqiPanel) aqiPanel.closest(".panel").style.display = "none";</script>';
     return;
 }
 

@@ -44,7 +44,7 @@ foreach ($result as $r) {
     }
 }
 if (!$has_valid) {
-    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No pollen data available</strong> for the selected time period. Pollen data is collected daily from online sources.</div>';
+    echo '<script>document.getElementById("container").parentElement.innerHTML = \'<div class="alert alert-info" style="margin:0"><i class="fa fa-info-circle"></i> <strong>No pollen data available</strong> for the selected time period. Pollen data is collected daily from online sources.</div>\';</script>';
     return;
 }
 
