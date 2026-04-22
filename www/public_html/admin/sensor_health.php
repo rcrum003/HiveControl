@@ -20,8 +20,11 @@ $sensors = $health['sensors'];
 $config = $health['config'];
 $is_metric = ($config['SHOW_METRIC'] === 'on');
 $stats = get_sensor_stats($conn, intval($period), $is_metric);
+$rh = get_reporting_health($conn, intval($period));
+$reporting = $rh['reporting'];
+$rh_summary = $rh['summary'];
 
-// Weather provider stats (from existing weather_health.php)
+// Weather provider stats
 $provider_stats = [];
 $recent_failures = [];
 $chart_providers = [];
@@ -52,7 +55,6 @@ try {
     $sth5 = $conn->prepare("SELECT role, COUNT(*) as total, SUM(success) as successes FROM weather_health WHERE success = 1 AND timestamp >= datetime('now', '-' || ? || ' days', 'localtime') GROUP BY role");
     $sth5->execute([$period]);
     $role_stats = $sth5->fetchAll(PDO::FETCH_ASSOC);
-
     $total_success = 0;
     foreach ($role_stats as $r) { $total_success += $r['successes']; }
     foreach ($role_stats as $r) {
@@ -64,86 +66,61 @@ try {
     }
 } catch (PDOException $e) {}
 
-// Sparkline trend data (last N days, thinned to ~100 points per sensor)
-$sparkline_period = "-$period days";
-$spark_sth = $conn->prepare("SELECT hivetempf, hivetempc, hiveweight, weather_tempf, weather_tempc, solarradiation, lux, OUT_COUNT, COALESCE(air_pm2_5_raw, air_pm2_5) as pm25, strftime('%s',date)*1000 AS datetime FROM allhivedata WHERE date > datetime('now', 'localtime', :p) ORDER BY datetime ASC");
-$spark_sth->execute([':p' => $sparkline_period]);
-$spark_rows = $spark_sth->fetchAll(PDO::FETCH_ASSOC);
-
-$spark_count = count($spark_rows);
-$spark_step = ($spark_count > 100) ? intval(ceil($spark_count / 100)) : 1;
-
-$spark_hivetemp = []; $spark_weight = []; $spark_wxtemp = [];
-$spark_solar = []; $spark_flights = []; $spark_pm25 = [];
-$idx = 0;
-foreach ($spark_rows as $r) {
-    $idx++;
-    if ($spark_step > 1 && ($idx % $spark_step !== 0) && $idx !== 1 && $idx !== $spark_count) continue;
-    $ts = $r['datetime'];
-    $tc = $is_metric ? 'hivetempc' : 'hivetempf';
-    $wc = $is_metric ? 'weather_tempc' : 'weather_tempf';
-
-    $v = is_numeric($r[$tc]) ? floatval($r[$tc]) : null;
-    if ($v !== null && $v != 0) $spark_hivetemp[] = "[$ts,$v]";
-
-    $v = is_numeric($r['hiveweight']) ? floatval($r['hiveweight']) : null;
-    if ($is_metric && $v !== null) $v = round($v * 0.453592, 2);
-    if ($v !== null && $v != 0) $spark_weight[] = "[$ts,$v]";
-
-    $v = is_numeric($r[$wc]) ? floatval($r[$wc]) : null;
-    if ($v !== null && $v != 0) $spark_wxtemp[] = "[$ts,$v]";
-
-    $v = is_numeric($r['solarradiation']) ? floatval($r['solarradiation']) : null;
-    if ($v !== null && $v != 0) $spark_solar[] = "[$ts,$v]";
-
-    $v = is_numeric($r['OUT_COUNT']) ? intval($r['OUT_COUNT']) : null;
-    if ($v !== null && $v != 0) $spark_flights[] = "[$ts,$v]";
-
-    $v = is_numeric($r['pm25']) ? floatval($r['pm25']) : null;
-    if ($v !== null) $spark_pm25[] = "[$ts,$v]";
-}
-
-// GDD sparkline
-$gdd_spark_sth = $conn->prepare("SELECT seasongdd, strftime('%s',gdddate)*1000 AS datetime FROM gdd WHERE gdddate > datetime('now', 'localtime', :p) ORDER BY datetime ASC");
-$gdd_spark_sth->execute([':p' => $sparkline_period]);
-$gdd_spark_rows = $gdd_spark_sth->fetchAll(PDO::FETCH_ASSOC);
-$spark_gdd = [];
-foreach ($gdd_spark_rows as $r) {
-    $v = is_numeric($r['seasongdd']) ? floatval($r['seasongdd']) : null;
-    if ($v !== null) $spark_gdd[] = "[" . $r['datetime'] . ",$v]";
-}
-
-// Pollen sparkline
-$pollen_spark_sth = $conn->prepare("SELECT pollenlevel, strftime('%s',date)*1000 AS datetime FROM pollen WHERE date >= datetime('now', 'localtime', :p) ORDER BY datetime ASC");
-$pollen_spark_sth->execute([':p' => $sparkline_period]);
-$pollen_spark_rows = $pollen_spark_sth->fetchAll(PDO::FETCH_ASSOC);
-$spark_pollen = [];
-foreach ($pollen_spark_rows as $r) {
-    $v = is_numeric($r['pollenlevel']) ? floatval($r['pollenlevel']) : null;
-    if ($v !== null) $spark_pollen[] = "[" . $r['datetime'] . ",$v]";
-}
-
-// EPA sparkline
-$spark_epa_o3 = [];
-try {
-    $epa_spark_sth = $conn->prepare("SELECT o3_aqi, strftime('%s',date)*1000 AS datetime FROM airquality_epa WHERE date > datetime('now', 'localtime', :p) ORDER BY datetime ASC");
-    $epa_spark_sth->execute([':p' => $sparkline_period]);
-    $epa_spark_rows = $epa_spark_sth->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($epa_spark_rows as $r) {
-        $v = is_numeric($r['o3_aqi']) ? intval($r['o3_aqi']) : null;
-        if ($v !== null) $spark_epa_o3[] = "[" . $r['datetime'] . ",$v]";
-    }
-} catch (PDOException $e) {}
-
 $temp_unit = $is_metric ? '°C' : '°F';
 $weight_unit = $is_metric ? 'kg' : 'lb';
+
+// Helper to render a sensor section
+function render_sensor_section($key, $sensor, $stats_data, $rh_sum, $stats_rows, $chart_id) {
+    if (!$sensor['enabled'] && !$sensor['always']) return;
+    $lbl = status_label_class($sensor['status']);
+    $uptime = isset($rh_sum[$key]) ? $rh_sum[$key]['uptime_pct'] : 0;
+    $gaps = isset($rh_sum[$key]) ? $rh_sum[$key]['gap_count'] : 0;
+    $total_p = isset($rh_sum[$key]) ? $rh_sum[$key]['total_periods'] : 0;
+    $uptime_cls = $uptime >= 95 ? 'success' : ($uptime >= 75 ? 'warning' : 'danger');
+    ?>
+            <div class="row" id="section-<?PHP echo $key; ?>">
+                <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa <?PHP echo $sensor['icon']; ?> fa-fw"></i> <strong><?PHP echo htmlspecialchars($sensor['name']); ?></strong>
+                            <span class="label <?PHP echo $lbl; ?> pull-right" style="margin-left:5px"><?PHP echo htmlspecialchars($sensor['status_label']); ?></span>
+                            <?PHP if ($sensor['last_reading']) { ?>
+                            <small class="pull-right text-muted" style="margin-right:10px">Last: <?PHP echo htmlspecialchars($sensor['last_reading']); ?> (<?PHP echo format_age($sensor['age_seconds']); ?>)</small>
+                            <?PHP } ?>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <!-- Reporting Health Chart -->
+                                <div class="col-lg-8 col-md-7">
+                                    <div id="<?PHP echo $chart_id; ?>" style="height:180px;"></div>
+                                </div>
+                                <!-- Stats -->
+                                <div class="col-lg-4 col-md-5">
+                                    <table class="table table-condensed table-striped" style="margin-bottom:5px">
+                                        <tr><td><strong>Uptime</strong></td><td><span class="label label-<?PHP echo $uptime_cls; ?>"><?PHP echo $uptime; ?>%</span></td></tr>
+                                        <tr><td>Periods Tracked</td><td><?PHP echo $total_p; ?></td></tr>
+                                        <tr><td>Gaps (no data)</td><td><?PHP echo $gaps > 0 ? '<span class="text-danger">' . $gaps . '</span>' : '<span class="text-success">0</span>'; ?></td></tr>
+                                        <?PHP foreach ($stats_rows as $label => $val) {
+                                            echo '<tr><td>' . $label . '</td><td>' . $val . '</td></tr>';
+                                        } ?>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <a href="<?PHP echo htmlspecialchars($sensor['detail_url']); ?>">View Data <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    <?PHP
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
-    <!-- Header and Navigation -->
-         <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
-    <!-- /Navigation -->
+    <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
+
     <div id="wrapper">
             <div class="row">
                 <div class="col-lg-12">
@@ -187,7 +164,7 @@ foreach ($sensors as $key => $s) {
                                 </div>
                             </div>
                         </div>
-                        <a href="' . htmlspecialchars($s['detail_url']) . '">
+                        <a href="#section-' . $key . '">
                             <div class="panel-footer">
                                 <span class="pull-left">View Details</span>
                                 <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -200,132 +177,65 @@ foreach ($sensors as $key => $s) {
 ?>
             </div>
 
-            <!-- Per-Sensor Detail Sections -->
+            <hr>
+            <h3><i class="fa fa-heartbeat"></i> Sensor Reporting Details</h3>
 
-            <!-- Hive Temp/Humidity -->
-<?PHP if ($sensors['hivetemp']['enabled']) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-thermometer-half fa-fw"></i> Hive Temperature &amp; Humidity
-                            <span class="label <?PHP echo status_label_class($sensors['hivetemp']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['hivetemp']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-hivetemp" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg Temp</td><td><?PHP echo is_numeric($stats['hivetemp']['avg_temp']) ? $stats['hivetemp']['avg_temp'] . $temp_unit : '--'; ?></td></tr>
-                                <tr><td>Max / Min</td><td><?PHP echo (is_numeric($stats['hivetemp']['max_temp']) ? $stats['hivetemp']['max_temp'] : '--') . ' / ' . (is_numeric($stats['hivetemp']['min_temp']) ? $stats['hivetemp']['min_temp'] : '--') . $temp_unit; ?></td></tr>
-                                <tr><td>Avg Humidity</td><td><?PHP echo is_numeric($stats['hivetemp']['avg_hum']) ? $stats['hivetemp']['avg_hum'] . '%' : '--'; ?></td></tr>
-                                <tr><td>Max / Min Hum</td><td><?PHP echo (is_numeric($stats['hivetemp']['max_hum']) ? $stats['hivetemp']['max_hum'] : '--') . ' / ' . (is_numeric($stats['hivetemp']['min_hum']) ? $stats['hivetemp']['min_hum'] : '--') . '%'; ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['hivetemp']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<?PHP } ?>
+            <!-- Hive Temp Section -->
+<?PHP
+render_sensor_section('hivetemp', $sensors['hivetemp'], $stats['hivetemp'], $rh_summary, [
+    'Avg Temp' => is_numeric($stats['hivetemp']['avg_temp']) ? $stats['hivetemp']['avg_temp'] . $temp_unit : '--',
+    'Max / Min' => (is_numeric($stats['hivetemp']['max_temp']) ? $stats['hivetemp']['max_temp'] : '--') . ' / ' . (is_numeric($stats['hivetemp']['min_temp']) ? $stats['hivetemp']['min_temp'] : '--') . $temp_unit,
+    'Avg Humidity' => is_numeric($stats['hivetemp']['avg_hum']) ? $stats['hivetemp']['avg_hum'] . '%' : '--',
+    'Readings' => intval($stats['hivetemp']['readings']),
+], 'chart-hivetemp');
+?>
 
-            <!-- Weight -->
-<?PHP if ($sensors['weight']['enabled']) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-balance-scale fa-fw"></i> Hive Weight
-                            <span class="label <?PHP echo status_label_class($sensors['weight']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['weight']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-weight" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg Weight</td><td><?PHP echo is_numeric($stats['weight']['avg_wt']) ? $stats['weight']['avg_wt'] . ' ' . $weight_unit : '--'; ?></td></tr>
-                                <tr><td>Max / Min</td><td><?PHP echo (is_numeric($stats['weight']['max_wt']) ? $stats['weight']['max_wt'] : '--') . ' / ' . (is_numeric($stats['weight']['min_wt']) ? $stats['weight']['min_wt'] : '--') . ' ' . $weight_unit; ?></td></tr>
-                                <tr><td>Gain/Loss</td><td><?PHP $d = $stats['weight']['diff_wt']; echo ($d !== null ? ($d >= 0 ? '+' : '') . $d . ' ' . $weight_unit : '--'); ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['weight']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<?PHP } ?>
+            <!-- Weight Section -->
+<?PHP
+$diff = $stats['weight']['diff_wt'];
+render_sensor_section('weight', $sensors['weight'], $stats['weight'], $rh_summary, [
+    'Avg Weight' => is_numeric($stats['weight']['avg_wt']) ? $stats['weight']['avg_wt'] . ' ' . $weight_unit : '--',
+    'Max / Min' => (is_numeric($stats['weight']['max_wt']) ? $stats['weight']['max_wt'] : '--') . ' / ' . (is_numeric($stats['weight']['min_wt']) ? $stats['weight']['min_wt'] : '--') . ' ' . $weight_unit,
+    'Gain/Loss' => ($diff !== null ? ($diff >= 0 ? '+' : '') . $diff . ' ' . $weight_unit : '--'),
+    'Readings' => intval($stats['weight']['readings']),
+], 'chart-weight');
+?>
 
-            <!-- Weather Station -->
-<?PHP $wx_enabled = !empty($config['WEATHER_LEVEL']) && $config['WEATHER_LEVEL'] !== 'none';
-if ($wx_enabled) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-cloud fa-fw"></i> Weather Station (<?PHP echo htmlspecialchars($config['WEATHER_LEVEL']); ?>)
-                            <span class="label <?PHP echo status_label_class($sensors['weather']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['weather']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-weather" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg Temp</td><td><?PHP echo is_numeric($stats['weather']['avg_temp']) ? $stats['weather']['avg_temp'] . $temp_unit : '--'; ?></td></tr>
-                                <tr><td>Max / Min</td><td><?PHP echo (is_numeric($stats['weather']['max_temp']) ? $stats['weather']['max_temp'] : '--') . ' / ' . (is_numeric($stats['weather']['min_temp']) ? $stats['weather']['min_temp'] : '--') . $temp_unit; ?></td></tr>
-                                <tr><td>Avg Humidity</td><td><?PHP echo is_numeric($stats['weather']['avg_hum']) ? $stats['weather']['avg_hum'] . '%' : '--'; ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['weather']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Weather Section -->
+<?PHP
+$wx_enabled = !empty($config['WEATHER_LEVEL']) && $config['WEATHER_LEVEL'] !== 'none';
+if ($wx_enabled) {
+    render_sensor_section('weather', $sensors['weather'], $stats['weather'], $rh_summary, [
+        'Avg Temp' => is_numeric($stats['weather']['avg_temp']) ? $stats['weather']['avg_temp'] . $temp_unit : '--',
+        'Max / Min' => (is_numeric($stats['weather']['max_temp']) ? $stats['weather']['max_temp'] : '--') . ' / ' . (is_numeric($stats['weather']['min_temp']) ? $stats['weather']['min_temp'] : '--') . $temp_unit,
+        'Avg Humidity' => is_numeric($stats['weather']['avg_hum']) ? $stats['weather']['avg_hum'] . '%' : '--',
+        'Provider' => htmlspecialchars($config['WEATHER_LEVEL']),
+    ], 'chart-weather');
+?>
 
             <!-- Weather Provider Detail (collapsible) -->
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading" style="cursor:pointer" data-toggle="collapse" data-target="#weather-detail">
-                            <i class="fa fa-bar-chart fa-fw"></i> Weather Provider Details
+                            <i class="fa fa-bar-chart fa-fw"></i> Weather Provider Statistics
                             <span class="pull-right"><i class="fa fa-chevron-down"></i></span>
                         </div>
                         <div id="weather-detail" class="panel-body collapse">
-                            <!-- Summary cards -->
                             <div class="row" style="margin-bottom: 15px;">
                                 <div class="col-md-3 col-sm-6">
-                                    <div class="panel panel-primary">
-                                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-cloud fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo htmlspecialchars($config['WEATHER_LEVEL'] ?: 'None'); ?></div><div>Primary</div></div></div></div>
-                                    </div>
+                                    <div class="panel panel-primary"><div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-cloud fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo htmlspecialchars($config['WEATHER_LEVEL'] ?: 'None'); ?></div><div>Primary</div></div></div></div></div>
                                 </div>
                                 <div class="col-md-3 col-sm-6">
-                                    <div class="panel panel-green">
-                                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-refresh fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo $primary_pct; ?>%</div><div>Primary Success</div></div></div></div>
-                                    </div>
+                                    <div class="panel panel-green"><div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-refresh fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo $primary_pct; ?>%</div><div>Primary Success</div></div></div></div></div>
                                 </div>
                                 <div class="col-md-3 col-sm-6">
-                                    <div class="panel panel-yellow">
-                                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-exchange fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo $fallback_pct; ?>%</div><div>Fallback Used</div></div></div></div>
-                                    </div>
+                                    <div class="panel panel-yellow"><div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-exchange fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo $fallback_pct; ?>%</div><div>Fallback Used</div></div></div></div></div>
                                 </div>
                                 <div class="col-md-3 col-sm-6">
-                                    <div class="panel panel-red">
-                                        <div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-clock-o fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo htmlspecialchars($config['WX_MAX_STALE_MINUTES'] ?: '120'); ?> min</div><div>Stale Threshold</div></div></div></div>
-                                    </div>
+                                    <div class="panel panel-red"><div class="panel-heading"><div class="row"><div class="col-xs-3"><i class="fa fa-clock-o fa-3x"></i></div><div class="col-xs-9 text-right"><div style="font-size:20px"><?PHP echo htmlspecialchars($config['WX_MAX_STALE_MINUTES'] ?: '120'); ?> min</div><div>Stale Threshold</div></div></div></div></div>
                                 </div>
                             </div>
-                            <!-- Provider Stats Table -->
                             <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-hover">
                                     <thead><tr><th>Provider</th><th>Total Calls</th><th>Successes</th><th>Success Rate</th><th>Avg Response</th><th>Avg Obs Age</th><th>Last Seen</th></tr></thead>
@@ -337,42 +247,25 @@ if (empty($provider_stats)) {
     foreach ($provider_stats as $stat) {
         $rate = floatval($stat['success_rate']);
         $badge = $rate >= 95 ? 'success' : ($rate >= 80 ? 'warning' : 'danger');
-        echo '<tr>';
-        echo '<td><strong>' . htmlspecialchars($stat['provider']) . '</strong></td>';
-        echo '<td>' . htmlspecialchars($stat['total_calls']) . '</td>';
-        echo '<td>' . htmlspecialchars($stat['successes']) . '</td>';
-        echo '<td><span class="label label-' . $badge . '">' . htmlspecialchars($stat['success_rate']) . '%</span></td>';
-        echo '<td>' . htmlspecialchars($stat['avg_response_ms']) . ' ms</td>';
-        echo '<td>' . ($stat['avg_obs_age'] !== null ? htmlspecialchars($stat['avg_obs_age']) . ' min' : '-') . '</td>';
-        echo '<td>' . htmlspecialchars($stat['last_seen']) . '</td>';
-        echo '</tr>';
+        echo '<tr><td><strong>' . htmlspecialchars($stat['provider']) . '</strong></td><td>' . htmlspecialchars($stat['total_calls']) . '</td><td>' . htmlspecialchars($stat['successes']) . '</td><td><span class="label label-' . $badge . '">' . htmlspecialchars($stat['success_rate']) . '%</span></td><td>' . htmlspecialchars($stat['avg_response_ms']) . ' ms</td><td>' . ($stat['avg_obs_age'] !== null ? htmlspecialchars($stat['avg_obs_age']) . ' min' : '-') . '</td><td>' . htmlspecialchars($stat['last_seen']) . '</td></tr>';
     }
 }
 ?>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- Charts -->
-                            <div class="row" style="margin-top: 15px;">
-                                <div class="col-lg-6"><div id="wx-success-chart" style="height: 250px;"></div></div>
-                                <div class="col-lg-6"><div id="wx-response-chart" style="height: 250px;"></div></div>
+                            <div class="row" style="margin-top:15px;">
+                                <div class="col-lg-6"><div id="wx-success-chart" style="height:250px;"></div></div>
+                                <div class="col-lg-6"><div id="wx-response-chart" style="height:250px;"></div></div>
                             </div>
-                            <!-- Recent Failures -->
 <?PHP if (!empty($recent_failures)) { ?>
-                            <h4 style="margin-top: 20px;"><i class="fa fa-exclamation-triangle"></i> Recent Failures</h4>
+                            <h4 style="margin-top:20px;"><i class="fa fa-exclamation-triangle"></i> Recent Failures</h4>
                             <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-hover" id="failures-table">
                                     <thead><tr><th>Time</th><th>Provider</th><th>Role</th><th>Error</th><th>Obs Age</th><th>Response</th></tr></thead>
                                     <tbody>
 <?PHP foreach ($recent_failures as $fail) {
-    echo '<tr>';
-    echo '<td>' . htmlspecialchars($fail['timestamp']) . '</td>';
-    echo '<td>' . htmlspecialchars($fail['provider']) . '</td>';
-    echo '<td><span class="label label-default">' . htmlspecialchars($fail['role']) . '</span></td>';
-    echo '<td>' . htmlspecialchars($fail['error_reason'] ?: '-') . '</td>';
-    echo '<td>' . htmlspecialchars($fail['observation_age_minutes']) . ' min</td>';
-    echo '<td>' . htmlspecialchars($fail['response_ms']) . ' ms</td>';
-    echo '</tr>';
+    echo '<tr><td>' . htmlspecialchars($fail['timestamp']) . '</td><td>' . htmlspecialchars($fail['provider']) . '</td><td><span class="label label-default">' . htmlspecialchars($fail['role']) . '</span></td><td>' . htmlspecialchars($fail['error_reason'] ?: '-') . '</td><td>' . htmlspecialchars($fail['observation_age_minutes']) . ' min</td><td>' . htmlspecialchars($fail['response_ms']) . ' ms</td></tr>';
 } ?>
                                     </tbody>
                                 </table>
@@ -384,188 +277,66 @@ if (empty($provider_stats)) {
             </div>
 <?PHP } ?>
 
-            <!-- Light/Solar -->
-<?PHP if ($sensors['light']['enabled']) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-sun-o fa-fw"></i> Light / Solar
-                            <span class="label <?PHP echo status_label_class($sensors['light']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['light']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-solar" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg Solar</td><td><?PHP echo is_numeric($stats['light']['avg_solar']) ? $stats['light']['avg_solar'] . ' W/m²' : '--'; ?></td></tr>
-                                <tr><td>Max / Min Solar</td><td><?PHP echo (is_numeric($stats['light']['max_solar']) ? $stats['light']['max_solar'] : '--') . ' / ' . (is_numeric($stats['light']['min_solar']) ? $stats['light']['min_solar'] : '--') . ' W/m²'; ?></td></tr>
-                                <tr><td>Avg Lux</td><td><?PHP echo is_numeric($stats['light']['avg_lux']) ? $stats['light']['avg_lux'] . ' lx' : '--'; ?></td></tr>
-                                <tr><td>Max / Min Lux</td><td><?PHP echo (is_numeric($stats['light']['max_lux']) ? $stats['light']['max_lux'] : '--') . ' / ' . (is_numeric($stats['light']['min_lux']) ? $stats['light']['min_lux'] : '--') . ' lx'; ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['light']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<?PHP } ?>
+            <!-- Light Section -->
+<?PHP
+render_sensor_section('light', $sensors['light'], $stats['light'], $rh_summary, [
+    'Avg Solar' => is_numeric($stats['light']['avg_solar']) ? $stats['light']['avg_solar'] . ' W/m²' : '--',
+    'Max Solar' => is_numeric($stats['light']['max_solar']) ? $stats['light']['max_solar'] . ' W/m²' : '--',
+    'Avg Lux' => is_numeric($stats['light']['avg_lux']) ? $stats['light']['avg_lux'] . ' lx' : '--',
+    'Readings' => intval($stats['light']['readings']),
+], 'chart-light');
+?>
 
-            <!-- Bee Counter -->
-<?PHP if ($sensors['beecount']['enabled']) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-bug fa-fw"></i> Bee Counter
-                            <span class="label <?PHP echo status_label_class($sensors['beecount']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['beecount']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-flights" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Total In</td><td><?PHP echo is_numeric($stats['beecount']['total_in']) ? number_format($stats['beecount']['total_in']) : '--'; ?></td></tr>
-                                <tr><td>Total Out</td><td><?PHP echo is_numeric($stats['beecount']['total_out']) ? number_format($stats['beecount']['total_out']) : '--'; ?></td></tr>
-                                <tr><td>Max In (single)</td><td><?PHP echo is_numeric($stats['beecount']['max_in']) ? $stats['beecount']['max_in'] : '--'; ?></td></tr>
-                                <tr><td>Max Out (single)</td><td><?PHP echo is_numeric($stats['beecount']['max_out']) ? $stats['beecount']['max_out'] : '--'; ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['beecount']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<?PHP } ?>
+            <!-- Bee Counter Section -->
+<?PHP
+render_sensor_section('beecount', $sensors['beecount'], $stats['beecount'], $rh_summary, [
+    'Total In' => is_numeric($stats['beecount']['total_in']) ? number_format($stats['beecount']['total_in']) : '--',
+    'Total Out' => is_numeric($stats['beecount']['total_out']) ? number_format($stats['beecount']['total_out']) : '--',
+    'Max In' => is_numeric($stats['beecount']['max_in']) ? $stats['beecount']['max_in'] : '--',
+    'Readings' => intval($stats['beecount']['readings']),
+], 'chart-beecount');
+?>
 
-            <!-- Air Quality -->
-<?PHP if ($sensors['air']['enabled']) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-industry fa-fw"></i> Air Quality
-                            <span class="label <?PHP echo status_label_class($sensors['air']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['air']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-pm25" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg PM2.5</td><td><?PHP echo is_numeric($stats['air']['avg_pm25']) ? $stats['air']['avg_pm25'] . ' µg/m³' : '--'; ?></td></tr>
-                                <tr><td>Max / Min PM2.5</td><td><?PHP echo (is_numeric($stats['air']['max_pm25']) ? $stats['air']['max_pm25'] : '--') . ' / ' . (is_numeric($stats['air']['min_pm25']) ? $stats['air']['min_pm25'] : '--') . ' µg/m³'; ?></td></tr>
-                                <tr><td>Avg AQI</td><td><?PHP echo is_numeric($stats['air']['avg_aqi']) ? $stats['air']['avg_aqi'] : '--'; ?></td></tr>
-                                <tr><td>Max AQI</td><td><?PHP echo is_numeric($stats['air']['max_aqi']) ? $stats['air']['max_aqi'] : '--'; ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['air']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<?PHP } ?>
+            <!-- Air Quality Section -->
+<?PHP
+render_sensor_section('air', $sensors['air'], $stats['air'], $rh_summary, [
+    'Avg PM2.5' => is_numeric($stats['air']['avg_pm25']) ? $stats['air']['avg_pm25'] . ' µg/m³' : '--',
+    'Max PM2.5' => is_numeric($stats['air']['max_pm25']) ? $stats['air']['max_pm25'] . ' µg/m³' : '--',
+    'Avg AQI' => is_numeric($stats['air']['avg_aqi']) ? $stats['air']['avg_aqi'] : '--',
+    'Readings' => intval($stats['air']['readings']),
+], 'chart-air');
+?>
 
-            <!-- EPA AirNow -->
-<?PHP if ($sensors['epa']['enabled']) { ?>
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-leaf fa-fw"></i> EPA AirNow
-                            <span class="label <?PHP echo status_label_class($sensors['epa']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['epa']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-epa" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg O3 AQI</td><td><?PHP echo is_numeric($stats['epa']['avg_o3'] ?? null) ? $stats['epa']['avg_o3'] : '--'; ?></td></tr>
-                                <tr><td>Max O3 AQI</td><td><?PHP echo is_numeric($stats['epa']['max_o3'] ?? null) ? $stats['epa']['max_o3'] : '--'; ?></td></tr>
-                                <tr><td>Avg NO2 AQI</td><td><?PHP echo is_numeric($stats['epa']['avg_no2'] ?? null) ? $stats['epa']['avg_no2'] : '--'; ?></td></tr>
-                                <tr><td>Max NO2 AQI</td><td><?PHP echo is_numeric($stats['epa']['max_no2'] ?? null) ? $stats['epa']['max_no2'] : '--'; ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['epa']['readings'] ?? 0); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-<?PHP } ?>
+            <!-- EPA Section -->
+<?PHP
+render_sensor_section('epa', $sensors['epa'], $stats['epa'] ?? ['readings' => 0], $rh_summary, [
+    'Avg O3 AQI' => is_numeric($stats['epa']['avg_o3'] ?? null) ? $stats['epa']['avg_o3'] : '--',
+    'Max O3 AQI' => is_numeric($stats['epa']['max_o3'] ?? null) ? $stats['epa']['max_o3'] : '--',
+    'Avg NO2 AQI' => is_numeric($stats['epa']['avg_no2'] ?? null) ? $stats['epa']['avg_no2'] : '--',
+    'Readings' => intval($stats['epa']['readings'] ?? 0),
+], 'chart-epa');
+?>
 
-            <!-- Pollen -->
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-pagelines fa-fw"></i> Pollen
-                            <span class="label <?PHP echo status_label_class($sensors['pollen']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['pollen']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-pollen" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg Level</td><td><?PHP echo is_numeric($stats['pollen']['avg_pollen']) ? $stats['pollen']['avg_pollen'] . ' / 12' : '--'; ?></td></tr>
-                                <tr><td>Max / Min</td><td><?PHP echo (is_numeric($stats['pollen']['max_pollen']) ? $stats['pollen']['max_pollen'] : '--') . ' / ' . (is_numeric($stats['pollen']['min_pollen']) ? $stats['pollen']['min_pollen'] : '--'); ?></td></tr>
-                                <tr><td>Readings</td><td><?PHP echo intval($stats['pollen']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Pollen Section -->
+<?PHP
+render_sensor_section('pollen', $sensors['pollen'], $stats['pollen'], $rh_summary, [
+    'Avg Level' => is_numeric($stats['pollen']['avg_pollen']) ? $stats['pollen']['avg_pollen'] . ' / 12' : '--',
+    'Max / Min' => (is_numeric($stats['pollen']['max_pollen']) ? $stats['pollen']['max_pollen'] : '--') . ' / ' . (is_numeric($stats['pollen']['min_pollen']) ? $stats['pollen']['min_pollen'] : '--'),
+    'Readings' => intval($stats['pollen']['readings']),
+], 'chart-pollen');
+?>
 
-            <!-- GDD -->
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-tree fa-fw"></i> Growing Degree Days
-                            <span class="label <?PHP echo status_label_class($sensors['gdd']['status']); ?> pull-right"><?PHP echo htmlspecialchars($sensors['gdd']['status_label']); ?></span>
-                        </div>
-                        <div class="panel-body">
-                            <div id="spark-gdd" style="height:200px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Stats (<?PHP echo $period; ?> day<?PHP echo $period !== '1' ? 's' : ''; ?>)</div>
-                        <div class="panel-body">
-                            <table class="table table-condensed table-striped">
-                                <tr><td>Avg Daily GDD</td><td><?PHP echo is_numeric($stats['gdd']['avg_gdd']) ? $stats['gdd']['avg_gdd'] : '--'; ?></td></tr>
-                                <tr><td>Season Total</td><td><?PHP echo is_numeric($stats['gdd']['max_season']) ? $stats['gdd']['max_season'] : '--'; ?></td></tr>
-                                <tr><td>Days Tracked</td><td><?PHP echo intval($stats['gdd']['readings']); ?></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- GDD Section -->
+<?PHP
+render_sensor_section('gdd', $sensors['gdd'], $stats['gdd'], $rh_summary, [
+    'Avg Daily GDD' => is_numeric($stats['gdd']['avg_gdd']) ? $stats['gdd']['avg_gdd'] : '--',
+    'Season Total' => is_numeric($stats['gdd']['max_season']) ? $stats['gdd']['max_season'] : '--',
+    'Days Tracked' => intval($stats['gdd']['readings']),
+], 'chart-gdd');
+?>
 
     </div>
-    <!-- /#page-wrapper -->
 
-    <!-- jQuery -->
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
@@ -581,83 +352,56 @@ if (empty($provider_stats)) {
             $('#failures-table').DataTable({ responsive: true, order: [[0, 'desc']], pageLength: 15 });
         }
 
-        var sparkOpts = function(container, title, data, color, suffix) {
-            return {
-                chart: { renderTo: container, type: 'line', zoomType: 'x', marginRight: 10 },
-                title: { text: null },
+        function reportingChart(container, title, data) {
+            if (!document.getElementById(container) || data.length === 0) return;
+            Highcharts.chart(container, {
+                chart: { type: 'column', height: 180, marginRight: 10 },
+                title: { text: 'Reporting Rate', style: { fontSize: '13px' } },
                 xAxis: { type: 'datetime', labels: { style: { fontSize: '10px' } } },
-                yAxis: { title: { text: title }, gridLineWidth: 1 },
+                yAxis: {
+                    title: { text: null },
+                    min: 0, max: 100,
+                    labels: { format: '{value}%', style: { fontSize: '10px' } },
+                    plotBands: [
+                        { from: 0, to: 50, color: 'rgba(255,0,0,0.05)' },
+                        { from: 50, to: 75, color: 'rgba(255,165,0,0.05)' },
+                        { from: 75, to: 100, color: 'rgba(0,128,0,0.05)' }
+                    ]
+                },
                 legend: { enabled: false },
-                tooltip: { shared: true, valueSuffix: suffix || '' },
-                plotOptions: { line: { marker: { enabled: false }, lineWidth: 2 } },
+                tooltip: { valueSuffix: '%', pointFormat: 'Reporting: <b>{point.y}%</b>' },
+                plotOptions: {
+                    column: {
+                        borderWidth: 0,
+                        groupPadding: 0.05,
+                        pointPadding: 0,
+                        colorByPoint: false,
+                        zones: [
+                            { value: 50, color: '#d9534f' },
+                            { value: 75, color: '#f0ad4e' },
+                            { color: '#5cb85c' }
+                        ]
+                    }
+                },
                 exporting: { enabled: false },
-                series: [{ name: title, data: data, color: color }]
-            };
-        };
-
-        // Hive Temp sparkline
-        var hiveTempData = [<?PHP echo implode(',', $spark_hivetemp); ?>];
-        if (hiveTempData.length > 0 && document.getElementById('spark-hivetemp')) {
-            new Highcharts.Chart(sparkOpts('spark-hivetemp', 'Hive Temp', hiveTempData, '#FF6347', ' <?PHP echo $temp_unit; ?>'));
+                series: [{ name: 'Reporting', data: data }]
+            });
         }
 
-        // Weight sparkline
-        var weightData = [<?PHP echo implode(',', $spark_weight); ?>];
-        if (weightData.length > 0 && document.getElementById('spark-weight')) {
-            new Highcharts.Chart(sparkOpts('spark-weight', 'Weight', weightData, '#4682B4', ' <?PHP echo $weight_unit; ?>'));
-        }
+<?PHP
+$chart_map = [
+    'hivetemp' => 'chart-hivetemp', 'weight' => 'chart-weight', 'weather' => 'chart-weather',
+    'light' => 'chart-light', 'beecount' => 'chart-beecount', 'air' => 'chart-air',
+    'epa' => 'chart-epa', 'pollen' => 'chart-pollen', 'gdd' => 'chart-gdd'
+];
+foreach ($chart_map as $key => $container) {
+    $data = isset($reporting[$key]) ? json_encode($reporting[$key]) : '[]';
+    $name = $sensors[$key]['name'];
+    echo "        reportingChart('$container', " . json_encode($name) . ", $data);\n";
+}
+?>
 
-        // Weather sparkline
-        var wxTempData = [<?PHP echo implode(',', $spark_wxtemp); ?>];
-        if (wxTempData.length > 0 && document.getElementById('spark-weather')) {
-            new Highcharts.Chart(sparkOpts('spark-weather', 'Outside Temp', wxTempData, '#228B22', ' <?PHP echo $temp_unit; ?>'));
-        }
-
-        // Solar sparkline
-        var solarData = [<?PHP echo implode(',', $spark_solar); ?>];
-        if (solarData.length > 0 && document.getElementById('spark-solar')) {
-            new Highcharts.Chart(sparkOpts('spark-solar', 'Solar Radiation', solarData, '#FFD700', ' W/m²'));
-        }
-
-        // Flights sparkline
-        var flightsData = [<?PHP echo implode(',', $spark_flights); ?>];
-        if (flightsData.length > 0 && document.getElementById('spark-flights')) {
-            new Highcharts.Chart(sparkOpts('spark-flights', 'Flights Out', flightsData, '#8B4513', ''));
-        }
-
-        // PM2.5 sparkline
-        var pm25Data = [<?PHP echo implode(',', $spark_pm25); ?>];
-        if (pm25Data.length > 0 && document.getElementById('spark-pm25')) {
-            new Highcharts.Chart(sparkOpts('spark-pm25', 'PM2.5', pm25Data, '#FF6347', ' µg/m³'));
-        }
-
-        // EPA sparkline
-        var epaData = [<?PHP echo implode(',', $spark_epa_o3); ?>];
-        if (epaData.length > 0 && document.getElementById('spark-epa')) {
-            new Highcharts.Chart(sparkOpts('spark-epa', 'O3 AQI', epaData, '#9370DB', ''));
-        }
-
-        // Pollen sparkline
-        var pollenData = [<?PHP echo implode(',', $spark_pollen); ?>];
-        if (pollenData.length > 0 && document.getElementById('spark-pollen')) {
-            var pollenOpts = sparkOpts('spark-pollen', 'Pollen Level', pollenData, '#4CAF50', ' / 12');
-            pollenOpts.series[0].type = 'area';
-            pollenOpts.series[0].fillOpacity = 0.3;
-            pollenOpts.yAxis.min = 0;
-            pollenOpts.yAxis.max = 12;
-            new Highcharts.Chart(pollenOpts);
-        }
-
-        // GDD sparkline
-        var gddData = [<?PHP echo implode(',', $spark_gdd); ?>];
-        if (gddData.length > 0 && document.getElementById('spark-gdd')) {
-            var gddOpts = sparkOpts('spark-gdd', 'Season GDD', gddData, '#8BC34A', ' GDD');
-            gddOpts.series[0].type = 'area';
-            gddOpts.series[0].fillOpacity = 0.3;
-            new Highcharts.Chart(gddOpts);
-        }
-
-        // Weather provider charts (inside collapsible)
+        // Weather provider charts (lazy render on expand)
 <?PHP if (!empty($chart_providers)) {
     $colors = ['#2196F3', '#4CAF50', '#FF9800', '#9C27B0', '#F44336', '#00BCD4'];
 ?>
@@ -679,10 +423,18 @@ if (empty($provider_stats)) {
             }
         });
 <?PHP } ?>
+
+        // Smooth scroll for card links
+        $('a[href^="#section-"]').on('click', function(e) {
+            e.preventDefault();
+            var target = $(this.getAttribute('href'));
+            if (target.length) {
+                $('html, body').animate({ scrollTop: target.offset().top - 60 }, 400);
+            }
+        });
     });
     </script>
 
-<!-- Footer -->
-     <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
+<?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/footer.php"); ?>
 </body>
 </html>

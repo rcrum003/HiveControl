@@ -301,6 +301,103 @@ function status_label_class($status) {
     }
 }
 
+function get_reporting_health($conn, $period_days) {
+    $sqlperiod = "-$period_days days";
+    $expected_per_hour = 4;
+
+    $columns = [
+        'hivetemp' => "SUM(CASE WHEN hivetempf IS NOT NULL AND hivetempf != '' AND CAST(hivetempf AS REAL) != 0 THEN 1 ELSE 0 END)",
+        'weight'   => "SUM(CASE WHEN hiveweight IS NOT NULL AND CAST(hiveweight AS REAL) != 0 THEN 1 ELSE 0 END)",
+        'weather'  => "SUM(CASE WHEN weather_tempf IS NOT NULL AND weather_tempf != '' AND CAST(weather_tempf AS REAL) != 0 THEN 1 ELSE 0 END)",
+        'light'    => "SUM(CASE WHEN (solarradiation IS NOT NULL AND CAST(solarradiation AS REAL) != 0) OR (lux IS NOT NULL AND CAST(lux AS REAL) != 0) THEN 1 ELSE 0 END)",
+        'beecount' => "SUM(CASE WHEN IN_COUNT IS NOT NULL OR OUT_COUNT IS NOT NULL THEN 1 ELSE 0 END)",
+        'air'      => "SUM(CASE WHEN air_pm2_5 IS NOT NULL OR air_pm2_5_raw IS NOT NULL THEN 1 ELSE 0 END)",
+    ];
+
+    $select_parts = [];
+    foreach ($columns as $key => $expr) {
+        $select_parts[] = "$expr as {$key}_ok";
+    }
+    $select_str = implode(', ', $select_parts);
+
+    $sth = $conn->prepare("SELECT strftime('%Y-%m-%d %H:00', date) as hour, COUNT(*) as total, $select_str FROM allhivedata WHERE date > datetime('now', 'localtime', :p) GROUP BY hour ORDER BY hour ASC");
+    $sth->execute([':p' => $sqlperiod]);
+    $hourly = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+    $reporting = [];
+    $anomalies = [];
+    foreach (['hivetemp', 'weight', 'weather', 'light', 'beecount', 'air'] as $key) {
+        $reporting[$key] = [];
+        $anomalies[$key] = [];
+    }
+
+    foreach ($hourly as $row) {
+        $ts = strtotime($row['hour']) * 1000;
+        $total = intval($row['total']);
+        foreach (['hivetemp', 'weight', 'weather', 'light', 'beecount', 'air'] as $key) {
+            $ok = intval($row[$key . '_ok']);
+            $rate = $total > 0 ? round(($ok / max($total, $expected_per_hour)) * 100) : 0;
+            $reporting[$key][] = [$ts, min($rate, 100)];
+            if ($ok == 0 && $total > 0) {
+                $anomalies[$key][] = $row['hour'];
+            }
+        }
+    }
+
+    // GDD reporting (daily)
+    $gdd_sth = $conn->prepare("SELECT strftime('%Y-%m-%d', gdddate) as day, COUNT(*) as cnt FROM gdd WHERE gdddate > datetime('now', 'localtime', :p) GROUP BY day ORDER BY day ASC");
+    $gdd_sth->execute([':p' => $sqlperiod]);
+    $gdd_daily = $gdd_sth->fetchAll(PDO::FETCH_ASSOC);
+    $reporting['gdd'] = [];
+    $anomalies['gdd'] = [];
+    foreach ($gdd_daily as $row) {
+        $ts = strtotime($row['day']) * 1000;
+        $reporting['gdd'][] = [$ts, $row['cnt'] > 0 ? 100 : 0];
+    }
+
+    // Pollen reporting (daily)
+    $pol_sth = $conn->prepare("SELECT strftime('%Y-%m-%d', date) as day, COUNT(*) as cnt FROM pollen WHERE date >= datetime('now', 'localtime', :p) GROUP BY day ORDER BY day ASC");
+    $pol_sth->execute([':p' => $sqlperiod]);
+    $pol_daily = $pol_sth->fetchAll(PDO::FETCH_ASSOC);
+    $reporting['pollen'] = [];
+    $anomalies['pollen'] = [];
+    foreach ($pol_daily as $row) {
+        $ts = strtotime($row['day']) * 1000;
+        $reporting['pollen'][] = [$ts, $row['cnt'] > 0 ? 100 : 0];
+    }
+
+    // EPA reporting (hourly)
+    $reporting['epa'] = [];
+    $anomalies['epa'] = [];
+    try {
+        $epa_sth = $conn->prepare("SELECT strftime('%Y-%m-%d %H:00', date) as hour, COUNT(*) as cnt FROM airquality_epa WHERE date > datetime('now', 'localtime', :p) GROUP BY hour ORDER BY hour ASC");
+        $epa_sth->execute([':p' => $sqlperiod]);
+        $epa_hourly = $epa_sth->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($epa_hourly as $row) {
+            $ts = strtotime($row['hour']) * 1000;
+            $reporting['epa'][] = [$ts, $row['cnt'] > 0 ? 100 : 0];
+        }
+    } catch (PDOException $e) {}
+
+    // Compute summary stats per sensor
+    $summary = [];
+    foreach ($reporting as $key => $data) {
+        $total_points = count($data);
+        $good_points = 0;
+        foreach ($data as $pt) {
+            if ($pt[1] >= 75) $good_points++;
+        }
+        $summary[$key] = [
+            'total_periods' => $total_points,
+            'good_periods' => $good_points,
+            'uptime_pct' => $total_points > 0 ? round(($good_points / $total_points) * 100, 1) : 0,
+            'gap_count' => count($anomalies[$key] ?? []),
+        ];
+    }
+
+    return ['reporting' => $reporting, 'anomalies' => $anomalies, 'summary' => $summary];
+}
+
 function get_sensor_stats($conn, $period_days, $is_metric) {
     $sqlperiod = "-$period_days days";
 
