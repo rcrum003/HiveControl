@@ -1,87 +1,40 @@
+<?php
 
-<?PHP
+include_once($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 
-include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
-require $_SERVER["DOCUMENT_ROOT"] . '/vendor/autoload.php';
-
-
-# Get main sensor data and store in a variable
-$sth = $conn->prepare("select (strftime('%s','now', 'localtime') - strftime('%s',date)) as age, date, hivetempf, hiveweight, weather_tempf from allhivedata ORDER BY datetime(\"date\") DESC LIMIT 1;");
+$sth = $conn->prepare("SELECT (strftime('%s','now','localtime') - strftime('%s',date)) AS age, date, hivetempf, hiveweight, weather_tempf FROM allhivedata ORDER BY datetime(date) DESC LIMIT 1");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
-$AGE=$result['age'];
-$HIVETEMPF=$result['hivetempf'];
-$HIVEWEIGHT=$result['hiveweight'];
-$WEATHERTEMPF=$result['weather_tempf'];
+$AGE = $result ? intval($result['age']) : 99999;
+$HIVETEMPF = $result ? $result['hivetempf'] : null;
+$HIVEWEIGHT = $result ? $result['hiveweight'] : null;
+$WEATHERTEMPF = $result ? $result['weather_tempf'] : null;
+$LAST_DATE = $result ? $result['date'] : 'N/A';
 
-#Get GDD Data
-#GDD 2015-12-05 23:04:47|0|3478
-$gddsth = $conn->prepare("select (strftime('%s','now', 'localtime') - strftime('%s',calcdate)) as age2, daygdd, seasongdd from gdd ORDER BY datetime(\"calcdate\") DESC LIMIT 1;");
+$gddsth = $conn->prepare("SELECT (strftime('%s','now','localtime') - strftime('%s',calcdate)) AS age2, daygdd, seasongdd FROM gdd ORDER BY datetime(calcdate) DESC LIMIT 1");
 $gddsth->execute();
 $gddresult = $gddsth->fetch(PDO::FETCH_ASSOC);
 
+$GDDAGE = $gddresult ? intval($gddresult['age2']) : 99999;
+$DAYGDD = $gddresult ? $gddresult['daygdd'] : null;
+$SEASONGDD = $gddresult ? $gddresult['seasongdd'] : null;
 
-$GDDAGE=$gddresult['age2'];
-$DAYGDD=$gddresult['daygdd'];
-$SEASONGDD=$gddresult['seasongdd'];
+$temp_ok = ($AGE <= 600 && is_numeric($HIVETEMPF) && $HIVETEMPF <= 150 && $HIVETEMPF >= -50);
+$weight_ok = ($AGE <= 600 && is_numeric($HIVEWEIGHT) && $HIVEWEIGHT > 0 && $HIVEWEIGHT <= 500);
+$weather_ok = ($AGE <= 600 && is_numeric($WEATHERTEMPF) && $WEATHERTEMPF <= 150 && $WEATHERTEMPF >= -70);
+$gdd_ok = ($GDDAGE <= 86400 && is_numeric($DAYGDD) && $DAYGDD >= 0 && $DAYGDD <= 36 && $SEASONGDD <= 5000);
 
-#86400 seconds is 24 hrs
-# Check to see if the weather was pulled within the last 10 minutes
-# 10 Minutes = 600 seconds
-
-                               #<button type="button" class="btn btn-success">Success</button>            
-                               # <button type="button" class="btn btn-warning">Warning</button>
-                               # <button type="button" class="btn btn-danger">Danger</button>
-
-#Start table
-#Row
-echo '<button type="button" class="btn btn-';
-if ($AGE > "600" || $HIVETEMPF > "150" || $HIVETEMPF < "-50") {
-	echo "danger";
+if ($AGE <= 600) {
+    $freshness = '<span class="label label-success">Live</span>';
+} elseif ($AGE <= 1800) {
+    $freshness = '<span class="label label-warning">' . round($AGE / 60) . 'm ago</span>';
 } else {
-	echo "success";
+    $freshness = '<span class="label label-danger">' . round($AGE / 3600, 1) . 'h ago</span>';
 }
-echo '">Temp</button>';
-#/Row
-
-echo '<button type="button" class="btn btn-';
-if ($AGE > "600" || $HIVEWEIGHT == "0" || $HIVEWEIGHT > "500" || $HIVEWEIGHT < "0") {
-	echo "danger";
-} else {
-	echo "success";
-}
-echo '">Weight</button>';
-#/Row
-
-
-echo '<button type="button" class="btn btn-';
-if ($AGE > "600" || $WEATHERTEMPF > "150" || $WEATHERTEMPF < "-70") {
-	echo "danger";
-} else {
-	echo "success";
-}
-echo '">Weather</button>';
-#/Row
-
-#GDD, every 24 hrs (86400)
-echo '<button type="button" class="btn btn-';
-if ($GDDAGE > "86400" || $DAYGDD < "0" || $DAYGDD > "36" || $SEASONGDD > "5000" ) {
-	echo "danger";
-} else {
-	echo "success";
-}
-echo '">GDD</button>';
-#/Row
-
-
-#    if ($result['age'] > "600") {
-    #echo 'It has been more than 10 minutes since last report';
-#	} 
-#  	else {
-#  		echo "We are good";
-#  	}	
-
-
-
 ?>
+<div style="margin-bottom: 8px;">Data: <?php echo $freshness; ?></div>
+<span class="label label-<?php echo $temp_ok ? 'success' : 'danger'; ?>">Temp</span>
+<span class="label label-<?php echo $weight_ok ? 'success' : 'danger'; ?>">Weight</span>
+<span class="label label-<?php echo $weather_ok ? 'success' : 'danger'; ?>">Weather</span>
+<span class="label label-<?php echo $gdd_ok ? 'success' : 'danger'; ?>">GDD</span>

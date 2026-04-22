@@ -57,6 +57,89 @@ if (!isset($chart_data_fetched)) {
 
     include_once($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
+    // Pre-build data arrays for dashboard charts (implode pattern)
+    $data_hivetemp = []; $data_outtemp = []; $data_hivehum = []; $data_outhum = [];
+    $data_netweight = []; $data_grossweight = []; $data_rain = [];
+    $data_solar = []; $data_lux = []; $data_flights = []; $data_wind = [];
+    $data_pm25 = []; $data_pm10 = []; $data_pm1 = [];
+    $data_pm25_aqi = []; $data_pm10_aqi = [];
+
+    // Thin data for large periods: keep every Nth row to cap at ~800 points
+    $data_point_count = count($chart_result);
+    $thin_step = ($data_point_count > 800) ? intval(ceil($data_point_count / 800)) : 1;
+    $idx = 0;
+
+    foreach ($chart_result as $r) {
+        $idx++;
+        if ($thin_step > 1 && ($idx % $thin_step !== 0) && $idx !== 1 && $idx !== $data_point_count) continue;
+
+        $ts = $r['datetime'];
+        $round = ($chart_rounding == "on");
+
+        $v = is_numeric($r['hivetempf']) ? ($round ? ceil($r['hivetempf']) : floatval($r['hivetempf'])) : null;
+        $data_hivetemp[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = is_numeric($r['weather_tempf']) ? ($round ? ceil($r['weather_tempf']) : floatval($r['weather_tempf'])) : null;
+        $data_outtemp[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) ? ($round ? ceil($r['hiveHum']) : floatval($r['hiveHum'])) : null;
+        $data_hivehum[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) ? ($round ? ceil($r['weather_humidity']) : floatval($r['weather_humidity'])) : null;
+        $data_outhum[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['hiveweight']) && $r['hiveweight'] != 0) ? ($round ? ceil($r['hiveweight']) : floatval($r['hiveweight'])) : null;
+        $data_netweight[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['hiverawweight']) && $r['hiverawweight'] != 0) ? ($round ? ceil($r['hiverawweight']) : floatval($r['hiverawweight'])) : null;
+        $data_grossweight[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['precip_1hr_in']) && $r['precip_1hr_in'] != 0) ? floatval($r['precip_1hr_in']) : null;
+        $data_rain[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['solarradiation']) && $r['solarradiation'] != 0) ? floatval($r['solarradiation']) : null;
+        $data_solar[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['lux']) && $r['lux'] != 0) ? floatval($r['lux']) : null;
+        $data_lux[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['out_count']) && $r['out_count'] != 0) ? floatval($r['out_count']) : null;
+        $data_flights[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = (is_numeric($r['wind']) && $r['wind'] != 0) ? floatval($r['wind']) : null;
+        $data_wind[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = is_numeric($r['air_pm2_5_raw']) ? floatval($r['air_pm2_5_raw']) : null;
+        $data_pm25[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = is_numeric($r['air_pm10_raw']) ? floatval($r['air_pm10_raw']) : null;
+        $data_pm10[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = is_numeric($r['air_pm1_raw']) ? floatval($r['air_pm1_raw']) : null;
+        $data_pm1[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = is_numeric($r['air_pm2_5_aqi']) ? intval($r['air_pm2_5_aqi']) : null;
+        $data_pm25_aqi[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+
+        $v = is_numeric($r['air_pm10_aqi']) ? intval($r['air_pm10_aqi']) : null;
+        $data_pm10_aqi[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+    }
+
+    $data_epa_o3 = []; $data_epa_no2 = []; $data_epa_pm25 = []; $data_epa_pm10 = [];
+    foreach ($chart_result_epa as $r) {
+        $ts = $r['datetime'];
+        $v = is_numeric($r['o3_aqi']) ? intval($r['o3_aqi']) : null;
+        $data_epa_o3[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+        $v = is_numeric($r['no2_aqi']) ? intval($r['no2_aqi']) : null;
+        $data_epa_no2[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+        $v = is_numeric($r['pm25_aqi']) ? intval($r['pm25_aqi']) : null;
+        $data_epa_pm25[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+        $v = is_numeric($r['pm10_aqi']) ? intval($r['pm10_aqi']) : null;
+        $data_epa_pm10[] = "[$ts," . ($v !== null ? $v : "null") . "]";
+    }
+
+    $show_markers = ($data_point_count <= 200) ? 'true' : 'false';
+
     $chart_data_fetched = true;
 }
 

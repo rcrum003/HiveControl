@@ -1,178 +1,68 @@
 <?php
-include "chart_data_fetch.php";
+include_once "dashboard_chart_shared.php";
 
-echo "
+$temp_unit = ($SHOW_METRIC == "on") ? "°C" : "°F";
+$brood_low = ($SHOW_METRIC == "on") ? 34 : 93;
+$brood_high = ($SHOW_METRIC == "on") ? 36 : 97;
+$danger_from = ($SHOW_METRIC == "on") ? 38 : 100;
+$danger_to = ($SHOW_METRIC == "on") ? 50 : 120;
+?>
+
 <script>
 $(function () {
     var chart = Highcharts.chart('climatecontainer', {
-        chart: {
-            zoomType: 'xy',
-            alignTicks: false
-        },
-        title: {
-            text: ''
-        },
-        xAxis: {
-            type: 'datetime',
-            dateTimeLabelFormats: {
-                second: '%m-%d<br/>%H:%M:%S',
-                minute: '%m-%d<br/>%H:%M',
-                hour: '%m-%d<br/>%H:%M',
-                day: '<br/>%m-%d',
-                week: '<br/>%m-%d',
-                month: '%Y-%m',
-                year: '%Y'
-            }
-        },
+        chart: { zoomType: 'x', height: 280 },
+        title: { text: '' },
+        xAxis: hcCommonXAxis,
         yAxis: [{
             gridLineWidth: 1,
-            labels: {
-                format: '{value} "; if ($SHOW_METRIC == "on") { echo "°C"; } else { echo "°F"; } echo "',
-                style: {
-                    color: '"; echo $color_hivetemp; echo "'
-                }
-            },
-            title: {
-                text: 'Temperature',
-                style: {
-                    color: '"; echo $color_hivetemp; echo "'
-                }
-            },
+            labels: { format: '{value} <?php echo $temp_unit; ?>', style: { color: '<?php echo $color_hivetemp; ?>' } },
+            title: { text: 'Temperature', style: { color: '<?php echo $color_hivetemp; ?>' } },
             minRange: 20,
             plotBands: [{
-                from: "; echo ($SHOW_METRIC == "on") ? "38" : "100"; echo ",
-                to: "; echo ($SHOW_METRIC == "on") ? "50" : "120"; echo ",
-                color: 'rgba(255, 0, 0, 0.05)',
-                label: {
-                    text: 'High Temp Zone',
-                    style: { color: '#999', fontSize: '10px' }
-                }
+                from: <?php echo $brood_low; ?>, to: <?php echo $brood_high; ?>,
+                color: 'rgba(0,180,0,0.08)',
+                label: { text: 'Brood Zone', align: 'right', x: -5, style: { fontSize: '10px', color: '#00A000' } }
+            }, {
+                from: <?php echo $danger_from; ?>, to: <?php echo $danger_to; ?>,
+                color: 'rgba(255,0,0,0.06)',
+                label: { text: 'Danger', align: 'right', x: -5, style: { fontSize: '10px', color: '#CC0000' } }
             }]
         }, {
             gridLineWidth: 0,
-            ceiling: 100,
-            floor: 0,
-            title: {
-                text: 'Humidity',
-                style: {
-                    color: '"; echo $color_hivehum; echo "'
-                }
-            },
-            labels: {
-                format: '{value} %',
-                style: {
-                    color: '"; echo $color_hivehum; echo "'
-                }
-            },
-            minRange: 20,
+            ceiling: 100, floor: 0,
+            title: { text: 'Humidity', style: { color: '<?php echo $color_hivehum; ?>' } },
+            labels: { format: '{value} %', style: { color: '<?php echo $color_hivehum; ?>' } },
             opposite: true
         }],
-        plotOptions: {";
-        if ($chart_smoothing == "on") {
-            echo "series: { connectNulls: true },";
-        }
-        echo "
-            line: {
-                marker: {
-                    enabled: true,
-                    radius: 2,
-                    symbol: 'circle'
-                },
-                dataLabels: { enabled: false },
-                enableMouseTracking: true
-            }
+        plotOptions: {
+            <?php if ($chart_smoothing == "on") echo "series: { connectNulls: true },"; ?>
+            line: { marker: { enabled: <?php echo $show_markers; ?>, radius: 1.5, symbol: 'circle' }, lineWidth: 2 }
         },
-        tooltip: {
-            formatter: function () {
-                var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
-                this.points.forEach(function (point) {
-                    s += '<br/>' + point.series.name + ': ' + point.y;
-                });
-                return s;
-            },
-            shared: true
-        },
-        exporting: {
-            buttons: {
-                contextButton: {
-                    menuItems: ['viewFullscreen', 'printChart', 'separator', 'downloadPNG', 'downloadJPEG', 'downloadPDF', 'downloadSVG']
-                }
-            }
-        },
+        tooltip: hcCommonTooltip,
+        exporting: hcCommonExporting,
         series: [{
-            type: 'line',
-            name: 'Hive Temp ("; if ($SHOW_METRIC == "on") { echo "°C"; } else { echo "°F"; } echo ")',
-            yAxis: 0,
-            data: ["; foreach($chart_result as $r){
-                if (is_numeric($r['hivetempf'])) {
-                    if ($chart_rounding == "on") {
-                        echo "[".$r['datetime'].", ".ceil($r['hivetempf'])."], ";
-                    } else {
-                        echo "[".$r['datetime'].", ".floatval($r['hivetempf'])."], ";
-                    }
-                } else {
-                    echo "[".$r['datetime'].", null], ";
-                }
-            } echo "],
-            color: '"; echo $color_hivetemp; echo "',
-            visible: "; echo $trend_hivetemp; echo "
-        },
-        {
-            type: 'line',
-            name: 'Outside Temp ("; if ($SHOW_METRIC == "on") { echo "°C"; } else { echo "°F"; } echo ")',
-            yAxis: 0,
-            data: ["; foreach($chart_result as $r){
-                if (is_numeric($r['weather_tempf'])) {
-                    if ($chart_rounding == "on") {
-                        echo "[".$r['datetime'].", ".ceil($r['weather_tempf'])."], ";
-                    } else {
-                        echo "[".$r['datetime'].", ".floatval($r['weather_tempf'])."], ";
-                    }
-                } else {
-                    echo "[".$r['datetime'].", null], ";
-                }
-            } echo "],
-            color: '"; echo $color_outtemp; echo "',
-            visible: "; echo $trend_outtemp; echo "
-        },
-        {
-            type: 'line',
-            name: 'Hive Humidity (%)',
-            yAxis: 1,
-            data: ["; foreach($chart_result as $r){
-                if (is_numeric($r['hiveHum']) && $r['hiveHum'] != 0) {
-                    if ($chart_rounding == "on") {
-                        echo "[".$r['datetime'].", ".ceil($r['hiveHum'])."], ";
-                    } else {
-                        echo "[".$r['datetime'].", ".floatval($r['hiveHum'])."], ";
-                    }
-                } else {
-                    echo "[".$r['datetime'].", null], ";
-                }
-            } echo "],
-            color: '"; echo $color_hivehum; echo "',
-            visible: "; echo $trend_hivehum; echo "
-        },
-        {
-            type: 'line',
-            name: 'Outside Humidity (%)',
-            yAxis: 1,
-            data: ["; foreach($chart_result as $r){
-                if (is_numeric($r['weather_humidity']) && $r['weather_humidity'] != 0) {
-                    if ($chart_rounding == "on") {
-                        echo "[".$r['datetime'].", ".ceil($r['weather_humidity'])."], ";
-                    } else {
-                        echo "[".$r['datetime'].", ".floatval($r['weather_humidity'])."], ";
-                    }
-                } else {
-                    echo "[".$r['datetime'].", null], ";
-                }
-            } echo "],
-            color: '"; echo $color_outhum; echo "',
-            visible: "; echo $trend_outhum; echo "
-        }
-        ]
+            name: 'Hive Temp (<?php echo $temp_unit; ?>)', yAxis: 0,
+            data: [<?php echo implode(',', $data_hivetemp); ?>],
+            color: '<?php echo $color_hivetemp; ?>',
+            visible: <?php echo $trend_hivetemp; ?>
+        }, {
+            name: 'Outside Temp (<?php echo $temp_unit; ?>)', yAxis: 0,
+            data: [<?php echo implode(',', $data_outtemp); ?>],
+            color: '<?php echo $color_outtemp; ?>',
+            visible: <?php echo $trend_outtemp; ?>
+        }, {
+            name: 'Hive Humidity (%)', yAxis: 1,
+            data: [<?php echo implode(',', $data_hivehum); ?>],
+            color: '<?php echo $color_hivehum; ?>',
+            visible: <?php echo $trend_hivehum; ?>
+        }, {
+            name: 'Outside Humidity (%)', yAxis: 1,
+            data: [<?php echo implode(',', $data_outhum); ?>],
+            color: '<?php echo $color_outhum; ?>',
+            visible: <?php echo $trend_outhum; ?>
+        }]
     });
+    dashboardCharts.push(chart);
 });
-</script>";
-?>
+</script>

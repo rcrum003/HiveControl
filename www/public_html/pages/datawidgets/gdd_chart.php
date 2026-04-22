@@ -41,11 +41,6 @@ $sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',gdddate)*1000 AS d
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-// Get Pollen Data
-$sth3 = $conn->prepare("SELECT pollenlevel, strftime('%s', date)*1000 AS datetime FROM pollen WHERE date > datetime('now', 'localtime', '$sqlperiod') ORDER by datetime ASC");
-$sth3->execute();
-$result3 = $sth3->fetchAll(PDO::FETCH_ASSOC);
-
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "
@@ -71,8 +66,7 @@ $(function () {
                 year: '%Y'
             }
         },
-        yAxis: [
-        {
+        yAxis: {
             gridLineWidth: 0,
             title: {
                 text: 'GDD',
@@ -86,27 +80,8 @@ $(function () {
                     color: '"; echo "$color_gdd"; echo "'
                 }
             },
-            minRange: 100,
-            opposite: false
+            minRange: 100
         },
-        {
-            gridLineWidth: 1,
-            title: {
-                text: 'Pollen',
-                style: {
-                    color: '"; echo "$color_pollen"; echo "'
-                }
-            },
-            labels: {
-                format: '{value}',
-                style: {
-                    color: '"; echo "$color_pollen"; echo "'
-                }
-            },
-            showEmpty: false,
-            opposite: false
-        }
-        ],
         plotOptions: {
             line: {
                 marker: {
@@ -143,11 +118,9 @@ $(function () {
                 }
             }
         },
-        series: [
-        {
+        series: [{
             type: 'area',
             name: 'GDD',
-            yAxis: 0,
             data: ["; foreach($result as $r){
                 if (is_numeric($r['gdd']) && $r['gdd'] != 0) {
                     echo "[".$r['datetime'].", ".floatval($r['gdd'])."], ";
@@ -157,22 +130,7 @@ $(function () {
             } echo "],
             color: '"; echo "$color_gdd"; echo "',
             visible: true
-        },
-        {
-            type: 'area',
-            name: 'Pollen',
-            yAxis: 1,
-            data: ["; foreach($result3 as $r){
-                if (is_numeric($r['pollenlevel']) && $r['pollenlevel'] != 0) {
-                    echo "[".$r['datetime'].", ".floatval($r['pollenlevel'])."], ";
-                } else {
-                    echo "[".$r['datetime'].", null], ";
-                }
-            } echo "],
-            color: '"; echo "$color_pollen"; echo "',
-            visible: "; echo "$trend_pollen"; echo "
-        }
-        ]
+        }]
     });
 });
 </script>";

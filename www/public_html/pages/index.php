@@ -242,10 +242,6 @@ header("Refresh: $sec; url=$page");
             <a href="/pages/index.php?period=year"><button type="button" class="btn btn btn-<?PHP if ($period == "year"){echo "primary";} else {echo "default";}?>">Year</button></a>
             <a href="/pages/index.php?period=all"><button type="button" class="btn btn btn-<?PHP if ($period == "all"){echo "primary";} else {echo "default";}?>">All</button></a>
 
-            <span style="margin-left: 20px;">
-                <button type="button" class="btn btn-sm btn-info" id="btn-split-view" onclick="toggleChartView('split')">Split View</button>
-                <button type="button" class="btn btn-sm btn-default" id="btn-combined-view" onclick="toggleChartView('combined')">Combined View</button>
-            </span>
             <br>
                 </div>
                 <!-- /.col-lg-12 -->
@@ -281,10 +277,18 @@ header("Refresh: $sec; url=$page");
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Environment & Foraging
+                            Environment
                         </div>
                         <div class="panel-body">
                             <div class="pull-center" id="envcontainer"></div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Foraging Conditions
+                        </div>
+                        <div class="panel-body">
+                            <div class="pull-center" id="foragingcontainer"></div>
                         </div>
                     </div>
                     <div class="panel panel-default">
@@ -298,21 +302,9 @@ header("Refresh: $sec; url=$page");
                     </div>
                 </div>
 
-                <!-- Combined View: Original All-in-One Chart -->
-                <div id="combined-view" style="display:none;">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Hive Charts
-                        </div>
-                        <div class="panel-body">
-                            <div class="pull-center" id="allcontainer"></div>
-                        </div>
-                    </div>
                 </div>
-
-                </div>
-                <!-- /.col-lg-6 -->
-            <?PHP 
+                <!-- /.col-lg-8 -->
+            <?PHP
             if ($SITE_TYPE == "normal") {
                 echo '
             
@@ -337,32 +329,11 @@ header("Refresh: $sec; url=$page");
 
                 </div>
                 ';} ?>
-                    <!-- /.panel -->
-                </div>
-                <!-- /.col-lg-6 -->
-            </div>
-            <!-- /.row -->                
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
-                </div>
-                <!-- /.col-lg-6 -->
 
-                <!-- /.col-lg-6 -->
             </div>
-            <!-- /.row -->    
-                        </div>
-                        </div>
-                        <!-- /.panel-footer -->
-                    </div>
-                    <!-- /.panel .chat-panel -->
-                </div>
-                <!-- /.col-lg-4 -->
-            </div>
-            <!-- /.Row1 -->
+            <!-- /.row -->
         </div>
         <!-- /#page-wrapper -->
-
     </div>
     <!-- /#wrapper -->
 
@@ -391,36 +362,12 @@ header("Refresh: $sec; url=$page");
   include "datawidgets/climate_chart.php";
   include "datawidgets/weight_overview_chart.php";
   include "datawidgets/environment_chart.php";
+  include "datawidgets/foraging_chart.php";
   include "datawidgets/airquality_dashboard_chart.php";
-  include "datawidgets/all_chart.php";
 
   include "datawidgets/weightguage-hc.php";
 
   ?>
-
-  <script>
-  function toggleChartView(view) {
-      if (view === 'split') {
-          document.getElementById('split-view').style.display = 'block';
-          document.getElementById('combined-view').style.display = 'none';
-          document.getElementById('btn-split-view').className = 'btn btn-sm btn-info';
-          document.getElementById('btn-combined-view').className = 'btn btn-sm btn-default';
-          localStorage.setItem('hc_chart_view', 'split');
-      } else {
-          document.getElementById('split-view').style.display = 'none';
-          document.getElementById('combined-view').style.display = 'block';
-          document.getElementById('btn-split-view').className = 'btn btn-sm btn-default';
-          document.getElementById('btn-combined-view').className = 'btn btn-sm btn-info';
-          localStorage.setItem('hc_chart_view', 'combined');
-      }
-  }
-  (function() {
-      var saved = localStorage.getItem('hc_chart_view');
-      if (saved === 'combined') {
-          toggleChartView('combined');
-      }
-  })();
-  </script>
   
     <!-- Custom Theme JavaScript -->
     <script src="../dist/js/sb-admin-2.js"></script>

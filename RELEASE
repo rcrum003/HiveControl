@@ -1,6 +1,47 @@
 Release Notes:
 
 --------------------
+2.20 Release
+--------------------
+DASHBOARD CHART OVERHAUL:
+- Replaced monolithic all-in-one chart with 5 focused dashboard charts
+  * Hive Climate: temp + humidity with brood zone (93-97F) and danger zone
+    plotBands, metric-aware thresholds
+  * Weight & Stores: net/gross weight + rain area chart, alert-driven
+    plotLines for swarm/robbing detection
+  * Environment: Solar radiation + Lux on dual y-axes
+  * Foraging Conditions (NEW): flight activity + wind with high-wind
+    plotBand (>20mph/32kph warning zone)
+  * Air Quality: PM2.5/PM10 concentrations + AQI with full EPA color-banded
+    plotBands (Good/Moderate/USG/Unhealthy/Very Unhealthy)
+- Synchronized crosshairs across all 5 dashboard charts
+  * Zoom on one chart zooms all charts to same time range
+  * Shared tooltip format with color bullets and number formatting
+- Pre-built data arrays with automatic thinning
+  * Data arrays built server-side via implode() instead of inline foreach
+  * Automatic point thinning when dataset exceeds 800 points
+  * Conditional markers: shown when <=200 points, hidden for larger datasets
+- Shared chart infrastructure (dashboard_chart_shared.php)
+  * Common x-axis, tooltip, and exporting configuration
+  * dashboardCharts array for cross-chart synchronization
+  * include_once pattern prevents duplicate queries and JS declarations
+- Removed combined/split view toggle (combined view was redundant with
+  focused charts providing better data density per chart)
+
+SIDEBAR IMPROVEMENTS:
+- Weight gauge: dynamic y-axis max (120% of actual weight, rounded to
+  nearest 10) instead of hardcoded 200lb ceiling
+- System status: replaced bare buttons with Bootstrap label badges, added
+  data freshness indicator (Live / Xm ago / Xh ago) with color coding
+
+GDD DETAIL PAGE:
+- Removed pollen series from GDD chart (pollen has its own dedicated page)
+
+HTML CLEANUP:
+- Removed 9 orphaned </div> tags in index.php from previous layout refactor
+- Fixed misleading HTML comments (col-lg-6 → col-lg-8)
+
+--------------------
 2.19 Release
 --------------------
 SECURITY FIXES:
