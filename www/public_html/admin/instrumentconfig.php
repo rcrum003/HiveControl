@@ -504,7 +504,7 @@ if($v->validate()) {
                                                             #Future Use
                                                             break;
                                                         case "hx711":
-                                                        echo '<center><button class="btn btn-primary" data-toggle="modal" type="button" data-target="#CalibModal">Calibrate Wizard</button><br>';
+                                                        echo '<center><a class="btn btn-primary" href="/admin/setup-wizard.php?step=3">Calibrate Wizard</a><br>';
                                                             break;
                                                         case "cpw200plus":
                                                             #Futureuse
@@ -518,7 +518,7 @@ if($v->validate()) {
                                                             #Future Use
                                                             break;
                                                         case "hx711":
-                                                        echo '<center><button class="btn btn-primary" data-toggle="modal" type="button" data-target="#CalibModal">Calibrate Wizard</button><br>';
+                                                        echo '<center><a class="btn btn-primary" href="/admin/setup-wizard.php?step=3">Calibrate Wizard</a><br>';
                                                             break;
                                                         case "cpw200plus":
                                                             #Futureuse
@@ -1058,24 +1058,6 @@ if (empty($health_rows)) {
             </div>
             <!-- /.row -->
 
-            <div class="modal fade" id="CalibModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                            <h4 class="modal-title" id="myModalLabel">Scale Calibration Wizard</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                            <iframe src="/admin/hx_wiz.php" width="100%" height="100%" frameborder="0" allowtransparency="true"></iframe>  
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal">Close Wizard</button>
-                                        </div>
-                                    </div>
-                                    <!-- /.modal-content -->
-                                </div>
-                                <!-- /.modal-dialog -->
-                </div>
                 <div class="modal fade" id="wx" tabindex="-1" role="dialog" aria-labelledby="wx" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
