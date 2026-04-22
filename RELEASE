@@ -1,6 +1,49 @@
 Release Notes:
 
 --------------------
+2.23 Release
+--------------------
+HIVE BODY CONFIGURATION REDESIGN:
+- Replaced spreadsheet-style table with visual hive builder
+  * Two-panel layout: Component Palette (left) + Interactive Stack (right)
+  * Click components to add them to the hive stack
+  * jQuery UI Sortable drag-and-drop reordering
+  * Click between components to place temperature sensor indicator
+  * Real-time tare weight calculation updates as components change
+  * Per-component weight inputs in the palette cards
+  * Feeder syrup tracking toggle
+  * Fixed weights section (Hive Top, Computer, Misc) separated from stack
+  * Responsive layout for mobile/tablet
+- SVG hive diagram renders proportional stacked view
+  * Components sized by type (deep=76px, medium=56px, shallow=42px, etc.)
+  * Color-coded by category (covers=gray, bodies=wood tones, feeder=blue)
+  * Frame lines and hand-hold details on body components
+  * Screen mesh pattern on screened bottom board
+  * Liquid level indicator on feeder when syrup present
+  * Inner cover ventilation notch detail
+
+DASHBOARD HIVE VISUALIZATION:
+- New "Hive Configuration" panel in dashboard sidebar
+  * Read-only SVG diagram of current hive stack
+  * Temperature sensor shown at configured position with live reading
+  * Feeder syrup level indicator
+  * Click diagram to edit configuration
+  * Falls back to "Configure Hive" link when no components configured
+- Reusable hive-diagram.js SVG rendering library shared by config page
+  and dashboard widget
+
+DATABASE CHANGES:
+- DB_PATCH_42: Added hive body stack and sensor tracking
+  * HIVE_STACK_ORDER (TEXT) — ordered component list, bottom-to-top
+  * SENSOR_TEMP_POSITION (INTEGER) — stack position of temperature sensor
+  * SENSOR_TEMP_LABEL (TEXT) — user-defined sensor label
+  * FEEDER_HAS_SYRUP (INTEGER) — feeder syrup state tracking
+  (DB version 33 -> 34)
+
+UPGRADE SCRIPT:
+- Added js/ and css/ directory copy to upgrade.sh for new web assets
+
+--------------------
 2.22 Release
 --------------------
 BUG FIXES:

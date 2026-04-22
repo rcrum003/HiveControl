@@ -68,6 +68,7 @@ header("Refresh: $sec; url=$page");
     <!-- Header and Navigation -->
          <?PHP include($_SERVER["DOCUMENT_ROOT"] . "/include/navigation.php"); ?>
     <!-- /Navigation -->
+    <link rel="stylesheet" href="/css/hive-diagram.css">
 
 
 
@@ -311,7 +312,15 @@ header("Refresh: $sec; url=$page");
                 <div class="col-lg-4">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Estimated Stores (Honey,Pollen,Nectar) 
+                            Hive Configuration
+                        </div>
+                        <div class="panel-body">';
+            include "datawidgets/hive_diagram.php";
+                        echo '</div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Estimated Stores (Honey,Pollen,Nectar)
                         </div>
                         <div class="panel-body">
                             <div class="pull-center" id="weightgauge-container"></div>
@@ -319,10 +328,10 @@ header("Refresh: $sec; url=$page");
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            System Status 
+                            System Status
                         </div>
                         <div class="panel-body">';
-            include "status.php"; 
+            include "status.php";
                         echo '</div>
 
                     </div>
@@ -355,7 +364,15 @@ header("Refresh: $sec; url=$page");
     <script src="/js/highcharts/modules/exporting.js"></script>
 
   <!-- Full Screen Popups -->
-    <script src="/js/popup.js"></script>    
+    <script src="/js/popup.js"></script>
+
+    <!-- Hive Diagram -->
+    <script src="/js/hive-diagram.js"></script>
+    <script>
+    if (window._hiveDiagramDashCfg && typeof HiveDiagram !== 'undefined') {
+        HiveDiagram.renderDashboard('#dashboard-hive-svg', window._hiveDiagramDashCfg);
+    }
+    </script>
 
   <?php
 

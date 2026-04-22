@@ -1,0 +1,211 @@
+/* Hive Diagram — shared styles for config editor and dashboard widget */
+
+/* ── Container ── */
+.hive-diagram-wrap {
+    text-align: center;
+    padding: 10px 0;
+}
+.hive-diagram-wrap svg {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ── Editor: two-panel layout ── */
+.hive-editor {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.hive-editor .palette-panel {
+    flex: 0 0 340px;
+    min-width: 280px;
+}
+.hive-editor .stack-panel {
+    flex: 1 1 400px;
+    min-width: 320px;
+}
+
+/* ── Palette cards ── */
+.palette-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+}
+.palette-card:hover {
+    border-color: #337ab7;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.palette-card img {
+    width: 80px;
+    height: auto;
+    flex-shrink: 0;
+}
+.palette-card .card-info {
+    flex: 1;
+}
+.palette-card .card-info h5 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.palette-card .card-info .weight-input {
+    width: 80px;
+}
+.palette-card .btn-add {
+    flex-shrink: 0;
+}
+
+/* ── Stack component items (sortable) ── */
+.hive-stack-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-height: 100px;
+}
+.hive-stack-list li {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    cursor: grab;
+    transition: transform 0.1s;
+}
+.hive-stack-list li:active {
+    cursor: grabbing;
+}
+.hive-stack-list li .remove-btn {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #d9534f;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.hive-stack-list li:hover .remove-btn {
+    opacity: 1;
+}
+
+/* Sensor drop-zone between components */
+.sensor-zone {
+    height: 6px;
+    margin: 0;
+    position: relative;
+    transition: height 0.15s, background 0.15s;
+    cursor: pointer;
+    border-radius: 2px;
+}
+.sensor-zone:hover {
+    height: 14px;
+    background: rgba(51,122,183,0.15);
+}
+.sensor-zone.has-sensor {
+    height: 20px;
+    background: rgba(51,122,183,0.08);
+}
+.sensor-zone .sensor-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #d9534f;
+    font-size: 16px;
+}
+
+/* ── Tare weight summary ── */
+.tare-summary {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+}
+.tare-summary .tare-value {
+    color: #337ab7;
+    font-size: 20px;
+}
+
+/* ── Fixed weights row ── */
+.fixed-weights {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.fixed-weights .fw-item {
+    flex: 1 1 140px;
+}
+.fixed-weights label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 2px;
+}
+.fixed-weights input {
+    width: 100%;
+}
+
+/* ── Dashboard widget ── */
+.dashboard-hive-diagram {
+    position: relative;
+    cursor: pointer;
+}
+.dashboard-hive-diagram .hive-link-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+.dashboard-hive-diagram .diagram-footer {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #999;
+}
+
+/* ── SVG tooltip ── */
+.hive-svg-tooltip {
+    position: absolute;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 1000;
+    display: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .hive-editor {
+        flex-direction: column;
+    }
+    .hive-editor .palette-panel {
+        flex: 1 1 100%;
+    }
+    .hive-stack-list li .remove-btn {
+        opacity: 1;
+        right: 4px;
+    }
+}

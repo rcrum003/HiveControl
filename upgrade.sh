@@ -325,6 +325,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_41
 			let DB_ver="33"
 		fi
+		if [[ $DB_ver -eq "33" ]]; then
+			echo "Applying DB Ver 34 Upgrades - Hive body stack order and sensor placement"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_42
+			let DB_ver="34"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
@@ -337,6 +342,11 @@ cp -Rp $WWWTempRepo/pages/* $DestWWWRepo/pages/
 cp -Rp $WWWTempRepo/admin/* $DestWWWRepo/admin/
 cp -Rp $WWWTempRepo/include/* $DestWWWRepo/include/
 cp -Rp $WWWTempRepo/errors/* $DestWWWRepo/errors/
+cp -Rp $WWWTempRepo/js/* $DestWWWRepo/js/
+mkdir -p $DestWWWRepo/css
+cp -Rp $WWWTempRepo/css/* $DestWWWRepo/css/
+mkdir -p $DestWWWRepo/bower_components/jquery-ui/dist
+cp -Rp $WWWTempRepo/bower_components/jquery-ui/dist/* $DestWWWRepo/bower_components/jquery-ui/dist/
 echo "============================================="
 
 echo "Upgrading our shell scripts"
