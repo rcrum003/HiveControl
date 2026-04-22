@@ -142,6 +142,7 @@ function render_sensor_section($key, $sensor, $stats_data, $rh_sum, $stats_rows,
             <!-- Summary Cards -->
             <div class="row">
 <?PHP
+$card_idx = 0;
 foreach ($sensors as $key => $s) {
     $panel_class = status_panel_class($s['status']);
     $label_class = status_label_class($s['status']);
@@ -152,7 +153,7 @@ foreach ($sensors as $key => $s) {
         $vals .= htmlspecialchars($v) . ' ';
     }
     $gray_style = ($s['status'] === 'gray') ? ' style="background-color:#d5d5d5; border-color:#bbb;"' : '';
-    $gray_head = ($s['status'] === 'gray') ? ' style="background-color:#aaa; border-color:#999; color:#fff;"' : '';
+    $gray_head = ($s['status'] === 'gray') ? ' style="background-color:#aaa; border-color:#999; color:#fff; min-height:90px;"' : ' style="min-height:90px;"';
     echo '
                 <div class="col-lg-3 col-md-6">
                     <div class="panel ' . $panel_class . '"' . $gray_style . '>
@@ -175,6 +176,9 @@ foreach ($sensors as $key => $s) {
                         </a>
                     </div>
                 </div>';
+    $card_idx++;
+    if ($card_idx % 4 === 0) echo '<div class="clearfix visible-lg-block"></div>';
+    if ($card_idx % 2 === 0) echo '<div class="clearfix visible-md-block visible-sm-block"></div>';
 }
 ?>
             </div>
