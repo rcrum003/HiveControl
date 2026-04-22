@@ -85,7 +85,8 @@ header("Refresh: $sec; url=$page");
 
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Dashboard - <?PHP echo "$recorddate"; ?></h1>
+                    <h1 class="page-header">Dashboard</h1>
+                    <p style="margin-top:-15px;color:#555"><i class="fa fa-clock-o"></i> Last Sensor Reading: <strong><?php echo trim($recorddate, '()'); ?></strong></p>
                 </div>
                 <!-- /.col-lg-12 -->
             </div>
