@@ -49,7 +49,7 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 $has_valid = false;
 foreach ($result as $r) {
-    if (is_numeric($r['IN_COUNT'] ?? null) || is_numeric($r['OUT_COUNT'] ?? null)) {
+    if ((is_numeric($r['IN_COUNT'] ?? null) && $r['IN_COUNT'] != 0) || (is_numeric($r['OUT_COUNT'] ?? null) && $r['OUT_COUNT'] != 0)) {
         $has_valid = true;
         break;
     }

@@ -62,7 +62,7 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 $has_valid = false;
 foreach ($result as $r) {
-    if (is_numeric($r['hivetemp'] ?? null) || is_numeric($r['weather_temp'] ?? null)) {
+    if ((is_numeric($r['hivetemp'] ?? null) && $r['hivetemp'] != 0) || (is_numeric($r['weather_temp'] ?? null) && $r['weather_temp'] != 0)) {
         $has_valid = true;
         break;
     }

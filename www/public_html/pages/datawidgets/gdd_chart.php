@@ -43,7 +43,7 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 $has_valid = false;
 foreach ($result as $r) {
-    if (is_numeric($r['gdd'] ?? null)) {
+    if (is_numeric($r['gdd'] ?? null) && $r['gdd'] != 0) {
         $has_valid = true;
         break;
     }

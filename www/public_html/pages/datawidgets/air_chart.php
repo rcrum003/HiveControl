@@ -17,7 +17,7 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 $has_valid = false;
 foreach ($result as $r) {
-    if (is_numeric($r['air_pm2_5'] ?? null) || is_numeric($r['air_pm2_5_raw'] ?? null) || is_numeric($r['air_aqi'] ?? null)) {
+    if ((is_numeric($r['air_pm2_5'] ?? null) && $r['air_pm2_5'] != 0) || (is_numeric($r['air_pm2_5_raw'] ?? null) && $r['air_pm2_5_raw'] != 0) || (is_numeric($r['air_aqi'] ?? null) && $r['air_aqi'] != 0)) {
         $has_valid = true;
         break;
     }

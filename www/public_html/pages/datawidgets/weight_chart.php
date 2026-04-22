@@ -53,7 +53,7 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 $has_valid = false;
 foreach ($result as $r) {
-    if (is_numeric($r['hiveweight'] ?? null) || is_numeric($r['hiverawweight'] ?? null)) {
+    if ((is_numeric($r['hiveweight'] ?? null) && $r['hiveweight'] != 0) || (is_numeric($r['hiverawweight'] ?? null) && $r['hiverawweight'] != 0)) {
         $has_valid = true;
         break;
     }

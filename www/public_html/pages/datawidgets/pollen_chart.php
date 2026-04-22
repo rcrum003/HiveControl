@@ -38,7 +38,7 @@ $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
 $has_valid = false;
 foreach ($result as $r) {
-    if (is_numeric($r['pollenlevel'] ?? null)) {
+    if (is_numeric($r['pollenlevel'] ?? null) && $r['pollenlevel'] != 0) {
         $has_valid = true;
         break;
     }
