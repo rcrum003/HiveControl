@@ -83,6 +83,11 @@ if [[ $DB_ver -eq "34" ]]; then
     sqlite3 $DestDB < $DBPatches/DB_PATCH_43
     let DB_ver="35"
 fi
+if [[ $DB_ver -eq "35" ]]; then
+    echo "Applying DB_PATCH_44 - Pollen enable/disable toggle"
+    sqlite3 $DestDB < $DBPatches/DB_PATCH_44
+    let DB_ver="36"
+fi
 
 echo $DB_ver > /home/HiveControl/data/DBVERSION
 echo "DB version now: $DB_ver"

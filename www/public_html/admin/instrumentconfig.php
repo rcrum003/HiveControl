@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v = new Valitron\Validator($_POST);
     $v->rule('required', ['ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_LUX'], 1)->message('{field} is required');
     $v->rule('slug', ['WXTEMPTYPE']);
-    $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER', 'ENABLE_AIR'], ['no', 'yes']);
+    $v->rule('in', ['ENABLE_HIVE_WEIGHT', 'ENABLE_LUX', 'ENABLE_HIVE_CAMERA', 'ENABLE_HIVE_WEIGHT_CHK', 'ENABLE_HIVE_TEMP_CHK', 'ENABLE_BEECOUNTER', 'ENABLE_AIR', 'ENABLE_POLLEN'], ['no', 'yes']);
     $v->rule('integer', ['HIVE_TEMP_GPIO', 'HIVE_LUX_GPIO', 'HIVE_WEIGHT_GPIO', 'HIVE_TEMP_SUB'], 1)->message('{field} must be a integer');
     $v->rule('numeric', ['HIVE_WEIGHT_SLOPE', 'HIVE_WEIGHT_INTERCEPT', 'HIVE_LUX_SLOPE', 'HIVE_LUX_INTERCEPT', 'HIVE_TEMP_SLOPE', 'HIVE_TEMP_INTERCEPT', 'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','HIVE_HUMIDITY_SLOPE','HIVE_HUMIDITY_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT','WEIGHT_TEMP_COEFF','WEIGHT_HUMIDITY_COEFF','WEIGHT_REF_TEMP','WEIGHT_REF_HUMIDITY'], 1)->message('{field} must be numeric');
     $v->rule('in', ['WEIGHT_COMPENSATION_ENABLED'], ['no', 'yes']);
@@ -125,14 +125,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ENABLE_AIRNOW = test_input($_POST["ENABLE_AIRNOW"] ?? 'no');
         $KEY_AIRNOW = test_input($_POST["KEY_AIRNOW"] ?? '');
         $AIRNOW_DISTANCE = test_input($_POST["AIRNOW_DISTANCE"] ?? '25');
+        $ENABLE_POLLEN = test_input($_POST["ENABLE_POLLEN"] ?? 'yes');
 
         $ver = $conn->prepare("SELECT version FROM hiveconfig");
         $ver->execute();
         $ver = $ver->fetchColumn();
         $version = ++$ver;
 
-        $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=?,WXAPIKEY=? WHERE id=1");
-        $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE,$HIVE_LUX_INTERCEPT,$HIVE_TEMP_SLOPE,$HIVE_TEMP_INTERCEPT,$WX_TEMP_SLOPE,$WX_TEMP_INTERCEPT,$HIVE_HUMIDITY_SLOPE,$HIVE_HUMIDITY_INTERCEPT,$WX_HUMIDITY_SLOPE,$WX_HUMIDITY_INTERCEPT,$HIVE_LUX_GPIO,$HIVE_WEIGHT_GPIO,$HIVE_TEMP_SUB,$ENABLE_AIR,$AIR_TYPE,$AIR_ID,$AIR_API,$AIR_LOCAL_URL,$WEIGHT_COMPENSATION_ENABLED,$WEIGHT_TEMP_COEFF,$WEIGHT_HUMIDITY_COEFF,$WEIGHT_REF_TEMP,$WEIGHT_REF_HUMIDITY,$weather_fallback,$weather_fallback_2,$wx_max_stale_minutes,$key_openweathermap,$key_weatherapi,$key_visualcrossing,$key_pirateweather,$key_tomorrow,$key_ambee,$ENABLE_AIRNOW,$KEY_AIRNOW,$AIRNOW_DISTANCE,$wxapikey));
+        $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=?,WXAPIKEY=?,ENABLE_POLLEN=? WHERE id=1");
+        $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE,$HIVE_LUX_INTERCEPT,$HIVE_TEMP_SLOPE,$HIVE_TEMP_INTERCEPT,$WX_TEMP_SLOPE,$WX_TEMP_INTERCEPT,$HIVE_HUMIDITY_SLOPE,$HIVE_HUMIDITY_INTERCEPT,$WX_HUMIDITY_SLOPE,$WX_HUMIDITY_INTERCEPT,$HIVE_LUX_GPIO,$HIVE_WEIGHT_GPIO,$HIVE_TEMP_SUB,$ENABLE_AIR,$AIR_TYPE,$AIR_ID,$AIR_API,$AIR_LOCAL_URL,$WEIGHT_COMPENSATION_ENABLED,$WEIGHT_TEMP_COEFF,$WEIGHT_HUMIDITY_COEFF,$WEIGHT_REF_TEMP,$WEIGHT_REF_HUMIDITY,$weather_fallback,$weather_fallback_2,$wx_max_stale_minutes,$key_openweathermap,$key_weatherapi,$key_visualcrossing,$key_pirateweather,$key_tomorrow,$key_ambee,$ENABLE_AIRNOW,$KEY_AIRNOW,$AIRNOW_DISTANCE,$wxapikey,$ENABLE_POLLEN));
         sleep(1);
 
         $sth = $conn->prepare("SELECT * FROM hiveconfig");
@@ -179,7 +180,8 @@ $hidden_fields = [
     'WX_TEMP_SLOPE','WX_TEMP_INTERCEPT','WX_HUMIDITY_SLOPE','WX_HUMIDITY_INTERCEPT',
     'WEATHER_FALLBACK','WEATHER_FALLBACK_2','WX_MAX_STALE_MINUTES',
     'ENABLE_AIR','AIR_TYPE','AIR_ID','AIR_API','AIR_LOCAL_URL',
-    'ENABLE_AIRNOW','KEY_AIRNOW','AIRNOW_DISTANCE'
+    'ENABLE_AIRNOW','KEY_AIRNOW','AIRNOW_DISTANCE',
+    'ENABLE_POLLEN'
 ];
 ?>
 
@@ -277,10 +279,16 @@ foreach ($ttypes as $tv => $tl) {
 }
 ?>
         </div>
-        <div class="temp-option" data-types="temperhum,temper,broodminder" style="<?= in_array($result['TEMPTYPE'], ['temperhum','temper','broodminder']) ? '' : 'display:none' ?>">
+        <div class="temp-option" data-types="temperhum,temper" style="<?= in_array($result['TEMPTYPE'], ['temperhum','temper']) ? '' : 'display:none' ?>">
             <div class="form-group"><label>Device Path</label>
                 <input type="text" name="HIVEDEVICE" class="form-control" style="max-width:300px" value="<?= h($result['HIVEDEVICE']) ?>" placeholder="/dev/hidraw1">
                 <p class="help-block">Use <code>tempered -e</code> to list devices</p>
+            </div>
+        </div>
+        <div class="temp-option" data-types="broodminder" style="<?= $result['TEMPTYPE'] == 'broodminder' ? '' : 'display:none' ?>">
+            <div class="form-group"><label>BLE MAC Address</label>
+                <input type="text" name="HIVEDEVICE" class="form-control" style="max-width:300px" value="<?= h($result['HIVEDEVICE']) ?>" placeholder="06:09:16:42:1c:8a">
+                <p class="help-block">Run <code>sudo python3 /home/HiveControl/software/broodminder/BM_Scan_bleak.py</code> to find nearby devices</p>
             </div>
         </div>
         <div class="temp-option" data-types="temper" style="<?= $result['TEMPTYPE'] == 'temper' ? '' : 'display:none' ?>">
@@ -761,14 +769,26 @@ $epa_pcls = $epa_on ? status_panel_class($sh['epa']['status']) : 'panel-default'
     </div>
 </div>
 
-<?php /* --- POLLEN --- */ ?>
-<div class="panel <?= status_panel_class($sh['pollen']['status']) ?>">
+<?php /* --- POLLEN --- */
+$pollen_on = (($result['ENABLE_POLLEN'] ?? 'yes') == 'yes');
+$pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel-default';
+?>
+<div class="panel <?= $pollen_pcls ?>">
     <div class="panel-heading">
-        <i class="fa fa-pagelines fa-fw"></i> <strong>Pollen Data</strong>
-        <span class="label <?= status_label_class($sh['pollen']['status']) ?>" style="margin-left:8px"><?= h($sh['pollen']['status_label']) ?></span>
-        <small class="text-muted" style="margin-left:8px">Primary: Pollen.com (US, free)</small>
+        <div class="row">
+            <div class="col-xs-8"><i class="fa fa-pagelines fa-fw"></i> <strong>Pollen Data</strong>
+            <?php if ($pollen_on): ?><span class="label <?= status_label_class($sh['pollen']['status']) ?>" style="margin-left:8px"><?= h($sh['pollen']['status_label']) ?></span><?php endif; ?>
+            <small class="text-muted" style="margin-left:8px">Primary: Pollen.com (US, free)</small>
+            </div>
+            <div class="col-xs-4 text-right">
+                <select name="ENABLE_POLLEN" class="form-control input-sm enable-toggle" data-target="#body-pollen" style="display:inline-block;width:auto">
+                    <option value="yes"<?= sel($result['ENABLE_POLLEN'] ?? 'yes', 'yes') ?>>Enabled</option>
+                    <option value="no"<?= sel($result['ENABLE_POLLEN'] ?? 'yes', 'no') ?>>Disabled</option>
+                </select>
+            </div>
+        </div>
     </div>
-    <div class="panel-body">
+    <div id="body-pollen" class="panel-body collapse<?= $pollen_on ? ' in' : '' ?>">
         <p>Optional fallback providers &mdash; enter API keys for additional data sources.</p>
         <div class="row">
             <div class="col-sm-6">

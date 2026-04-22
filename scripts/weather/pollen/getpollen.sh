@@ -21,6 +21,11 @@ DATE=$(TZ=":$TIMEZONE" date '+%F')
 LOGDATE=$(TZ=":$TIMEZONE" date '+%F %T')
 DATASOURCE="$HOMEDIR/data/hive-data.db"
 
+# --- Check if pollen collection is enabled ---
+if [ "$ENABLE_POLLEN" = "no" ]; then
+	exit 0
+fi
+
 # --- Check if today already has data ---
 existing=$(sqlite3 "$DATASOURCE" "SELECT COUNT(*) FROM pollen WHERE date = '$DATE';")
 if [ "$existing" -gt 0 ]; then

@@ -208,6 +208,7 @@ header("Refresh: $sec; url=$page");
                         </a>
                     </div>
                 </div>
+                <?php if ($enable_pollen): ?>
                 <div class="col-lg-fifth col-md-6">
                     <div class="panel panel-<?php echo $pollen_card_class; ?>">
                         <div class="panel-heading">
@@ -230,6 +231,7 @@ header("Refresh: $sec; url=$page");
                         </a>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
             <!-- /.Top Row -->
             <!-- New Row 1 -->

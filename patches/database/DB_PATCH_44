@@ -1,0 +1,2 @@
+-- DB_PATCH_44: Add pollen enable/disable toggle
+ALTER TABLE hiveconfig ADD COLUMN ENABLE_POLLEN TEXT DEFAULT 'yes';
