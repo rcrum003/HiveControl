@@ -51,6 +51,11 @@ $sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+if (empty($result)) {
+    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No weight data available</strong> for the selected time period. Data will appear here once the weight sensor begins recording.</div>';
+    return;
+}
+
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
 echo "

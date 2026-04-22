@@ -15,6 +15,11 @@ $sth = $conn->prepare("SELECT air_pm1, air_pm2_5, air_pm10, air_pm2_5_raw, air_p
 $sth->execute([':p' => $sqlperiod]);
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+if (empty($result)) {
+    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No air quality data available</strong> for the selected time period. Data will appear here once an air quality sensor is configured and recording.</div>';
+    return;
+}
+
 $epa_result = [];
 try {
     $epa_sth = $conn->prepare("SELECT o3_aqi, no2_aqi, pm25_aqi, strftime('%s',date)*1000 AS datetime FROM airquality_epa WHERE date > datetime('now', 'localtime', :p) ORDER by datetime ASC");

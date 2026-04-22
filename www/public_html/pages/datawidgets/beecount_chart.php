@@ -47,6 +47,10 @@ $sth = $conn->prepare("SELECT IN_COUNT, OUT_COUNT, precip_1hr_in, strftime('%s',
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+if (empty($result)) {
+    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No bee count data available</strong> for the selected time period. Data will appear here once the bee counter begins recording.</div>';
+    return;
+}
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 

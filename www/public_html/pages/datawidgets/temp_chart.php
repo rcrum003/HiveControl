@@ -60,6 +60,10 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
+if (empty($result)) {
+    echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No temperature data available</strong> for the selected time period. Data will appear here once the temperature sensor begins recording.</div>';
+    return;
+}
 
 include($_SERVER["DOCUMENT_ROOT"] . "/include/gettheme.php");
 
