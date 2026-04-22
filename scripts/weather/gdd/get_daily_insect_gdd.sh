@@ -90,8 +90,16 @@ backfill_from_openmeteo() {
 
 	# Get existing dates to skip, and current season total
 	local existing_dates=$(sqlite3 "$DATASOURCE" "SELECT gdddate FROM gdd WHERE gdddate >= '$SEASON_START';")
-	local running_total=$(sqlite3 "$DATASOURCE" "SELECT COALESCE(SUM(daygdd), 0) FROM gdd WHERE gdddate >= '$SEASON_START';" 2>/dev/null)
-	running_total="${running_total:-0}"
+	local running_total
+	for attempt in 1 2 3; do
+		running_total=$(sqlite3 "$DATASOURCE" "SELECT COALESCE(SUM(daygdd), 0) FROM gdd WHERE gdddate >= '$SEASON_START';")
+		if [ -n "$running_total" ]; then break; fi
+		sleep 2
+	done
+	if [ -z "$running_total" ]; then
+		loglocal "$DATE" GDD ERROR "Backfill: could not read season total (DB locked?), aborting"
+		return 1
+	fi
 
 	# Build all inserts as a single transaction
 	local sql="BEGIN TRANSACTION;"
