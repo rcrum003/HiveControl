@@ -704,6 +704,21 @@ if [[ "$Installed_Ver" < "2.19" ]]; then
 	sudo pip3 install bleak --break-system-packages 2>/dev/null || sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null
 fi
 
+if [[ "$Installed_Ver" < "2.24" ]]; then
+	# Update sudoers to allow www-data to run reboot/shutdown from web UI
+	echo "Updating sudoers for restart/shutdown support"
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+	sudo chown root:root /etc/sudoers.d/hivecontrol
+	sudo chmod 440 /etc/sudoers.d/hivecontrol
+	CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
+	if [[ $CHECKSUDO -gt 0 ]]; then
+		echo "Sudoers update SUCCESS"
+	else
+		echo "Something went wrong with our SUDOERS file, removing it"
+		sudo rm -f /etc/sudoers.d/hivecontrol
+	fi
+fi
+
 echo "============================================="
 echo "success"
 #Cleanup and set the flag in the DB

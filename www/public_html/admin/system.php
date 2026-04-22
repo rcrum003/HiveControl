@@ -187,6 +187,26 @@ if(!empty($command)) {
                 }
                 break;
 
+            case "restart":
+                require_csrf_token();
+                if ($confirm == "yes") {
+                    $user_ip = getUserIP();
+                    loglocal($now, "SYSTEM", "INFO", "Restart initiated by Admin from source IP $user_ip");
+                    sleep(1);
+                    exec('sudo /sbin/reboot &');
+                }
+                break;
+
+            case "shutdown":
+                require_csrf_token();
+                if ($confirm == "yes") {
+                    $user_ip = getUserIP();
+                    loglocal($now, "SYSTEM", "INFO", "Shutdown initiated by Admin from source IP $user_ip");
+                    sleep(1);
+                    exec('sudo /sbin/shutdown -h now &');
+                }
+                break;
+
             case "pause":
                 # pauses current conditions script
                 $ver = $conn->prepare("SELECT version FROM hiveconfig");
@@ -247,7 +267,7 @@ if(!empty($command)) {
                                 <img src="../images/disk.png" width="75" height="75">
                                     <div class="text-center">Update Code</div>
                 </a></button>
-                <?PHP if ($command == "clearlogs" || $command == "upgrade" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "server_status") {
+                <?PHP if ($command == "clearlogs" || $command == "upgrade" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "server_status" || $command == "restart" || $command == "shutdown") {
                     echo '<a href="/admin/system.php">
                     <button type="button" class="btn btn-outline btn-default btn-lg">
                                 <img src="../images/delete.png" width="75" height="75">
@@ -291,7 +311,17 @@ if(!empty($command)) {
                         } ?>
 
                 </a></button>
-                
+
+                <button type="button" class="btn btn-outline btn-default btn-lg" data-toggle="modal" data-target="#RestartModal">
+                                <i class="fa fa-refresh" style="font-size:60px;display:block;margin:8px auto;color:#333"></i>
+                                    <div class="text-center">Restart</div>
+                </button>
+
+                <button type="button" class="btn btn-outline btn-default btn-lg" data-toggle="modal" data-target="#ShutdownModal">
+                                <i class="fa fa-power-off" style="font-size:60px;display:block;margin:8px auto;color:#d9534f"></i>
+                                    <div class="text-center">Shutdown</div>
+                </button>
+
             </div>
                                 
 
@@ -312,7 +342,7 @@ if(!empty($command)) {
                             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
                             echo '<b>Upgrade Request '.htmlspecialchars($msgid).' Errored Out </b><br>'; echo htmlspecialchars($error); echo '</div>';
                             } 
-                        if ($command == "clearlogs" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "none") {
+                        if ($command == "clearlogs" || $command == "cleardata" || $command == "removezero" || $command == "pause" || $command == "restart" || $command == "shutdown" || $command == "none") {
                             getlog($conn);
                         }
                         if ($command == "upgrade") {
@@ -443,6 +473,55 @@ if(!empty($command)) {
                 </div>
                             <!-- /.modal -->
 
+                <div class="modal fade" id="RestartModal" tabindex="-1" role="dialog" aria-labelledby="restartModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                            <h4 class="modal-title" id="restartModalLabel">Restart HiveControl</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>This will restart the Raspberry Pi. The system will be unavailable for about 1-2 minutes while it reboots.</p>
+                                            <p>Data collection will resume automatically after the restart.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="/admin/system.php" style="display:inline">
+                                                <?php echo csrf_field(); ?>
+                                                <input type="hidden" name="command" value="restart">
+                                                <input type="hidden" name="confirm" value="yes">
+                                                <button type="submit" class="btn btn-warning">Yes, Restart Now</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                </div>
+
+                <div class="modal fade" id="ShutdownModal" tabindex="-1" role="dialog" aria-labelledby="shutdownModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                            <h4 class="modal-title" id="shutdownModalLabel"><i class="fa fa-exclamation-triangle" style="color:#d9534f"></i> Shutdown HiveControl</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="alert alert-danger">
+                                                <strong>Warning:</strong> This will completely shut down the Raspberry Pi. You will need to <strong>physically unplug and re-plug the power cable</strong> to turn it back on.
+                                            </div>
+                                            <p>All data collection will stop until you power cycle the device.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="/admin/system.php" style="display:inline">
+                                                <?php echo csrf_field(); ?>
+                                                <input type="hidden" name="command" value="shutdown">
+                                                <input type="hidden" name="confirm" value="yes">
+                                                <button type="submit" class="btn btn-danger">Yes, Shut Down</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                </div>
 
     </body>
     <!-- /#wrapper -->

@@ -115,6 +115,19 @@ echo "============================================="
 # Update install files
 cp -Rp /home/HiveControl/upgrade/HiveControl/install/* /home/HiveControl/install/
 
+# Update sudoers (for restart/shutdown web UI support)
+echo "Updating sudoers..."
+sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+sudo chown root:root /etc/sudoers.d/hivecontrol
+sudo chmod 440 /etc/sudoers.d/hivecontrol
+CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
+if [[ $CHECKSUDO -gt 0 ]]; then
+    echo "Sudoers update SUCCESS"
+else
+    echo "Something went wrong with sudoers, removing it"
+    sudo rm -f /etc/sudoers.d/hivecontrol
+fi
+
 # ─── Finalize ───────────────────────────────────────────────
 loglocal "$DATE" UPGRADE SUCCESS "Dev upgrade to $Latest_Ver from branch $BRANCH"
 sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
