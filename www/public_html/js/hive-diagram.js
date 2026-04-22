@@ -414,6 +414,7 @@ var HiveDiagram = (function () {
     EditorController.prototype.refresh = function () {
         this.renderDiagram();
         this.renderList();
+        this.initSortable();
         this.refreshTare();
         if (this.onChangeCallback) {
             this.onChangeCallback(this);
@@ -442,8 +443,8 @@ var HiveDiagram = (function () {
             items.push(
                 '<li data-stack-index="' + i + '">' +
                 '<div class="palette-card" style="border-left:4px solid ' + cdef.color + '">' +
-                '<span class="card-info"><i class="fa fa-arrows-v" style="color:#ccc;margin-right:8px"></i>' +
-                '<strong>' + escapeHtml(cdef.label) + '</strong></span>' +
+                '<span class="drag-handle" style="cursor:grab;padding:4px 8px;margin-right:4px"><i class="fa fa-arrows-v" style="color:#ccc"></i></span>' +
+                '<span class="card-info"><strong>' + escapeHtml(cdef.label) + '</strong></span>' +
                 '<button type="button" class="btn btn-xs btn-danger remove-comp" data-idx="' + i + '">&times;</button>' +
                 '</div>' +
                 '</li>'
@@ -485,10 +486,14 @@ var HiveDiagram = (function () {
         var $list = $(this.listContainer);
         if (!$list.length || !$.fn.sortable) return;
 
+        if ($list.data('ui-sortable')) {
+            $list.sortable('destroy');
+        }
+
         $list.sortable({
             items: 'li[data-stack-index]',
             axis: 'y',
-            handle: '.fa-arrows-v',
+            handle: '.drag-handle',
             tolerance: 'pointer',
             placeholder: 'ui-sortable-placeholder',
             update: function () {
@@ -496,14 +501,17 @@ var HiveDiagram = (function () {
                 $list.find('li[data-stack-index]').each(function () {
                     newOrder.push(parseInt($(this).data('stack-index'), 10));
                 });
-                // newOrder is top-to-bottom in display, so reverse for bottom-to-top stack
                 var newStack = [];
                 for (var i = newOrder.length - 1; i >= 0; i--) {
                     newStack.push(self.stack[newOrder[i]]);
                 }
                 self.stack = newStack;
                 self._dirty = true;
-                self.refresh();
+                self.renderDiagram();
+                self.refreshTare();
+                if (self.onChangeCallback) {
+                    self.onChangeCallback(self);
+                }
             }
         });
     };
