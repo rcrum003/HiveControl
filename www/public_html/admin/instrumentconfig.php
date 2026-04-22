@@ -832,7 +832,8 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
     <script src="../dist/js/sb-admin-2.js"></script>
 
     <?PHP
-    $FILEVERSION = file_get_contents('./hiveconfig.ver', true);
+    $verfile = __DIR__ . '/hiveconfig.ver';
+    $FILEVERSION = file_exists($verfile) ? file_get_contents($verfile) : 0;
     if ($result['VERSION'] > $FILEVERSION) {
         $foo = shell_exec("sudo /home/HiveControl/scripts/data/hiveconfig.sh");
     }
