@@ -41,7 +41,14 @@ $sth = $conn->prepare("SELECT seasongdd AS gdd, strftime('%s',gdddate)*1000 AS d
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-if (empty($result)) {
+$has_valid = false;
+foreach ($result as $r) {
+    if (is_numeric($r['gdd'] ?? null)) {
+        $has_valid = true;
+        break;
+    }
+}
+if (!$has_valid) {
     echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No growing degree day data available</strong> for the selected time period. GDD data is calculated daily from weather observations.</div>';
     return;
 }

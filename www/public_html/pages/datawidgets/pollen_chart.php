@@ -36,7 +36,14 @@ $sth = $conn->prepare("SELECT pollenlevel, pollentypes, strftime('%s', date)*100
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-if (empty($result)) {
+$has_valid = false;
+foreach ($result as $r) {
+    if (is_numeric($r['pollenlevel'] ?? null)) {
+        $has_valid = true;
+        break;
+    }
+}
+if (!$has_valid) {
     echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No pollen data available</strong> for the selected time period. Pollen data is collected daily from online sources.</div>';
     return;
 }

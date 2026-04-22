@@ -15,7 +15,14 @@ $sth = $conn->prepare("SELECT air_pm1, air_pm2_5, air_pm10, air_pm2_5_raw, air_p
 $sth->execute([':p' => $sqlperiod]);
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-if (empty($result)) {
+$has_valid = false;
+foreach ($result as $r) {
+    if (is_numeric($r['air_pm2_5'] ?? null) || is_numeric($r['air_pm2_5_raw'] ?? null) || is_numeric($r['air_aqi'] ?? null)) {
+        $has_valid = true;
+        break;
+    }
+}
+if (!$has_valid) {
     echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No air quality data available</strong> for the selected time period. Data will appear here once an air quality sensor is configured and recording.</div>';
     return;
 }

@@ -51,7 +51,14 @@ $sth = $conn->prepare("SELECT hiveweight, hiverawweight, precip_1hr_in, wind_mph
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-if (empty($result)) {
+$has_valid = false;
+foreach ($result as $r) {
+    if (is_numeric($r['hiveweight'] ?? null) || is_numeric($r['hiverawweight'] ?? null)) {
+        $has_valid = true;
+        break;
+    }
+}
+if (!$has_valid) {
     echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No weight data available</strong> for the selected time period. Data will appear here once the weight sensor begins recording.</div>';
     return;
 }

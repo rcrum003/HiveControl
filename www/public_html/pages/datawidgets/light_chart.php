@@ -43,7 +43,14 @@ $sth = $conn->prepare("SELECT solarradiation, lux, strftime('%s',date)*1000 AS d
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-if (empty($result)) {
+$has_valid = false;
+foreach ($result as $r) {
+    if (is_numeric($r['solarradiation'] ?? null) || is_numeric($r['lux'] ?? null)) {
+        $has_valid = true;
+        break;
+    }
+}
+if (!$has_valid) {
     echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No light data available</strong> for the selected time period. Data will appear here once the light sensor begins recording.</div>';
     return;
 }

@@ -60,7 +60,14 @@ include($_SERVER["DOCUMENT_ROOT"] . "/include/db-connect.php");
 $sth->execute();
 $result = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-if (empty($result)) {
+$has_valid = false;
+foreach ($result as $r) {
+    if (is_numeric($r['hivetemp'] ?? null) || is_numeric($r['weather_temp'] ?? null)) {
+        $has_valid = true;
+        break;
+    }
+}
+if (!$has_valid) {
     echo '<div class="alert alert-info" style="margin:20px 0"><i class="fa fa-info-circle"></i> <strong>No temperature data available</strong> for the selected time period. Data will appear here once the temperature sensor begins recording.</div>';
     return;
 }
