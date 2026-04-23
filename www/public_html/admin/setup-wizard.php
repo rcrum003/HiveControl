@@ -227,8 +227,8 @@ if (isset($_GET['saved'])) { $saved = true; }
 // Step definitions for progress bar
 $steps = [
     1 => ['label' => 'Basic Info',    'icon' => 'fa-home'],
-    2 => ['label' => 'Temp/Humidity', 'icon' => 'fa-thermometer-half'],
-    3 => ['label' => 'Weight',        'icon' => 'fa-balance-scale'],
+    2 => ['label' => 'Temp/Humidity', 'icon' => 'fa-fire'],
+    3 => ['label' => 'Weight',        'icon' => 'fa-dashboard'],
     4 => ['label' => 'Light',         'icon' => 'fa-sun-o'],
     5 => ['label' => 'Weather',       'icon' => 'fa-cloud'],
     6 => ['label' => 'Camera',        'icon' => 'fa-camera'],
@@ -469,7 +469,7 @@ if ($step === 1): ?>
 <?php
 // ==================== STEP 2: TEMP/HUMIDITY ====================
 elseif ($step === 2): ?>
-            <div class="step-title"><i class="fa fa-thermometer-half"></i> Temperature &amp; Humidity Sensor</div>
+            <div class="step-title"><i class="fa fa-fire"></i> Temperature &amp; Humidity Sensor</div>
             <div class="step-description">Configure the sensor that monitors conditions inside your hive.</div>
 
             <form method="POST" action="setup-wizard.php?step=2" id="step-form">
@@ -478,7 +478,7 @@ elseif ($step === 2): ?>
                 <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="enable-toggle">
-                    <label><i class="fa fa-thermometer-half"></i> Enable Temp/Humidity Sensor</label>
+                    <label><i class="fa fa-fire"></i> Enable Temp/Humidity Sensor</label>
                     <select name="ENABLE_HIVE_TEMP_CHK" id="sensor-enable" class="form-control" style="width:120px;">
                         <option value="yes" <?php if (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
                         <option value="no" <?php if (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
@@ -601,7 +601,7 @@ elseif ($step === 2): ?>
 <?php
 // ==================== STEP 3: WEIGHT ====================
 elseif ($step === 3): ?>
-            <div class="step-title"><i class="fa fa-balance-scale"></i> Weight Scale</div>
+            <div class="step-title"><i class="fa fa-dashboard"></i> Weight Scale</div>
             <div class="step-description">Configure the scale that monitors your hive's weight for tracking nectar flow and colony health.</div>
 
             <form method="POST" action="setup-wizard.php?step=3" id="step-form">
@@ -610,7 +610,7 @@ elseif ($step === 3): ?>
                 <input type="hidden" name="test_sensor_type" value="" id="test_sensor_type_field">
 
                 <div class="enable-toggle">
-                    <label><i class="fa fa-balance-scale"></i> Enable Weight Scale</label>
+                    <label><i class="fa fa-dashboard"></i> Enable Weight Scale</label>
                     <select name="ENABLE_HIVE_WEIGHT_CHK" id="sensor-enable" class="form-control" style="width:120px;">
                         <option value="yes" <?php if (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
                         <option value="no" <?php if (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') !== 'yes') echo 'selected'; ?>>Disabled</option>
@@ -661,7 +661,7 @@ elseif ($step === 3): ?>
 
                             <!-- Step 1: Baseline -->
                             <div class="fieldcal-step" id="fieldcal-step-1">
-                                <h4 style="margin-top:0;"><i class="fa fa-balance-scale"></i> Step 1: Baseline Reading</h4>
+                                <h4 style="margin-top:0;"><i class="fa fa-dashboard"></i> Step 1: Baseline Reading</h4>
                                 <p>Leave the hive on the scale as-is. <strong>Do not add or remove anything.</strong> We'll take a baseline reading of the current load.</p>
                                 <button type="button" class="btn btn-test" id="btn-fieldcal-baseline" onclick="FieldCal.takeBaseline()">
                                     <i class="fa fa-play"></i> Take Baseline Reading
@@ -727,7 +727,7 @@ elseif ($step === 3): ?>
 
                             <!-- Step 1: Tare/Zero -->
                             <div class="cal-step" id="cal-step-1">
-                                <h4 style="margin-top:0;"><i class="fa fa-balance-scale"></i> Step 1: Zero the Scale</h4>
+                                <h4 style="margin-top:0;"><i class="fa fa-dashboard"></i> Step 1: Zero the Scale</h4>
                                 <p>Remove <strong>all weight</strong> from the scale, including any hive equipment. The scale should be completely empty.</p>
                                 <p class="help-text">We'll take a raw sensor reading to establish the zero point.</p>
                                 <button type="button" class="btn btn-test" id="btn-zero" onclick="CalWiz.takeZeroReading()">
@@ -819,7 +819,7 @@ elseif ($step === 3): ?>
 
                         <!-- Environmental Drift Compensation -->
                         <div style="margin-top:20px; padding:15px; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:4px;">
-                            <h4 style="margin-top:0;"><i class="fa fa-thermometer-half"></i> Environmental Drift Compensation</h4>
+                            <h4 style="margin-top:0;"><i class="fa fa-fire"></i> Environmental Drift Compensation</h4>
                             <p class="help-text">Automatically corrects weight readings for temperature and humidity drift. Recalibrates weekly using nighttime data when bees are inactive.</p>
                             <select name="WEIGHT_COMPENSATION_ENABLED" class="form-control" style="width:120px;">
                                 <option value="yes" <?php if (($config['WEIGHT_COMPENSATION_ENABLED'] ?? 'no') === 'yes') echo 'selected'; ?>>Enabled</option>
@@ -1306,11 +1306,11 @@ elseif ($step === 8): ?>
                         : 'Not set',
                     'Timezone' => $config['TIMEZONE'] ?? 'Not set',
                 ]],
-                2 => ['Temp/Humidity', 'fa-thermometer-half', [
+                2 => ['Temp/Humidity', 'fa-fire', [
                     'Status' => $config['ENABLE_HIVE_TEMP_CHK'] ?? 'no',
                     'Sensor Type' => (($config['ENABLE_HIVE_TEMP_CHK'] ?? 'no') === 'yes') ? strtoupper($config['TEMPTYPE'] ?? '') : 'N/A',
                 ]],
-                3 => ['Weight Scale', 'fa-balance-scale', [
+                3 => ['Weight Scale', 'fa-dashboard', [
                     'Status' => $config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no',
                     'Scale Type' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes') ? strtoupper($config['SCALETYPE'] ?? '') : 'N/A',
                     'Calibration' => (($config['ENABLE_HIVE_WEIGHT_CHK'] ?? 'no') === 'yes')

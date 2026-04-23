@@ -1,4 +1,4 @@
-<h1><i class="fa fa-balance-scale"></i> Calibration Guide</h1>
+<h1><i class="fa fa-dashboard"></i> Calibration Guide</h1>
 
 <div class="alert alert-info">
     <strong>Why Calibrate?</strong> Calibration ensures your sensors provide accurate, reliable data for making informed beekeeping decisions.

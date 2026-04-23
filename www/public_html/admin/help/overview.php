@@ -10,13 +10,13 @@
 <div class="row">
     <div class="col-md-6">
         <div class="feature-box">
-            <h4><i class="fa fa-thermometer-half"></i> Temperature Monitoring</h4>
+            <h4><i class="fa fa-fire"></i> Temperature Monitoring</h4>
             <p>Track internal hive temperature and ambient weather conditions to understand your colony's environment.</p>
         </div>
     </div>
     <div class="col-md-6">
         <div class="feature-box">
-            <h4><i class="fa fa-balance-scale"></i> Weight Tracking</h4>
+            <h4><i class="fa fa-dashboard"></i> Weight Tracking</h4>
             <p>Monitor hive weight changes to track honey production, nectar flow, and colony activity.</p>
         </div>
     </div>

@@ -453,7 +453,7 @@ var HiveDiagram = (function () {
             // Sensor zone between this and next component below
             if (i > 0) {
                 var zoneClass = (this.sensorPosition === i - 1) ? 'sensor-zone has-sensor' : 'sensor-zone';
-                var sensorIcon = (this.sensorPosition === i - 1) ? '<span class="sensor-icon"><i class="fa fa-thermometer-half"></i></span>' : '';
+                var sensorIcon = (this.sensorPosition === i - 1) ? '<span class="sensor-icon"><i class="fa fa-fire"></i></span>' : '';
                 items.push('<li class="' + zoneClass + '" data-sensor-pos="' + (i - 1) + '">' + sensorIcon + '</li>');
             }
         }

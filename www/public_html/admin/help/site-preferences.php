@@ -34,7 +34,7 @@
 <h2>Unit Preferences</h2>
 
 <div class="feature-box">
-    <h4><i class="fa fa-balance-scale"></i> Measurement Units</h4>
+    <h4><i class="fa fa-dashboard"></i> Measurement Units</h4>
     <p>Choose between Imperial and Metric units:</p>
 
     <table class="table table-bordered">

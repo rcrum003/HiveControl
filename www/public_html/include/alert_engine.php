@@ -77,7 +77,7 @@ function get_active_alerts($conn) {
                 'severity' => 'warning',
                 'title' => 'High Hive Temperature',
                 'message' => "Hive temp is {$current_temp}{$temp_unit} (threshold: {$display_high}{$temp_unit}).",
-                'icon' => 'fa-thermometer-full'
+                'icon' => 'fa-fire'
             ];
         }
 
@@ -88,7 +88,7 @@ function get_active_alerts($conn) {
                 'severity' => 'warning',
                 'title' => 'Low Hive Temperature',
                 'message' => "Hive temp is {$current_temp}{$temp_unit} (threshold: {$display_low}{$temp_unit}).",
-                'icon' => 'fa-thermometer-empty'
+                'icon' => 'fa-fire'
             ];
         }
     }
