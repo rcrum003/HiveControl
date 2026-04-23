@@ -1,6 +1,85 @@
 Release Notes:
 
 --------------------
+2.25 Release
+--------------------
+INSTRUMENT CONFIG REDESIGN:
+- Complete rewrite of instrumentconfig.php (1143 lines → 930 lines)
+  * Replaced flat 6-column HTML table with 3-tab layout using Bootstrap 3
+    nav-tabs: Hive Sensors, Weather, Environment
+  * Each sensor section is a collapsible panel with enable/disable toggle
+  * Panels color-coded by sensor health status (green/yellow/red/gray)
+  * Sensor health status badges at top of page from sensor_health_check.php
+  * Removed auto-submit on every field change — explicit Save button instead
+  * Unsaved changes warning with browser beforeunload prompt
+  * Tab state persists across saves via hidden _active_tab field + URL hash
+  * Success/error feedback alerts after save
+- Weather source configuration improvements
+  * Client-side show/hide replaces server-side PHP conditional rendering
+  * Provider-specific fields (API keys, station IDs) show only for selected source
+  * Shared WXSTATION field rendered once with dynamic label text per provider
+    (Station ID / Station MAC / Station Serial)
+  * Fallback chain warnings for duplicate or same-as-primary selections
+  * Free providers (Open-Meteo, NWS) show location from Hive Config with
+    "no API key needed" messaging
+- Per-sensor AJAX test buttons via livevalue.php (no full page reload)
+- Auto-generated hidden field safety net replaces 48 hand-maintained hidden inputs
+- Added CSRF protection (require_csrf_token / csrf_field)
+- BroodMinder sensor type now shows correct help text:
+  * Label: "BLE MAC Address" instead of "Device Path"
+  * Placeholder: MAC format instead of /dev/hidraw path
+  * Help: BM_Scan_bleak.py command instead of "tempered -e"
+- Helper functions h(), sel(), chk() for cleaner HTML output
+- Removed dead WX Underground modal and commented-out GPIO blocks
+
+POLLEN COLLECTION TOGGLE:
+- New ENABLE_POLLEN setting in Instrument Config → Environment tab
+  * Enable/disable dropdown with collapsible panel body
+  * When disabled:
+    - Dashboard hides the pollen metric card
+    - Sensor Health Dashboard hides the pollen sensor card
+    - Instrument Config hides pollen status badge
+    - getpollen.sh cron job exits early (no API calls)
+  * Defaults to 'yes' — no behavior change for existing installs
+
+SCHEMA VALIDATION:
+- New scripts/data/schema_validate.sh ensures DB has all required columns
+  * Reads PRAGMA table_info and adds any missing columns with defaults
+  * Idempotent — safe to run multiple times
+  * Runs automatically after the patch chain in upgrade.sh and upgrade-dev.sh
+  * Fixes upgrades from older versions (e.g. 2.22) where the sequential
+    patch chain starts too high and skips needed columns
+  * Can be run standalone: sudo bash schema_validate.sh /path/to/hive-data.db
+  * Covers all columns from DB_PATCH_35 through DB_PATCH_44
+
+UPGRADE SYSTEM IMPROVEMENTS:
+- upgrade-dev.sh now self-updates from the cloned repo before finalizing
+  * Previously the installed copy ran without updating itself, so new DB
+    patches added in later pushes were never reached
+- upgrade.sh and upgrade-dev.sh both call schema_validate.sh after patches
+
+ICON FIXES (Font Awesome 4.2 compatibility):
+- Bundled Font Awesome is 4.2.0; replaced icons added in 4.4+/4.7+:
+  * fa-thermometer-half → fa-fire (temperature/heat)
+  * fa-balance-scale → fa-dashboard (weight gauge)
+  * fa-industry → fa-flask (air quality)
+  * fa-thermometer-full/empty → fa-fire (alerts)
+- Fixed across: sensor_health_check.php, instrumentconfig.php,
+  setup-wizard.php, help pages, alert_engine.php, hive-diagram.js
+
+BUG FIXES:
+- Wrapped UPDATE query in try/catch to show error message instead of
+  blank white screen on save failure
+- Guarded hiveconfig.ver read with file_exists() to prevent PHP warning
+  on fresh deploys where the file hasn't been created yet
+- Guarded ENABLE_POLLEN query in currentconditions.php with try/catch
+  so dashboard renders even before DB_PATCH_44 is applied
+
+DATABASE CHANGES:
+- DB_PATCH_44: Added ENABLE_POLLEN column to hiveconfig (default 'yes')
+  (DB version 35 -> 36)
+
+--------------------
 2.24 Release
 --------------------
 WX UNDERGROUND API MIGRATION:
