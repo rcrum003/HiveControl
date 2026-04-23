@@ -1,6 +1,21 @@
 Release Notes:
 
 --------------------
+2.28 Release
+--------------------
+DASHBOARD CAMERA SNAPSHOT:
+- Dashboard sidebar shows a still image from the USB camera when enabled
+  * Snapshot captured from mjpg_streamer (localhost:8080/?action=snapshot)
+    each time currconditions.sh runs (every 15 minutes)
+  * Saved to images/hive_snapshot.jpg with atomic write (tmp + mv)
+  * "Hive Camera" panel appears below Hive Configuration in the sidebar
+  * Shows capture timestamp and links to live stream (video.php)
+  * Placeholder message shown before first snapshot is captured
+  * Panel hidden entirely when ENABLE_HIVE_CAMERA is not 'yes'
+  * Image cache-busted via filemtime query string to prevent stale display
+  * Fails gracefully if mjpg_streamer is not running
+
+--------------------
 2.27 Release
 --------------------
 VIDEO PAGE REDESIGN:
