@@ -169,14 +169,13 @@ static inline int tsl2561_getdata(TSL2561 *sensor, uint16_t *full_spectrum, uint
  */
 /**************************************************************************/
 static uint32_t TSL2561_CALCULATE_LUX(TSL2561 *sensor, uint16_t broadband, uint16_t ir) {
-	unsigned long chScale;
-	unsigned long channel1;
-	unsigned long channel0;  
+	uint32_t chScale;
+	uint32_t channel1;
+	uint32_t channel0;
 	uint16_t clipThreshold;
-	unsigned long ratio1 = 0;
-	unsigned long ratio;
-	unsigned int b, m;
-	unsigned long temp;
+	uint32_t ratio1 = 0;
+	uint32_t ratio;
+	uint32_t b, m;
 	uint32_t lux;
   	
 	// Make sure the sensor isn't saturated!
@@ -265,14 +264,19 @@ static uint32_t TSL2561_CALCULATE_LUX(TSL2561 *sensor, uint16_t broadband, uint1
 		{b=TSL2561_LUX_B8T; m=TSL2561_LUX_M8T;}
 	#endif
 	
-	temp = ((channel0 * b) - (channel1 * m));
-	
-	// do not allow negative lux value
-	if (temp < 0) temp = 0;
-	
+	uint32_t product0 = channel0 * b;
+	uint32_t product1 = channel1 * m;
+	uint32_t temp;
+
+	if (product1 >= product0) {
+		temp = 0;
+	} else {
+		temp = product0 - product1;
+	}
+
 	// round lsb (2^(LUX_SCALE-1))
 	temp += (1 << (TSL2561_LUX_LUXSCALE-1));
-	
+
 	// strip off fractional portion
 	lux = temp >> TSL2561_LUX_LUXSCALE;
 	

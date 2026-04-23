@@ -117,6 +117,41 @@ echo "Upgrading binaries..."
 cp -Rp $softwareSource/* $softwareDest/
 echo "============================================="
 
+# Recompile TSL2561 light sensor binary for current architecture
+OS_ARCH=$(uname -m)
+case "$OS_ARCH" in
+    aarch64|arm64|x86_64|amd64) IS_64BIT=true ;;
+    *) IS_64BIT=false ;;
+esac
+
+echo "Compiling TSL2561 light sensor binary for $OS_ARCH"
+cd /home/HiveControl/software/tsl2561
+if [ -f Makefile ]; then
+    make clean
+    if make; then
+        sudo make install
+        echo "TSL2561 compiled and installed to /usr/local/bin/2561"
+    else
+        echo "Warning: TSL2561 compilation failed"
+        if [ "$IS_64BIT" = false ]; then
+            echo "Falling back to pre-compiled 32-bit binary"
+            sudo cp /home/HiveControl/software/tsl2561/2561 /usr/local/bin/2561
+        else
+            echo "Error: No pre-compiled 64-bit binary available — TSL2561 sensor will not work"
+        fi
+    fi
+else
+    echo "Warning: TSL2561 Makefile not found, compiling manually"
+    gcc -Wall -O2 -o TSL2561.o -c TSL2561.c && \
+    gcc -Wall -O2 -o 2561.o -c 2561.c && \
+    gcc -Wall -O2 -o 2561 TSL2561.o 2561.o && \
+    sudo install -m 755 2561 /usr/local/bin/2561 && \
+    echo "TSL2561 compiled and installed" || \
+    echo "Warning: TSL2561 compilation failed"
+    rm -f *.o
+fi
+echo "============================================="
+
 # Update install files
 cp -Rp /home/HiveControl/upgrade/HiveControl/install/* /home/HiveControl/install/
 

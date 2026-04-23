@@ -42,9 +42,7 @@ int main() {
 	
 	// sense the luminosity from the sensor (lux is the luminosity taken in "lux" measure units)
 	// the last parameter can be 1 to enable library auto gain, or 0 to disable it
-	rc = TSL2561_SENSELIGHT(&light1, &broadband, &ir, &lux, 1
-		//Test. RC: 0(Success), broadband: 435, ir: 182, lux: 21
-		// 0 = Success, -1 Error, broadband, ir, lux
+	rc = TSL2561_SENSELIGHT(&light1, &broadband, &ir, &lux, 1);
 	printf("%i, %i, %i, %i\n", rc, broadband, ir, lux);
 	
 	TSL2561_CLOSE(&light1);

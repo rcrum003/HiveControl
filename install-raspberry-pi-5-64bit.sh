@@ -358,6 +358,33 @@ sudo apt remove python3-pigpio -y 2>/dev/null || true
 
 echo "lgpio installation complete"
 
+####################################################################################
+# Compile architecture-specific binaries
+####################################################################################
+OS_ARCH=$(uname -m)
+case "$OS_ARCH" in
+    aarch64|arm64|x86_64|amd64) IS_64BIT=true ;;
+    *) IS_64BIT=false ;;
+esac
+
+echo "------------------------"
+echo "Compiling TSL2561 light sensor binary for $OS_ARCH"
+echo "------------------------"
+cd /home/HiveControl/software/tsl2561
+make clean
+if make; then
+    sudo make install
+    echo "TSL2561 compiled and installed to /usr/local/bin/2561"
+else
+    echo "Warning: TSL2561 compilation failed"
+    if [ "$IS_64BIT" = false ]; then
+        echo "Falling back to pre-compiled 32-bit binary"
+        sudo cp /home/HiveControl/software/tsl2561/2561 /usr/local/bin/2561
+    else
+        echo "Error: No pre-compiled 64-bit binary available — TSL2561 sensor will not work"
+    fi
+fi
+
 #Allow www-data to run python and other commands
 	#Update SUDOERs
 	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
