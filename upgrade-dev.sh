@@ -75,17 +75,17 @@ echo "Checking for DB upgrades..."
 
 if [[ $DB_ver -eq "33" ]]; then
     echo "Applying DB_PATCH_42 - Hive body stack order and sensor placement"
-    sqlite3 $DestDB < $DBPatches/DB_PATCH_42
+    sqlite3 $DestDB < $DBPatches/DB_PATCH_42 2>/dev/null || true
     let DB_ver="34"
 fi
 if [[ $DB_ver -eq "34" ]]; then
     echo "Applying DB_PATCH_43 - WX Underground API key"
-    sqlite3 $DestDB < $DBPatches/DB_PATCH_43
+    sqlite3 $DestDB < $DBPatches/DB_PATCH_43 2>/dev/null || true
     let DB_ver="35"
 fi
 if [[ $DB_ver -eq "35" ]]; then
     echo "Applying DB_PATCH_44 - Pollen enable/disable toggle"
-    sqlite3 $DestDB < $DBPatches/DB_PATCH_44
+    sqlite3 $DestDB < $DBPatches/DB_PATCH_44 2>/dev/null || true
     let DB_ver="36"
 fi
 
