@@ -16,6 +16,14 @@ function get_sensor_health($conn, $period_days = 1) {
         $enable_airnow = $an_row['ENABLE_AIRNOW'] ?? 'no';
     } catch (PDOException $e) {}
 
+    $enable_pollen = 'yes';
+    try {
+        $ep_sth = $conn->prepare("SELECT ENABLE_POLLEN FROM hiveconfig WHERE id=1");
+        $ep_sth->execute();
+        $ep_row = $ep_sth->fetch(PDO::FETCH_ASSOC);
+        $enable_pollen = $ep_row['ENABLE_POLLEN'] ?? 'yes';
+    } catch (PDOException $e) {}
+
     $latest_sth = $conn->prepare("SELECT *, (strftime('%s','now','localtime') - strftime('%s',date)) AS age_seconds FROM allhivedata ORDER BY datetime(date) DESC LIMIT 1");
     $latest_sth->execute();
     $latest = $latest_sth->fetch(PDO::FETCH_ASSOC);
@@ -190,7 +198,7 @@ function get_sensor_health($conn, $period_days = 1) {
     $pollen_age = $pollen_latest ? intval($pollen_latest['age_seconds']) : 99999;
     $sensors['pollen'] = build_sensor(
         'Pollen',
-        'always',
+        $enable_pollen,
         $pollen_latest,
         $pollen_age,
         129600,
