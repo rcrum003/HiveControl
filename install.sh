@@ -525,6 +525,47 @@ echo "Installing bleak Python BLE package..."
 sudo pip3 install bleak --break-system-packages 2>/dev/null || sudo pip3 install bleak 2>/dev/null || sudo apt install -y python3-bleak 2>/dev/null || echo "Warning: Could not install bleak - BroodMinder support may not work"
 ####################################################################################
 
+####################################################################################
+# USB Camera Livestream Support (mjpg-streamer)
+####################################################################################
+echo "========================================================================"
+echo "Installing USB Camera Livestream Support"
+echo "========================================================================"
+
+sudo apt-get install -y libjpeg62-turbo-dev 2>/dev/null || sudo apt-get install -y libjpeg-dev
+sudo apt-get install -y v4l-utils
+
+if [ ! -f /usr/local/bin/mjpg_streamer ]; then
+	echo "Building mjpg-streamer from source..."
+	cd /home/HiveControl/software
+	sudo git clone https://github.com/jacksonliam/mjpg-streamer.git mjpg-streamer-build
+	cd mjpg-streamer-build/mjpg-streamer-experimental
+	mkdir -p _build && cd _build
+	cmake .. && make && sudo make install && {
+		echo "mjpg-streamer installed successfully"
+	} || {
+		echo "Warning: mjpg-streamer build failed — USB camera livestream will not work"
+	}
+	cd /home/HiveControl
+	rm -rf /home/HiveControl/software/mjpg-streamer-build
+else
+	echo "mjpg-streamer already installed, skipping build"
+fi
+
+sudo cp /home/HiveControl/install/init.d/livestream /etc/init.d/livestream
+sudo chmod +x /etc/init.d/livestream
+sudo update-rc.d livestream defaults 2>/dev/null || true
+
+if [ -e /dev/video0 ]; then
+	echo "USB camera detected at /dev/video0 — starting livestream"
+	sudo /etc/init.d/livestream start
+else
+	echo "No USB camera detected — livestream service installed but not started"
+	echo "Connect a USB camera and run: sudo /etc/init.d/livestream start"
+fi
+
+####################################################################################
+
 if [[ $KEYBOARD = "true" ]]; then
 	#Adds touch screen keyboard
 echo "Installing Touch Screen Keyboard Support"

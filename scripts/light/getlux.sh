@@ -10,11 +10,11 @@ source /home/HiveControl/scripts/data/check.inc
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 			
-if [ $LUX_SOURCE = "tsl2591" ]; then
+if [ "$LUX_SOURCE" = "tsl2591" ]; then
 	lux=$($HOMEDIR/scripts/light/tsl2591.sh)
-elif [[ $LUX_SOURCE = "tsl2561" ]]; then
+elif [ "$LUX_SOURCE" = "tsl2561" ]; then
 	lux=$($HOMEDIR/scripts/light/tsl2561.sh)
-elif [ $LUX_SOURCE = "wx" ]; then
+elif [ "$LUX_SOURCE" = "wx" ]; then
 	#echo "- getting solarradiation from weatherstation"
 	lux="null"
 	echo "null"

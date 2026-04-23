@@ -7,18 +7,24 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: mjpg_streamer for webcam
-# Description:       Streams /dev/video0 to http://IP/?action=stream
+# Description:       Streams USB camera /dev/video0 to http://IP:8080/?action=stream
 ### END INIT INFO
-#/mjpg_streamer -i "input_file.so -f /home/HiveControl/www/public_html/video/out -n frame.jpg" -o "output_http.so -w /home/HiveControl/www/public_html/video"
+
+DEVICE="/dev/video0"
+RESOLUTION="640x480"
+FPS="15"
+PORT="8080"
+
 f_message(){
         echo "[+] $1"
 }
- 
-# Carry out specific functions when asked to by the system
+
 case "$1" in
         start)
-                f_message "Starting mjpg_streamer"
-                /usr/local/bin/mjpg_streamer -b -i "input_file.so -f /home/HiveControl/www/public_html/video/out -n frame.jpg" -o "output_http.so -w /home/HiveControl/www/public_html/video"
+                f_message "Starting mjpg_streamer on ${DEVICE}"
+                /usr/local/bin/mjpg_streamer -b \
+                        -i "input_uvc.so -d ${DEVICE} -r ${RESOLUTION} -f ${FPS}" \
+                        -o "output_http.so -p ${PORT} -w /usr/local/share/mjpg-streamer/www"
                 sleep 2
                 f_message "mjpg_streamer started"
                 ;;
@@ -30,7 +36,9 @@ case "$1" in
         restart)
                 f_message "Restarting daemon: mjpg_streamer"
                 killall mjpg_streamer
-                /usr/local/bin/mjpg_streamer -b -i "input_file.so -f /home/HiveControl/www/public_html/video/out -n frame.jpg" -o "output_http.so -w /home/HiveControl/www/public_html/video"
+                /usr/local/bin/mjpg_streamer -b \
+                        -i "input_uvc.so -d ${DEVICE} -r ${RESOLUTION} -f ${FPS}" \
+                        -o "output_http.so -p ${PORT} -w /usr/local/share/mjpg-streamer/www"
                 sleep 2
                 f_message "Restarted daemon: mjpg_streamer"
                 ;;

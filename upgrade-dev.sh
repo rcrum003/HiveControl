@@ -180,6 +180,41 @@ else
 fi
 echo "============================================="
 
+# ─── USB Camera Livestream ──────────────────────────────────
+echo "Installing USB camera livestream support"
+
+sudo apt-get install -y libjpeg62-turbo-dev 2>/dev/null || sudo apt-get install -y libjpeg-dev
+sudo apt-get install -y v4l-utils
+
+if [ ! -f /usr/local/bin/mjpg_streamer ]; then
+    echo "Building mjpg-streamer from source..."
+    cd /home/HiveControl/software
+    sudo git clone https://github.com/jacksonliam/mjpg-streamer.git mjpg-streamer-build
+    cd mjpg-streamer-build/mjpg-streamer-experimental
+    mkdir -p _build && cd _build
+    cmake .. && make && sudo make install && {
+        echo "mjpg-streamer installed successfully"
+    } || {
+        echo "Warning: mjpg-streamer build failed — USB camera livestream will not work"
+    }
+    cd /home/HiveControl
+    rm -rf /home/HiveControl/software/mjpg-streamer-build
+else
+    echo "mjpg-streamer already installed, skipping build"
+fi
+
+sudo cp /home/HiveControl/upgrade/HiveControl/install/init.d/livestream /etc/init.d/livestream
+sudo chmod +x /etc/init.d/livestream
+sudo update-rc.d livestream defaults 2>/dev/null || true
+
+if [ -e /dev/video0 ]; then
+    echo "USB camera detected — restarting livestream service"
+    sudo /etc/init.d/livestream restart
+else
+    echo "No USB camera detected — livestream service updated but not started"
+fi
+echo "============================================="
+
 # Update install files
 cp -Rp /home/HiveControl/upgrade/HiveControl/install/* /home/HiveControl/install/
 
