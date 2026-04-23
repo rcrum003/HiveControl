@@ -133,6 +133,13 @@ else
     sudo rm -f /etc/sudoers.d/hivecontrol
 fi
 
+# ─── Self-update ────────────────────────────────────────────
+if [ -f "/home/HiveControl/upgrade/HiveControl/upgrade-dev.sh" ]; then
+    cp /home/HiveControl/upgrade/HiveControl/upgrade-dev.sh /home/HiveControl/upgrade-dev.sh
+    chmod u+x /home/HiveControl/upgrade-dev.sh
+    echo "upgrade-dev.sh self-updated"
+fi
+
 # ─── Finalize ───────────────────────────────────────────────
 loglocal "$DATE" UPGRADE SUCCESS "Dev upgrade to $Latest_Ver from branch $BRANCH"
 sqlite3 $DestDB "UPDATE hiveconfig SET upgrade_available=\"no\" WHERE id=1"
