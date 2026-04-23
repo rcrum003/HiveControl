@@ -29,35 +29,28 @@
 /**
  * read two bytes from i2c bus getting a 16 bit unsigned integer
  */
-static inline uint16_t tsl2561_read16(TSL2561 *sensor, uint8_t reg) {
-	uint16_t x;
-	
-	if(sensor->adapter_fd == -1) { // not opened
-		// TODO: choose a valid errno error
+static inline int tsl2561_read16(TSL2561 *sensor, uint8_t reg, uint16_t *value) {
+	if(sensor->adapter_fd == -1) {
 		sensor->lasterr = -1;
-		return 0;
+		return -1;
 	}
-	
-	// ask for reading
+
 	sensor->buf[0] = reg;
 	if(write(sensor->adapter_fd, sensor->buf, 1) != 1) {
 		sensor->lasterr = errno;
 		return -1;
 	}
-	
+
 	if(read(sensor->adapter_fd, sensor->buf, 2) != 2) {
 		sensor->lasterr = errno;
-		return 0;
+		return -1;
 	}
-	
-	//printf("x1: 0x%0x, x2: 0x%0x\n", sensor->buf[1], sensor->buf[0]);
-	x = sensor->buf[1];
-	x <<= 8;
-	x |= sensor->buf[0];
-	
-	//printf("test: 0x%02x%02x: 0x%04x\n", sensor->buf[1], sensor->buf[0], x);
-	
-	return x;
+
+	*value = sensor->buf[1];
+	*value <<= 8;
+	*value |= sensor->buf[0];
+
+	return 0;
 }
 /**
  * read one byte from i2c bus getting a 8 bit unsigned integer
@@ -148,19 +141,18 @@ static inline int tsl2561_getdata(TSL2561 *sensor, uint16_t *full_spectrum, uint
 		break;
 	}
 	//usleep(450000);
-	// reads two bytes from channel 0 (full spectrum + infrared)
-	//*full_spectrum = wiringPiI2CReadReg16(_fd, TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW);
-	*full_spectrum = tsl2561_read16(sensor, TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW);
-	//fprintf(stdout, "got 0x%04X for full spectrum light\n", *full_spectrum);
-	
-	// reads two bytes from channel 1 (infrared)
-	//*infrared = wiringPiI2CReadReg16(_fd, TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW);
-	*infrared = tsl2561_read16(sensor, TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW);
-	//fprintf(stdout, "got 0x%04X for ir light\n", *infrared);
-	
-	// turn the device off to save power
+	if(tsl2561_read16(sensor, TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN0_LOW, full_spectrum) != 0) {
+		TSL2561_OFF(sensor);
+		return -1;
+	}
+
+	if(tsl2561_read16(sensor, TSL2561_COMMAND_BIT | TSL2561_WORD_BIT | TSL2561_REGISTER_CHAN1_LOW, infrared) != 0) {
+		TSL2561_OFF(sensor);
+		return -1;
+	}
+
 	TSL2561_OFF(sensor);
-	
+
 	return 0;
 }
 /**
@@ -343,22 +335,24 @@ int TSL2561_OPEN(TSL2561 *sensor) {
 		return -1;
 	}
 	
-	if (ioctl(sensor->adapter_fd, I2C_SLAVE, sensor->sensor_addr) < 0) { // talk to the requested device
+	if (ioctl(sensor->adapter_fd, I2C_SLAVE, sensor->sensor_addr) < 0) {
 		sensor->lasterr = errno;
 		close(sensor->adapter_fd);
 		sensor->adapter_fd = -1;
 		return -1;
 	}
-	
-	TSL2561_SETINTEGRATIONTIME(sensor, TSL2561_INTEGRATIONTIME_402MS);
-	TSL2561_SETGAIN(sensor, TSL2561_GAIN_16X);
-	
-	/*
-	TSL2561_ON(sensor);
-        tsl2561_write8(sensor, 0x81, 0x11);
-	TSL2561_OFF(sensor);
-	*/
-	
+
+	if(TSL2561_SETINTEGRATIONTIME(sensor, TSL2561_INTEGRATIONTIME_402MS) != 0) {
+		close(sensor->adapter_fd);
+		sensor->adapter_fd = -1;
+		return -1;
+	}
+	if(TSL2561_SETGAIN(sensor, TSL2561_GAIN_16X) != 0) {
+		close(sensor->adapter_fd);
+		sensor->adapter_fd = -1;
+		return -1;
+	}
+
 	return 0;
 }
 void TSL2561_CLOSE(TSL2561 *sensor) {
