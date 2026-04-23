@@ -150,6 +150,29 @@ else
     echo "Warning: TSL2561 compilation failed"
     rm -f *.o
 fi
+echo "Compiling TSL2591 light sensor binary for $OS_ARCH"
+cd /home/HiveControl/software/tsl2591
+if [ -f Makefile ]; then
+    make clean
+    if make; then
+        sudo make install
+        echo "TSL2591 compiled and installed to /usr/local/bin/2591"
+    else
+        echo "Warning: TSL2591 compilation failed"
+        if [ "$IS_64BIT" = false ]; then
+            echo "Falling back to pre-compiled 32-bit binary"
+            sudo cp /home/HiveControl/software/binaries/2591 /usr/local/bin/2591
+        else
+            echo "Error: No pre-compiled 64-bit binary available — TSL2591 sensor will not work"
+        fi
+    fi
+else
+    echo "Warning: TSL2591 Makefile not found, compiling manually"
+    gcc -Wall -O2 -o 2591 2591.c && \
+    sudo install -m 755 2591 /usr/local/bin/2591 && \
+    echo "TSL2591 compiled and installed" || \
+    echo "Warning: TSL2591 compilation failed"
+fi
 echo "============================================="
 
 # Update install files

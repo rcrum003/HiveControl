@@ -385,6 +385,24 @@ else
     fi
 fi
 
+echo "------------------------"
+echo "Compiling TSL2591 light sensor binary for $OS_ARCH"
+echo "------------------------"
+cd /home/HiveControl/software/tsl2591
+make clean
+if make; then
+    sudo make install
+    echo "TSL2591 compiled and installed to /usr/local/bin/2591"
+else
+    echo "Warning: TSL2591 compilation failed"
+    if [ "$IS_64BIT" = false ]; then
+        echo "Falling back to pre-compiled 32-bit binary"
+        sudo cp /home/HiveControl/software/binaries/2591 /usr/local/bin/2591
+    else
+        echo "Error: No pre-compiled 64-bit binary available — TSL2591 sensor will not work"
+    fi
+fi
+
 #Allow www-data to run python and other commands
 	#Update SUDOERs
 	sudo cp /etc/sudoers /home/HiveControl/install/sudoers.org
