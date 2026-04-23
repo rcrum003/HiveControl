@@ -1,6 +1,32 @@
 Release Notes:
 
 --------------------
+2.27 Release
+--------------------
+VIDEO PAGE REDESIGN:
+- Replaced broken weather panel with live environmental data from database
+  * Old panel referenced defunct Weather Underground API variables that were
+    never defined — showed blank/empty values
+  * New "Current Conditions" panel (green) queries allhivedata for latest:
+    temperature, dew point, humidity, wind speed/direction/gusts,
+    barometric pressure with trend, precipitation (hourly/daily),
+    solar radiation and lux
+  * New "Hive Conditions" panel (yellow) shows hive temp, humidity, weight
+  * All values respect imperial/metric (SHOW_METRIC) toggle
+  * Conditional rows — wind, pressure, precipitation, light sections only
+    appear when data is available
+  * Timestamp shows when data was last recorded
+- Removed inaccurate "This supports native MJPEG streaming" info banner
+  * Stream is PHP-proxied, not direct MJPEG to browser
+- VLC direct connect URL moved to subtle note under the video frame
+- Uses Font Awesome 4.2-compatible icons throughout
+
+DB PATCH CHAIN ROBUSTNESS:
+- upgrade.sh and upgrade-dev.sh now suppress duplicate column errors
+  * sqlite3 patch commands use 2>/dev/null || true so DBVERSION counter
+    still advances when schema_validate.sh has already added columns
+
+--------------------
 2.25 Release
 --------------------
 INSTRUMENT CONFIG REDESIGN:
