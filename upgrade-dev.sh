@@ -91,6 +91,11 @@ fi
 
 echo $DB_ver > /home/HiveControl/data/DBVERSION
 echo "DB version now: $DB_ver"
+
+# Validate schema — catches any columns missed by the patch chain
+if [ -f "/home/HiveControl/upgrade/HiveControl/scripts/data/schema_validate.sh" ]; then
+    bash /home/HiveControl/upgrade/HiveControl/scripts/data/schema_validate.sh "$DestDB"
+fi
 echo "============================================="
 
 # ─── Copy Files ─────────────────────────────────────────────

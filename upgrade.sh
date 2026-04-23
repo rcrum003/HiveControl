@@ -335,11 +335,22 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_43
 			let DB_ver="35"
 		fi
+		if [[ $DB_ver -eq "35" ]]; then
+			echo "Applying DB Ver 36 Upgrades - Pollen enable/disable toggle"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_44
+			let DB_ver="36"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"
 	#fi
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
+
+# Validate schema — catches any columns missed by the patch chain
+if [ -f "/home/HiveControl/upgrade/HiveControl/scripts/data/schema_validate.sh" ]; then
+	bash /home/HiveControl/upgrade/HiveControl/scripts/data/schema_validate.sh "$DestDB"
+fi
+echo "============================================="
 
 #Now that DB schema is up to date, copy new scripts and web files
 echo "Upgrading WWW pages"
