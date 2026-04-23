@@ -219,12 +219,12 @@ $hidden_fields = [
         <div style="margin-bottom:15px">
 <?php
 $badge_map = [
-    'hivetemp' => ['l' => 'Temp', 'i' => 'fa-thermometer-half'],
-    'weight'   => ['l' => 'Weight', 'i' => 'fa-balance-scale'],
+    'hivetemp' => ['l' => 'Temp', 'i' => 'fa-fire'],
+    'weight'   => ['l' => 'Weight', 'i' => 'fa-dashboard'],
     'weather'  => ['l' => 'Weather', 'i' => 'fa-cloud'],
     'light'    => ['l' => 'Light', 'i' => 'fa-sun-o'],
     'beecount' => ['l' => 'Bees', 'i' => 'fa-bug'],
-    'air'      => ['l' => 'Air', 'i' => 'fa-industry'],
+    'air'      => ['l' => 'Air', 'i' => 'fa-flask'],
     'pollen'   => ['l' => 'Pollen', 'i' => 'fa-pagelines'],
 ];
 foreach ($badge_map as $bk => $b) {
@@ -262,7 +262,7 @@ $temp_pcls = $temp_on ? status_panel_class($sh['hivetemp']['status']) : 'panel-d
 <div class="panel <?= $temp_pcls ?>">
     <div class="panel-heading">
         <div class="row">
-            <div class="col-xs-8"><i class="fa fa-thermometer-half fa-fw"></i> <strong>Temperature / Humidity</strong>
+            <div class="col-xs-8"><i class="fa fa-fire fa-fw"></i> <strong>Temperature / Humidity</strong>
             <?php if ($temp_on): ?><span class="label <?= status_label_class($sh['hivetemp']['status']) ?>" style="margin-left:8px"><?= h($sh['hivetemp']['status_label']) ?></span><?php endif; ?>
             </div>
             <div class="col-xs-4 text-right">
@@ -328,7 +328,7 @@ $wt_pcls = $wt_on ? status_panel_class($sh['weight']['status']) : 'panel-default
 <div class="panel <?= $wt_pcls ?>">
     <div class="panel-heading">
         <div class="row">
-            <div class="col-xs-8"><i class="fa fa-balance-scale fa-fw"></i> <strong>Weight Scale</strong>
+            <div class="col-xs-8"><i class="fa fa-dashboard fa-fw"></i> <strong>Weight Scale</strong>
             <?php if ($wt_on): ?><span class="label <?= status_label_class($sh['weight']['status']) ?>" style="margin-left:8px"><?= h($sh['weight']['status_label']) ?></span><?php endif; ?>
             </div>
             <div class="col-xs-4 text-right">
@@ -708,7 +708,7 @@ $air_pcls = $air_on ? status_panel_class($sh['air']['status']) : 'panel-default'
 <div class="panel <?= $air_pcls ?>">
     <div class="panel-heading">
         <div class="row">
-            <div class="col-xs-8"><i class="fa fa-industry fa-fw"></i> <strong>Air Quality (PurpleAir)</strong>
+            <div class="col-xs-8"><i class="fa fa-flask fa-fw"></i> <strong>Air Quality (PurpleAir)</strong>
             <?php if ($air_on): ?><span class="label <?= status_label_class($sh['air']['status']) ?>" style="margin-left:8px"><?= h($sh['air']['status_label']) ?></span><?php endif; ?>
             </div>
             <div class="col-xs-4 text-right">

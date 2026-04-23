@@ -53,7 +53,7 @@ function get_sensor_health($conn, $period_days = 1) {
         $latest,
         $age,
         1200,
-        'fa-thermometer-half',
+        'fa-fire',
         '/pages/temp.php?chart=line&period=week',
         function($row) use ($is_metric) {
             $temp_col = $is_metric ? 'hivetempc' : 'hivetempf';
@@ -75,7 +75,7 @@ function get_sensor_health($conn, $period_days = 1) {
         $latest,
         $age,
         1200,
-        'fa-balance-scale',
+        'fa-dashboard',
         '/pages/weight.php?chart=line&period=week',
         function($row) use ($is_metric) {
             $wt = is_numeric($row['hiveweight'] ?? null) ? floatval($row['hiveweight']) : null;
@@ -161,7 +161,7 @@ function get_sensor_health($conn, $period_days = 1) {
         $latest,
         $age,
         1200,
-        'fa-industry',
+        'fa-flask',
         '/pages/air.php?chart=line&period=week',
         function($row) {
             $pm25 = is_numeric($row['air_pm2_5'] ?? null) ? floatval($row['air_pm2_5']) : (is_numeric($row['air_pm2_5_raw'] ?? null) ? floatval($row['air_pm2_5_raw']) : null);
