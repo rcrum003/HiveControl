@@ -532,5 +532,28 @@ fi
 
 # End Sharing
 print_separator
+
+#############################################
+# Capture camera snapshot (if enabled)
+#############################################
+if [ "$ENABLE_HIVE_CAMERA" = "yes" ]; then
+	SNAPSHOT_URL="http://localhost:8080/?action=snapshot"
+	SNAPSHOT_DIR="$HOMEDIR/www/public_html/images"
+	SNAPSHOT_FILE="$SNAPSHOT_DIR/hive_snapshot.jpg"
+
+	echo "--- Capturing camera snapshot ---"
+	mkdir -p "$SNAPSHOT_DIR"
+
+	if curl --silent --max-time 10 -o "$SNAPSHOT_FILE.tmp" "$SNAPSHOT_URL" && \
+	   [ -s "$SNAPSHOT_FILE.tmp" ]; then
+		mv "$SNAPSHOT_FILE.tmp" "$SNAPSHOT_FILE"
+		echo "Snapshot saved to $SNAPSHOT_FILE"
+	else
+		rm -f "$SNAPSHOT_FILE.tmp"
+		echo "WARNING: Camera snapshot failed (mjpg_streamer may not be running)"
+	fi
+fi
+
+print_separator
 echo "Script Completed"
 print_separator

@@ -320,7 +320,50 @@ header("Refresh: $sec; url=$page");
                         <div class="panel-body">';
             include "datawidgets/hive_diagram.php";
                         echo '</div>
+                    </div>';
+
+            $cam_enabled = false;
+            try {
+                $cam_q = $conn->prepare("SELECT ENABLE_HIVE_CAMERA FROM hiveconfig WHERE id=1");
+                $cam_q->execute();
+                $cam_row = $cam_q->fetch(PDO::FETCH_ASSOC);
+                $cam_enabled = (($cam_row['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes');
+            } catch (Exception $e) {}
+
+            if ($cam_enabled):
+                $snap_path = $_SERVER['DOCUMENT_ROOT'] . '/images/hive_snapshot.jpg';
+                $snap_exists = file_exists($snap_path);
+                $snap_time = $snap_exists ? date("M j, g:i A", filemtime($snap_path)) : '';
+            ?>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-video-camera fa-fw"></i> Hive Camera
+                            <?php if ($snap_time): ?>
+                            <span class="pull-right small text-muted"><?php echo $snap_time; ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="panel-body" style="padding:5px;">
+                            <?php if ($snap_exists): ?>
+                            <a href="/pages/video.php">
+                                <img src="/images/hive_snapshot.jpg?t=<?php echo filemtime($snap_path); ?>"
+                                     alt="Hive Camera" style="width:100%; border-radius:4px;" />
+                            </a>
+                            <p class="text-center small text-muted" style="margin:5px 0 0;">
+                                <a href="/pages/video.php">View Live Stream <i class="fa fa-arrow-right"></i></a>
+                            </p>
+                            <?php else: ?>
+                            <p class="text-muted text-center" style="margin:20px 0;">
+                                <i class="fa fa-camera fa-2x"></i><br>
+                                Snapshot not yet available.<br>
+                                <small>Image captures on next data collection cycle.</small>
+                            </p>
+                            <?php endif; ?>
+                        </div>
                     </div>
+            <?php
+            endif;
+
+                echo '
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Estimated Stores (Honey,Pollen,Nectar)
