@@ -5,37 +5,16 @@
  * Included inside index.php — expects $conn (PDO) to be available.
  */
 
-// Fetch hive body config
-$hiveBodySth = $conn->prepare("SELECT
-    hc.HIVE_STACK_ORDER,
-    hc.SENSOR_TEMP_POSITION,
-    hc.SENSOR_TEMP_LABEL,
-    hc.FEEDER_HAS_SYRUP,
-    hc.FRAME_FEEDER_POSITION,
-    hc.FRAME_FEEDER_LABEL,
-    hc.NUM_HIVE_BASE_SOLID_BOTTOM_BOARD,
-    hc.NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD,
-    hc.NUM_HIVE_FEEDER,
-    hc.NUM_HIVE_TOP_INNER_COVER,
-    hc.NUM_HIVE_TOP_TELE_COVER,
-    hc.NUM_HIVE_TOP_MIGRATORY_COVER,
-    hc.NUM_HIVE_BODY_MEDIUM_FOUNDATION,
-    hc.NUM_HIVE_BODY_DEEP_FOUNDATION,
-    hc.NUM_HIVE_BODY_SHAL_FOUNDATION,
-    hw.HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT,
-    hw.HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT,
-    hw.HIVE_FEEDER_WEIGHT,
-    hw.HIVE_TOP_INNER_COVER_WEIGHT,
-    hw.HIVE_TOP_TELE_COVER_WEIGHT,
-    hw.HIVE_TOP_MIGRATORY_COVER_WEIGHT,
-    hw.HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT,
-    hw.HIVE_BODY_DEEP_FOUNDATION_WEIGHT,
-    hw.HIVE_BODY_SHAL_FOUNDATION_WEIGHT
-FROM hiveconfig hc
-INNER JOIN hiveequipmentweight hw ON hc.id = hw.id
-WHERE hc.id = 1");
-$hiveBodySth->execute();
-$hiveBody = $hiveBodySth->fetch(PDO::FETCH_ASSOC);
+// Fetch hive body config — use SELECT * so new columns don't break old DBs
+try {
+    $hiveBodySth = $conn->prepare("SELECT * FROM hiveconfig hc
+        INNER JOIN hiveequipmentweight hw ON hc.id = hw.id
+        WHERE hc.id = 1");
+    $hiveBodySth->execute();
+    $hiveBody = $hiveBodySth->fetch(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $hiveBody = null;
+}
 
 // Check if any components are configured
 $hasComponents = false;

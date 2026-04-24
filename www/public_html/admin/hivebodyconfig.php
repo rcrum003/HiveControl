@@ -110,9 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             HIVE_STACK_ORDER = ?,
             SENSOR_TEMP_POSITION = ?,
             SENSOR_TEMP_LABEL = ?,
-            FEEDER_HAS_SYRUP = ?,
-            FRAME_FEEDER_POSITION = ?,
-            FRAME_FEEDER_LABEL = ?
+            FEEDER_HAS_SYRUP = ?
             WHERE id = 1");
         $doit2->execute([
             $version,
@@ -128,10 +126,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stackOrder,
             $sensorPos,
             $sensorLabel,
-            $feederSyrup,
-            $frameFeederPos,
-            $frameFeederLabel
+            $feederSyrup
         ]);
+
+        // Frame feeder columns may not exist on older DBs — save separately
+        try {
+            $ff = $conn->prepare("UPDATE hiveconfig SET FRAME_FEEDER_POSITION = ?, FRAME_FEEDER_LABEL = ? WHERE id = 1");
+            $ff->execute([$frameFeederPos, $frameFeederLabel]);
+        } catch (Exception $e) {}
 
         // Refresh result
         $sth2 = $conn->prepare("SELECT * FROM hiveconfig INNER JOIN hiveequipmentweight ON hiveconfig.id = hiveequipmentweight.id WHERE hiveconfig.id = 1");
