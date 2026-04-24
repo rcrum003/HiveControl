@@ -88,6 +88,11 @@ if [[ $DB_ver -eq "35" ]]; then
     sqlite3 $DestDB < $DBPatches/DB_PATCH_44 2>/dev/null || true
     let DB_ver="36"
 fi
+if [[ $DB_ver -eq "36" ]]; then
+    echo "Applying DB_PATCH_45 - In-hive frame feeder placement"
+    sqlite3 $DestDB < $DBPatches/DB_PATCH_45 2>/dev/null || true
+    let DB_ver="37"
+fi
 
 echo $DB_ver > /home/HiveControl/data/DBVERSION
 echo "DB version now: $DB_ver"

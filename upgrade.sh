@@ -340,6 +340,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_44 2>/dev/null || true
 			let DB_ver="36"
 		fi
+		if [[ $DB_ver -eq "36" ]]; then
+			echo "Applying DB Ver 37 Upgrades - In-hive frame feeder placement"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_45 2>/dev/null || true
+			let DB_ver="37"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"

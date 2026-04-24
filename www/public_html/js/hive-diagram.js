@@ -150,6 +150,7 @@ var HiveDiagram = (function () {
         var sensorPos = (opts.sensorPosition != null && opts.sensorPosition >= 0) ? opts.sensorPosition : -1;
         var sensorValue = opts.sensorValue || '';
         var sensorLabel = opts.sensorLabel || '';
+        var frameFeederPos = (opts.frameFeederPosition != null && opts.frameFeederPosition >= 0) ? opts.frameFeederPosition : -1;
         var weights = opts.weights || {};
         var showLabels = (mode === 'editor') || opts.showLabels;
         var scale = opts.scale || 1;
@@ -201,6 +202,15 @@ var HiveDiagram = (function () {
                 var holdY = y + (h / 2) - 4;
                 parts.push('<rect x="' + (x + 2) + '" y="' + holdY + '" width="14" height="8" rx="3" fill="' + cdef.strokeColor + '" opacity="0.4"/>');
                 parts.push('<rect x="' + (x + w - 16) + '" y="' + holdY + '" width="14" height="8" rx="3" fill="' + cdef.strokeColor + '" opacity="0.4"/>');
+            }
+
+            // Frame feeder indicator inside body component
+            if (frameFeederPos >= 0 && (compKey === 'deep' || compKey === 'medium' || compKey === 'shallow') && (stack.length - 1 - ri) === frameFeederPos) {
+                var ffCenterX = x + (w / 2);
+                var ffW = Math.min(24, w * 0.15);
+                parts.push('<rect x="' + (ffCenterX - ffW / 2) + '" y="' + (y + 2) + '" width="' + ffW + '" height="' + (h - 4) + '" rx="1" fill="rgba(74,144,217,0.35)" stroke="#4A90D9" stroke-width="1.5"/>');
+                var dY = y + (h / 2);
+                parts.push('<path d="M' + ffCenterX + ',' + (dY - 5) + ' Q' + (ffCenterX + 3.5) + ',' + (dY + 1) + ' ' + ffCenterX + ',' + (dY + 5) + ' Q' + (ffCenterX - 3.5) + ',' + (dY + 1) + ' ' + ffCenterX + ',' + (dY - 5) + ' Z" fill="#4A90D9" opacity="0.85"/>');
             }
 
             // Screen pattern for screened bottom board
@@ -288,6 +298,7 @@ var HiveDiagram = (function () {
             sensorLabel: config.sensorLabel || '',
             weights: config.weights || {},
             feederHasSyrup: config.feederHasSyrup || false,
+            frameFeederPosition: config.frameFeederPosition,
             showLabels: false
         });
     }
@@ -301,6 +312,7 @@ var HiveDiagram = (function () {
             sensorLabel: opts.sensorLabel || '',
             weights: opts.weights || {},
             feederHasSyrup: opts.feederHasSyrup || false,
+            frameFeederPosition: opts.frameFeederPosition,
             showLabels: true
         });
     }
@@ -317,6 +329,8 @@ var HiveDiagram = (function () {
         this.sensorPosition = (config.sensorTempPosition != null) ? config.sensorTempPosition : -1;
         this.sensorLabel = config.sensorLabel || 'Hive Temp';
         this.feederHasSyrup = config.feederHasSyrup || false;
+        this.frameFeederPosition = (config.frameFeederPosition != null) ? config.frameFeederPosition : -1;
+        this.frameFeederLabel = config.frameFeederLabel || 'Frame Feeder';
         this.diagramContainer = config.diagramContainer || '#hive-stack-diagram';
         this.listContainer = config.listContainer || '#hive-stack-list';
         this.tareContainer = config.tareContainer || '#tare-weight';
@@ -355,6 +369,11 @@ var HiveDiagram = (function () {
         if (this.sensorPosition >= this.stack.length) {
             this.sensorPosition = -1;
         }
+        if (this.frameFeederPosition === index) {
+            this.frameFeederPosition = -1;
+        } else if (this.frameFeederPosition > index) {
+            this.frameFeederPosition--;
+        }
         this._dirty = true;
         this.refresh();
     };
@@ -369,6 +388,14 @@ var HiveDiagram = (function () {
 
     EditorController.prototype.setSensorPosition = function (position) {
         this.sensorPosition = (position === this.sensorPosition) ? -1 : position;
+        this._dirty = true;
+        this.refresh();
+    };
+
+    EditorController.prototype.setFrameFeederPosition = function (position) {
+        var compKey = this.stack[position];
+        if (compKey !== 'deep' && compKey !== 'medium' && compKey !== 'shallow') return;
+        this.frameFeederPosition = (position === this.frameFeederPosition) ? -1 : position;
         this._dirty = true;
         this.refresh();
     };
@@ -426,7 +453,9 @@ var HiveDiagram = (function () {
             sensorPosition: this.sensorPosition,
             sensorLabel: this.sensorLabel,
             weights: this.weights,
-            feederHasSyrup: this.feederHasSyrup
+            feederHasSyrup: this.feederHasSyrup,
+            frameFeederPosition: this.frameFeederPosition,
+            frameFeederLabel: this.frameFeederLabel
         });
     };
 
@@ -440,11 +469,18 @@ var HiveDiagram = (function () {
         for (var i = this.stack.length - 1; i >= 0; i--) {
             var compKey = this.stack[i];
             var cdef = COMPONENT_DEFS[compKey];
+            var isBody = (compKey === 'deep' || compKey === 'medium' || compKey === 'shallow');
+            var feederBtn = '';
+            if (isBody) {
+                var feederActive = (this.frameFeederPosition === i);
+                feederBtn = '<button type="button" class="btn btn-xs feeder-toggle' + (feederActive ? ' active' : '') + '" data-idx="' + i + '" title="Place frame feeder here"><i class="fa fa-tint"></i></button> ';
+            }
             items.push(
                 '<li data-stack-index="' + i + '">' +
                 '<div class="palette-card" style="border-left:4px solid ' + cdef.color + '">' +
                 '<span class="drag-handle" style="cursor:grab;padding:4px 8px;margin-right:4px"><i class="fa fa-arrows-v" style="color:#ccc"></i></span>' +
                 '<span class="card-info"><strong>' + escapeHtml(cdef.label) + '</strong></span>' +
+                feederBtn +
                 '<button type="button" class="btn btn-xs btn-danger remove-comp" data-idx="' + i + '">&times;</button>' +
                 '</div>' +
                 '</li>'
@@ -471,6 +507,13 @@ var HiveDiagram = (function () {
         $list.find('.sensor-zone').off('click').on('click', function () {
             var pos = parseInt($(this).data('sensor-pos'), 10);
             self.setSensorPosition(pos);
+        });
+
+        // Bind frame feeder toggle clicks
+        $list.find('.feeder-toggle').off('click').on('click', function (e) {
+            e.stopPropagation();
+            var idx = parseInt($(this).data('idx'), 10);
+            self.setFrameFeederPosition(idx);
         });
     };
 
@@ -501,11 +544,16 @@ var HiveDiagram = (function () {
                 $list.find('li[data-stack-index]').each(function () {
                     newOrder.push(parseInt($(this).data('stack-index'), 10));
                 });
+                var oldToNew = {};
                 var newStack = [];
                 for (var i = newOrder.length - 1; i >= 0; i--) {
+                    oldToNew[newOrder[i]] = newOrder.length - 1 - i;
                     newStack.push(self.stack[newOrder[i]]);
                 }
                 self.stack = newStack;
+                if (self.frameFeederPosition >= 0 && oldToNew[self.frameFeederPosition] !== undefined) {
+                    self.frameFeederPosition = oldToNew[self.frameFeederPosition];
+                }
                 self._dirty = true;
                 self.renderDiagram();
                 self.refreshTare();

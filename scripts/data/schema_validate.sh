@@ -81,6 +81,10 @@ ensure_column "WXAPIKEY" "TEXT DEFAULT ''"
 # Pollen enable/disable (DB_PATCH_44)
 ensure_column "ENABLE_POLLEN" "TEXT DEFAULT 'yes'"
 
+# In-hive frame feeder placement (DB_PATCH_45)
+ensure_column "FRAME_FEEDER_POSITION"  "INTEGER DEFAULT -1"
+ensure_column "FRAME_FEEDER_LABEL"     "TEXT DEFAULT 'Frame Feeder'"
+
 # Chart display columns
 ensure_column "color_pollen"    "TEXT DEFAULT '#66BB6A'"
 ensure_column "trend_pollen"    "TEXT DEFAULT 'off'"

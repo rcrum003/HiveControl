@@ -11,6 +11,8 @@ $hiveBodySth = $conn->prepare("SELECT
     hc.SENSOR_TEMP_POSITION,
     hc.SENSOR_TEMP_LABEL,
     hc.FEEDER_HAS_SYRUP,
+    hc.FRAME_FEEDER_POSITION,
+    hc.FRAME_FEEDER_LABEL,
     hc.NUM_HIVE_BASE_SOLID_BOTTOM_BOARD,
     hc.NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD,
     hc.NUM_HIVE_FEEDER,
@@ -102,6 +104,8 @@ $dashConfig = [
     'sensorValue' => $sensorValue,
     'sensorLabel' => isset($hiveBody['SENSOR_TEMP_LABEL']) ? $hiveBody['SENSOR_TEMP_LABEL'] : 'Hive Temp',
     'feederHasSyrup' => isset($hiveBody['FEEDER_HAS_SYRUP']) ? (intval($hiveBody['FEEDER_HAS_SYRUP']) ? true : false) : false,
+    'frameFeederPosition' => isset($hiveBody['FRAME_FEEDER_POSITION']) ? intval($hiveBody['FRAME_FEEDER_POSITION']) : -1,
+    'frameFeederLabel' => isset($hiveBody['FRAME_FEEDER_LABEL']) ? $hiveBody['FRAME_FEEDER_LABEL'] : 'Frame Feeder',
 ];
 ?>
 

@@ -92,6 +92,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sensorPos = isset($clean['SENSOR_TEMP_POSITION']) ? intval($clean['SENSOR_TEMP_POSITION']) : -1;
         $sensorLabel = isset($clean['SENSOR_TEMP_LABEL']) ? substr($clean['SENSOR_TEMP_LABEL'], 0, 50) : 'Hive Temp';
         $feederSyrup = isset($clean['FEEDER_HAS_SYRUP']) ? (intval($clean['FEEDER_HAS_SYRUP']) ? 1 : 0) : 0;
+        $frameFeederPos = isset($clean['FRAME_FEEDER_POSITION']) ? intval($clean['FRAME_FEEDER_POSITION']) : -1;
+        $frameFeederLabel = isset($clean['FRAME_FEEDER_LABEL']) ? substr($clean['FRAME_FEEDER_LABEL'], 0, 50) : 'Frame Feeder';
 
         // Update hiveconfig with quantities and new fields
         $doit2 = $conn->prepare("UPDATE hiveconfig SET
@@ -108,7 +110,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             HIVE_STACK_ORDER = ?,
             SENSOR_TEMP_POSITION = ?,
             SENSOR_TEMP_LABEL = ?,
-            FEEDER_HAS_SYRUP = ?
+            FEEDER_HAS_SYRUP = ?,
+            FRAME_FEEDER_POSITION = ?,
+            FRAME_FEEDER_LABEL = ?
             WHERE id = 1");
         $doit2->execute([
             $version,
@@ -124,7 +128,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stackOrder,
             $sensorPos,
             $sensorLabel,
-            $feederSyrup
+            $feederSyrup,
+            $frameFeederPos,
+            $frameFeederLabel
         ]);
 
         // Refresh result
@@ -147,6 +153,8 @@ $stackOrder = isset($result['HIVE_STACK_ORDER']) ? $result['HIVE_STACK_ORDER'] :
 $sensorPos = isset($result['SENSOR_TEMP_POSITION']) ? intval($result['SENSOR_TEMP_POSITION']) : -1;
 $sensorLabel = isset($result['SENSOR_TEMP_LABEL']) ? $result['SENSOR_TEMP_LABEL'] : 'Hive Temp';
 $feederSyrup = isset($result['FEEDER_HAS_SYRUP']) ? intval($result['FEEDER_HAS_SYRUP']) : 0;
+$frameFeederPos = isset($result['FRAME_FEEDER_POSITION']) ? intval($result['FRAME_FEEDER_POSITION']) : -1;
+$frameFeederLabel = isset($result['FRAME_FEEDER_LABEL']) ? $result['FRAME_FEEDER_LABEL'] : 'Frame Feeder';
 
 $jsConfig = [
     'stackOrder' => $stackOrder ? explode(',', $stackOrder) : [],
@@ -180,6 +188,8 @@ $jsConfig = [
     'sensorTempPosition' => $sensorPos,
     'sensorLabel' => $sensorLabel,
     'feederHasSyrup' => $feederSyrup ? true : false,
+    'frameFeederPosition' => $frameFeederPos,
+    'frameFeederLabel' => $frameFeederLabel,
 ];
 ?>
 <!DOCTYPE html>
@@ -197,7 +207,7 @@ $jsConfig = [
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Hive Body Configuration</h1>
-                <p class="text-muted">Build your hive visually. Drag components to reorder, click between components to place your temperature sensor.</p>
+                <p class="text-muted">Build your hive visually. Drag to reorder, click between components to place your temperature sensor, click <i class="fa fa-tint" style="color:#4A90D9"></i> on a body to place a frame feeder.</p>
             </div>
         </div>
 
@@ -223,6 +233,8 @@ $jsConfig = [
         <input type="hidden" name="SENSOR_TEMP_POSITION" id="field-sensor-pos" value="<?php echo $sensorPos; ?>">
         <input type="hidden" name="SENSOR_TEMP_LABEL" id="field-sensor-label" value="<?php echo htmlspecialchars($sensorLabel); ?>">
         <input type="hidden" name="FEEDER_HAS_SYRUP" id="field-feeder-syrup" value="<?php echo $feederSyrup; ?>">
+        <input type="hidden" name="FRAME_FEEDER_POSITION" id="field-frame-feeder-pos" value="<?php echo $frameFeederPos; ?>">
+        <input type="hidden" name="FRAME_FEEDER_LABEL" id="field-frame-feeder-label" value="<?php echo htmlspecialchars($frameFeederLabel); ?>">
 
         <!-- Hidden fields for quantities (computed from stack) -->
         <input type="hidden" name="NUM_HIVE_BASE_SOLID_BOTTOM_BOARD" id="qty-NUM_HIVE_BASE_SOLID_BOTTOM_BOARD" value="<?php echo intval($result['NUM_HIVE_BASE_SOLID_BOTTOM_BOARD'] ?? 0); ?>">
@@ -342,10 +354,11 @@ $jsConfig = [
                     </div>
                 </div>
 
-                <!-- Sensor Label -->
+                <!-- Sensors & Feeders -->
                 <div class="panel panel-default">
-                    <div class="panel-heading"><strong>Temperature Sensor</strong></div>
+                    <div class="panel-heading"><strong>Sensors & Feeders</strong></div>
                     <div class="panel-body">
+                        <h5 style="margin-top:0;color:#888">Temperature Sensor</h5>
                         <p class="text-muted" style="font-size:12px">Click between components in the stack to place your sensor. Click again to remove.</p>
                         <label>Sensor Label:</label>
                         <input type="text" class="form-control input-sm" id="sensor-label-input" maxlength="50"
@@ -357,6 +370,14 @@ $jsConfig = [
                                 Feeder contains syrup
                             </label>
                         </div>
+
+                        <hr style="margin:12px 0">
+                        <h5 style="margin-top:0;color:#888">Frame Feeder</h5>
+                        <p class="text-muted" style="font-size:12px">Click the <i class="fa fa-tint" style="color:#4A90D9"></i> button on a body component to place your in-hive frame feeder. Click again to remove.</p>
+                        <label>Feeder Label:</label>
+                        <input type="text" class="form-control input-sm" id="frame-feeder-label-input" maxlength="50"
+                               value="<?php echo htmlspecialchars($frameFeederLabel); ?>"
+                               placeholder="e.g. Frame Feeder, Division Board Feeder">
                     </div>
                 </div>
             </div>
@@ -420,6 +441,8 @@ $jsConfig = [
             $('#field-sensor-pos').val(ctrl.sensorPosition);
             $('#field-sensor-label').val(ctrl.sensorLabel);
             $('#field-feeder-syrup').val(ctrl.feederHasSyrup ? 1 : 0);
+            $('#field-frame-feeder-pos').val(ctrl.frameFeederPosition);
+            $('#field-frame-feeder-label').val(ctrl.frameFeederLabel);
 
             var qtys = ctrl.getQuantities();
             for (var qkey in qtys) {
@@ -462,6 +485,12 @@ $jsConfig = [
         // Feeder syrup
         $('#feeder-syrup-check').on('change', function () {
             editor.setFeederSyrup($(this).is(':checked'));
+        });
+
+        // Frame feeder label
+        $('#frame-feeder-label-input').on('change', function () {
+            editor.frameFeederLabel = $(this).val();
+            editor.refresh();
         });
     });
     </script>
