@@ -1,6 +1,36 @@
 Release Notes:
 
 --------------------
+2.29 Release
+--------------------
+IN-HIVE FRAME FEEDER PLACEMENT:
+- New frame feeder placement indicator in hive body configuration
+  * Select which hive body (deep, medium, or shallow) contains a frame feeder
+  * Frame feeder renders as a black box inside the body in the SVG diagram
+  * Feeder position and label saved to database alongside sensor placement
+  * Dashboard diagram shows frame feeder in configured position
+
+SENSOR & FEEDER PLACEMENT UX REDESIGN:
+- Replaced confusing invisible click zones with explicit placement mode toolbar
+  * "Place Sensor" and "Place Feeder" buttons in toolbar above the stack
+  * Sensor mode: large dashed drop targets appear between components
+  * Feeder mode: eligible body components highlight, non-eligible items dim
+  * Yellow instruction banner explains what to click in each mode
+  * Current placement shown with red highlight; click again to relocate
+  * Escape key or re-clicking toolbar button cancels placement mode
+  * Inline badges show current sensor/feeder positions in idle mode
+  * Placement status indicators with one-click remove buttons in toolbar
+
+DATABASE RESILIENCE:
+- Dashboard diagram query uses SELECT * with try/catch to prevent crash
+  when frame feeder columns are not yet in the database
+- Hive body config page auto-creates FRAME_FEEDER_POSITION and
+  FRAME_FEEDER_LABEL columns on load if they don't exist
+- Frame feeder save wrapped in separate try/catch for old DB compatibility
+- DB patch 45 adds frame feeder columns via upgrade chain
+- schema_validate.sh ensures frame feeder columns exist
+
+--------------------
 2.28 Release
 --------------------
 DASHBOARD CAMERA SNAPSHOT:
