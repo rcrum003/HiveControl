@@ -102,23 +102,24 @@
 }
 
 /* Sensor drop-zone between components */
-.sensor-zone {
-    height: 6px;
+.hive-stack-list li.sensor-zone {
+    height: 12px;
     margin: 0;
     position: relative;
     transition: height 0.15s, background 0.15s;
     cursor: pointer;
     border-radius: 2px;
+    background: rgba(51,122,183,0.04);
 }
-.sensor-zone:hover {
-    height: 14px;
+.hive-stack-list li.sensor-zone:hover {
+    height: 18px;
     background: rgba(51,122,183,0.15);
 }
-.sensor-zone.has-sensor {
-    height: 20px;
+.hive-stack-list li.sensor-zone.has-sensor {
+    height: 24px;
     background: rgba(51,122,183,0.08);
 }
-.sensor-zone .sensor-icon {
+.hive-stack-list li.sensor-zone .sensor-icon {
     position: absolute;
     left: 50%;
     top: 50%;

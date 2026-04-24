@@ -175,7 +175,7 @@ var HiveDiagram = (function () {
         var reversed = stack.slice().reverse();
         var sensorDrawnAt = -1;
         if (sensorPos >= 0) {
-            sensorDrawnAt = stack.length - 1 - sensorPos;
+            sensorDrawnAt = stack.length - 2 - sensorPos;
         }
 
         for (var ri = 0; ri < reversed.length; ri++) {
