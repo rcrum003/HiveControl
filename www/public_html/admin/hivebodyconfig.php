@@ -10,6 +10,10 @@ function test_input($data) {
     return $data;
 }
 
+// Ensure frame feeder columns exist (safe on older DBs that haven't run upgrade)
+try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN FRAME_FEEDER_POSITION INTEGER DEFAULT -1"); } catch (Exception $e) {}
+try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN FRAME_FEEDER_LABEL TEXT DEFAULT 'Frame Feeder'"); } catch (Exception $e) {}
+
 // Load current config
 $sth = $conn->prepare("SELECT * FROM hiveconfig INNER JOIN hiveequipmentweight ON hiveconfig.id = hiveequipmentweight.id WHERE hiveconfig.id = 1");
 $sth->execute();
