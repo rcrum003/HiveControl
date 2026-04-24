@@ -208,9 +208,7 @@ var HiveDiagram = (function () {
             if (frameFeederPos >= 0 && (compKey === 'deep' || compKey === 'medium' || compKey === 'shallow') && (stack.length - 1 - ri) === frameFeederPos) {
                 var ffCenterX = x + (w / 2);
                 var ffW = Math.min(24, w * 0.15);
-                parts.push('<rect x="' + (ffCenterX - ffW / 2) + '" y="' + (y + 2) + '" width="' + ffW + '" height="' + (h - 4) + '" rx="1" fill="rgba(74,144,217,0.35)" stroke="#4A90D9" stroke-width="1.5"/>');
-                var dY = y + (h / 2);
-                parts.push('<path d="M' + ffCenterX + ',' + (dY - 5) + ' Q' + (ffCenterX + 3.5) + ',' + (dY + 1) + ' ' + ffCenterX + ',' + (dY + 5) + ' Q' + (ffCenterX - 3.5) + ',' + (dY + 1) + ' ' + ffCenterX + ',' + (dY - 5) + ' Z" fill="#4A90D9" opacity="0.85"/>');
+                parts.push('<rect x="' + (ffCenterX - ffW / 2) + '" y="' + (y + 2) + '" width="' + ffW + '" height="' + (h - 4) + '" rx="1" fill="#222" stroke="#000" stroke-width="1.5"/>');
             }
 
             // Screen pattern for screened bottom board
