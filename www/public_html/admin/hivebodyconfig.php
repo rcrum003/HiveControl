@@ -209,7 +209,7 @@ $jsConfig = [
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Hive Body Configuration</h1>
-                <p class="text-muted">Build your hive visually. Drag to reorder, click between components to place your temperature sensor, click <i class="fa fa-tint" style="color:#4A90D9"></i> on a body to place a frame feeder.</p>
+                <p class="text-muted">Build your hive visually. Click components to add, drag to reorder. Use the placement tools to position your sensor and feeder.</p>
             </div>
         </div>
 
@@ -360,8 +360,7 @@ $jsConfig = [
                 <div class="panel panel-default">
                     <div class="panel-heading"><strong>Sensors & Feeders</strong></div>
                     <div class="panel-body">
-                        <h5 style="margin-top:0;color:#888">Temperature Sensor</h5>
-                        <p class="text-muted" style="font-size:12px">Click between components in the stack to place your sensor. Click again to remove.</p>
+                        <p class="text-muted" style="font-size:12px;margin-top:0">Use the placement tools in the hive stack panel to position your sensor and feeder.</p>
                         <label>Sensor Label:</label>
                         <input type="text" class="form-control input-sm" id="sensor-label-input" maxlength="50"
                                value="<?php echo htmlspecialchars($sensorLabel); ?>"
@@ -372,11 +371,8 @@ $jsConfig = [
                                 Feeder contains syrup
                             </label>
                         </div>
-
-                        <hr style="margin:12px 0">
-                        <h5 style="margin-top:0;color:#888">Frame Feeder</h5>
-                        <p class="text-muted" style="font-size:12px">Click the <i class="fa fa-tint" style="color:#4A90D9"></i> button on a body component to place your in-hive frame feeder. Click again to remove.</p>
-                        <label>Feeder Label:</label>
+                        <hr style="margin:10px 0">
+                        <label>Frame Feeder Label:</label>
                         <input type="text" class="form-control input-sm" id="frame-feeder-label-input" maxlength="50"
                                value="<?php echo htmlspecialchars($frameFeederLabel); ?>"
                                placeholder="e.g. Frame Feeder, Division Board Feeder">
@@ -392,6 +388,15 @@ $jsConfig = [
                         <span class="pull-right text-muted" style="font-size:12px"><i class="fa fa-arrows-v"></i> Drag to reorder</span>
                     </div>
                     <div class="panel-body">
+                        <!-- Placement toolbar -->
+                        <div class="placement-toolbar">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default" id="btn-place-sensor"><i class="fa fa-bullseye"></i> Place Sensor</button>
+                                <button type="button" class="btn btn-default" id="btn-place-feeder"><i class="fa fa-tint"></i> Place Feeder</button>
+                            </div>
+                            <div id="placement-status" class="placement-status"></div>
+                        </div>
+
                         <!-- Interactive stack list -->
                         <ul class="hive-stack-list" id="hive-stack-list"></ul>
 
@@ -450,6 +455,22 @@ $jsConfig = [
             for (var qkey in qtys) {
                 $('#qty-' + qkey).val(qtys[qkey]);
             }
+
+            // Update toolbar button states
+            $('#btn-place-sensor').toggleClass('active', ctrl.placementMode === 'sensor');
+            $('#btn-place-feeder').toggleClass('active', ctrl.placementMode === 'feeder');
+
+            // Update placement status indicators
+            var statusHtml = '';
+            if (ctrl.sensorPosition >= 0) {
+                var sDesc = ctrl.getPlacementDescription('sensor');
+                statusHtml += '<span class="placement-indicator sensor-placed"><i class="fa fa-bullseye"></i> ' + sDesc + '<span class="remove-placement" data-remove="sensor">&times;</span></span>';
+            }
+            if (ctrl.frameFeederPosition >= 0) {
+                var fDesc = ctrl.getPlacementDescription('feeder');
+                statusHtml += '<span class="placement-indicator feeder-placed"><i class="fa fa-tint"></i> ' + fDesc + '<span class="remove-placement" data-remove="feeder">&times;</span></span>';
+            }
+            $('#placement-status').html(statusHtml);
         };
 
         var editor = new HiveDiagram.EditorController(config);
@@ -493,6 +514,28 @@ $jsConfig = [
         $('#frame-feeder-label-input').on('change', function () {
             editor.frameFeederLabel = $(this).val();
             editor.refresh();
+        });
+
+        // Placement toolbar buttons
+        $('#btn-place-sensor').on('click', function () {
+            editor.enterPlacementMode('sensor');
+        });
+        $('#btn-place-feeder').on('click', function () {
+            editor.enterPlacementMode('feeder');
+        });
+
+        // Remove placement via status indicator
+        $(document).on('click', '.remove-placement', function () {
+            var which = $(this).data('remove');
+            if (which === 'sensor') {
+                editor.sensorPosition = -1;
+                editor._dirty = true;
+                editor.refresh();
+            } else if (which === 'feeder') {
+                editor.frameFeederPosition = -1;
+                editor._dirty = true;
+                editor.refresh();
+            }
         });
     });
     </script>

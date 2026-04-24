@@ -101,51 +101,142 @@
     opacity: 1;
 }
 
-/* Sensor drop-zone between components */
-.hive-stack-list li.sensor-zone {
-    height: 12px;
-    margin: 0;
-    position: relative;
-    transition: height 0.15s, background 0.15s;
-    cursor: pointer;
-    border-radius: 2px;
-    background: rgba(51,122,183,0.04);
+/* ── Placement toolbar ── */
+.placement-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 0 12px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
-.hive-stack-list li.sensor-zone:hover {
-    height: 18px;
-    background: rgba(51,122,183,0.15);
+.placement-toolbar .btn.active {
+    background: #337ab7;
+    border-color: #2e6da4;
+    color: #fff;
 }
-.hive-stack-list li.sensor-zone.has-sensor {
-    height: 24px;
-    background: rgba(51,122,183,0.08);
+.placement-status {
+    flex: 1 1 100%;
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
 }
-.hive-stack-list li.sensor-zone .sensor-icon {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+.placement-status:empty {
+    display: none;
+}
+.placement-indicator {
+    display: inline-block;
+    padding: 3px 10px;
+    margin: 2px 4px 2px 0;
+    border-radius: 3px;
+    font-size: 12px;
+}
+.placement-indicator.sensor-placed {
+    background: #fdf0ed;
+    border: 1px solid #d9534f;
     color: #d9534f;
-    font-size: 16px;
+}
+.placement-indicator.feeder-placed {
+    background: #eef4fb;
+    border: 1px solid #337ab7;
+    color: #337ab7;
+}
+.placement-indicator .remove-placement {
+    margin-left: 6px;
+    cursor: pointer;
+    opacity: 0.6;
+    font-weight: bold;
+}
+.placement-indicator .remove-placement:hover {
+    opacity: 1;
 }
 
-/* ── Feeder toggle button on body components ── */
-.feeder-toggle {
-    background: #ccc;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    padding: 2px 6px;
+/* ── Placement instruction banner ── */
+.placement-instruction {
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: #fcf8e3;
+    border: 1px solid #faebcc;
+    border-radius: 4px;
+    color: #8a6d3b;
+    font-size: 13px;
+    list-style: none;
+    cursor: default;
+}
+.placement-instruction .fa {
     margin-right: 4px;
+}
+
+/* ── Sensor drop targets (visible only in placement mode) ── */
+.sensor-drop-target {
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border: 2px dashed #337ab7;
+    background: rgba(51,122,183,0.06);
+    border-radius: 4px;
+    margin: 4px 0;
+    font-size: 12px;
+    color: #337ab7;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s, border-color 0.15s;
+    list-style: none;
 }
-.feeder-toggle:hover {
-    background: #4A90D9;
-    color: #fff;
+.sensor-drop-target:hover {
+    background: rgba(51,122,183,0.15);
+    border-style: solid;
 }
-.feeder-toggle.active {
-    background: #4A90D9;
-    color: #fff;
+.sensor-drop-target.current-position {
+    border-color: #d9534f;
+    color: #d9534f;
+    background: rgba(217,83,79,0.06);
+}
+.sensor-drop-target.current-position:hover {
+    background: rgba(217,83,79,0.12);
+}
+
+/* ── Feeder placement mode highlights ── */
+.placing-feeder .hive-stack-list li.stack-item .palette-card {
+    opacity: 0.45;
+    transition: opacity 0.15s;
+}
+.placing-feeder .hive-stack-list li.feeder-eligible .palette-card {
+    opacity: 1;
+    border: 2px dashed #337ab7;
+    cursor: pointer;
+}
+.placing-feeder .hive-stack-list li.feeder-eligible:hover .palette-card {
+    border-style: solid;
+    background: rgba(51,122,183,0.06);
+}
+.placing-feeder .hive-stack-list li.feeder-current .palette-card {
+    border-color: #d9534f;
+}
+
+/* ── Inline indicator badges (idle mode) ── */
+.sensor-indicator-badge {
+    display: block;
+    text-align: center;
+    padding: 4px 8px;
+    margin: 2px 0;
+    background: #fdf0ed;
+    border: 1px solid #ebccd1;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #d9534f;
+    list-style: none;
+    cursor: default;
+}
+.feeder-indicator-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 6px;
+    background: #eef4fb;
+    border: 1px solid #bce0fd;
+    border-radius: 3px;
+    font-size: 10px;
+    color: #337ab7;
 }
 
 /* ── Tare weight summary ── */
@@ -228,5 +319,13 @@
     .hive-stack-list li .remove-btn {
         opacity: 1;
         right: 4px;
+    }
+    .sensor-drop-target {
+        height: 44px;
+        line-height: 44px;
+        font-size: 13px;
+    }
+    .placement-toolbar .btn {
+        padding: 8px 14px;
     }
 }

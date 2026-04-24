@@ -333,6 +333,7 @@ var HiveDiagram = (function () {
         this.listContainer = config.listContainer || '#hive-stack-list';
         this.tareContainer = config.tareContainer || '#tare-weight';
         this.onChangeCallback = config.onChange || null;
+        this.placementMode = 'idle';
         this._dirty = false;
     }
 
@@ -364,8 +365,13 @@ var HiveDiagram = (function () {
     EditorController.prototype.removeComponent = function (index) {
         if (index < 0 || index >= this.stack.length) return;
         this.stack.splice(index, 1);
-        if (this.sensorPosition >= this.stack.length) {
-            this.sensorPosition = -1;
+        if (this.sensorPosition >= 0) {
+            if (index <= this.sensorPosition) {
+                this.sensorPosition--;
+            }
+            if (this.sensorPosition < 0 || this.sensorPosition >= this.stack.length - 1) {
+                this.sensorPosition = -1;
+            }
         }
         if (this.frameFeederPosition === index) {
             this.frameFeederPosition = -1;
@@ -386,6 +392,7 @@ var HiveDiagram = (function () {
 
     EditorController.prototype.setSensorPosition = function (position) {
         this.sensorPosition = (position === this.sensorPosition) ? -1 : position;
+        this.placementMode = 'idle';
         this._dirty = true;
         this.refresh();
     };
@@ -394,8 +401,46 @@ var HiveDiagram = (function () {
         var compKey = this.stack[position];
         if (compKey !== 'deep' && compKey !== 'medium' && compKey !== 'shallow') return;
         this.frameFeederPosition = (position === this.frameFeederPosition) ? -1 : position;
+        this.placementMode = 'idle';
         this._dirty = true;
         this.refresh();
+    };
+
+    EditorController.prototype.enterPlacementMode = function (mode) {
+        if (this.placementMode === mode) {
+            this.placementMode = 'idle';
+        } else {
+            if (mode === 'sensor' && this.stack.length < 2) return;
+            if (mode === 'feeder') {
+                var hasBody = false;
+                for (var i = 0; i < this.stack.length; i++) {
+                    var k = this.stack[i];
+                    if (k === 'deep' || k === 'medium' || k === 'shallow') { hasBody = true; break; }
+                }
+                if (!hasBody) return;
+            }
+            this.placementMode = mode;
+        }
+        this.refresh();
+    };
+
+    EditorController.prototype.cancelPlacement = function () {
+        if (this.placementMode !== 'idle') {
+            this.placementMode = 'idle';
+            this.refresh();
+        }
+    };
+
+    EditorController.prototype.getPlacementDescription = function (type) {
+        if (type === 'sensor' && this.sensorPosition >= 0 && this.sensorPosition < this.stack.length - 1) {
+            var below = COMPONENT_DEFS[this.stack[this.sensorPosition]].label;
+            var above = COMPONENT_DEFS[this.stack[this.sensorPosition + 1]].label;
+            return 'Between ' + above + ' and ' + below;
+        }
+        if (type === 'feeder' && this.frameFeederPosition >= 0 && this.frameFeederPosition < this.stack.length) {
+            return 'In ' + COMPONENT_DEFS[this.stack[this.frameFeederPosition]].label;
+        }
+        return '';
     };
 
     EditorController.prototype.setFeederSyrup = function (hasSyrup) {
@@ -440,6 +485,7 @@ var HiveDiagram = (function () {
         this.renderDiagram();
         this.renderList();
         this.initSortable();
+        this.initKeyboard();
         this.refreshTare();
         if (this.onChangeCallback) {
             this.onChangeCallback(this);
@@ -462,57 +508,80 @@ var HiveDiagram = (function () {
         if (!$list.length) return;
         var self = this;
         var items = [];
+        var mode = this.placementMode;
 
-        // Render bottom-to-top as displayed (reversed for visual top-first)
+        var $panel = $list.closest('.stack-panel');
+        $panel.removeClass('placing-sensor placing-feeder');
+        if (mode === 'sensor') $panel.addClass('placing-sensor');
+        if (mode === 'feeder') $panel.addClass('placing-feeder');
+
+        if (mode === 'sensor') {
+            items.push('<li class="placement-instruction"><i class="fa fa-info-circle"></i> Click between components to place the temperature sensor. Press Escape to cancel.</li>');
+        } else if (mode === 'feeder') {
+            items.push('<li class="placement-instruction"><i class="fa fa-info-circle"></i> Click a highlighted body to place the frame feeder. Press Escape to cancel.</li>');
+        }
+
         for (var i = this.stack.length - 1; i >= 0; i--) {
             var compKey = this.stack[i];
             var cdef = COMPONENT_DEFS[compKey];
             var isBody = (compKey === 'deep' || compKey === 'medium' || compKey === 'shallow');
-            var feederBtn = '';
-            if (isBody) {
-                var feederActive = (this.frameFeederPosition === i);
-                feederBtn = '<button type="button" class="btn btn-xs feeder-toggle' + (feederActive ? ' active' : '') + '" data-idx="' + i + '" title="Place frame feeder here"><i class="fa fa-tint"></i></button> ';
+
+            var liClasses = 'stack-item';
+            if (mode === 'feeder' && isBody) {
+                liClasses += ' feeder-eligible';
+                if (this.frameFeederPosition === i) liClasses += ' feeder-current';
             }
+
+            var feederBadge = '';
+            if (mode === 'idle' && this.frameFeederPosition === i) {
+                feederBadge = ' <span class="feeder-indicator-badge"><i class="fa fa-tint"></i> ' + escapeHtml(this.frameFeederLabel) + '</span>';
+            }
+
+            var dragHandle = (mode === 'idle')
+                ? '<span class="drag-handle" style="cursor:grab;padding:4px 8px;margin-right:4px"><i class="fa fa-arrows-v" style="color:#ccc"></i></span>'
+                : '';
+            var removeBtn = (mode === 'idle')
+                ? '<button type="button" class="btn btn-xs btn-danger remove-comp" data-idx="' + i + '">&times;</button>'
+                : '';
+
             items.push(
-                '<li data-stack-index="' + i + '">' +
+                '<li data-stack-index="' + i + '" class="' + liClasses + '">' +
                 '<div class="palette-card" style="border-left:4px solid ' + cdef.color + '">' +
-                '<span class="drag-handle" style="cursor:grab;padding:4px 8px;margin-right:4px"><i class="fa fa-arrows-v" style="color:#ccc"></i></span>' +
-                '<span class="card-info"><strong>' + escapeHtml(cdef.label) + '</strong></span>' +
-                feederBtn +
-                '<button type="button" class="btn btn-xs btn-danger remove-comp" data-idx="' + i + '">&times;</button>' +
+                dragHandle +
+                '<span class="card-info"><strong>' + escapeHtml(cdef.label) + '</strong>' + feederBadge + '</span>' +
+                removeBtn +
                 '</div>' +
                 '</li>'
             );
 
-            // Sensor zone between this and next component below
             if (i > 0) {
-                var zoneClass = (this.sensorPosition === i - 1) ? 'sensor-zone has-sensor' : 'sensor-zone';
-                var sensorIcon = (this.sensorPosition === i - 1) ? '<span class="sensor-icon"><i class="fa fa-fire"></i></span>' : '';
-                items.push('<li class="' + zoneClass + '" data-sensor-pos="' + (i - 1) + '">' + sensorIcon + '</li>');
+                if (mode === 'sensor') {
+                    var isCurrent = (this.sensorPosition === i - 1);
+                    var dropClass = isCurrent ? 'sensor-drop-target current-position' : 'sensor-drop-target';
+                    var dropText = isCurrent ? '<i class="fa fa-bullseye"></i> Current sensor position' : 'Place sensor here';
+                    items.push('<li class="' + dropClass + '" data-sensor-pos="' + (i - 1) + '">' + dropText + '</li>');
+                } else if (mode === 'idle' && this.sensorPosition === i - 1) {
+                    items.push('<li class="sensor-indicator-badge"><i class="fa fa-bullseye"></i> ' + escapeHtml(this.sensorLabel) + '</li>');
+                }
             }
         }
 
         $list.html(items.join(''));
 
-        // Bind remove buttons
-        $list.find('.remove-comp').off('click').on('click', function (e) {
-            e.stopPropagation();
-            var idx = parseInt($(this).data('idx'), 10);
-            self.removeComponent(idx);
-        });
-
-        // Bind sensor zone clicks
-        $list.find('.sensor-zone').off('click').on('click', function () {
-            var pos = parseInt($(this).data('sensor-pos'), 10);
-            self.setSensorPosition(pos);
-        });
-
-        // Bind frame feeder toggle clicks
-        $list.find('.feeder-toggle').off('click').on('click', function (e) {
-            e.stopPropagation();
-            var idx = parseInt($(this).data('idx'), 10);
-            self.setFrameFeederPosition(idx);
-        });
+        if (mode === 'idle') {
+            $list.find('.remove-comp').off('click').on('click', function (e) {
+                e.stopPropagation();
+                self.removeComponent(parseInt($(this).data('idx'), 10));
+            });
+        } else if (mode === 'sensor') {
+            $list.find('.sensor-drop-target').off('click').on('click', function () {
+                self.setSensorPosition(parseInt($(this).data('sensor-pos'), 10));
+            });
+        } else if (mode === 'feeder') {
+            $list.find('.feeder-eligible').off('click').on('click', function () {
+                self.setFrameFeederPosition(parseInt($(this).data('stack-index'), 10));
+            });
+        }
     };
 
     EditorController.prototype.refreshTare = function () {
@@ -520,6 +589,15 @@ var HiveDiagram = (function () {
         if ($tare.length) {
             $tare.text(this.getTareWeight().toFixed(2));
         }
+    };
+
+    EditorController.prototype.initKeyboard = function () {
+        var self = this;
+        $(document).off('keydown.hivePlacement').on('keydown.hivePlacement', function (e) {
+            if (e.key === 'Escape' && self.placementMode !== 'idle') {
+                self.cancelPlacement();
+            }
+        });
     };
 
     EditorController.prototype.initSortable = function () {
@@ -530,6 +608,8 @@ var HiveDiagram = (function () {
         if ($list.data('ui-sortable')) {
             $list.sortable('destroy');
         }
+
+        if (this.placementMode !== 'idle') return;
 
         $list.sortable({
             items: 'li[data-stack-index]',
