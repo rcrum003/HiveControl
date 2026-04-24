@@ -13,6 +13,14 @@ $SITE_TYPE = $result3['SITE_TYPE'];
 $SHOW_METRIC = $result3['SHOW_METRIC'];
 $HCVersion = $result3['HCVersion'];
 
+$nav_camera_enabled = false;
+try {
+    $cam_sth = $conn->prepare("SELECT ENABLE_HIVE_CAMERA FROM hiveconfig WHERE id=1");
+    $cam_sth->execute();
+    $cam_result = $cam_sth->fetch(PDO::FETCH_ASSOC);
+    $nav_camera_enabled = (($cam_result['ENABLE_HIVE_CAMERA'] ?? 'no') === 'yes');
+} catch (Exception $e) {}
+
 # =====================================================================
 # Set the header
 # =====================================================================
@@ -110,9 +118,13 @@ echo '
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>
-                    <li>
+                    ';
+if ($nav_camera_enabled) {
+    echo '<li>
                             <a href="/pages/video.php"><i class="fa fa-video-camera fa-fw"></i>Camera</a>
-                        </li>
+                        </li>';
+}
+echo '
                 <li class="dropdown">
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                         <i class="fa fa-gear fa-fw"></i> Settings <i class="fa fa-caret-down"></i>
@@ -196,9 +208,13 @@ if ($orient == "normal") {
                                 </li>
                                 
                             </ul>
-                        <li>
+                        ';
+if ($nav_camera_enabled) {
+    echo '<li>
                             <a href="/pages/video.php"><i class="fa fa-video-camera fa-fw"></i> Live WebCam</a>
-                        </li>
+                        </li>';
+}
+echo '
                         <li>
                             <a href="#"><i class="fa fa-gear fa-fw"></i>Settings<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
