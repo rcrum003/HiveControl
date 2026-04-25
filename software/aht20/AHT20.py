@@ -106,22 +106,23 @@ class SMBus2I2CAdapter:
         """Scan available I2C buses for the AHT20 at the expected address."""
         import glob
         bus_paths = sorted(glob.glob('/dev/i2c-*'))
+        errors = []
         for path in bus_paths:
             bus_num = int(path.split('-')[-1])
             try:
                 bus = SMBus(bus_num)
-                msg_w = i2c_msg.write(address, [0x71])
-                msg_r = i2c_msg.read(address, 1)
-                bus.i2c_rdwr(msg_w, msg_r)
+                msg = i2c_msg.read(address, 1)
+                bus.i2c_rdwr(msg)
                 return bus
-            except Exception:
+            except Exception as e:
+                errors.append("bus {}: {}".format(bus_num, e))
                 try:
                     bus.close()
                 except Exception:
                     pass
         raise FileNotFoundError(
-            "AHT20 not found on any I2C bus. "
-            "Check wiring. Expected at address 0x38."
+            "AHT20 not found at address 0x{:02x} on any I2C bus. {}"
+            .format(address, "; ".join(errors))
         )
 
     def write_bytes(self, data: list) -> None:
