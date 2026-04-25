@@ -1,6 +1,32 @@
 Release Notes:
 
 --------------------
+2.33 Release
+--------------------
+SETUP WIZARD:
+- Added Zip Code field to Step 1 (Basic Info) for pollen and EPA AirNow
+- Zip code is used by pollen.com and AirNow APIs for location-based data
+
+INSTRUMENT CONFIG:
+- Added test buttons for weather, air quality, EPA AirNow, pollen, and camera
+  * Each integration panel now has a Test button to verify it's working
+  * Uses existing AJAX test infrastructure (livevalue.php)
+
+EPA AIRNOW FIX:
+- Fixed missing O3/ozone data from AirNow integration
+  * Lat/lon API endpoint only returned nearest reporting area (e.g., Bridgeport
+    PM2.5) and missed monitors in other areas (e.g., Westport ozone)
+  * Now uses zip code API endpoint when ZIP is configured, which returns data
+    from all reporting areas covering that zip code
+  * Falls back to lat/lon endpoint when no zip code is set
+
+POLLEN TEST FIX:
+- Added getpollen.sh to www-data sudoers whitelist so pollen test button works
+
+DATABASE:
+- DB_PATCH_46: Added ZIP column to hiveconfig table
+
+--------------------
 2.32 Release
 --------------------
 SETUP WIZARD:

@@ -345,6 +345,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_45 2>/dev/null || true
 			let DB_ver="37"
 		fi
+		if [[ $DB_ver -eq "37" ]]; then
+			echo "Applying DB Ver 38 Upgrades - ZIP code for pollen and location services"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_46 2>/dev/null || true
+			let DB_ver="38"
+		fi
 
 	#else
 	#	echo "Skipping DB, no new database upgrades available"

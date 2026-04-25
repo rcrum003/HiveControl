@@ -1,0 +1,2 @@
+-- DB_PATCH_46: Add ZIP code for pollen.com and location-based services
+ALTER TABLE hiveconfig ADD COLUMN ZIP TEXT DEFAULT '';

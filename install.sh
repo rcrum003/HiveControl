@@ -269,8 +269,9 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_42
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_43
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_44
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_45
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_46
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
-sudo echo 45 > /home/HiveControl/data/DBVERSION
+sudo echo 46 > /home/HiveControl/data/DBVERSION
 
 #Setup backup directory
 mkdir -p /home/HiveControl/data/backups

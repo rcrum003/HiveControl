@@ -58,12 +58,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $v->rule('regex', 'HIVENAME', '/^[a-zA-Z0-9_-]+$/')->message('Hive Name can only contain letters, numbers, dashes, and underscores');
             $v->rule('lengthMax', ['HIVENAME', 'CITY', 'STATE'], 40);
             $v->rule('lengthMax', ['LATITUDE', 'LONGITUDE'], 20);
+            $v->rule('lengthMax', ['ZIP'], 10);
             if ($v->validate()) {
-                $update_fields = ['HIVENAME=?', 'CITY=?', 'STATE=?', 'TIMEZONE=?', 'LATITUDE=?', 'LONGITUDE=?'];
+                $update_fields = ['HIVENAME=?', 'CITY=?', 'STATE=?', 'ZIP=?', 'TIMEZONE=?', 'LATITUDE=?', 'LONGITUDE=?'];
                 $update_values = [
                     test_input($_POST['HIVENAME']),
                     test_input($_POST['CITY']),
                     test_input($_POST['STATE']),
+                    test_input($_POST['ZIP'] ?? ''),
                     test_input_allow_slash($_POST['TIMEZONE'] ?? ($config['TIMEZONE'] ?? 'America/New_York')),
                     test_input($_POST['LATITUDE'] ?? ($config['LATITUDE'] ?? '')),
                     test_input($_POST['LONGITUDE'] ?? ($config['LONGITUDE'] ?? ''))
@@ -393,16 +395,22 @@ if ($step === 1): ?>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="CITY">City <span style="color:#d9534f;">*</span></label>
                             <input type="text" class="form-control" name="CITY" value="<?php echo htmlspecialchars($config['CITY'] ?? ''); ?>" placeholder="e.g., Portland" required>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="STATE">State <span style="color:#d9534f;">*</span></label>
                             <input type="text" class="form-control" name="STATE" value="<?php echo htmlspecialchars($config['STATE'] ?? ''); ?>" placeholder="e.g., Oregon" required>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="ZIP">Zip Code</label>
+                            <input type="text" class="form-control" name="ZIP" id="ZIP" value="<?php echo htmlspecialchars($config['ZIP'] ?? ''); ?>" placeholder="e.g., 97201" maxlength="10">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -1305,7 +1313,7 @@ elseif ($step === 8): ?>
             $sections = [
                 1 => ['Basic Info', 'fa-home', [
                     'Hive Name' => $config['HIVENAME'] ?? 'Not set',
-                    'Location' => ($config['CITY'] ?? '') . ', ' . ($config['STATE'] ?? ''),
+                    'Location' => ($config['CITY'] ?? '') . ', ' . ($config['STATE'] ?? '') . (!empty($config['ZIP']) ? ' ' . $config['ZIP'] : ''),
                     'Coordinates' => (!empty($config['LATITUDE']) && !empty($config['LONGITUDE']))
                         ? $config['LATITUDE'] . ', ' . $config['LONGITUDE']
                         : 'Not set',

@@ -5,10 +5,12 @@
 # Fetches hourly observations from nearest EPA regulatory monitor
 # Stores in airquality_epa table (separate from PurpleAir PM data)
 #
-# API: https://docs.airnowapi.org/CurrentObservationsByLatLon/query
+# API: https://docs.airnowapi.org/ (zip code or lat/lon endpoint)
 # Free tier: 500 requests/day (running hourly = 24/day)
+# Uses ZIP code endpoint when available (returns all reporting areas)
+# Falls back to lat/lon endpoint (may only return nearest area)
 #
-# v 2026042001
+# v 2026042501
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -39,7 +41,14 @@ fi
 
 DISTANCE="${AIRNOW_DISTANCE:-25}"
 
-API_URL="https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${LAT}&longitude=${LON}&distance=${DISTANCE}&API_KEY=${KEY}"
+# Prefer zip code endpoint — it returns data from all reporting areas covering the zip
+# (e.g., both Bridgeport PM2.5 and Westport O3 for Fairfield, CT)
+# Fall back to lat/lon if no ZIP configured
+if [ -n "${ZIP:-}" ]; then
+    API_URL="https://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode=${ZIP}&distance=${DISTANCE}&API_KEY=${KEY}"
+else
+    API_URL="https://www.airnowapi.org/aq/observation/latLong/current/?format=application/json&latitude=${LAT}&longitude=${LON}&distance=${DISTANCE}&API_KEY=${KEY}"
+fi
 
 TEMPFILE=$(mktemp /tmp/airnow_XXXXXX.json)
 trap 'rm -f "$TEMPFILE"' EXIT
