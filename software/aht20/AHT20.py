@@ -69,135 +69,72 @@ class AHT20:
         self._i2c.close()
 
 
-class PigpioI2CAdapter:
-    """Adapter for pigpio raw I2C (Pi 4 and earlier)."""
+class RawI2CAdapter:
+    """Adapter using raw file descriptor I/O. Works on all Pi I2C buses including bit-banged."""
 
-    def __init__(self, pi, bus: int = 1, address: int = AHT20_I2C_ADDR) -> None:
-        self._pi = pi
-        self._handle = pi.i2c_open(bus, address)
-
-    def write_bytes(self, data: list) -> None:
-        self._pi.i2c_write_device(self._handle, data)
-
-    def read_bytes(self, count: int) -> list:
-        _count, data = self._pi.i2c_read_device(self._handle, count)
-        return list(data)
-
-    def close(self) -> None:
-        if self._handle is not None:
-            self._pi.i2c_close(self._handle)
-            self._handle = None
-
-
-class SMBus2I2CAdapter:
-    """Adapter for smbus2. Uses raw I2C transactions via i2c_rdwr. Works on all Pi versions."""
+    I2C_SLAVE = 0x0703
 
     def __init__(self, bus: int | None = None, address: int = AHT20_I2C_ADDR) -> None:
-        from smbus2 import SMBus, i2c_msg
-        self._i2c_msg = i2c_msg
-        self._address = address
-
-        if bus is not None:
-            self._bus = SMBus(bus)
-        else:
-            self._bus = self._find_bus(SMBus, i2c_msg, address)
-
-    def _find_bus(self, SMBus, i2c_msg, address: int):
-        """Scan available I2C buses for the AHT20 at the expected address."""
+        import fcntl
         import glob
         import os
+        self._os = os
+        self._fcntl = fcntl
+        self._address = address
+        self._fd = None
+
+        if bus is not None:
+            self._open_bus(bus, address)
+        else:
+            self._find_and_open_bus(address)
+
+    def _open_bus(self, bus_num: int, address: int) -> None:
+        path = "/dev/i2c-{}".format(bus_num)
+        self._fd = self._os.open(path, self._os.O_RDWR)
+        self._fcntl.ioctl(self._fd, self.I2C_SLAVE, address)
+
+    def _find_and_open_bus(self, address: int) -> None:
+        import glob
         bus_paths = sorted(glob.glob('/dev/i2c-*'))
         errors = []
         for path in bus_paths:
             bus_num = int(path.split('-')[-1])
             try:
-                bus = SMBus(bus_num)
-                # Probe with a write (status request) — AHT20 may NACK bare reads
-                msg = i2c_msg.write(address, [0x71])
-                bus.i2c_rdwr(msg)
-                return bus
-            except OSError as e:
-                errors.append("bus {}: {}".format(bus_num, e))
-                try:
-                    bus.close()
-                except Exception:
-                    pass
+                self._open_bus(bus_num, address)
+                # Verify device responds with a single-byte read
+                self._os.read(self._fd, 1)
+                return
             except Exception as e:
                 errors.append("bus {}: {}".format(bus_num, e))
-                try:
-                    bus.close()
-                except Exception:
-                    pass
-
-        # Last resort: use ioctl I2C_SLAVE directly (bypasses smbus2 transaction layer)
-        import fcntl
-        I2C_SLAVE = 0x0703
-        for path in bus_paths:
-            try:
-                fd = os.open(path, os.O_RDWR)
-                fcntl.ioctl(fd, I2C_SLAVE, address)
-                os.close(fd)
-                bus_num = int(path.split('-')[-1])
-                return SMBus(bus_num)
-            except Exception:
-                try:
-                    os.close(fd)
-                except Exception:
-                    pass
-
+                if self._fd is not None:
+                    try:
+                        self._os.close(self._fd)
+                    except Exception:
+                        pass
+                    self._fd = None
         raise FileNotFoundError(
             "AHT20 not found at address 0x{:02x} on any I2C bus. {}"
             .format(address, "; ".join(errors))
         )
 
     def write_bytes(self, data: list) -> None:
-        msg = self._i2c_msg.write(self._address, data)
-        self._bus.i2c_rdwr(msg)
+        self._os.write(self._fd, bytes(data))
 
     def read_bytes(self, count: int) -> list:
-        msg = self._i2c_msg.read(self._address, count)
-        self._bus.i2c_rdwr(msg)
-        return list(msg)
+        return list(self._os.read(self._fd, count))
 
     def close(self) -> None:
-        if self._bus is not None:
-            self._bus.close()
-            self._bus = None
+        if self._fd is not None:
+            self._os.close(self._fd)
+            self._fd = None
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, '/home/HiveControl/software')
+    adapter = RawI2CAdapter()
+    sensor = AHT20(adapter)
+    temp_c, humidity = sensor.read_data()
 
-    adapter = None
-    cleanup_fn = None
+    temp_f = (temp_c * 1.8) + 32.0
+    print("{:.2f} {:.2f} {:.2f}".format(temp_f, temp_c, humidity))
 
-    try:
-        from gpio_abstraction.gpio_factory import get_gpio, cleanup
-        from gpio_abstraction.pi_detect import is_pi5_or_later
-
-        gpio = get_gpio()
-        if not gpio.connected:
-            raise RuntimeError("GPIO not connected")
-
-        if is_pi5_or_later():
-            adapter = SMBus2I2CAdapter()
-        else:
-            adapter = PigpioI2CAdapter(gpio.pi)
-        cleanup_fn = cleanup
-
-    except Exception:
-        # gpio_abstraction failed (pigpio not installed, daemon not running, etc.)
-        # Fall back to smbus2 which works on all Pi versions via kernel I2C driver
-        adapter = SMBus2I2CAdapter()
-
-    try:
-        sensor = AHT20(adapter)
-        temp_c, humidity = sensor.read_data()
-
-        temp_f = (temp_c * 1.8) + 32.0
-        print("{:.2f} {:.2f} {:.2f}".format(temp_f, temp_c, humidity))
-
-        sensor.close()
-    finally:
-        if cleanup_fn:
-            cleanup_fn()
+    sensor.close()
