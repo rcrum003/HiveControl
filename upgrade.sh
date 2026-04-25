@@ -848,6 +848,21 @@ if [[ "$Installed_Ver" < "2.26" ]]; then
 	fi
 fi
 
+if [[ "$Installed_Ver" < "2.33" ]]; then
+	# Update sudoers to allow www-data to run getpollen.sh (for test button)
+	echo "Updating sudoers for pollen test support"
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+	sudo chown root:root /etc/sudoers.d/hivecontrol
+	sudo chmod 440 /etc/sudoers.d/hivecontrol
+	CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
+	if [[ $CHECKSUDO -gt 0 ]]; then
+		echo "Sudoers update SUCCESS"
+	else
+		echo "Something went wrong with our SUDOERS file, removing it"
+		sudo rm -f /etc/sudoers.d/hivecontrol
+	fi
+fi
+
 echo "============================================="
 echo "success"
 #Cleanup and set the flag in the DB
