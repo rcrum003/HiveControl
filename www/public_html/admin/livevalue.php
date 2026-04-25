@@ -67,7 +67,22 @@ switch ($sensor) {
         break;
 
     case "pollen":
-        $value = shell_exec("/usr/bin/timeout 30 sudo /home/HiveControl/scripts/weather/pollen/getpollen.sh 2>&1 | tail -10");
+        $dbpath = "/home/HiveControl/data/hive-data.db";
+        try {
+            $pdb = new PDO("sqlite:$dbpath");
+            $pdb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $row = $pdb->query("SELECT date, pollenlevel, pollentypes FROM pollen ORDER BY date DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $levels = ['None', 'Low', 'Moderate', 'High'];
+                $lvl = $levels[min((int)$row['pollenlevel'], 3)] ?? $row['pollenlevel'];
+                $value = "Date: " . $row['date'] . "\nLevel: " . $lvl . " (" . $row['pollenlevel'] . ")\nTypes: " . ($row['pollentypes'] ?: 'N/A');
+            } else {
+                $value = "No pollen data in database yet. Run the pollen collection script or wait for the next scheduled run.";
+            }
+            $pdb = null;
+        } catch (Exception $e) {
+            $value = "DB error: " . $e->getMessage();
+        }
         $valueheader = "Pollen Data";
         break;
 
