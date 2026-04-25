@@ -116,20 +116,29 @@ class SMBus2I2CAdapter:
 if __name__ == "__main__":
     sys.path.insert(0, '/home/HiveControl/software')
 
+    adapter = None
+    cleanup_fn = None
+
     try:
-        from gpio_abstraction.pi_detect import is_pi5_or_later
         from gpio_abstraction.gpio_factory import get_gpio, cleanup
+        from gpio_abstraction.pi_detect import is_pi5_or_later
 
         gpio = get_gpio()
         if not gpio.connected:
-            print("Error GPIO not connected")
-            sys.exit(1)
+            raise RuntimeError("GPIO not connected")
 
         if is_pi5_or_later():
             adapter = SMBus2I2CAdapter()
         else:
             adapter = PigpioI2CAdapter(gpio.pi)
+        cleanup_fn = cleanup
 
+    except Exception:
+        # gpio_abstraction failed (pigpio not installed, daemon not running, etc.)
+        # Fall back to smbus2 which works on all Pi versions via kernel I2C driver
+        adapter = SMBus2I2CAdapter()
+
+    try:
         sensor = AHT20(adapter)
         temp_c, humidity = sensor.read_data()
 
@@ -137,22 +146,6 @@ if __name__ == "__main__":
         print("{:.2f} {:.2f} {:.2f}".format(temp_f, temp_c, humidity))
 
         sensor.close()
-        cleanup()
-
-    except ImportError:
-        import pigpio
-
-        pi = pigpio.pi()
-        if not pi.connected:
-            print("Error pigpio not connected")
-            sys.exit(1)
-
-        adapter = PigpioI2CAdapter(pi)
-        sensor = AHT20(adapter)
-        temp_c, humidity = sensor.read_data()
-
-        temp_f = (temp_c * 1.8) + 32.0
-        print("{:.2f} {:.2f} {:.2f}".format(temp_f, temp_c, humidity))
-
-        sensor.close()
-        pi.stop()
+    finally:
+        if cleanup_fn:
+            cleanup_fn()
