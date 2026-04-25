@@ -115,14 +115,20 @@ $(function () {
             }]
         },
         plotOptions: {
-            line: {
+            area: {
                 marker: {
                     enabled: true,
-                    radius: 3,
+                    radius: 4,
                     symbol: 'circle'
                 },
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    formatter: function() {
+                        return this.point.pollentypes || '';
+                    },
+                    style: { fontSize: '10px', fontWeight: 'normal', textOutline: '1px white' },
+                    allowOverlap: false,
+                    y: -8
                 },
                 enableMouseTracking: true
             }
@@ -131,7 +137,10 @@ $(function () {
             formatter: function () {
                 var s = '<b>' + Highcharts.dateFormat('%m/%d %H:%M', this.x) + '</b>';
                 this.points.forEach(function (point) {
-                    s += '<br/>' + point.series.name + ': ' + point.y;
+                    s += '<br/>' + point.series.name + ': ' + point.y + ' / 12';
+                    if (point.point.pollentypes) {
+                        s += '<br/><em>Blooming: ' + point.point.pollentypes + '</em>';
+                    }
                 });
                 return s;
             },
@@ -156,9 +165,11 @@ $(function () {
             name: 'Pollen Index',
             data: ["; foreach($result as $r){
                 if (is_numeric($r['pollenlevel']) && $r['pollenlevel'] != 0) {
-                    echo "[".$r['datetime'].", ".floatval($r['pollenlevel'])."], ";
+                    $types = trim($r['pollentypes'] ?? '');
+                    $types_js = addslashes($types);
+                    echo "{x:".$r['datetime'].",y:".floatval($r['pollenlevel']).",pollentypes:'".$types_js."'},";
                 } else {
-                    echo "[".$r['datetime'].", null], ";
+                    echo "{x:".$r['datetime'].",y:null},";
                 }
             } echo "],
             color: '"; echo "$color_pollen"; echo "',
