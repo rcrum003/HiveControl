@@ -291,8 +291,9 @@ foreach ($ttypes as $tv => $tl) {
         </div>
         <div class="temp-option" data-types="broodminder" style="<?= $result['TEMPTYPE'] == 'broodminder' ? '' : 'display:none' ?>">
             <div class="form-group"><label>BLE MAC Address</label>
-                <input type="text" name="HIVEDEVICE" class="form-control" style="max-width:300px" value="<?= h($result['HIVEDEVICE']) ?>" placeholder="06:09:16:42:1c:8a">
-                <p class="help-block">Run <code>sudo python3 /home/HiveControl/software/broodminder/BM_Scan_bleak.py</code> to find nearby devices</p>
+                <input type="text" name="HIVEDEVICE" id="ble-mac-input" class="form-control" style="max-width:300px" value="<?= h($result['HIVEDEVICE']) ?>" placeholder="06:09:16:42:1c:8a">
+                <button type="button" class="btn btn-info btn-sm ble-discover-btn" data-target="#ble-mac-input" style="margin-top:5px"><i class="fa fa-bluetooth fa-fw"></i> Discover Devices</button>
+                <div class="ble-scan-result" style="margin-top:8px"></div>
             </div>
         </div>
         <div class="temp-option" data-types="temper" style="<?= $result['TEMPTYPE'] == 'temper' ? '' : 'display:none' ?>">
@@ -966,6 +967,44 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
                 error: function() { res.html('<span class="text-danger">Read failed</span>'); },
                 complete: function() { btn.prop('disabled', false).find('i').removeClass('fa-spin'); }
             });
+        });
+
+        // BLE Discover (BroodMinder)
+        $('.ble-discover-btn').on('click', function() {
+            var btn = $(this), targetSel = btn.data('target'), res = btn.siblings('.ble-scan-result');
+            btn.prop('disabled', true).find('i').removeClass('fa-bluetooth').addClass('fa-spinner fa-spin');
+            res.html('<span class="text-muted">Scanning for BroodMinder devices (~15 seconds)...</span>');
+            $.ajax({
+                url: 'livevalue.php?sensor=blescan', cache: false, timeout: 30000,
+                success: function(d) {
+                    var lines = d.trim().split('\n');
+                    var macs = [];
+                    lines.forEach(function(line) {
+                        var m = line.match(/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i);
+                        if (m && macs.indexOf(m[1].toLowerCase()) === -1) macs.push(m[1].toLowerCase());
+                    });
+                    if (macs.length === 0) {
+                        res.html('<span class="text-warning"><i class="fa fa-exclamation-triangle"></i> No BroodMinder devices found. Make sure the sensor is nearby and powered on.</span>');
+                    } else {
+                        var html = '<strong>Found ' + macs.length + ' device(s):</strong><br>';
+                        macs.forEach(function(mac) {
+                            html += '<a href="#" class="ble-pick label label-info" style="margin:2px;display:inline-block;cursor:pointer" data-mac="' + mac + '">' + mac + '</a> ';
+                        });
+                        html += '<br><small class="text-muted">Click an address to select it.</small>';
+                        res.html(html);
+                    }
+                },
+                error: function() { res.html('<span class="text-danger"><i class="fa fa-times"></i> Scan failed. Check Bluetooth adapter.</span>'); },
+                complete: function() { btn.prop('disabled', false).find('i').removeClass('fa-spinner fa-spin').addClass('fa-bluetooth'); }
+            });
+        });
+        $(document).on('click', '.ble-pick', function(e) {
+            e.preventDefault();
+            var mac = $(this).data('mac');
+            var target = $(this).closest('.form-group').find('input[name="HIVEDEVICE"]');
+            if (target.length) target.val(mac).trigger('change');
+            $(this).closest('.ble-scan-result').find('.ble-pick').removeClass('label-success');
+            $(this).addClass('label-success');
         });
 
         // Unsaved changes

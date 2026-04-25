@@ -541,7 +541,9 @@ elseif ($step === 2): ?>
                         <div id="opt-broodminder" class="temp-opt" style="display:none;">
                             <div class="form-group">
                                 <label>BLE Device Address</label>
-                                <input type="text" class="form-control" name="HIVEDEVICE" value="<?php echo htmlspecialchars($config['HIVEDEVICE'] ?? ''); ?>" placeholder="06:09:42:1c:8a">
+                                <input type="text" class="form-control" name="HIVEDEVICE" id="wiz-ble-mac" value="<?php echo htmlspecialchars($config['HIVEDEVICE'] ?? ''); ?>" placeholder="06:09:42:1c:8a">
+                                <button type="button" class="btn btn-info btn-sm ble-discover-btn" data-target="#wiz-ble-mac" style="margin-top:5px"><i class="fa fa-bluetooth fa-fw"></i> Discover Devices</button>
+                                <div class="ble-scan-result" style="margin-top:8px"></div>
                                 <p class="help-text">Full MAC address in lowercase, as printed on the device</p>
                             </div>
                         </div>
@@ -2122,6 +2124,44 @@ elseif ($step === 8): ?>
             });
         }
     };
+
+    // BLE Discover (BroodMinder)
+    $(document).on('click', '.ble-discover-btn', function() {
+        var btn = $(this), res = btn.siblings('.ble-scan-result');
+        btn.prop('disabled', true).find('i').removeClass('fa-bluetooth').addClass('fa-spinner fa-spin');
+        res.html('<span class="text-muted">Scanning for BroodMinder devices (~15 seconds)...</span>');
+        $.ajax({
+            url: 'livevalue.php?sensor=blescan', cache: false, timeout: 30000,
+            success: function(d) {
+                var lines = d.trim().split('\n');
+                var macs = [];
+                lines.forEach(function(line) {
+                    var m = line.match(/([0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2}:[0-9a-f]{2})/i);
+                    if (m && macs.indexOf(m[1].toLowerCase()) === -1) macs.push(m[1].toLowerCase());
+                });
+                if (macs.length === 0) {
+                    res.html('<span class="text-warning"><i class="fa fa-exclamation-triangle"></i> No BroodMinder devices found. Make sure the sensor is nearby and powered on.</span>');
+                } else {
+                    var html = '<strong>Found ' + macs.length + ' device(s):</strong><br>';
+                    macs.forEach(function(mac) {
+                        html += '<a href="#" class="ble-pick label label-info" style="margin:2px;display:inline-block;cursor:pointer" data-mac="' + mac + '">' + mac + '</a> ';
+                    });
+                    html += '<br><small class="text-muted">Click an address to select it.</small>';
+                    res.html(html);
+                }
+            },
+            error: function() { res.html('<span class="text-danger"><i class="fa fa-times"></i> Scan failed. Check Bluetooth adapter.</span>'); },
+            complete: function() { btn.prop('disabled', false).find('i').removeClass('fa-spinner fa-spin').addClass('fa-bluetooth'); }
+        });
+    });
+    $(document).on('click', '.ble-pick', function(e) {
+        e.preventDefault();
+        var mac = $(this).data('mac');
+        var target = $(this).closest('.form-group').find('input[name="HIVEDEVICE"]');
+        if (target.length) target.val(mac).trigger('change');
+        $(this).closest('.ble-scan-result').find('.ble-pick').removeClass('label-success');
+        $(this).addClass('label-success');
+    });
 
     // Auto-fire test if we came back from a save+test action
     $(document).ready(function() {

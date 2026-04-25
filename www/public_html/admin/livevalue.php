@@ -66,6 +66,11 @@ switch ($sensor) {
         $valueheader = "EPA AirNow Data";
         break;
 
+    case "blescan":
+        $value = shell_exec("/usr/bin/timeout 25 sudo python3 /home/HiveControl/software/broodminder/BM_Scan_bleak.py 15 2>&1");
+        $valueheader = "BLE Scan Results";
+        break;
+
     default:
         $valueheader = "Unknown sensor type";
         $value = "Specify a valid sensor: hivetemp, hiveweight, hivelux, weather, camera, airquality, airnow";
