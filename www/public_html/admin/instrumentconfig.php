@@ -277,7 +277,7 @@ $temp_pcls = $temp_on ? status_panel_class($sh['hivetemp']['status']) : 'panel-d
         <div class="form-group">
             <label>Sensor Type</label><br>
 <?php
-$ttypes = ['temperhum'=>'TemperHum','temper'=>'Temper','dht22'=>'DHT22','dht21'=>'DHT21','sht31d'=>'SHT31-D','bme280'=>'BME280','bme680'=>'BME680','broodminder'=>'BroodMinder'];
+$ttypes = ['temperhum'=>'TemperHum','temper'=>'Temper','dht22'=>'DHT22','dht21'=>'DHT21','sht31d'=>'SHT31-D','bme280'=>'BME280','bme680'=>'BME680','aht20'=>'AHT20','broodminder'=>'BroodMinder'];
 foreach ($ttypes as $tv => $tl) {
     echo '<label class="radio-inline"><input type="radio" name="TEMPTYPE" value="'.$tv.'"'.chk($result['TEMPTYPE'],$tv).' class="temp-type-radio"> '.$tl.'</label>';
 }

@@ -25,6 +25,8 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 			GETTEMP=$($HOMEDIR/scripts/temp/bme680.sh)
 		elif [[ $TEMPTYPE = "bme280" ]]; then
 			GETTEMP=$($HOMEDIR/scripts/temp/bme280.sh)
+		elif [[ $TEMPTYPE = "aht20" ]]; then
+			GETTEMP=$($HOMEDIR/scripts/temp/aht20.sh)
 		elif [[ $TEMPTYPE = "broodminder" ]]; then
 			GETTEMP=$($HOMEDIR/scripts/temp/broodminder.sh $HIVEDEVICE)
 		fi
