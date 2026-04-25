@@ -90,13 +90,39 @@ class PigpioI2CAdapter:
 
 
 class SMBus2I2CAdapter:
-    """Adapter for smbus2 (Pi 5 and later). Uses raw I2C transactions via i2c_rdwr."""
+    """Adapter for smbus2. Uses raw I2C transactions via i2c_rdwr. Works on all Pi versions."""
 
-    def __init__(self, bus: int = 1, address: int = AHT20_I2C_ADDR) -> None:
+    def __init__(self, bus: int | None = None, address: int = AHT20_I2C_ADDR) -> None:
         from smbus2 import SMBus, i2c_msg
-        self._bus = SMBus(bus)
         self._i2c_msg = i2c_msg
         self._address = address
+
+        if bus is not None:
+            self._bus = SMBus(bus)
+        else:
+            self._bus = self._find_bus(SMBus, i2c_msg, address)
+
+    def _find_bus(self, SMBus, i2c_msg, address: int):
+        """Scan available I2C buses for the AHT20 at the expected address."""
+        import glob
+        bus_paths = sorted(glob.glob('/dev/i2c-*'))
+        for path in bus_paths:
+            bus_num = int(path.split('-')[-1])
+            try:
+                bus = SMBus(bus_num)
+                msg_w = i2c_msg.write(address, [0x71])
+                msg_r = i2c_msg.read(address, 1)
+                bus.i2c_rdwr(msg_w, msg_r)
+                return bus
+            except Exception:
+                try:
+                    bus.close()
+                except Exception:
+                    pass
+        raise FileNotFoundError(
+            "AHT20 not found on any I2C bus. "
+            "Check wiring. Expected at address 0x38."
+        )
 
     def write_bytes(self, data: list) -> None:
         msg = self._i2c_msg.write(self._address, data)
