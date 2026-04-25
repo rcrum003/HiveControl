@@ -105,21 +105,46 @@ class SMBus2I2CAdapter:
     def _find_bus(self, SMBus, i2c_msg, address: int):
         """Scan available I2C buses for the AHT20 at the expected address."""
         import glob
+        import os
         bus_paths = sorted(glob.glob('/dev/i2c-*'))
         errors = []
         for path in bus_paths:
             bus_num = int(path.split('-')[-1])
             try:
                 bus = SMBus(bus_num)
-                msg = i2c_msg.read(address, 1)
+                # Probe with a write (status request) — AHT20 may NACK bare reads
+                msg = i2c_msg.write(address, [0x71])
                 bus.i2c_rdwr(msg)
                 return bus
+            except OSError as e:
+                errors.append("bus {}: {}".format(bus_num, e))
+                try:
+                    bus.close()
+                except Exception:
+                    pass
             except Exception as e:
                 errors.append("bus {}: {}".format(bus_num, e))
                 try:
                     bus.close()
                 except Exception:
                     pass
+
+        # Last resort: use ioctl I2C_SLAVE directly (bypasses smbus2 transaction layer)
+        import fcntl
+        I2C_SLAVE = 0x0703
+        for path in bus_paths:
+            try:
+                fd = os.open(path, os.O_RDWR)
+                fcntl.ioctl(fd, I2C_SLAVE, address)
+                os.close(fd)
+                bus_num = int(path.split('-')[-1])
+                return SMBus(bus_num)
+            except Exception:
+                try:
+                    os.close(fd)
+                except Exception:
+                    pass
+
         raise FileNotFoundError(
             "AHT20 not found at address 0x{:02x} on any I2C bus. {}"
             .format(address, "; ".join(errors))
