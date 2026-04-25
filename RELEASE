@@ -1,6 +1,34 @@
 Release Notes:
 
 --------------------
+2.32 Release
+--------------------
+SETUP WIZARD:
+- Added "Exit to Dashboard" link in wizard header, visible on every step
+
+I2C SETUP FIX:
+- Fixed I2C not being enabled after fresh install on Pi 4 and Pi 5
+  * Old setup_i2c.sh appended dtparam lines to the end of config.txt,
+    which could land inside conditional [pi4]/[cm4] sections and be ignored
+  * Now uses raspi-config nonint do_i2c 0 which handles config.txt
+    section placement correctly
+  * Falls back to manual config.txt editing only when raspi-config
+    is not present
+  * Detects Pi 5 Bookworm config path (/boot/firmware/config.txt)
+  * Removed i2c1_baudrate=10000 throttle that was unnecessary
+
+HIVE BODY CONFIGURATION FIX:
+- Fixed "Save Configuration" not working on newly installed hives
+  * Weight input fields had step="0.1" which made browser HTML5
+    validation reject pre-populated values like 5.63 — changed to
+    step="any" so any decimal is accepted
+  * Added defensive auto-creation of hiveequipmentweight table and row
+  * Added auto-creation of hive stack columns (HIVE_STACK_ORDER,
+    SENSOR_TEMP_POSITION, SENSOR_TEMP_LABEL, FEEDER_HAS_SYRUP)
+  * Changed INNER JOIN to LEFT JOIN for fresh install resilience
+  * Added try/catch around save with user-visible error message
+
+--------------------
 2.31 Release
 --------------------
 SETUP WIZARD:
