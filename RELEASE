@@ -1,6 +1,29 @@
 Release Notes:
 
 --------------------
+2.30 Release
+--------------------
+NEW SENSOR: ADAFRUIT AHT20 (I2C):
+- Custom zero-dependency Python driver using raw Linux I2C file descriptors
+- Auto-detects I2C bus by scanning /dev/i2c-* and probing for device at 0x38
+- Works on Pi 4 and Pi 5 without pigpio, smbus2, or any pip packages
+- Bash wrapper with retry loop, validation, and dewpoint calculation
+- Wiring note on config page: "Ensure AHT20 is plugged into the TSL port
+  (farthest port from the ethernet jack)"
+
+NEW SENSOR: ADAFRUIT SHT41 TRINKEY (USB):
+- Custom zero-dependency Python driver using stdlib termios for serial I/O
+- Trinkey connects via USB and presents as /dev/ttyACM0 (serial at 115200 baud)
+- Handles both factory firmware (4-field CSV) and simple firmware (2-field CSV)
+- No pyserial or other pip packages required
+- Bash wrapper with retry loop, validation, and dewpoint calculation
+- USB connection note on config page
+
+INSTRUMENT CONFIG:
+- Added AHT20 and SHT41 Trinkey to temperature sensor type selector
+- Conditional help blocks with wiring/connection guidance for each sensor
+
+--------------------
 2.29 Release
 --------------------
 IN-HIVE FRAME FEEDER PLACEMENT:

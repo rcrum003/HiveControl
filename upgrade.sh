@@ -796,6 +796,16 @@ if [[ "$Installed_Ver" < "2.25" ]]; then
 	fi
 fi
 
+if [[ "$Installed_Ver" < "2.30" ]]; then
+	# AHT20 (I2C) and SHT41 Trinkey (USB) temperature/humidity sensors
+	# Both use zero-dependency Python drivers — no pip packages needed
+	# Files are copied by the generic software/scripts cp -Rp above;
+	# just ensure the new bash wrappers are executable
+	echo "Setting up AHT20 and SHT41 Trinkey sensor scripts"
+	sudo chmod u+x /home/HiveControl/scripts/temp/aht20.sh 2>/dev/null || true
+	sudo chmod u+x /home/HiveControl/scripts/temp/sht41trinkey.sh 2>/dev/null || true
+fi
+
 if [[ "$Installed_Ver" < "2.26" ]]; then
 	# USB Camera Livestream — install mjpg-streamer and update init.d service
 	echo "Installing USB camera livestream support"
