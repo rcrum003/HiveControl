@@ -66,6 +66,11 @@ switch ($sensor) {
         $valueheader = "EPA AirNow Data";
         break;
 
+    case "pollen":
+        $value = shell_exec("/usr/bin/timeout 30 sudo /home/HiveControl/scripts/weather/pollen/getpollen.sh 2>&1 | tail -10");
+        $valueheader = "Pollen Data";
+        break;
+
     case "blescan":
         $value = shell_exec("/usr/bin/timeout 25 sudo python3 /home/HiveControl/software/broodminder/BM_Scan_bleak.py 15 2>&1");
         $valueheader = "BLE Scan Results";
@@ -73,7 +78,7 @@ switch ($sensor) {
 
     default:
         $valueheader = "Unknown sensor type";
-        $value = "Specify a valid sensor: hivetemp, hiveweight, hivelux, weather, camera, airquality, airnow";
+        $value = "Specify a valid sensor: hivetemp, hiveweight, hivelux, weather, camera, airquality, airnow, pollen";
         break;
 }
 

@@ -485,6 +485,9 @@ $bee_pcls = $bee_on ? status_panel_class($sh['beecount']['status']) : 'panel-def
             <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="PI"<?= chk($result['CAMERATYPE'], 'PI') ?>> Pi Camera</label>
             <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="USB"<?= chk($result['CAMERATYPE'], 'USB') ?>> USB</label>
         </div>
+        <hr>
+        <button type="button" class="btn btn-info btn-sm test-sensor" data-sensor="camera" data-result="#test-camera"><i class="fa fa-refresh"></i> Test Camera</button>
+        <span id="test-camera" style="margin-left:10px"></span>
     </div>
 </div>
 
@@ -627,6 +630,10 @@ foreach ($wst as $wv => $wl) {
             </div>
         </div>
 
+        <hr>
+        <button type="button" class="btn btn-info btn-sm test-sensor" data-sensor="weather" data-result="#test-weather"><i class="fa fa-refresh"></i> Test Weather</button>
+        <span id="test-weather" style="margin-left:10px"></span>
+
     </div>
 </div>
 
@@ -747,6 +754,9 @@ $air_pcls = $air_on ? status_panel_class($sh['air']['status']) : 'panel-default'
                 <input type="text" name="AIR_LOCAL_URL" class="form-control" style="max-width:350px" value="<?= h($result['AIR_LOCAL_URL'] ?? '') ?>" placeholder="http://192.168.1.x/json">
             </div>
         </div>
+        <hr>
+        <button type="button" class="btn btn-info btn-sm test-sensor" data-sensor="airquality" data-result="#test-air"><i class="fa fa-refresh"></i> Test Air Quality</button>
+        <span id="test-air" style="margin-left:10px"></span>
     </div>
 </div>
 
@@ -779,6 +789,9 @@ $epa_pcls = $epa_on ? status_panel_class($sh['epa']['status']) : 'panel-default'
                 <span class="input-group-addon">miles</span>
             </div>
         </div>
+        <hr>
+        <button type="button" class="btn btn-info btn-sm test-sensor" data-sensor="airnow" data-result="#test-epa"><i class="fa fa-refresh"></i> Test EPA AirNow</button>
+        <span id="test-epa" style="margin-left:10px"></span>
     </div>
 </div>
 
@@ -817,6 +830,9 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
                 </div>
             </div>
         </div>
+        <hr>
+        <button type="button" class="btn btn-info btn-sm test-sensor" data-sensor="pollen" data-result="#test-pollen"><i class="fa fa-refresh"></i> Test Pollen</button>
+        <span id="test-pollen" style="margin-left:10px"></span>
     </div>
 </div>
 
