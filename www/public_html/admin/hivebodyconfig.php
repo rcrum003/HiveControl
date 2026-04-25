@@ -13,9 +13,30 @@ function test_input($data) {
 // Ensure frame feeder columns exist (safe on older DBs that haven't run upgrade)
 try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN FRAME_FEEDER_POSITION INTEGER DEFAULT -1"); } catch (Exception $e) {}
 try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN FRAME_FEEDER_LABEL TEXT DEFAULT 'Frame Feeder'"); } catch (Exception $e) {}
+// Ensure hive stack columns exist
+try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN HIVE_STACK_ORDER TEXT DEFAULT ''"); } catch (Exception $e) {}
+try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN SENSOR_TEMP_POSITION INTEGER DEFAULT -1"); } catch (Exception $e) {}
+try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN SENSOR_TEMP_LABEL TEXT DEFAULT 'Hive Temp'"); } catch (Exception $e) {}
+try { $conn->exec("ALTER TABLE hiveconfig ADD COLUMN FEEDER_HAS_SYRUP INTEGER DEFAULT 0"); } catch (Exception $e) {}
+
+// Ensure hiveequipmentweight table and row exist
+try {
+    $conn->exec("CREATE TABLE IF NOT EXISTS hiveequipmentweight (
+        HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT REAL DEFAULT 0, HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT REAL DEFAULT 0,
+        HIVE_FEEDER_WEIGHT REAL DEFAULT 0, HIVE_TOP_INNER_COVER_WEIGHT REAL DEFAULT 0,
+        HIVE_TOP_TELE_COVER_WEIGHT REAL DEFAULT 0, HIVE_TOP_MIGRATORY_COVER_WEIGHT REAL DEFAULT 0,
+        HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT REAL DEFAULT 0, HIVE_BODY_MEDIUM_FOUNDATION_LESS_WEIGHT REAL DEFAULT 0,
+        HIVE_BODY_DEEP_FOUNDATION_WEIGHT REAL DEFAULT 0, HIVE_BODY_DEEP_FOUNDATION_LESS_WEIGHT REAL DEFAULT 0,
+        HIVE_BODY_SHAL_FOUNDATION_WEIGHT REAL DEFAULT 0, HIVE_BODY_SHAL_FOUNDATION_LESS_WEIGHT REAL DEFAULT 0,
+        HIVE_TOP_WEIGHT REAL DEFAULT 0, HIVE_COMPUTER_WEIGHT REAL DEFAULT 0, HIVE_MISC_WEIGHT REAL DEFAULT 0, id INTEGER DEFAULT 1)");
+    $chk = $conn->query("SELECT COUNT(*) FROM hiveequipmentweight WHERE id = 1")->fetchColumn();
+    if ($chk == 0) {
+        $conn->exec("INSERT INTO hiveequipmentweight (id) VALUES (1)");
+    }
+} catch (Exception $e) {}
 
 // Load current config
-$sth = $conn->prepare("SELECT * FROM hiveconfig INNER JOIN hiveequipmentweight ON hiveconfig.id = hiveequipmentweight.id WHERE hiveconfig.id = 1");
+$sth = $conn->prepare("SELECT * FROM hiveconfig LEFT JOIN hiveequipmentweight ON hiveconfig.id = hiveequipmentweight.id WHERE hiveconfig.id = 1");
 $sth->execute();
 $result = $sth->fetch(PDO::FETCH_ASSOC);
 
@@ -44,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $v->rule('integer', $intFields)->message('{field} must be a whole number');
 
     if ($v->validate()) {
+      try {
         // Get and increment version
         $ver = $conn->prepare("SELECT version FROM hiveconfig WHERE id = 1");
         $ver->execute();
@@ -114,7 +136,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             HIVE_STACK_ORDER = ?,
             SENSOR_TEMP_POSITION = ?,
             SENSOR_TEMP_LABEL = ?,
-            FEEDER_HAS_SYRUP = ?
+            FEEDER_HAS_SYRUP = ?,
+            FRAME_FEEDER_POSITION = ?,
+            FRAME_FEEDER_LABEL = ?
             WHERE id = 1");
         $doit2->execute([
             $version,
@@ -130,20 +154,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stackOrder,
             $sensorPos,
             $sensorLabel,
-            $feederSyrup
+            $feederSyrup,
+            $frameFeederPos,
+            $frameFeederLabel
         ]);
 
-        // Frame feeder columns may not exist on older DBs — save separately
-        try {
-            $ff = $conn->prepare("UPDATE hiveconfig SET FRAME_FEEDER_POSITION = ?, FRAME_FEEDER_LABEL = ? WHERE id = 1");
-            $ff->execute([$frameFeederPos, $frameFeederLabel]);
-        } catch (Exception $e) {}
-
         // Refresh result
-        $sth2 = $conn->prepare("SELECT * FROM hiveconfig INNER JOIN hiveequipmentweight ON hiveconfig.id = hiveequipmentweight.id WHERE hiveconfig.id = 1");
+        $sth2 = $conn->prepare("SELECT * FROM hiveconfig LEFT JOIN hiveequipmentweight ON hiveconfig.id = hiveequipmentweight.id WHERE hiveconfig.id = 1");
         $sth2->execute();
         $result = $sth2->fetch(PDO::FETCH_ASSOC);
         $saveMessage = 'Hive configuration saved successfully.';
+      } catch (Exception $e) {
+        $saveError = 'Save failed: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+      }
     } else {
         $errs = array_values($v->errors());
         $errMsgs = [];
@@ -275,7 +298,7 @@ $jsConfig = [
                             <div class="card-info">
                                 <h5><?php echo htmlspecialchars($item['label']); ?></h5>
                                 <label>Weight (lbs):</label>
-                                <input type="number" step="0.1" min="0" class="form-control input-sm weight-input"
+                                <input type="number" step="any" min="0" class="form-control input-sm weight-input"
                                        name="<?php echo $item['weightKey']; ?>"
                                        data-weight-key="<?php echo $item['weightKey']; ?>"
                                        value="<?php echo htmlspecialchars($result[$item['weightKey']] ?? '0'); ?>">
@@ -299,7 +322,7 @@ $jsConfig = [
                             <div class="card-info">
                                 <h5><?php echo htmlspecialchars($item['label']); ?></h5>
                                 <label>Weight (lbs):</label>
-                                <input type="number" step="0.1" min="0" class="form-control input-sm weight-input"
+                                <input type="number" step="any" min="0" class="form-control input-sm weight-input"
                                        name="<?php echo $item['weightKey']; ?>"
                                        data-weight-key="<?php echo $item['weightKey']; ?>"
                                        value="<?php echo htmlspecialchars($result[$item['weightKey']] ?? '0'); ?>">
@@ -321,7 +344,7 @@ $jsConfig = [
                             <div class="card-info">
                                 <h5><?php echo htmlspecialchars($item['label']); ?></h5>
                                 <label>Weight (lbs):</label>
-                                <input type="number" step="0.1" min="0" class="form-control input-sm weight-input"
+                                <input type="number" step="any" min="0" class="form-control input-sm weight-input"
                                        name="<?php echo $item['weightKey']; ?>"
                                        data-weight-key="<?php echo $item['weightKey']; ?>"
                                        value="<?php echo htmlspecialchars($result[$item['weightKey']] ?? '0'); ?>">
@@ -340,19 +363,19 @@ $jsConfig = [
                         <div class="fixed-weights">
                             <div class="fw-item">
                                 <label>Hive Top Weight (lbs)</label>
-                                <input type="number" step="0.1" min="0" class="form-control input-sm fixed-weight-input"
+                                <input type="number" step="any" min="0" class="form-control input-sm fixed-weight-input"
                                        name="HIVE_TOP_WEIGHT" data-fixed-key="HIVE_TOP_WEIGHT"
                                        value="<?php echo htmlspecialchars($result['HIVE_TOP_WEIGHT'] ?? '0'); ?>">
                             </div>
                             <div class="fw-item">
                                 <label>Computer Weight (lbs)</label>
-                                <input type="number" step="0.1" min="0" class="form-control input-sm fixed-weight-input"
+                                <input type="number" step="any" min="0" class="form-control input-sm fixed-weight-input"
                                        name="HIVE_COMPUTER_WEIGHT" data-fixed-key="HIVE_COMPUTER_WEIGHT"
                                        value="<?php echo htmlspecialchars($result['HIVE_COMPUTER_WEIGHT'] ?? '0'); ?>">
                             </div>
                             <div class="fw-item">
                                 <label>Misc Weight (lbs)</label>
-                                <input type="number" step="0.1" min="0" class="form-control input-sm fixed-weight-input"
+                                <input type="number" step="any" min="0" class="form-control input-sm fixed-weight-input"
                                        name="HIVE_MISC_WEIGHT" data-fixed-key="HIVE_MISC_WEIGHT"
                                        value="<?php echo htmlspecialchars($result['HIVE_MISC_WEIGHT'] ?? '0'); ?>">
                             </div>
