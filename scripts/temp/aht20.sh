@@ -1,6 +1,6 @@
 #!/bin/bash
 # read the Adafruit AHT20 Temp/Humidity Sensor
-# Version 1.0
+# Version 1.1
 # Supporting the HiveControl project
 # gets and returns data like the temperhum
 
@@ -37,7 +37,13 @@ do
 
         aht20STATUS=$(echo $aht20_out |awk '{print $1}')
 
-        if [[ "$aht20STATUS" != "Error" ]]; then
+        # Check that we got numeric output (not a traceback or error message)
+        if [[ "$aht20STATUS" == "Error" ]] || [[ "$aht20STATUS" == "Traceback" ]] || [[ -z "$aht20STATUS" ]] || ! echo "$aht20STATUS" | grep -qE '^-?[0-9]'; then
+
+            message="$aht20_out"
+            DATA_GOOD=0
+
+          else
 
                   TEMPF_RAW=$(echo $aht20_out | awk '{print $1}')
                   TEMPC_RAW=$(echo $aht20_out | awk '{print $2}')
@@ -54,7 +60,7 @@ do
                   TEMP_MINTEST=$(echo "$TEMPF > -50" | bc)
                   HUMIDITY_MAXTEST=$(echo "$HUMIDITY > 101" | bc)
                   TEMP_MAXTEST=$(echo "$TEMPF > 150" | bc)
-                  if [ $HUMIDITY_MINTEST == "0" ] && [ $TEMP_MINTEST != "0" ] && [ $HUMIDITY_MAXTEST == "0" ] && [ $TEMP_MAXTEST == "0" ]
+                  if [ "$HUMIDITY_MINTEST" == "0" ] && [ "$TEMP_MINTEST" != "0" ] && [ "$HUMIDITY_MAXTEST" == "0" ] && [ "$TEMP_MAXTEST" == "0" ]
                     then
                    echo $TEMPF $HUMIDITY $dewpoint_f $TEMPC
                   else
@@ -63,11 +69,6 @@ do
                       exit
                   fi
                 DATA_GOOD=1
-
-          else
-
-            message="$aht20_out"
-            DATA_GOOD=0
 
           fi
 
