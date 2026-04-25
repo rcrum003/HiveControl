@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="121"
+Upgrade_ver="122"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
