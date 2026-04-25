@@ -300,6 +300,9 @@ foreach ($ttypes as $tv => $tl) {
                 <input type="text" name="HIVE_TEMP_SUB" class="form-control" style="max-width:100px" value="<?= h($result['HIVE_TEMP_SUB']) ?>">
             </div>
         </div>
+        <div class="temp-option" data-types="aht20" style="<?= $result['TEMPTYPE'] == 'aht20' ? '' : 'display:none' ?>">
+            <p class="help-block">Ensure AHT20 is plugged into the TSL port (farthest port from the ethernet jack).</p>
+        </div>
         <div class="temp-option" data-types="dht22,dht21" style="<?= in_array($result['TEMPTYPE'], ['dht22','dht21']) ? '' : 'display:none' ?>">
             <div class="form-group"><label>GPIO Pin</label>
                 <input type="text" name="HIVE_TEMP_GPIO" class="form-control" style="max-width:80px" value="<?= h($result['HIVE_TEMP_GPIO']) ?>">
