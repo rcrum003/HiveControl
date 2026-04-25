@@ -336,7 +336,8 @@ function stepConfigured($config, $step) {
 </head>
 <body>
     <div class="wizard-container">
-        <div class="wizard-header">
+        <div class="wizard-header" style="position:relative">
+            <a href="/pages/index.php" style="position:absolute;top:12px;right:15px;color:rgba(255,255,255,0.85);font-size:13px;text-decoration:none" title="Return to Dashboard"><i class="fa fa-arrow-left"></i> Exit to Dashboard</a>
             <i class="fa fa-home" style="font-size: 40px;"></i>
             <h1>HiveControl Setup Wizard</h1>
             <p>Configure your sensors step by step</p>
