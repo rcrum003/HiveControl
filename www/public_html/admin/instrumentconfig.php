@@ -650,6 +650,7 @@ foreach ($wst as $wv => $wl) {
                         </optgroup>
                     </select>
                     <div id="fb1-info" style="margin-top:5px"></div>
+                    <div id="fb1-key" style="margin-top:8px"></div>
                 </div>
             </div>
             <div class="col-sm-6">
@@ -668,6 +669,7 @@ foreach ($wst as $wv => $wl) {
                         </optgroup>
                     </select>
                     <div id="fb2-info" style="margin-top:5px"></div>
+                    <div id="fb2-key" style="margin-top:8px"></div>
                 </div>
             </div>
         </div>
@@ -902,7 +904,33 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
             updateFallbackInfo();
         });
 
-        // Fallback warnings
+        // Fallback warnings and API key inputs
+        var fbKeyMap = {
+            openweathermap: { field: 'KEY_OPENWEATHERMAP', label: 'OpenWeatherMap API Key', url: 'https://openweathermap.org/api', note: 'Free: 1,000 calls/day' },
+            weatherapi:     { field: 'KEY_WEATHERAPI',     label: 'WeatherAPI.com API Key', url: 'https://www.weatherapi.com/signup.aspx', note: 'Free: 1M calls/month' },
+            visualcrossing: { field: 'KEY_VISUALCROSSING', label: 'Visual Crossing API Key', url: 'https://www.visualcrossing.com/sign-up', note: 'Free: 1,000 calls/day' },
+            pirateweather:  { field: 'KEY_PIRATEWEATHER',  label: 'Pirate Weather API Key',  url: 'https://pirateweather.net', note: 'Free: 20,000 calls/day' }
+        };
+
+        function renderFbKey(containerSel, provider) {
+            var $c = $(containerSel);
+            var primarySrc = $('#weather-source').val();
+            if (!provider || !fbKeyMap[provider] || provider === primarySrc) { $c.empty(); return; }
+            var info = fbKeyMap[provider];
+            var primaryInput = $('input[name="' + info.field + '"]');
+            var curVal = primaryInput.length ? primaryInput.val() : '';
+            $c.html(
+                '<label>' + info.label + '</label>' +
+                '<input type="text" class="form-control fb-key-input" data-target="' + info.field + '" style="max-width:400px" value="' + $('<span>').text(curVal).html() + '">' +
+                '<p class="help-block">' + info.note + '. <a href="' + info.url + '" target="_blank">Get a key</a></p>'
+            );
+        }
+
+        $(document).on('input change', '.fb-key-input', function() {
+            var target = $(this).data('target');
+            $('input[name="' + target + '"]').val($(this).val());
+        });
+
         function updateFallbackInfo() {
             var p = $('#weather-source').val();
             var f1 = $('#weather-fb1').val();
@@ -921,6 +949,8 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
             } else {
                 $('#fb2-info').html('<small class="text-muted">Optional third-tier source.</small>');
             }
+            renderFbKey('#fb1-key', f1);
+            renderFbKey('#fb2-key', f2);
         }
         $('#weather-fb1, #weather-fb2').on('change', updateFallbackInfo);
         updateFallbackInfo();
