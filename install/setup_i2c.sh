@@ -10,46 +10,48 @@ if [ "$(id -u)" != 0 ]; then
   exit 1
 fi
 
-# Detect config.txt location (Pi 5 / Bookworm uses /boot/firmware/config.txt)
-if [ -f /boot/firmware/config.txt ]; then
-  CONFIG_TXT="/boot/firmware/config.txt"
-else
-  CONFIG_TXT="/boot/config.txt"
-fi
-echo ">>> Using config: $CONFIG_TXT"
-
-# enable I2C on Raspberry Pi
 echo '>>> Enable I2C'
-if grep -q 'i2c-bcm2708' /etc/modules; then
-  echo 'Seems i2c-bcm2708 module already exists, skip this step.'
+
+# Use raspi-config nonint if available (handles config.txt sections correctly)
+if command -v raspi-config >/dev/null 2>&1; then
+  echo 'Using raspi-config to enable I2C...'
+  raspi-config nonint do_i2c 0
+  echo 'I2C enabled via raspi-config.'
 else
-  echo 'i2c-bcm2708' >> /etc/modules
-fi
-if grep -q 'i2c-dev' /etc/modules; then
-  echo 'Seems i2c-dev module already exists, skip this step.'
-else
-  echo 'i2c-dev' >> /etc/modules
-fi
-if grep -q 'dtparam=i2c1=on' "$CONFIG_TXT"; then
-  echo 'Seems i2c1 parameter already set, skip this step.'
-else
-  echo 'dtparam=i2c1=on' >> "$CONFIG_TXT"
-fi
-if grep -q 'dtparam=i2c1_baudrate=10000' "$CONFIG_TXT"; then
-  echo "Seems dtparam=i2c1_baudrate=10000 is already set, skip this step."
-else
-  echo 'dtparam=i2c1_baudrate=10000' >> "$CONFIG_TXT"
-fi
-if grep -q 'dtparam=i2c_arm=on' "$CONFIG_TXT"; then
-  echo 'Seems i2c_arm parameter already set, skip this step.'
-else
-  echo 'dtparam=i2c_arm=on' >> "$CONFIG_TXT"
-fi
-if [ -f /etc/modprobe.d/raspi-blacklist.conf ]; then
-  sed -i 's/^blacklist spi-bcm2708/#blacklist spi-bcm2708/' /etc/modprobe.d/raspi-blacklist.conf
-  sed -i 's/^blacklist i2c-bcm2708/#blacklist i2c-bcm2708/' /etc/modprobe.d/raspi-blacklist.conf
-else
-  echo 'File raspi-blacklist.conf does not exist, skip this step.'
+  echo 'raspi-config not found, configuring manually...'
+
+  # Detect config.txt location (Pi 5 / Bookworm uses /boot/firmware/config.txt)
+  if [ -f /boot/firmware/config.txt ]; then
+    CONFIG_TXT="/boot/firmware/config.txt"
+  else
+    CONFIG_TXT="/boot/config.txt"
+  fi
+  echo "Using config: $CONFIG_TXT"
+
+  if grep -q 'i2c-bcm2708' /etc/modules; then
+    echo 'Seems i2c-bcm2708 module already exists, skip this step.'
+  else
+    echo 'i2c-bcm2708' >> /etc/modules
+  fi
+  if grep -q 'i2c-dev' /etc/modules; then
+    echo 'Seems i2c-dev module already exists, skip this step.'
+  else
+    echo 'i2c-dev' >> /etc/modules
+  fi
+  if grep -q 'dtparam=i2c1=on' "$CONFIG_TXT"; then
+    echo 'Seems i2c1 parameter already set, skip this step.'
+  else
+    echo 'dtparam=i2c1=on' >> "$CONFIG_TXT"
+  fi
+  if grep -q 'dtparam=i2c_arm=on' "$CONFIG_TXT"; then
+    echo 'Seems i2c_arm parameter already set, skip this step.'
+  else
+    echo 'dtparam=i2c_arm=on' >> "$CONFIG_TXT"
+  fi
+  if [ -f /etc/modprobe.d/raspi-blacklist.conf ]; then
+    sed -i 's/^blacklist spi-bcm2708/#blacklist spi-bcm2708/' /etc/modprobe.d/raspi-blacklist.conf
+    sed -i 's/^blacklist i2c-bcm2708/#blacklist i2c-bcm2708/' /etc/modprobe.d/raspi-blacklist.conf
+  fi
 fi
 
 # Load i2c-dev module immediately (takes effect without reboot)
