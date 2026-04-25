@@ -20,17 +20,23 @@ source /home/HiveControl/scripts/data/logger.inc
 DATE=$(TZ=":$TIMEZONE" date '+%F')
 LOGDATE=$(TZ=":$TIMEZONE" date '+%F %T')
 DATASOURCE="$HOMEDIR/data/hive-data.db"
+TEST_MODE=0
+if [ "${1:-}" = "--test" ]; then
+	TEST_MODE=1
+fi
 
 # --- Check if pollen collection is enabled ---
-if [ "$ENABLE_POLLEN" = "no" ]; then
+if [ "$ENABLE_POLLEN" = "no" ] && [ $TEST_MODE -eq 0 ]; then
 	exit 0
 fi
 
 # --- Check if today already has data ---
-existing=$(sqlite3 "$DATASOURCE" "SELECT COUNT(*) FROM pollen WHERE date = '$DATE';")
-if [ "$existing" -gt 0 ]; then
-	loglocal "$LOGDATE" POLLEN INFO "Today ($DATE) already has pollen data, skipping"
-	exit 0
+if [ $TEST_MODE -eq 0 ]; then
+	existing=$(sqlite3 "$DATASOURCE" "SELECT COUNT(*) FROM pollen WHERE date = '$DATE';")
+	if [ "$existing" -gt 0 ]; then
+		loglocal "$LOGDATE" POLLEN INFO "Today ($DATE) already has pollen data, skipping"
+		exit 0
+	fi
 fi
 
 # --- Severity/index helpers for Open-Meteo grains/m³ ---
@@ -525,6 +531,7 @@ if [ -z "$POL_LEVEL" ]; then
 fi
 
 if [ -z "$POL_LEVEL" ] || [[ ! "$POL_LEVEL" =~ ^[0-9]+$ ]]; then
+	echo "ERROR: Could not get valid pollen data from any source (level='$POL_LEVEL')"
 	loglocal "$LOGDATE" POLLEN ERROR "Could not get valid pollen data from any source (level='$POL_LEVEL')"
 	exit 1
 fi
@@ -532,5 +539,10 @@ fi
 # Step 4: Insert into database
 POL_TYPES_SAFE="${POL_TYPES//\'/\'\'}"
 sqlite3 "$DATASOURCE" "INSERT OR IGNORE INTO pollen (date, pollenlevel, pollentypes) VALUES ('$DATE', $POL_LEVEL, '$POL_TYPES_SAFE');"
+
+echo "Date: $DATE"
+echo "Source: ${POLLEN_SOURCE:-unknown}"
+echo "Level: $POL_LEVEL"
+echo "Types: ${POL_TYPES:-N/A}"
 
 loglocal "$LOGDATE" POLLEN INFO "Stored: Date=$DATE Level=$POL_LEVEL Types=$POL_TYPES Source=$POLLEN_SOURCE"
