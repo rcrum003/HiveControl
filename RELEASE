@@ -1,6 +1,48 @@
 Release Notes:
 
 --------------------
+2.31 Release
+--------------------
+SETUP WIZARD:
+- Added AHT20 (I2C) and SHT41 Trinkey (USB) to temperature sensor selection
+- Added AHT20 and SHT41 Trinkey to local weather sensor type list
+
+BROODMINDER BLE DISCOVER:
+- New "Discover Devices" button in BroodMinder config panel
+  * Runs 15-second BLE scan for nearby BroodMinder sensors
+  * Displays found devices as clickable MAC address labels
+  * Click a device to auto-fill the BLE address field
+  * Available in both setup wizard and instrument config pages
+  * New livevalue.php "blescan" endpoint for AJAX-driven scanning
+
+WEATHER FALLBACK API KEYS:
+- Fallback weather source dropdowns now show API key input when a
+  key-required provider is selected (OpenWeatherMap, WeatherAPI,
+  Visual Crossing, Pirate Weather)
+  * Key input with signup link appears dynamically below dropdown
+  * Pre-populates from existing key if previously entered
+  * Values sync to primary-section form fields on save
+  * Hidden when fallback matches primary (key field already visible)
+
+POLLEN CHART:
+- Pollen detail chart now shows blooming pollen types next to each dot
+  * Data labels above markers display active pollen species
+  * Tooltip enriched with "Blooming: ..." line
+
+SENSOR HEALTH DIAGNOSTICS:
+- Sensor health dashboard now shows a diagnostic reason when sensors
+  report "No Data" or 0% uptime
+  * Per-sensor hints (check wiring, API key, internet, etc.)
+  * Weather/pollen/EPA sensors pull last error from weather_health table
+  * Warning shown above "View Data" link in panel footer
+
+INSTALL FIX:
+- Fresh installs now apply DB patches 44-45 (ENABLE_POLLEN and
+  FRAME_FEEDER columns) — fixes "no such column: ENABLE_POLLEN"
+  error on newly installed hives
+- Updated DBVERSION from 35 to 45
+
+--------------------
 2.30 Release
 --------------------
 NEW SENSOR: ADAFRUIT AHT20 (I2C):
