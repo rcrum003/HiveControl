@@ -69,14 +69,63 @@ try {
 $temp_unit = $is_metric ? '°C' : '°F';
 $weight_unit = $is_metric ? 'kg' : 'lb';
 
+function get_sensor_diagnostic($key, $sensor, $uptime, $conn) {
+    if ($sensor['status'] === 'green' && $uptime >= 75) return '';
+
+    $hints = [
+        'hivetemp' => 'Check sensor wiring and verify the correct Sensor Type is selected in Instrument Config.',
+        'weight'   => 'Check scale wiring and verify the correct Scale Type is selected in Instrument Config.',
+        'weather'  => 'Check internet connectivity and weather provider API key in Instrument Config.',
+        'light'    => 'Check light sensor wiring and verify it is enabled in Instrument Config.',
+        'beecount' => 'Check camera connection and verify Bee Counter is enabled in Instrument Config.',
+        'air'      => 'Check PurpleAir sensor ID and internet connectivity.',
+        'epa'      => 'Verify AirNow API key and ZIP code in Instrument Config.',
+        'pollen'   => 'Pollen data is fetched daily at noon. Check internet connectivity.',
+        'gdd'      => 'GDD is calculated from weather data. Ensure weather collection is working.',
+    ];
+
+    $reason = '';
+    if ($sensor['status_label'] === 'No Data' && !$sensor['last_reading']) {
+        $reason = 'No readings have ever been recorded for this sensor.';
+    } elseif ($sensor['status_label'] === 'No Data') {
+        $reason = 'Sensor is enabled but last reading contained no valid data.';
+    } elseif ($sensor['status_label'] === 'Stale') {
+        $reason = 'Last reading is older than expected — sensor may have stopped reporting.';
+    } elseif ($sensor['status_label'] === 'Out of Range') {
+        $reason = 'Latest reading is outside the expected range — sensor may be malfunctioning.';
+    } elseif ($uptime == 0) {
+        $reason = 'No valid readings were recorded during the selected period.';
+    }
+
+    $health_roles = ['weather' => 'primary', 'pollen' => 'pollen', 'epa' => 'primary'];
+    if (isset($health_roles[$key])) {
+        try {
+            $role = $health_roles[$key];
+            $h_sth = $conn->prepare("SELECT error_reason, provider, timestamp FROM weather_health WHERE role = :role AND success = 0 AND error_reason IS NOT NULL AND error_reason != '' ORDER BY timestamp DESC LIMIT 1");
+            $h_sth->execute([':role' => $role]);
+            $last_err = $h_sth->fetch(PDO::FETCH_ASSOC);
+            if ($last_err && !empty($last_err['error_reason'])) {
+                $reason .= ' Last error from ' . htmlspecialchars($last_err['provider']) . ': "' . htmlspecialchars($last_err['error_reason']) . '" (' . htmlspecialchars($last_err['timestamp']) . ').';
+            }
+        } catch (PDOException $e) {}
+    }
+
+    if ($reason) {
+        $reason .= ' ' . ($hints[$key] ?? '');
+    }
+
+    return trim($reason);
+}
+
 // Helper to render a sensor section
-function render_sensor_section($key, $sensor, $stats_data, $rh_sum, $stats_rows, $chart_id) {
+function render_sensor_section($key, $sensor, $stats_data, $rh_sum, $stats_rows, $chart_id, $conn = null) {
     if (!$sensor['enabled'] && !$sensor['always']) return;
     $lbl = status_label_class($sensor['status']);
     $uptime = isset($rh_sum[$key]) ? $rh_sum[$key]['uptime_pct'] : 0;
     $gaps = isset($rh_sum[$key]) ? $rh_sum[$key]['gap_count'] : 0;
     $total_p = isset($rh_sum[$key]) ? $rh_sum[$key]['total_periods'] : 0;
     $uptime_cls = $uptime >= 95 ? 'success' : ($uptime >= 75 ? 'warning' : 'danger');
+    $diagnostic = $conn ? get_sensor_diagnostic($key, $sensor, $uptime, $conn) : '';
     ?>
             <div class="row" id="section-<?PHP echo $key; ?>">
                 <div class="col-lg-12">
@@ -108,6 +157,9 @@ function render_sensor_section($key, $sensor, $stats_data, $rh_sum, $stats_rows,
                             </div>
                         </div>
                         <div class="panel-footer">
+                            <?PHP if ($diagnostic) { ?>
+                            <p class="text-danger" style="margin:0 0 5px 0"><i class="fa fa-exclamation-triangle"></i> <?PHP echo $diagnostic; ?></p>
+                            <?PHP } ?>
                             <a href="<?PHP echo htmlspecialchars($sensor['detail_url']); ?>">View Data <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
@@ -193,7 +245,7 @@ render_sensor_section('hivetemp', $sensors['hivetemp'], $stats['hivetemp'], $rh_
     'Max / Min' => (is_numeric($stats['hivetemp']['max_temp']) ? $stats['hivetemp']['max_temp'] : '--') . ' / ' . (is_numeric($stats['hivetemp']['min_temp']) ? $stats['hivetemp']['min_temp'] : '--') . $temp_unit,
     'Avg Humidity' => is_numeric($stats['hivetemp']['avg_hum']) ? $stats['hivetemp']['avg_hum'] . '%' : '--',
     'Readings' => intval($stats['hivetemp']['readings']),
-], 'chart-hivetemp');
+], 'chart-hivetemp', $conn);
 ?>
 
             <!-- Weight Section -->
@@ -204,7 +256,7 @@ render_sensor_section('weight', $sensors['weight'], $stats['weight'], $rh_summar
     'Max / Min' => (is_numeric($stats['weight']['max_wt']) ? $stats['weight']['max_wt'] : '--') . ' / ' . (is_numeric($stats['weight']['min_wt']) ? $stats['weight']['min_wt'] : '--') . ' ' . $weight_unit,
     'Gain/Loss' => ($diff !== null ? ($diff >= 0 ? '+' : '') . $diff . ' ' . $weight_unit : '--'),
     'Readings' => intval($stats['weight']['readings']),
-], 'chart-weight');
+], 'chart-weight', $conn);
 ?>
 
             <!-- Weather Section -->
@@ -216,7 +268,7 @@ if ($wx_enabled) {
         'Max / Min' => (is_numeric($stats['weather']['max_temp']) ? $stats['weather']['max_temp'] : '--') . ' / ' . (is_numeric($stats['weather']['min_temp']) ? $stats['weather']['min_temp'] : '--') . $temp_unit,
         'Avg Humidity' => is_numeric($stats['weather']['avg_hum']) ? $stats['weather']['avg_hum'] . '%' : '--',
         'Provider' => htmlspecialchars($config['WEATHER_LEVEL']),
-    ], 'chart-weather');
+    ], 'chart-weather', $conn);
 ?>
 
             <!-- Weather Provider Detail (collapsible) -->
@@ -290,7 +342,7 @@ render_sensor_section('light', $sensors['light'], $stats['light'], $rh_summary, 
     'Max Solar' => is_numeric($stats['light']['max_solar']) ? $stats['light']['max_solar'] . ' W/m²' : '--',
     'Avg Lux' => is_numeric($stats['light']['avg_lux']) ? $stats['light']['avg_lux'] . ' lx' : '--',
     'Readings' => intval($stats['light']['readings']),
-], 'chart-light');
+], 'chart-light', $conn);
 ?>
 
             <!-- Bee Counter Section -->
@@ -300,7 +352,7 @@ render_sensor_section('beecount', $sensors['beecount'], $stats['beecount'], $rh_
     'Total Out' => is_numeric($stats['beecount']['total_out']) ? number_format($stats['beecount']['total_out']) : '--',
     'Max In' => is_numeric($stats['beecount']['max_in']) ? $stats['beecount']['max_in'] : '--',
     'Readings' => intval($stats['beecount']['readings']),
-], 'chart-beecount');
+], 'chart-beecount', $conn);
 ?>
 
             <!-- Air Quality Section -->
@@ -310,7 +362,7 @@ render_sensor_section('air', $sensors['air'], $stats['air'], $rh_summary, [
     'Max PM2.5' => is_numeric($stats['air']['max_pm25']) ? $stats['air']['max_pm25'] . ' µg/m³' : '--',
     'Avg AQI' => is_numeric($stats['air']['avg_aqi']) ? $stats['air']['avg_aqi'] : '--',
     'Readings' => intval($stats['air']['readings']),
-], 'chart-air');
+], 'chart-air', $conn);
 ?>
 
             <!-- EPA Section -->
@@ -320,7 +372,7 @@ render_sensor_section('epa', $sensors['epa'], $stats['epa'] ?? ['readings' => 0]
     'Max O3 AQI' => is_numeric($stats['epa']['max_o3'] ?? null) ? $stats['epa']['max_o3'] : '--',
     'Avg NO2 AQI' => is_numeric($stats['epa']['avg_no2'] ?? null) ? $stats['epa']['avg_no2'] : '--',
     'Readings' => intval($stats['epa']['readings'] ?? 0),
-], 'chart-epa');
+], 'chart-epa', $conn);
 ?>
 
             <!-- Pollen Section -->
@@ -329,7 +381,7 @@ render_sensor_section('pollen', $sensors['pollen'], $stats['pollen'], $rh_summar
     'Avg Level' => is_numeric($stats['pollen']['avg_pollen']) ? $stats['pollen']['avg_pollen'] . ' / 12' : '--',
     'Max / Min' => (is_numeric($stats['pollen']['max_pollen']) ? $stats['pollen']['max_pollen'] : '--') . ' / ' . (is_numeric($stats['pollen']['min_pollen']) ? $stats['pollen']['min_pollen'] : '--'),
     'Readings' => intval($stats['pollen']['readings']),
-], 'chart-pollen');
+], 'chart-pollen', $conn);
 ?>
 
             <!-- GDD Section -->
@@ -338,7 +390,7 @@ render_sensor_section('gdd', $sensors['gdd'], $stats['gdd'], $rh_summary, [
     'Avg Daily GDD' => is_numeric($stats['gdd']['avg_gdd']) ? $stats['gdd']['avg_gdd'] : '--',
     'Season Total' => is_numeric($stats['gdd']['max_season']) ? $stats['gdd']['max_season'] : '--',
     'Days Tracked' => intval($stats['gdd']['readings']),
-], 'chart-gdd');
+], 'chart-gdd', $conn);
 ?>
 
     </div>
