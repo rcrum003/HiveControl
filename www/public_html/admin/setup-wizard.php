@@ -491,11 +491,13 @@ elseif ($step === 2): ?>
                     $temp_types = [
                         'temperhum' => ['TemperHum (USB)', 'USB temperature and humidity sensor'],
                         'temper' => ['Temper (USB)', 'USB temperature-only sensor'],
+                        'sht41trinkey' => ['SHT41 Trinkey (USB)', 'USB temperature and humidity sensor'],
                         'dht22' => ['DHT22 (GPIO)', 'Digital humidity and temperature sensor'],
                         'dht21' => ['DHT21 (GPIO)', 'Digital humidity and temperature sensor'],
                         'sht31d' => ['SHT31-D (I2C)', 'High-accuracy temperature and humidity sensor'],
                         'bme280' => ['BME280 (I2C)', 'Temperature, humidity, and pressure sensor'],
                         'bme680' => ['BME680 (I2C)', 'Environmental sensor with gas detection'],
+                        'aht20' => ['AHT20 (I2C)', 'Temperature and humidity sensor'],
                         'broodminder' => ['BroodMinder T/TH (BLE)', 'Bluetooth brood monitoring sensor'],
                     ];
                     foreach ($temp_types as $val => $info): ?>
@@ -1035,7 +1037,7 @@ elseif ($step === 5): ?>
                 <div id="wx-opt-localsensors" class="wx-opt" style="display:none; margin-top:15px;">
                     <label>Sensor Type</label>
                     <?php
-                    $wx_sensor_types = ['temperhum','dht21','dht22','sht31d','bme280','bme680'];
+                    $wx_sensor_types = ['temperhum','dht21','dht22','sht31d','bme280','bme680','aht20','sht41trinkey'];
                     foreach ($wx_sensor_types as $wst): ?>
                         <div class="sensor-option" style="display:inline-block; margin-right:5px;">
                             <input type="radio" name="WXTEMPTYPE" value="<?php echo $wst; ?>" id="wst_<?php echo $wst; ?>"
