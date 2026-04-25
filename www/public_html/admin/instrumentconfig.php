@@ -277,7 +277,7 @@ $temp_pcls = $temp_on ? status_panel_class($sh['hivetemp']['status']) : 'panel-d
         <div class="form-group">
             <label>Sensor Type</label><br>
 <?php
-$ttypes = ['temperhum'=>'TemperHum','temper'=>'Temper','dht22'=>'DHT22','dht21'=>'DHT21','sht31d'=>'SHT31-D','bme280'=>'BME280','bme680'=>'BME680','aht20'=>'AHT20','broodminder'=>'BroodMinder'];
+$ttypes = ['temperhum'=>'TemperHum','temper'=>'Temper','dht22'=>'DHT22','dht21'=>'DHT21','sht31d'=>'SHT31-D','bme280'=>'BME280','bme680'=>'BME680','aht20'=>'AHT20','sht41_trinkey'=>'SHT41 Trinkey','broodminder'=>'BroodMinder'];
 foreach ($ttypes as $tv => $tl) {
     echo '<label class="radio-inline"><input type="radio" name="TEMPTYPE" value="'.$tv.'"'.chk($result['TEMPTYPE'],$tv).' class="temp-type-radio"> '.$tl.'</label>';
 }
@@ -302,6 +302,9 @@ foreach ($ttypes as $tv => $tl) {
         </div>
         <div class="temp-option" data-types="aht20" style="<?= $result['TEMPTYPE'] == 'aht20' ? '' : 'display:none' ?>">
             <p class="help-block">Ensure AHT20 is plugged into the TSL port (farthest port from the ethernet jack).</p>
+        </div>
+        <div class="temp-option" data-types="sht41_trinkey" style="<?= $result['TEMPTYPE'] == 'sht41_trinkey' ? '' : 'display:none' ?>">
+            <p class="help-block">SHT41 Trinkey connects via USB. It will appear as <code>/dev/ttyACM0</code> (or similar). Ensure the Trinkey is plugged into a USB port on the Pi.</p>
         </div>
         <div class="temp-option" data-types="dht22,dht21" style="<?= in_array($result['TEMPTYPE'], ['dht22','dht21']) ? '' : 'display:none' ?>">
             <div class="form-group"><label>GPIO Pin</label>
