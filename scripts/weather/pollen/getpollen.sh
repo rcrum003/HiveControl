@@ -507,7 +507,7 @@ backfill_pollen
 
 # Step 2: Check again if today got filled
 existing=$(sqlite3 "$DATASOURCE" "SELECT COUNT(*) FROM pollen WHERE date = '$DATE';")
-if [ "$existing" -gt 0 ]; then
+if [ "$existing" -gt 0 ] && [ $TEST_MODE -eq 0 ]; then
 	exit 0
 fi
 
@@ -531,7 +531,11 @@ if [ -z "$POL_LEVEL" ]; then
 fi
 
 if [ -z "$POL_LEVEL" ] || [[ ! "$POL_LEVEL" =~ ^[0-9]+$ ]]; then
-	echo "ERROR: Could not get valid pollen data from any source (level='$POL_LEVEL')"
+	echo "ERROR: Could not get valid pollen data from any source"
+	[ -z "${ZIP:-}" ] && echo "  - Pollen.com requires a ZIP code (set in Setup Wizard Step 1)"
+	[ -z "${LATITUDE:-}" ] || [ -z "${LONGITUDE:-}" ] && echo "  - Open-Meteo requires latitude/longitude"
+	[ -z "${KEY_TOMORROW:-}" ] && echo "  - Tomorrow.io requires KEY_TOMORROW API key"
+	[ -z "${KEY_AMBEE:-}" ] && echo "  - Ambee requires KEY_AMBEE API key"
 	loglocal "$LOGDATE" POLLEN ERROR "Could not get valid pollen data from any source (level='$POL_LEVEL')"
 	exit 1
 fi
