@@ -1,7 +1,7 @@
 Release Notes:
 
 --------------------
-2.33 Release
+2.34 Release
 --------------------
 SETUP WIZARD:
 - Added Zip Code field to Step 1 (Basic Info) for pollen and EPA AirNow
@@ -20,8 +20,17 @@ EPA AIRNOW FIX:
     from all reporting areas covering that zip code
   * Falls back to lat/lon endpoint when no zip code is set
 
-POLLEN TEST FIX:
-- Added getpollen.sh to www-data sudoers whitelist so pollen test button works
+POLLEN:
+- Pollen test button now runs the full API pipeline with --test flag,
+  bypassing the "already collected today" and "disabled" guards so
+  new hives can verify pollen is working immediately
+- Added getpollen.sh to www-data sudoers whitelist
+- Version-gated sudoers update in upgrade.sh for existing hives
+
+UPGRADE SYSTEM:
+- Fixed checkupgrades.sh not picking up new upgrade.sh versions due to
+  GitHub CDN caching — added Cache-Control: no-cache headers to all
+  curl calls fetching from raw.githubusercontent.com
 
 DATABASE:
 - DB_PATCH_46: Added ZIP column to hiveconfig table
