@@ -44,7 +44,7 @@ switch ($sensor) {
         break;
 
     case "weather":
-        $value = shell_exec("/usr/bin/timeout 20 sudo /home/HiveControl/scripts/weather/getwx.sh 2>/dev/null | tail -5");
+        $value = shell_exec("/usr/bin/timeout 20 sudo /home/HiveControl/scripts/weather/getwx.sh 2>&1 | tail -5");
         $valueheader = "Weather Data";
         break;
 
@@ -57,12 +57,12 @@ switch ($sensor) {
         break;
 
     case "airquality":
-        $value = shell_exec("/usr/bin/timeout 20 sudo /home/HiveControl/scripts/air/getair.sh 2>/dev/null | tail -5");
+        $value = shell_exec("/usr/bin/timeout 20 sudo /home/HiveControl/scripts/air/getair.sh 2>&1 | tail -5");
         $valueheader = "Air Quality Data";
         break;
 
     case "airnow":
-        $value = shell_exec("/usr/bin/timeout 60 sudo /home/HiveControl/scripts/air/getairnow.sh 2>/dev/null | tail -10");
+        $value = shell_exec("/usr/bin/timeout 60 sudo /home/HiveControl/scripts/air/getairnow.sh 2>&1 | tail -10");
         $valueheader = "EPA AirNow Data";
         break;
 
