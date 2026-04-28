@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="123"
+Upgrade_ver="124"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -863,6 +863,11 @@ if [[ "$Installed_Ver" < "2.35" ]]; then
 	sudo cp /home/HiveControl/upgrade/HiveControl/install/init.d/rtsp_stream /etc/init.d/rtsp_stream
 	sudo chmod +x /etc/init.d/rtsp_stream
 	sudo update-rc.d rtsp_stream defaults 2>/dev/null || true
+fi
+
+if [[ "$Installed_Ver" < "2.36" ]]; then
+	echo "Enabling WAL journal mode for SQLite (reduces database locking)"
+	sqlite3 /home/HiveControl/data/hive-data.db "PRAGMA journal_mode = WAL;"
 fi
 
 if [[ "$Installed_Ver" < "2.33" ]]; then

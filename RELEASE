@@ -1,6 +1,16 @@
 Release Notes:
 
 --------------------
+2.36 Release
+--------------------
+DATABASE STABILITY:
+- Fixed "database is locked" (SQLITE_BUSY) errors during concurrent access
+- Enabled WAL (Write-Ahead Logging) journal mode for concurrent read/write support
+- Added 5-second busy_timeout to PHP database connections (retries instead of failing)
+- Added busy_timeout to shell scripts that write sensor data (currconditions, airnow)
+- Upgrade automatically enables WAL mode on existing databases
+
+--------------------
 2.35 Release
 --------------------
 RTSP CAMERA STREAM:

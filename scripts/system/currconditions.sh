@@ -438,7 +438,7 @@ INSERT INTO allhivedata (
 EOF
 )
 
-if ! sqlite3 "$DB_PATH" "$SQL_INSERT" 2>&1; then
+if ! sqlite3 "$DB_PATH" "PRAGMA busy_timeout = 5000; $SQL_INSERT" 2>&1; then
 	echo "ERROR: Failed to insert data into database"
 	exit 1
 fi

@@ -127,12 +127,12 @@ RECORD_DATE_UTC=$(date -u '+%F %H:00')
 # Insert into EPA table (REPLACE on duplicate date+source)
 SQL="INSERT OR REPLACE INTO airquality_epa (date, date_utc, o3_ppm, o3_aqi, no2_ppb, no2_aqi, pm25_aqi, pm10_aqi, reporting_area, source) VALUES ('$RECORD_DATE', '$RECORD_DATE_UTC', '$O3_PPM', '$O3_AQI', '$NO2_PPB', '$NO2_AQI', '$PM25_AQI', '$PM10_AQI', '$REPORTING_AREA', 'airnow');"
 
-if ! sqlite3 "$DB_PATH" "$SQL" 2>&1; then
+if ! sqlite3 "$DB_PATH" "PRAGMA busy_timeout = 5000; $SQL" 2>&1; then
     loglocal "$DATE" AIRNOW ERROR "Failed to insert EPA data into database"
     exit 1
 fi
 
 # Log health success
-sqlite3 "$DB_PATH" "INSERT OR REPLACE INTO weather_health (date, provider, status, message) VALUES ('$(date +%Y-%m-%d)', 'airnow', 'ok', 'O3=$O3_AQI NO2=$NO2_AQI PM2.5=$PM25_AQI area=$REPORTING_AREA');" 2>/dev/null
+sqlite3 "$DB_PATH" "PRAGMA busy_timeout = 5000; INSERT OR REPLACE INTO weather_health (date, provider, status, message) VALUES ('$(date +%Y-%m-%d)', 'airnow', 'ok', 'O3=$O3_AQI NO2=$NO2_AQI PM2.5=$PM25_AQI area=$REPORTING_AREA');" 2>/dev/null
 
 echo "AirNow: O3_AQI=$O3_AQI, NO2_AQI=$NO2_AQI, PM2.5_AQI=$PM25_AQI, Area=$REPORTING_AREA"
