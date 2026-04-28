@@ -21,4 +21,5 @@ trap 'rm -f "$TMPFILE"' EXIT
 
 if [ -s "$TMPFILE" ]; then
     mv "$TMPFILE" "$OUTPUT"
+    chown www-data:www-data "$OUTPUT" 2>/dev/null
 fi

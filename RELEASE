@@ -1,6 +1,12 @@
 Release Notes:
 
 --------------------
+2.41 Release
+--------------------
+RTSP FIX:
+- Fixed snapshot file owned by root — now chown to www-data after capture
+
+--------------------
 2.40 Release
 --------------------
 UPGRADE CACHE FIX:
