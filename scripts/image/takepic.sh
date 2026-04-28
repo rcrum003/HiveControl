@@ -3,6 +3,11 @@
 
 source /home/HiveControl/scripts/hiveconfig.inc
 
+if [ "$CAMERATYPE" = "RTSP" ] && [ -n "$CAMERA_RTSP_URL" ]; then
+	/home/HiveControl/scripts/image/rtsp_snapshot.sh
+	exit $?
+fi
+
 #Take a full picture
 raspistill -drc high -ex auto -awb auto -o $PUBLIC_HTML_DIR/images/current.jpg
 

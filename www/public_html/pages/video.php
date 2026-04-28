@@ -7,6 +7,11 @@
     <!-- /Navigation -->
 
 <?php
+$cam_cfg = $conn->prepare("SELECT CAMERATYPE, CAMERA_RTSP_URL FROM hiveconfig WHERE id=1");
+$cam_cfg->execute();
+$cam = $cam_cfg->fetch(PDO::FETCH_ASSOC);
+$is_rtsp = (($cam['CAMERATYPE'] ?? '') === 'RTSP' && !empty($cam['CAMERA_RTSP_URL']));
+
 $env = $conn->prepare("
     SELECT weather_tempf, weather_tempc, weather_humidity,
            weather_dewf, weather_dewc,
@@ -97,6 +102,17 @@ function fmt($val, $suffix = '') {
                             <i class="fa fa-video-camera fa-fw"></i> Live Stream
                         </div>
                         <div class="panel-body">
+                            <?php if ($is_rtsp): ?>
+                            <video id="rtsp-player" controls autoplay muted playsinline style="width:100%; max-width:960px; background:#000;"></video>
+                            <div id="stream-error" class="alert alert-warning" style="display:none;">
+                                Stream not available. Make sure the RTSP stream service is running:<br>
+                                <code>sudo /etc/init.d/rtsp_stream start</code>
+                            </div>
+                            <p class="text-muted small" style="margin-top:8px;">
+                                <i class="fa fa-plug fa-fw"></i>
+                                VLC direct connect: <code><?php echo htmlspecialchars($cam['CAMERA_RTSP_URL']); ?></code>
+                            </p>
+                            <?php else: ?>
                             <img id="livestream" src="/pages/videostream.php" style="width:100%; max-width:640px;" />
                             <div id="stream-error" class="alert alert-warning" style="display:none;">
                                 Stream not available. Make sure the livestream service is running:<br>
@@ -106,6 +122,7 @@ function fmt($val, $suffix = '') {
                                 <i class="fa fa-plug fa-fw"></i>
                                 VLC direct connect: <code>http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST']); ?>:8080/?action=stream</code>
                             </p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -241,12 +258,42 @@ function fmt($val, $suffix = '') {
 
     <script src="../dist/js/sb-admin-2.js"></script>
 
+    <?php if ($is_rtsp): ?>
+    <script src="/js/hls.min.js"></script>
+    <script>
+    (function() {
+        var video = document.getElementById('rtsp-player');
+        var errEl = document.getElementById('stream-error');
+        var src = '/stream/live.m3u8';
+
+        function showError() {
+            video.style.display = 'none';
+            errEl.style.display = 'block';
+        }
+
+        if (Hls.isSupported()) {
+            var hls = new Hls({ liveSyncDurationCount: 2, liveMaxLatencyDurationCount: 4 });
+            hls.loadSource(src);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) showError();
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = src;
+            video.addEventListener('error', showError);
+        } else {
+            showError();
+        }
+    })();
+    </script>
+    <?php else: ?>
     <script>
     document.getElementById('livestream').onerror = function() {
         this.style.display = 'none';
         document.getElementById('stream-error').style.display = 'block';
     };
     </script>
+    <?php endif; ?>
 
     <!-- Custom Theme JavaScript -->
 <!-- Footer -->

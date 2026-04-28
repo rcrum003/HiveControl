@@ -110,7 +110,8 @@ INSERT INTO hiveconfig (
                            trend_pressure,
                            color_pollen,
                            trend_pollen,
-                           WEATHER_FALLBACK
+                           WEATHER_FALLBACK,
+                           CAMERA_RTSP_URL
 			)
 
 		VALUES (
@@ -216,6 +217,7 @@ INSERT INTO hiveconfig (
                            '', 
                            '', 
                            '', 
+                           '',
                            '',
                            '',
                            ''

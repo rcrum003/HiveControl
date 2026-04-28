@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="122"
+Upgrade_ver="123"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -349,6 +349,11 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			echo "Applying DB Ver 38 Upgrades - ZIP code for pollen and location services"
 			sqlite3 $DestDB < $DBPatches/DB_PATCH_46 2>/dev/null || true
 			let DB_ver="38"
+		fi
+		if [[ $DB_ver -eq "38" ]]; then
+			echo "Applying DB Ver 39 Upgrades - RTSP camera stream support"
+			sqlite3 $DestDB < $DBPatches/DB_PATCH_47 2>/dev/null || true
+			let DB_ver="39"
 		fi
 
 	#else
@@ -846,6 +851,18 @@ if [[ "$Installed_Ver" < "2.26" ]]; then
 	else
 		echo "No USB camera detected — livestream service updated but not started"
 	fi
+fi
+
+if [[ "$Installed_Ver" < "2.35" ]]; then
+	echo "Installing RTSP camera stream support"
+	sudo apt-get install -y ffmpeg 2>/dev/null || echo "Warning: ffmpeg install failed"
+	mkdir -p /home/HiveControl/www/public_html/stream
+	sudo chown www-data:www-data /home/HiveControl/www/public_html/stream
+	sudo chmod u+x /home/HiveControl/scripts/image/rtsp_stream.sh 2>/dev/null || true
+	sudo chmod u+x /home/HiveControl/scripts/image/rtsp_snapshot.sh 2>/dev/null || true
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/init.d/rtsp_stream /etc/init.d/rtsp_stream
+	sudo chmod +x /etc/init.d/rtsp_stream
+	sudo update-rc.d rtsp_stream defaults 2>/dev/null || true
 fi
 
 if [[ "$Installed_Ver" < "2.33" ]]; then

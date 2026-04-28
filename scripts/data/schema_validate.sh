@@ -85,6 +85,12 @@ ensure_column "ENABLE_POLLEN" "TEXT DEFAULT 'yes'"
 ensure_column "FRAME_FEEDER_POSITION"  "INTEGER DEFAULT -1"
 ensure_column "FRAME_FEEDER_LABEL"     "TEXT DEFAULT 'Frame Feeder'"
 
+# ZIP code (DB_PATCH_46)
+ensure_column "ZIP" "TEXT DEFAULT ''"
+
+# RTSP camera stream (DB_PATCH_47)
+ensure_column "CAMERA_RTSP_URL" "TEXT DEFAULT ''"
+
 # Chart display columns
 ensure_column "color_pollen"    "TEXT DEFAULT '#66BB6A'"
 ensure_column "trend_pollen"    "TEXT DEFAULT 'off'"

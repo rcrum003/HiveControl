@@ -1,0 +1,64 @@
+#!/bin/sh
+# /etc/init.d/rtsp_stream
+### BEGIN INIT INFO
+# Provides:          rtsp_stream
+# Required-Start:    $network
+# Required-Stop:     $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: RTSP to HLS stream proxy
+# Description:       Converts RTSP camera stream to HLS for browser playback
+### END INIT INFO
+
+SCRIPT="/home/HiveControl/scripts/image/rtsp_stream.sh"
+PIDFILE="/var/run/rtsp_stream.pid"
+
+f_message(){
+        echo "[+] $1"
+}
+
+case "$1" in
+        start)
+                if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+                        f_message "rtsp_stream is already running (pid $(cat "$PIDFILE"))"
+                        exit 0
+                fi
+                f_message "Starting RTSP stream proxy"
+                nohup "$SCRIPT" > /home/HiveControl/logs/rtsp_stream.log 2>&1 &
+                sleep 2
+                if [ -f "$PIDFILE" ]; then
+                        f_message "rtsp_stream started (pid $(cat "$PIDFILE"))"
+                else
+                        f_message "rtsp_stream not started (RTSP may not be configured)"
+                fi
+                ;;
+        stop)
+                if [ -f "$PIDFILE" ]; then
+                        f_message "Stopping rtsp_stream..."
+                        kill "$(cat "$PIDFILE")" 2>/dev/null
+                        rm -f "$PIDFILE"
+                        # Also kill any ffmpeg child processes
+                        pkill -f "ffmpeg.*rtsp.*live.m3u8" 2>/dev/null
+                        f_message "rtsp_stream stopped"
+                else
+                        f_message "rtsp_stream is not running"
+                fi
+                ;;
+        restart)
+                $0 stop
+                sleep 1
+                $0 start
+                ;;
+        status)
+                if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+                        f_message "rtsp_stream is running (pid $(cat "$PIDFILE"))"
+                else
+                        f_message "rtsp_stream is not running"
+                fi
+                ;;
+        *)
+                f_message "Usage: $0 {start|stop|status|restart}"
+                exit 1
+                ;;
+esac
+exit 0

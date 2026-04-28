@@ -91,6 +91,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ENABLE_HIVE_CAMERA = test_input($_POST["ENABLE_HIVE_CAMERA"]);
         $ENABLE_BEECOUNTER = test_input($_POST["ENABLE_BEECOUNTER"]);
         $CAMERATYPE = test_input($_POST["CAMERATYPE"]);
+        $CAMERA_RTSP_URL = trim(strip_tags($_POST["CAMERA_RTSP_URL"] ?? ''));
+        if ($CAMERATYPE === 'RTSP' && $CAMERA_RTSP_URL !== '' && !preg_match('#^rtsps?://#i', $CAMERA_RTSP_URL)) {
+            $CAMERA_RTSP_URL = '';
+        }
         $COUNTERTYPE = test_input($_POST["COUNTERTYPE"]);
 
         $weather_level = test_input($_POST["WEATHER_LEVEL"]);
@@ -133,8 +137,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $version = ++$ver;
 
         try {
-            $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=?,WXAPIKEY=?,ENABLE_POLLEN=? WHERE id=1");
-            $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE,$HIVE_LUX_INTERCEPT,$HIVE_TEMP_SLOPE,$HIVE_TEMP_INTERCEPT,$WX_TEMP_SLOPE,$WX_TEMP_INTERCEPT,$HIVE_HUMIDITY_SLOPE,$HIVE_HUMIDITY_INTERCEPT,$WX_HUMIDITY_SLOPE,$WX_HUMIDITY_INTERCEPT,$HIVE_LUX_GPIO,$HIVE_WEIGHT_GPIO,$HIVE_TEMP_SUB,$ENABLE_AIR,$AIR_TYPE,$AIR_ID,$AIR_API,$AIR_LOCAL_URL,$WEIGHT_COMPENSATION_ENABLED,$WEIGHT_TEMP_COEFF,$WEIGHT_HUMIDITY_COEFF,$WEIGHT_REF_TEMP,$WEIGHT_REF_HUMIDITY,$weather_fallback,$weather_fallback_2,$wx_max_stale_minutes,$key_openweathermap,$key_weatherapi,$key_visualcrossing,$key_pirateweather,$key_tomorrow,$key_ambee,$ENABLE_AIRNOW,$KEY_AIRNOW,$AIRNOW_DISTANCE,$wxapikey,$ENABLE_POLLEN));
+            $doit = $conn->prepare("UPDATE hiveconfig SET ENABLE_HIVE_CAMERA=?,ENABLE_HIVE_WEIGHT_CHK=?,ENABLE_HIVE_TEMP_CHK=?,SCALETYPE=?,TEMPTYPE=?,version=?,HIVEDEVICE=?,ENABLE_LUX=?,LUX_SOURCE=?,HIVE_TEMP_GPIO=?,HIVE_WEIGHT_SLOPE=?,HIVE_WEIGHT_INTERCEPT=?,ENABLE_BEECOUNTER=?,CAMERATYPE=?,COUNTERTYPE=?,weather_level=?,key=?,wxstation=?,WXTEMPTYPE=?,WX_TEMPER_DEVICE=?,WX_TEMP_GPIO=?,weather_detail=?,local_wx_type=?,local_wx_url=?, HIVE_LUX_SLOPE=?, HIVE_LUX_INTERCEPT=?, HIVE_TEMP_SLOPE=?, HIVE_TEMP_INTERCEPT=?, WX_TEMP_SLOPE=?, WX_TEMP_INTERCEPT=?, HIVE_HUMIDITY_SLOPE=?, HIVE_HUMIDITY_INTERCEPT=?, WX_HUMIDITY_SLOPE=?, WX_HUMIDITY_INTERCEPT=?, HIVE_LUX_GPIO=?, HIVE_WEIGHT_GPIO=?,HIVE_TEMP_SUB=?,ENABLE_AIR=?,AIR_TYPE=?,AIR_ID=?,AIR_API=?,AIR_LOCAL_URL=?,WEIGHT_COMPENSATION_ENABLED=?,WEIGHT_TEMP_COEFF=?,WEIGHT_HUMIDITY_COEFF=?,WEIGHT_REF_TEMP=?,WEIGHT_REF_HUMIDITY=?,WEATHER_FALLBACK=?,WEATHER_FALLBACK_2=?,WX_MAX_STALE_MINUTES=?,KEY_OPENWEATHERMAP=?,KEY_WEATHERAPI=?,KEY_VISUALCROSSING=?,KEY_PIRATEWEATHER=?,KEY_TOMORROW=?,KEY_AMBEE=?,ENABLE_AIRNOW=?,KEY_AIRNOW=?,AIRNOW_DISTANCE=?,WXAPIKEY=?,ENABLE_POLLEN=?,CAMERA_RTSP_URL=? WHERE id=1");
+            $doit->execute(array($ENABLE_HIVE_CAMERA,$ENABLE_HIVE_WEIGHT_CHK,$ENABLE_HIVE_TEMP_CHK,$SCALETYPE,$TEMPTYPE,$version,$HIVEDEVICE,$ENABLE_LUX,$LUX_SOURCE,$HIVE_TEMP_GPIO,$HIVE_WEIGHT_SLOPE,$HIVE_WEIGHT_INTERCEPT,$ENABLE_BEECOUNTER,$CAMERATYPE,$COUNTERTYPE,$weather_level,$key,$wxstation,$WXTEMPTYPE,$WX_TEMPER_DEVICE,$WX_TEMP_GPIO,$weather_detail,$local_wx_type,$local_wx_url,$HIVE_LUX_SLOPE,$HIVE_LUX_INTERCEPT,$HIVE_TEMP_SLOPE,$HIVE_TEMP_INTERCEPT,$WX_TEMP_SLOPE,$WX_TEMP_INTERCEPT,$HIVE_HUMIDITY_SLOPE,$HIVE_HUMIDITY_INTERCEPT,$WX_HUMIDITY_SLOPE,$WX_HUMIDITY_INTERCEPT,$HIVE_LUX_GPIO,$HIVE_WEIGHT_GPIO,$HIVE_TEMP_SUB,$ENABLE_AIR,$AIR_TYPE,$AIR_ID,$AIR_API,$AIR_LOCAL_URL,$WEIGHT_COMPENSATION_ENABLED,$WEIGHT_TEMP_COEFF,$WEIGHT_HUMIDITY_COEFF,$WEIGHT_REF_TEMP,$WEIGHT_REF_HUMIDITY,$weather_fallback,$weather_fallback_2,$wx_max_stale_minutes,$key_openweathermap,$key_weatherapi,$key_visualcrossing,$key_pirateweather,$key_tomorrow,$key_ambee,$ENABLE_AIRNOW,$KEY_AIRNOW,$AIRNOW_DISTANCE,$wxapikey,$ENABLE_POLLEN,$CAMERA_RTSP_URL));
             sleep(1);
             $save_success = true;
         } catch (PDOException $e) {
@@ -177,7 +181,7 @@ $hidden_fields = [
     'ENABLE_HIVE_WEIGHT_CHK','SCALETYPE','HIVE_WEIGHT_GPIO','HIVE_WEIGHT_SLOPE','HIVE_WEIGHT_INTERCEPT',
     'WEIGHT_COMPENSATION_ENABLED','WEIGHT_TEMP_COEFF','WEIGHT_HUMIDITY_COEFF','WEIGHT_REF_TEMP','WEIGHT_REF_HUMIDITY',
     'ENABLE_LUX','LUX_SOURCE','HIVE_LUX_GPIO','HIVE_LUX_SLOPE','HIVE_LUX_INTERCEPT',
-    'ENABLE_BEECOUNTER','COUNTERTYPE','ENABLE_HIVE_CAMERA','CAMERATYPE',
+    'ENABLE_BEECOUNTER','COUNTERTYPE','ENABLE_HIVE_CAMERA','CAMERATYPE','CAMERA_RTSP_URL',
     'WEATHER_LEVEL','WEATHER_DETAIL','KEY','KEY_OPENWEATHERMAP','KEY_WEATHERAPI','KEY_VISUALCROSSING',
     'KEY_PIRATEWEATHER','KEY_TOMORROW','KEY_AMBEE','WXSTATION','WXAPIKEY','WXTEMPTYPE',
     'WX_TEMPER_DEVICE','WX_TEMP_GPIO','local_wx_type','local_wx_url',
@@ -482,8 +486,14 @@ $bee_pcls = $bee_on ? status_panel_class($sh['beecount']['status']) : 'panel-def
     <div id="body-camera" class="panel-body collapse<?= $result['ENABLE_HIVE_CAMERA'] == 'yes' ? ' in' : '' ?>">
         <div class="form-group">
             <label>Camera Type</label><br>
-            <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="PI"<?= chk($result['CAMERATYPE'], 'PI') ?>> Pi Camera</label>
-            <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="USB"<?= chk($result['CAMERATYPE'], 'USB') ?>> USB</label>
+            <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="PI"<?= chk($result['CAMERATYPE'], 'PI') ?> class="camera-type-radio"> Pi Camera</label>
+            <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="USB"<?= chk($result['CAMERATYPE'], 'USB') ?> class="camera-type-radio"> USB</label>
+            <label class="radio-inline"><input type="radio" name="CAMERATYPE" value="RTSP"<?= chk($result['CAMERATYPE'], 'RTSP') ?> class="camera-type-radio"> RTSP Stream</label>
+        </div>
+        <div id="rtsp-url-group" class="form-group" style="display:<?= ($result['CAMERATYPE'] ?? '') === 'RTSP' ? 'block' : 'none' ?>">
+            <label>RTSP Stream URL</label>
+            <input type="text" name="CAMERA_RTSP_URL" class="form-control" style="max-width:500px" value="<?= h($result['CAMERA_RTSP_URL'] ?? '') ?>" placeholder="rtsps://user:pass@camera-ip:port/stream">
+            <p class="help-block">Supports <code>rtsp://</code> and <code>rtsps://</code> (RTSP over TLS). Stream is converted to HLS for browser playback.</p>
         </div>
         <hr>
         <button type="button" class="btn btn-info btn-sm test-sensor" data-sensor="camera" data-result="#test-camera"><i class="fa fa-refresh"></i> Test Camera</button>
@@ -971,6 +981,11 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
         }
         $('#weather-fb1, #weather-fb2').on('change', updateFallbackInfo);
         updateFallbackInfo();
+
+        // Camera type toggle — show/hide RTSP URL field
+        $('.camera-type-radio').on('change', function() {
+            $('#rtsp-url-group').toggle($(this).val() === 'RTSP');
+        });
 
         // Test sensor (AJAX)
         $('.test-sensor').on('click', function() {

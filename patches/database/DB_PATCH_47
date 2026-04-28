@@ -1,0 +1,2 @@
+-- DB_PATCH_47: RTSP camera stream support
+ALTER TABLE hiveconfig ADD COLUMN CAMERA_RTSP_URL TEXT DEFAULT '';

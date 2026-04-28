@@ -270,8 +270,9 @@ sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_43
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_44
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_45
 sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_46
+sudo sqlite3 /home/HiveControl/data/hive-data.db < DB_PATCH_47
 sudo sqlite3 /home/HiveControl/data/hive-data.db < /home/HiveControl/install/database/default_hiveconfig.sql
-sudo echo 46 > /home/HiveControl/data/DBVERSION
+sudo echo 47 > /home/HiveControl/data/DBVERSION
 
 #Setup backup directory
 mkdir -p /home/HiveControl/data/backups
@@ -566,6 +567,17 @@ else
 	echo "No USB camera detected — livestream service installed but not started"
 	echo "Connect a USB camera and run: sudo /etc/init.d/livestream start"
 fi
+
+# RTSP camera stream support (ffmpeg + HLS)
+echo "Installing ffmpeg for RTSP camera stream support..."
+sudo apt-get install -y ffmpeg 2>/dev/null || echo "Warning: ffmpeg install failed — RTSP camera streams will not work"
+mkdir -p /home/HiveControl/www/public_html/stream
+sudo chown www-data:www-data /home/HiveControl/www/public_html/stream
+sudo chmod u+x /home/HiveControl/scripts/image/rtsp_stream.sh
+sudo chmod u+x /home/HiveControl/scripts/image/rtsp_snapshot.sh
+sudo cp /home/HiveControl/install/init.d/rtsp_stream /etc/init.d/rtsp_stream
+sudo chmod +x /etc/init.d/rtsp_stream
+sudo update-rc.d rtsp_stream defaults 2>/dev/null || true
 
 ####################################################################################
 
