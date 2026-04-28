@@ -3,10 +3,15 @@ Release Notes:
 --------------------
 2.37 Release
 --------------------
-RTSP CAMERA AUTO-START:
-- RTSP stream service now starts automatically when camera is configured and saved
+RTSP CAMERA FIXES:
+- Fixed dashboard snapshot not generating for RTSP cameras
+  * currconditions.sh now calls rtsp_snapshot.sh for RTSP camera type
+  * Previously only handled USB/Pi cameras via mjpg_streamer
+- Added TLS support for rtsps:// URLs (self-signed certs on UniFi, etc.)
+  * Both rtsp_snapshot.sh and rtsp_stream.sh now pass -tls_verify 0
+- RTSP stream service auto-starts when camera is configured and saved
 - Service stops automatically when camera type is changed away from RTSP
-- Stream restarts on config change to pick up new RTSP URL
+- Camera test button now shows ffmpeg errors instead of hiding them
 - Added /etc/init.d/rtsp_stream to sudoers for web UI service control
 
 --------------------

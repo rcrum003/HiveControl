@@ -49,7 +49,7 @@ switch ($sensor) {
         break;
 
     case "camera":
-        $value = shell_exec("/usr/bin/timeout 10 sudo /home/HiveControl/scripts/image/takepic.sh 2>/dev/null");
+        $value = shell_exec("/usr/bin/timeout 15 sudo /home/HiveControl/scripts/image/takepic.sh 2>&1");
         if ($value === null || trim($value) === '') {
             $value = "Camera capture completed. Check /home/HiveControl/www/public_html/images/ for output.";
         }

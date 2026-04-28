@@ -537,20 +537,29 @@ print_separator
 # Capture camera snapshot (if enabled)
 #############################################
 if [ "$ENABLE_HIVE_CAMERA" = "yes" ]; then
-	SNAPSHOT_URL="http://localhost:8080/?action=snapshot"
 	SNAPSHOT_DIR="$HOMEDIR/www/public_html/images"
 	SNAPSHOT_FILE="$SNAPSHOT_DIR/hive_snapshot.jpg"
 
 	echo "--- Capturing camera snapshot ---"
 	mkdir -p "$SNAPSHOT_DIR"
 
-	if curl --silent --max-time 10 -o "$SNAPSHOT_FILE.tmp" "$SNAPSHOT_URL" && \
-	   [ -s "$SNAPSHOT_FILE.tmp" ]; then
-		mv "$SNAPSHOT_FILE.tmp" "$SNAPSHOT_FILE"
-		echo "Snapshot saved to $SNAPSHOT_FILE"
+	if [ "$CAMERATYPE" = "RTSP" ] && [ -n "$CAMERA_RTSP_URL" ]; then
+		$HOMEDIR/scripts/image/rtsp_snapshot.sh
+		if [ -s "$SNAPSHOT_FILE" ]; then
+			echo "RTSP snapshot saved to $SNAPSHOT_FILE"
+		else
+			echo "WARNING: RTSP snapshot failed (check URL and stream)"
+		fi
 	else
-		rm -f "$SNAPSHOT_FILE.tmp"
-		echo "WARNING: Camera snapshot failed (mjpg_streamer may not be running)"
+		SNAPSHOT_URL="http://localhost:8080/?action=snapshot"
+		if curl --silent --max-time 10 -o "$SNAPSHOT_FILE.tmp" "$SNAPSHOT_URL" && \
+		   [ -s "$SNAPSHOT_FILE.tmp" ]; then
+			mv "$SNAPSHOT_FILE.tmp" "$SNAPSHOT_FILE"
+			echo "Snapshot saved to $SNAPSHOT_FILE"
+		else
+			rm -f "$SNAPSHOT_FILE.tmp"
+			echo "WARNING: Camera snapshot failed (mjpg_streamer may not be running)"
+		fi
 	fi
 fi
 
