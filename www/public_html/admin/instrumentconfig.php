@@ -875,6 +875,12 @@ $pollen_pcls = $pollen_on ? status_panel_class($sh['pollen']['status']) : 'panel
     $FILEVERSION = file_exists($verfile) ? file_get_contents($verfile) : 0;
     if ($result['VERSION'] > $FILEVERSION) {
         $foo = shell_exec("sudo /home/HiveControl/scripts/data/hiveconfig.sh");
+
+        if (($result['CAMERATYPE'] ?? '') === 'RTSP' && ($result['CAMERA_RTSP_URL'] ?? '') !== '' && ($result['ENABLE_HIVE_CAMERA'] ?? '') === 'yes') {
+            shell_exec('sudo /etc/init.d/rtsp_stream restart > /dev/null 2>&1 &');
+        } else {
+            shell_exec('sudo /etc/init.d/rtsp_stream stop > /dev/null 2>&1 &');
+        }
     }
     ?>
 

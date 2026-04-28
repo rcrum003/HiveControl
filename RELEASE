@@ -1,6 +1,15 @@
 Release Notes:
 
 --------------------
+2.37 Release
+--------------------
+RTSP CAMERA AUTO-START:
+- RTSP stream service now starts automatically when camera is configured and saved
+- Service stops automatically when camera type is changed away from RTSP
+- Stream restarts on config change to pick up new RTSP URL
+- Added /etc/init.d/rtsp_stream to sudoers for web UI service control
+
+--------------------
 2.36 Release
 --------------------
 DATABASE STABILITY:

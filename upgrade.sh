@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="124"
+Upgrade_ver="125"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -868,6 +868,18 @@ fi
 if [[ "$Installed_Ver" < "2.36" ]]; then
 	echo "Enabling WAL journal mode for SQLite (reduces database locking)"
 	sqlite3 /home/HiveControl/data/hive-data.db "PRAGMA journal_mode = WAL;"
+
+	echo "Updating sudoers for RTSP stream service control"
+	sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
+	sudo chown root:root /etc/sudoers.d/hivecontrol
+	sudo chmod 440 /etc/sudoers.d/hivecontrol
+	CHECKSUDO=$(sudo visudo -c 2>&1 | grep -c "parsed OK")
+	if [[ $CHECKSUDO -gt 0 ]]; then
+		echo "Sudoers update SUCCESS"
+	else
+		echo "Something went wrong with our SUDOERS file, removing it"
+		sudo rm -f /etc/sudoers.d/hivecontrol
+	fi
 fi
 
 if [[ "$Installed_Ver" < "2.33" ]]; then
