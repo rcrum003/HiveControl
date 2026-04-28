@@ -1,7 +1,7 @@
 Release Notes:
 
 --------------------
-2.37 Release
+2.38 Release
 --------------------
 RTSP CAMERA FIXES:
 - Fixed dashboard snapshot not generating for RTSP cameras
@@ -13,6 +13,11 @@ RTSP CAMERA FIXES:
 - Service stops automatically when camera type is changed away from RTSP
 - Camera test button now shows ffmpeg errors instead of hiding them
 - Added /etc/init.d/rtsp_stream to sudoers for web UI service control
+
+--------------------
+2.37 Release
+--------------------
+- Auto-start RTSP stream service on camera config save
 
 --------------------
 2.36 Release
