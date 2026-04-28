@@ -1,6 +1,14 @@
 Release Notes:
 
 --------------------
+2.42 Release
+--------------------
+TEMPERATURE CHART:
+- Added Brood Zone band (93-97°F / 34-36°C) to full temperature page charts
+- Added Danger band (100-120°F / 38-50°C) to full temperature page charts
+- Bands appear on both line and area chart views (matches dashboard climate chart)
+
+--------------------
 2.41 Release
 --------------------
 RTSP FIX:

@@ -14,11 +14,19 @@ if ( $SHOW_METRIC == "on") {
     $HIVETEMP = "hivetempc";
     $WEATHER_TEMP = "weather_tempc";
     $PRECIP_1HR = "precip_1hr_metric";
+    $brood_low = 34;
+    $brood_high = 36;
+    $danger_from = 38;
+    $danger_to = 50;
 }
 else {
     $HIVETEMP = "hivetempf";
     $WEATHER_TEMP = "weather_tempf";
     $PRECIP_1HR = "precip_1hr_in";
+    $brood_low = 93;
+    $brood_high = 97;
+    $danger_from = 100;
+    $danger_to = 120;
 }
 
 
@@ -112,7 +120,16 @@ $(function () {
                 }
             },
             minRange: 20,
-            showEmpty: false
+            showEmpty: false,
+            plotBands: [{
+                from: "; echo $brood_low; echo ", to: "; echo $brood_high; echo ",
+                color: 'rgba(0,180,0,0.08)',
+                label: { text: 'Brood Zone', align: 'right', x: -5, style: { fontSize: '10px', color: '#00A000' } }
+            }, {
+                from: "; echo $danger_from; echo ", to: "; echo $danger_to; echo ",
+                color: 'rgba(255,0,0,0.06)',
+                label: { text: 'Danger', align: 'right', x: -5, style: { fontSize: '10px', color: '#CC0000' } }
+            }]
         },
         {
             gridLineWidth: 0,
@@ -327,7 +344,16 @@ $(function () {
                 }
             },
             minRange: 20,
-            showEmpty: false
+            showEmpty: false,
+            plotBands: [{
+                from: "; echo $brood_low; echo ", to: "; echo $brood_high; echo ",
+                color: 'rgba(0,180,0,0.08)',
+                label: { text: 'Brood Zone', align: 'right', x: -5, style: { fontSize: '10px', color: '#00A000' } }
+            }, {
+                from: "; echo $danger_from; echo ", to: "; echo $danger_to; echo ",
+                color: 'rgba(255,0,0,0.06)',
+                label: { text: 'Danger', align: 'right', x: -5, style: { fontSize: '10px', color: '#CC0000' } }
+            }]
         }],
         tooltip: {
             formatter: function () {
