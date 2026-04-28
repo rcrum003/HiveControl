@@ -1,6 +1,23 @@
 Release Notes:
 
 --------------------
+2.35 Release
+--------------------
+RTSP CAMERA STREAM:
+- New "RTSP Stream" camera type in instrument configuration
+  * Enter an rtsp:// or rtsps:// URL from any IP camera
+  * Stream is converted to HLS via ffmpeg for browser playback
+  * Uses hls.js library — works in all modern browsers
+  * ffmpeg uses codec copy (no transcoding) for minimal Pi CPU usage
+- Video page auto-detects camera type and shows HLS player or MJPEG
+- Dashboard snapshot captured from RTSP stream via ffmpeg
+- New init.d service (rtsp_stream) with watchdog auto-restart
+- VLC direct connect URL shown on video page for native RTSP playback
+
+DATABASE:
+- DB_PATCH_47: Added CAMERA_RTSP_URL column to hiveconfig table
+
+--------------------
 2.34 Release
 --------------------
 SETUP WIZARD:
