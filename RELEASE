@@ -1,6 +1,13 @@
 Release Notes:
 
 --------------------
+2.39 Release
+--------------------
+RTSP FIX:
+- Removed -tls_verify flag (not supported on Raspbian ffmpeg)
+- rtsps:// should work without it — Pi ffmpeg skips TLS verification by default
+
+--------------------
 2.38 Release
 --------------------
 RTSP CAMERA FIXES:

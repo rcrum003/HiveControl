@@ -21,11 +21,6 @@ case "$CAMERA_RTSP_URL" in
     *) echo "ERROR: Invalid RTSP URL"; exit 1 ;;
 esac
 
-TLS_OPTS=""
-if echo "$CAMERA_RTSP_URL" | grep -qi "^rtsps://"; then
-    TLS_OPTS="-tls_verify 0"
-fi
-
 cleanup() {
     rm -f "$PIDFILE"
     rm -f "$STREAM_DIR"/live*.ts "$STREAM_DIR"/live.m3u8
@@ -41,7 +36,6 @@ MAX_RETRY_DELAY=60
 while true; do
     /usr/bin/ffmpeg -hide_banner -loglevel warning \
         -rtsp_transport tcp \
-        $TLS_OPTS \
         -i "$CAMERA_RTSP_URL" \
         -fflags flush_packets \
         -max_delay 500000 \
