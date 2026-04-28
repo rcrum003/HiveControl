@@ -1,6 +1,13 @@
 Release Notes:
 
 --------------------
+2.40 Release
+--------------------
+UPGRADE CACHE FIX:
+- Added timestamp query-string cache buster to all GitHub raw URL fetches
+- Ensures checkupgrades.sh always gets the latest VERSION and upgrade.sh
+
+--------------------
 2.39 Release
 --------------------
 RTSP FIX:

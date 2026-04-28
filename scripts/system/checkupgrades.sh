@@ -12,13 +12,13 @@ DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
 Upgrade_ver_file=$(cat /home/HiveControl/upgrade.sh | grep "Upgrade_ver" |head -1 |awk -F\" '{print $2}')
 	#Get the version available
-	Upgrade_latest_ver=$(curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh |grep "Upgrade_ver" |head -1 |awk -F\" '{print $2}')
+	Upgrade_latest_ver=$(curl -s -L -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh?$(date +%s)" |grep "Upgrade_ver" |head -1 |awk -F\" '{print $2}')
 
 	if [[ $( echo "$Upgrade_ver_file < $Upgrade_latest_ver" | bc) -eq 1 ]]; then
 			echo "NEWUPGRADE"
 			echo "Found a new version of upgrade.sh, downloading.."
 			loglocal "$DATE" UPGRADE SUCCESS "Downloaded upgrade.sh to version - $Upgrade_latest_ver"
-			curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh -o /home/HiveControl/upgrade.sh
+			curl -s -L -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/rcrum003/HiveControl/master/upgrade.sh?$(date +%s)" -o /home/HiveControl/upgrade.sh
 	fi
 
 
@@ -28,7 +28,7 @@ echo "Installed $Installed_Ver"
 
 Db="/home/HiveControl/data/hive-data.db"
 #Get the latest HiveControl version
-Latest_Ver=$(curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
+Latest_Ver=$(curl -s -L -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION?$(date +%s)")
 echo "Newest version is $Latest_Ver"
 
 if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
