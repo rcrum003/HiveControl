@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="130"
+Upgrade_ver="131"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -376,6 +376,8 @@ cp -Rp $WWWTempRepo/errors/* $DestWWWRepo/errors/
 cp -Rp $WWWTempRepo/js/* $DestWWWRepo/js/
 mkdir -p $DestWWWRepo/css
 cp -Rp $WWWTempRepo/css/* $DestWWWRepo/css/
+mkdir -p $DestWWWRepo/api
+cp -Rp $WWWTempRepo/api/* $DestWWWRepo/api/
 mkdir -p $DestWWWRepo/bower_components/jquery-ui/dist
 cp -Rp $WWWTempRepo/bower_components/jquery-ui/dist/* $DestWWWRepo/bower_components/jquery-ui/dist/
 echo "============================================="
@@ -895,6 +897,12 @@ if [[ "$Installed_Ver" < "2.33" ]]; then
 		echo "Something went wrong with our SUDOERS file, removing it"
 		sudo rm -f /etc/sudoers.d/hivecontrol
 	fi
+fi
+
+if [[ "$Installed_Ver" < "2.43" ]]; then
+	echo "Creating API endpoint directory"
+	mkdir -p /home/HiveControl/www/public_html/api
+	chown www-data:www-data /home/HiveControl/www/public_html/api
 fi
 
 echo "============================================="

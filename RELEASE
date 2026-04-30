@@ -1,6 +1,19 @@
 Release Notes:
 
 --------------------
+2.43 Release
+--------------------
+API:
+- New unauthenticated JSON endpoint at /api/status.php for external reporting apps
+- Returns hive name, ID, location, and unit preference (metric/imperial)
+- Returns latest sensor readings (hive temp, humidity, weight, weather, air quality)
+- Returns 24-hour and 1-hour trends for weight and temperature (direction + delta)
+- Returns active alarms from the alert engine (high/low temp, robbing, swarm, honey flow, etc.)
+- CORS enabled for cross-origin access
+- Rate limited to 60 requests/min per IP to protect Pi resources
+- Respects metric/imperial display setting from hive configuration
+
+--------------------
 2.42 Release
 --------------------
 TEMPERATURE CHART:
