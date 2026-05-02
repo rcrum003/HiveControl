@@ -43,10 +43,10 @@ function check_if_blank() {
     #Function to check if we have a real value
     #Useful when we pull values from multiple sources
     #Usage check variablename (omit the $)
-    
+
     if [[ ${!1} == "" ]]; then
-      let ${1}='null'
-    fi 
+      printf -v "$1" '%s' "null"
+    fi
 
 }
 

@@ -1,6 +1,21 @@
 Release Notes:
 
 --------------------
+2.44 Release
+--------------------
+CONFIG SYNC FIX (CRITICAL):
+- Fixed `let` arithmetic bug in hiveconfig.sh that corrupted string values (timezone, API keys) to 0
+- Fixed same `let` bug in check.inc check_if_blank function — now uses printf -v for safe string assignment
+- Added missing jq extractions for KEY_TOMORROW and KEY_AMBEE from remote config JSON
+- Local-only fields (timezone, API keys, sensor GPIO/calibration, system paths, weather config) are now
+  protected from remote overwrite — hivecontrol.org can only sync hive identity, bee management, and
+  enable flags, not device-specific settings
+- Fixed VERSION drift: after remote-to-local sync, VERSION is set to MAX(local, remote)+1 to prevent
+  re-import loops where remote falsely appears "newer"
+- Added config sync logging: local vs remote VERSION comparison logged for debugging
+- Fixed exit codes: config sync now exits 0 (success) instead of 1 (error)
+
+--------------------
 2.43 Release
 --------------------
 API:

@@ -125,6 +125,8 @@ else # 1.
 
 			fi
 
+		loglocal "$DATE" CONFIG INFO "Config sync check: local VERSION=$DBVERSION, remote VERSION=$HIVE_CONFIG_VERSION"
+
 		#####################################################################
 		# If hivecontrol.org is newer, import that as our new DB config
 		#####################################################################
@@ -225,6 +227,9 @@ else # 1.
 					POST_wx_station=$(jq -r .wx_station $HIVE_CONFIG)
 					POST_wx_temp_type=$(jq -r .wx_temp_type $HIVE_CONFIG)
 					
+					POST_key_tomorrow=$(jq -r .key_tomorrow $HIVE_CONFIG)
+					POST_key_ambee=$(jq -r .key_ambee $HIVE_CONFIG)
+
 					POST_enable_hive_air_chk=$(jq -r .enable_hive_air_chk $HIVE_CONFIG)
 					POST_hive_air_type=$(jq -r .hive_air_type $HIVE_CONFIG)
 					POST_hive_air_id=$(jq -r .hive_air_id $HIVE_CONFIG)
@@ -236,26 +241,19 @@ else # 1.
 			#You have to evaluate if something is blank, if so, use the local copy.
 			#let's make a function
 			function A {
-				#Function to check if a value is null, so we dont' overwrite the local DB
-				# $1 remote_variable value to check
-				# $2 local_variable to use if it was blank
-				# Usage " A $POST_name name"
-				#remote_var="$1"
-				local_var="$2"
+				# Fall back to local DB value when remote is null/blank
+				# $1 = remote variable name, $2 = local DB column name
+				local local_var="$2"
 
 				if [[ ${!1} == "null" || ${!1} == "" ]]; then
-					#Remote Value was null or blank
-					#Get local value
 					echo "Checking value..... ${1}"
 					LOCAL_VAR_VAL=$(sqlite3 $LOCALDATABASE "SELECT $local_var from hiveconfig;")
-					#Set the remote_var
 					if [[ $LOCAL_VAR_VAL == "" ]]; then
-						let LOCAL_VAR_VAL="null"
+						printf -v "$1" '%s' "null"
 					else
-						let ${1}="$LOCAL_VAR_VAL"
+						printf -v "$1" '%s' "$LOCAL_VAR_VAL"
 					fi
 				fi
-
 			}
 
 
@@ -451,19 +449,88 @@ else # 1.
 				check_if_blank POST_wx_temp_type
 				
 
+			# Protect local-only fields: always use local DB values, never remote
+				echo "Preserving local-only fields (timezone, API keys, sensor config, system paths)"
+				POST_timezone=$(sqlite3 $LOCALDATABASE "SELECT TIMEZONE from hiveconfig;")
+				POST_computer=$(sqlite3 $LOCALDATABASE "SELECT COMPUTER from hiveconfig;")
+				POST_homedir=$(sqlite3 $LOCALDATABASE "SELECT HOMEDIR from hiveconfig;")
+				POST_public_html_dir=$(sqlite3 $LOCALDATABASE "SELECT PUBLIC_HTML_DIR from hiveconfig;")
+
+				# API keys
+				POST_key_openweathermap=$(sqlite3 $LOCALDATABASE "SELECT KEY_OPENWEATHERMAP from hiveconfig;")
+				POST_key_weatherapi=$(sqlite3 $LOCALDATABASE "SELECT KEY_WEATHERAPI from hiveconfig;")
+				POST_key_visualcrossing=$(sqlite3 $LOCALDATABASE "SELECT KEY_VISUALCROSSING from hiveconfig;")
+				POST_key_pirateweather=$(sqlite3 $LOCALDATABASE "SELECT KEY_PIRATEWEATHER from hiveconfig;")
+				POST_key_tomorrow=$(sqlite3 $LOCALDATABASE "SELECT KEY_TOMORROW from hiveconfig;")
+				POST_key_ambee=$(sqlite3 $LOCALDATABASE "SELECT KEY_AMBEE from hiveconfig;")
+				POST_key_airnow=$(sqlite3 $LOCALDATABASE "SELECT KEY_AIRNOW from hiveconfig;")
+
+				# Sensor GPIO, type, calibration
+				POST_temptype=$(sqlite3 $LOCALDATABASE "SELECT TEMPTYPE from hiveconfig;")
+				POST_hivedevice=$(sqlite3 $LOCALDATABASE "SELECT HIVEDEVICE from hiveconfig;")
+				POST_hive_temp_gpio=$(sqlite3 $LOCALDATABASE "SELECT HIVE_TEMP_GPIO from hiveconfig;")
+				POST_hive_temp_slope=$(sqlite3 $LOCALDATABASE "SELECT HIVE_TEMP_SLOPE from hiveconfig;")
+				POST_hive_temp_intercept=$(sqlite3 $LOCALDATABASE "SELECT HIVE_TEMP_INTERCEPT from hiveconfig;")
+				POST_hive_temp_measure=$(sqlite3 $LOCALDATABASE "SELECT HIVE_TEMP_MEASURE from hiveconfig;")
+				POST_hive_humidity_slope=$(sqlite3 $LOCALDATABASE "SELECT HIVE_HUMIDITY_SLOPE from hiveconfig;")
+				POST_hive_humidity_intercept=$(sqlite3 $LOCALDATABASE "SELECT HIVE_HUMIDITY_INTERCEPT from hiveconfig;")
+				POST_scaletype=$(sqlite3 $LOCALDATABASE "SELECT SCALETYPE from hiveconfig;")
+				POST_hive_weight_gpio=$(sqlite3 $LOCALDATABASE "SELECT HIVE_WEIGHT_GPIO from hiveconfig;")
+				POST_hive_weight_slope=$(sqlite3 $LOCALDATABASE "SELECT HIVE_WEIGHT_SLOPE from hiveconfig;")
+				POST_hive_weight_intercept=$(sqlite3 $LOCALDATABASE "SELECT HIVE_WEIGHT_INTERCEPT from hiveconfig;")
+				POST_lux_source=$(sqlite3 $LOCALDATABASE "SELECT LUX_SOURCE from hiveconfig;")
+				POST_hive_lux_gpio=$(sqlite3 $LOCALDATABASE "SELECT HIVE_LUX_GPIO from hiveconfig;")
+				POST_hive_lux_slope=$(sqlite3 $LOCALDATABASE "SELECT HIVE_LUX_SLOPE from hiveconfig;")
+				POST_hive_lux_intercept=$(sqlite3 $LOCALDATABASE "SELECT HIVE_LUX_INTERCEPT from hiveconfig;")
+				POST_cameratype=$(sqlite3 $LOCALDATABASE "SELECT CAMERATYPE from hiveconfig;")
+				POST_cameramode=$(sqlite3 $LOCALDATABASE "SELECT CAMERAMODE from hiveconfig;")
+				POST_countertype=$(sqlite3 $LOCALDATABASE "SELECT COUNTERTYPE from hiveconfig;")
+
+				# Weather source config
+				POST_local_wx_type=$(sqlite3 $LOCALDATABASE "SELECT local_wx_type from hiveconfig;")
+				POST_local_wx_url=$(sqlite3 $LOCALDATABASE "SELECT local_wx_url from hiveconfig;")
+				POST_wx_station=$(sqlite3 $LOCALDATABASE "SELECT WXSTATION from hiveconfig;")
+				POST_wx_temp_type=$(sqlite3 $LOCALDATABASE "SELECT WXTEMPTYPE from hiveconfig;")
+				POST_wx_temper_device=$(sqlite3 $LOCALDATABASE "SELECT WX_TEMPER_DEVICE from hiveconfig;")
+				POST_wx_temp_gpio=$(sqlite3 $LOCALDATABASE "SELECT WX_TEMP_GPIO from hiveconfig;")
+				POST_wx_temp_slope=$(sqlite3 $LOCALDATABASE "SELECT WX_TEMP_SLOPE from hiveconfig;")
+				POST_wx_temp_intercept=$(sqlite3 $LOCALDATABASE "SELECT WX_TEMP_INTERCEPT from hiveconfig;")
+				POST_wx_humidity_slope=$(sqlite3 $LOCALDATABASE "SELECT WX_HUMIDITY_SLOPE from hiveconfig;")
+				POST_wx_humidity_intercept=$(sqlite3 $LOCALDATABASE "SELECT WX_HUMIDITY_INTERCEPT from hiveconfig;")
+				POST_weather_fallback=$(sqlite3 $LOCALDATABASE "SELECT WEATHER_FALLBACK from hiveconfig;")
+				POST_weather_fallback_2=$(sqlite3 $LOCALDATABASE "SELECT WEATHER_FALLBACK_2 from hiveconfig;")
+				POST_wx_max_stale_minutes=$(sqlite3 $LOCALDATABASE "SELECT WX_MAX_STALE_MINUTES from hiveconfig;")
+				POST_weather_detail=$(sqlite3 $LOCALDATABASE "SELECT WEATHER_DETAIL from hiveconfig;")
+				POST_weather_level=$(sqlite3 $LOCALDATABASE "SELECT WEATHER_LEVEL from hiveconfig;")
+
+				# Air quality config
+				POST_enable_airnow=$(sqlite3 $LOCALDATABASE "SELECT ENABLE_AIRNOW from hiveconfig;")
+				POST_airnow_distance=$(sqlite3 $LOCALDATABASE "SELECT AIRNOW_DISTANCE from hiveconfig;")
+				POST_enable_hive_air_chk=$(sqlite3 $LOCALDATABASE "SELECT ENABLE_HIVE_AIR_CHK from hiveconfig;")
+				POST_hive_air_type=$(sqlite3 $LOCALDATABASE "SELECT HIVE_AIR_TYPE from hiveconfig;")
+				POST_hive_air_id=$(sqlite3 $LOCALDATABASE "SELECT HIVE_AIR_ID from hiveconfig;")
+				POST_hive_air_api=$(sqlite3 $LOCALDATABASE "SELECT HIVE_AIR_API from hiveconfig;")
+
 			#Update Local DB
 		 	sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET HIVEAPI=\"$HIVEAPI\", HIVENAME=\"$POST_name\", HIVEID=\"$POST_id\", CAMERAMODE=\"$POST_cameramode\", CAMERATYPE=\"$POST_cameratype\", check_for_upgrades=\"$POST_check_for_upgrades\", COMPUTER=\"$POST_computer\", COUNTERTYPE=\"$POST_countertype\", ENABLE_BEECOUNTER=\"$POST_enable_beecounter\", ENABLE_HIVE_CAMERA=\"$POST_enable_hive_camera\", ENABLE_HIVE_TEMP_CHK=\"$POST_enable_hive_temp_chk\", ENABLE_HIVE_WEIGHT_CHK=\"$POST_enable_hive_weight_chk\", ENABLE_LUX=\"$POST_enable_lux\", GDD_BASE_TEMP=\"$POST_gdd_base_temp\", GDD_START_DATE=\"$POST_gdd_start_date\", HCVersion=\"$POST_hc_version\", HIVE_HUMIDITY_INTERCEPT=\"$POST_hive_humidity_intercept\", HIVE_HUMIDITY_SLOPE=\"$POST_hive_humidity_slope\", HIVE_LUX_GPIO=\"$POST_hive_lux_gpio\", HIVE_LUX_INTERCEPT=\"$POST_hive_lux_intercept\", HIVE_LUX_SLOPE=\"$POST_hive_lux_slope\", HIVE_TEMP_GPIO=\"$POST_hive_temp_gpio\", HIVE_TEMP_INTERCEPT=\"$POST_hive_temp_intercept\", HIVE_TEMP_MEASURE=\"$POST_hive_temp_measure\", HIVE_TEMP_SLOPE=\"$POST_hive_temp_slope\", HIVE_WEIGHT_GPIO=\"$POST_hive_weight_gpio\", HIVE_WEIGHT_INTERCEPT=\"$POST_hive_weight_intercept\", HIVE_WEIGHT_SLOPE=\"$POST_hive_weight_slope\", HIVEDEVICE=\"$POST_hivedevice\", INTERNET=\"$POST_internet\", LATITUDE=\"$POST_latitude\", local_wx_type=\"$POST_local_wx_type\", local_wx_url=\"$POST_local_wx_url\", LONGITUDE=\"$POST_longitude\", LUX_SOURCE=\"$POST_lux_source\", NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD\", NUM_HIVE_BASE_SOLID_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SOLID_BOTTOM_BOARD\", NUM_HIVE_BODY_DEEP_FOUNDATION=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION\", NUM_HIVE_BODY_DEEP_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION_LESS\", NUM_HIVE_BODY_MEDIUM_FOUNDATION=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION\", NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS\", NUM_HIVE_BODY_SHAL_FOUNDATION=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION\", NUM_HIVE_BODY_SHAL_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION_LESS\", NUM_HIVE_FEEDER=\"$POST_NUM_HIVE_FEEDER\", NUM_HIVE_TOP_INNER_COVER=\"$POST_NUM_HIVE_TOP_INNER_COVER\", NUM_HIVE_TOP_MIGRATORY_COVER=\"$POST_NUM_HIVE_TOP_MIGRATORY_COVER\", NUM_HIVE_TOP_TELE_COVER=\"$POST_NUM_HIVE_TOP_TELE_COVER\", POWER=\"$POST_power\", PUBLIC_HTML_DIR=\"$POST_public_html_dir\", RUN=\"$POST_run\", SCALETYPE=\"$POST_scaletype\", START_DATE=\"$POST_start_date\", STATUS=\"$POST_status\", TEMPTYPE=\"$POST_temptype\", TIMEZONE=\"$POST_timezone\", VERSION=\"$POST_version\", WEATHER_DETAIL=\"$POST_weather_detail\", WEATHER_LEVEL=\"$POST_weather_level\", WX_HUMIDITY_INTERCEPT=\"$POST_wx_humidity_intercept\", WX_HUMIDITY_SLOPE=\"$POST_wx_humidity_slope\", WXSTATION=\"$POST_wx_station\", WX_TEMP_GPIO=\"$POST_wx_temp_gpio\", WX_TEMP_INTERCEPT=\"$POST_wx_temp_intercept\", WX_TEMP_SLOPE=\"$POST_wx_temp_slope\", WXTEMPTYPE=\"$POST_wx_temp_type\", WX_TEMPER_DEVICE=\"$POST_wx_temper_device\", WEATHER_FALLBACK=\"$POST_weather_fallback\", WEATHER_FALLBACK_2=\"$POST_weather_fallback_2\", WX_MAX_STALE_MINUTES=\"$POST_wx_max_stale_minutes\", KEY_OPENWEATHERMAP=\"$POST_key_openweathermap\", KEY_WEATHERAPI=\"$POST_key_weatherapi\", KEY_VISUALCROSSING=\"$POST_key_visualcrossing\", KEY_PIRATEWEATHER=\"$POST_key_pirateweather\", KEY_TOMORROW=\"$POST_key_tomorrow\", KEY_AMBEE=\"$POST_key_ambee\", KEY_AIRNOW=\"$POST_key_airnow\", ENABLE_AIRNOW=\"$POST_enable_airnow\", AIRNOW_DISTANCE=\"$POST_airnow_distance\";"
 			 #Register Success
-			 	#Set DBVersion to match the HiveControl.org version
-				DBVersion=$POST_version
-				MESSAGE="Updated Local Config with Newer Version from HiveControl.org"
+				# Use MAX of local and remote VERSION to prevent re-import loops
+				if [ "$DBVERSION" -gt "$POST_version" ]; then
+					MERGED_VERSION=$DBVERSION
+				else
+					MERGED_VERSION=$POST_version
+				fi
+				MERGED_VERSION=$((MERGED_VERSION+1))
+				sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET VERSION=\"$MERGED_VERSION\";"
+
+				MESSAGE="Updated Local Config with Newer Version from HiveControl.org (local-only fields preserved)"
 				loglocal "$DATE" CONFIG INFO "$MESSAGE"
 				echo "$MESSAGE"
 				PUBLIC_HTML_DIR="$HOMEDIR/www/public_html/"
-				echo "$DBVERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
+				echo "$MERGED_VERSION" > $PUBLIC_HTML_DIR/admin/hiveconfig.ver
 				dump_config_to_file
 
-				exit 1
+				exit 0
 		 	
 		 	fi # 4.
 			###############################################################
@@ -526,7 +593,7 @@ else # 1.
 			#SHARE_SUB_STATUS=$(/bin/echo $SHARE_API_STATUS | $HOMEDIR/scripts/system/JSON.sh -b |awk -F\" '{print $4}' |awk -F, '{print $1}')
 				 dump_config_to_file
 
-				 exit 1
+				 exit 0
 
 				 fi	#5
 	
