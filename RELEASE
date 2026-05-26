@@ -1,6 +1,21 @@
 Release Notes:
 
 --------------------
+2.45 Release
+--------------------
+UPGRADE CHECK FIX:
+- Fixed checkupgrades.sh corrupting hiveconfig.inc when GitHub rate-limits requests
+  * When raw.githubusercontent.com returns a rate-limit/anti-scraping error page
+    instead of file content, the HTML (including GitHub Terms of Service text with
+    parentheses) was written into the database and then dumped into hiveconfig.inc
+  * Bash syntax error on source: "unexpected token `('" from the TOS URL
+  * Added is_valid_github_response() validation that rejects responses containing
+    HTML tags, "terms of service", "scraping GitHub", or "rate limit" text
+  * Added numeric format validation for VERSION content before writing to database
+  * Script now exits cleanly with a log warning instead of corrupting the config
+  * Reuses already-fetched upgrade.sh content instead of making a redundant curl call
+
+--------------------
 2.44 Release
 --------------------
 CONFIG SYNC FIX (CRITICAL):
