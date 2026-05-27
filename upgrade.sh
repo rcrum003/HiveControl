@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="132"
+Upgrade_ver="133"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -903,6 +903,11 @@ if [[ "$Installed_Ver" < "2.43" ]]; then
 	echo "Creating API endpoint directory"
 	mkdir -p /home/HiveControl/www/public_html/api
 	chown www-data:www-data /home/HiveControl/www/public_html/api
+fi
+
+if [[ "$Installed_Ver" < "2.45" ]]; then
+	echo "Cleaning Up Bad Github insertions"
+	sqlite3 /home/HiveControl/data/hive-data.db "delete from allhivedata where hiveid=\"\";"
 fi
 
 echo "============================================="
