@@ -16,6 +16,15 @@ HIVE EQUIPMENT MANAGED AT HIVECONTROL.ORG:
   * The Hive Body page shows that the equipment is managed at hivecontrol.org;
     changes made there are replaced on the next config sync
 
+HISTORY SYNC FIXED:
+- scripts/data/synchive_to_hivecontrol.sh uploads this hive's local history to
+  hivecontrol.org, for readings recorded while the hive couldn't upload
+  * Previously it stopped after the first 500 readings, skipped the oldest one,
+    could shift columns, and overwrote the hive id on every local row
+  * Now sends every reading, 500 at a time, and remembers where it got to
+    (data/sync.state), so running it again only sends what's new
+  * Options: --since YYYY-MM-DD to send only recent readings, --restart to start over
+  * Safe to re-run: hivecontrol.org ignores readings it already has
 
 --------------------
 2.45 Release
