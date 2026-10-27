@@ -91,7 +91,8 @@ HiveControl uses a collection of bash scripts to gather sensor data from physica
 ├── beecounter/
 │   └── beecounter.sh           # Optical bee counter
 ├── data/
-│   ├── hiveconfig.sh           # Configuration loader
+│   ├── hiveconfig.sh           # Configuration loader and cloud config sync
+│   ├── equipment_to_cloud.sh   # 2.46: one-time hand-over of hive equipment to the cloud
 │   ├── check.inc               # Data validation functions
 │   ├── logger.inc              # Logging functions
 │   └── cloud.inc               # Hivetool.org integration
@@ -261,6 +262,11 @@ cd "$HOMEDIR"
 1. Read `WEIGHT_TYPE` from configuration
 2. Call appropriate sensor script
 3. Return: `RAW_WEIGHT NET_WEIGHT`
+
+**Tare:** the net weight subtracts the equipment's weight: Σ(`NUM_HIVE_*` × the part's
+`HIVE_*_WEIGHT`) + `HIVE_TOP_WEIGHT` + `HIVE_COMPUTER_WEIGHT` + `HIVE_MISC_WEIGHT`, from
+`hiveconfig.inc`. Since 2.46 the counts and weights come from hivecontrol.org (see
+`equipment_to_cloud.sh` and `hiveconfig.sh`).
 
 **Supported Sensors:**
 - `hx711` → hx711.sh
@@ -534,6 +540,44 @@ EOF
 ```
 
 **Used by**: All scripts that need configuration
+
+**Cloud config sync (registered hives):** compares the local config `VERSION` with
+hivecontrol.org's and imports whichever side is newer. Since 2.46 it also:
+
+- runs `equipment_to_cloud.sh` first while `/home/HiveControl/data/.equipment_in_cloud` is
+  missing, so the one-time equipment hand-over is retried until it goes through;
+- applies part weights from a downloaded config (`apply_cloud_equipment_weights`): when the
+  config has `HIVE_*_WEIGHT` values (the cloud manages the hive's equipment), they're written to
+  `hiveequipmentweight`, numbers only, creating the table/row if needed. No weights in the config
+  means the cloud doesn't manage it yet, and local weights are left alone.
+
+#### equipment_to_cloud.sh
+**Purpose**: Hand the hive's equipment over to hivecontrol.org (HiveControl 2.46)
+
+**Location**: `/home/HiveControl/scripts/data/equipment_to_cloud.sh`
+
+From 2.46 the cloud manages the hive's equipment: box stack, part weights, sensor and frame
+feeder positions. This script sends what the Hive Body page stored locally, once:
+
+- **Reads:** from `hiveconfig`: `HIVE_STACK_ORDER`, `NUM_HIVE_*` box counts,
+  `SENSOR_TEMP_POSITION`/`_LABEL`, `FRAME_FEEDER_POSITION`/`_LABEL`, `FEEDER_HAS_SYRUP`. From
+  `hiveequipmentweight`: every `HIVE_*_WEIGHT`. A column an older install lacks isn't sent.
+- **Posts** them with `api_token`, `hive_id` and `hivename` to `$POST_EQUIPMENT_URL`
+  (`cloud.inc`: `$CLOUD_URL/hive/equipment`).
+- **Replies:**
+  - `SUCCESS`: imported.
+  - `EXISTS`: the cloud already had equipment for this hive and keeps it.
+  - `INVALID_DATA`: nothing configured locally.
+
+  Each of these writes the flag `/home/HiveControl/data/.equipment_in_cloud`, and the script
+  never sends again.
+- **Anything else** (offline, bad token, stale hive id): logs a `CONFIG WARNING` and exits 1.
+  `hiveconfig.sh` retries on its next run.
+- **Not connected:** a hive without an API token is skipped (nothing to hand over to).
+
+**Run by**: `upgrade.sh` (2.46 block) and `hiveconfig.sh` until the flag exists.
+
+Cloud side of this hand-over: `docs/equipment.md` in the HiveControl 2026 repository.
 
 #### check.inc
 **Purpose**: Data validation functions

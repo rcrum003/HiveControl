@@ -9,7 +9,7 @@
 
 #Get the latest upgrade script
 
-Upgrade_ver="133"
+Upgrade_ver="134"
 
 source /home/HiveControl/scripts/hiveconfig.inc
 source /home/HiveControl/scripts/data/logger.inc
@@ -908,6 +908,15 @@ fi
 if [[ "$Installed_Ver" < "2.45" ]]; then
 	echo "Cleaning Up Bad Github insertions"
 	sqlite3 /home/HiveControl/data/hive-data.db "delete from allhivedata where hiveid=\"\";"
+fi
+
+if [[ "$Installed_Ver" < "2.46" ]]; then
+	# Hive equipment (stack, part weights, sensor and feeder positions) moves to
+	# hivecontrol.org, which manages it from now on. Send what this hive has; if
+	# the cloud can't be reached, hiveconfig.sh keeps retrying until it can.
+	echo "Sending hive equipment and weights to hivecontrol.org"
+	chmod +x /home/HiveControl/scripts/data/equipment_to_cloud.sh
+	/home/HiveControl/scripts/data/equipment_to_cloud.sh || echo "Couldn't reach hivecontrol.org; will retry on the next config check"
 fi
 
 echo "============================================="

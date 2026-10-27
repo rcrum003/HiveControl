@@ -20,6 +20,9 @@ POST_CONFIGVERSION_URL="$CLOUD_URL/hive/config/version"
 POST_GETCONFIG_URL="$CLOUD_URL/hive/config"
 POST_UPDATECONFIG_URL="$CLOUD_URL/hive/config/update"
 
+#Equipment (HiveControl 2.46): one-time upload, then managed in the cloud
+POST_EQUIPMENT_URL="$CLOUD_URL/hive/equipment"
+
 
 #Common functions:
 function hc_senddata () {	

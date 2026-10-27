@@ -127,6 +127,27 @@ WHERE id = 1;
 
 ---
 
+### hiveequipmentweight
+
+Empty weight of each kind of hive part, in lbs (one row, `id = 1`). `getweight.sh` multiplies
+them by the `NUM_HIVE_*` counts in `hiveconfig` to get the tare.
+
+| Column | Part |
+|---|---|
+| `HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT`, `HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT` | bottom boards |
+| `HIVE_BODY_DEEP_FOUNDATION_WEIGHT`, `HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT`, `HIVE_BODY_SHAL_FOUNDATION_WEIGHT` (and `*_LESS_WEIGHT` for foundationless) | boxes |
+| `HIVE_FEEDER_WEIGHT` | hive-top feeder |
+| `HIVE_TOP_INNER_COVER_WEIGHT`, `HIVE_TOP_TELE_COVER_WEIGHT`, `HIVE_TOP_MIGRATORY_COVER_WEIGHT` | covers |
+| `HIVE_TOP_WEIGHT`, `HIVE_COMPUTER_WEIGHT`, `HIVE_MISC_WEIGHT` | on the scale, not in the stack |
+
+Created by the Hive Body page (older installs may not have it until then).
+
+**Since 2.46** hivecontrol.org owns these values. `hiveconfig.sh` overwrites them from the
+downloaded config once the cloud manages the hive's equipment. The one-time upload of the local
+values is `scripts/data/equipment_to_cloud.sh`. The related `hiveconfig` columns
+`HIVE_STACK_ORDER`, `SENSOR_TEMP_POSITION`/`_LABEL`, `FRAME_FEEDER_POSITION`/`_LABEL` and
+`FEEDER_HAS_SYRUP` are uploaded once but not synced back.
+
 ### logs
 
 **Purpose**: System audit trail and error logging

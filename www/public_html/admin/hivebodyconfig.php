@@ -239,6 +239,13 @@ $jsConfig = [
                 <p class="text-muted">Build your hive visually. Click components to add, drag to reorder. Use the placement tools to position your sensor and feeder.</p>
             </div>
         </div>
+        <?php if (file_exists('/home/HiveControl/data/.equipment_in_cloud') && !empty($result['HIVEAPI'])): ?>
+        <div class="alert alert-info">
+            <i class="fa fa-cloud"></i> This hive's equipment and weights are managed at
+            <a href="https://www.hivecontrol.org" target="_blank" rel="noopener">hivecontrol.org</a>
+            (Hive config &rarr; Equipment). Changes made here are replaced on the next config sync.
+        </div>
+        <?php endif; ?>
 
         <?php if ($saveMessage): ?>
         <div class="alert alert-success alert-dismissable">

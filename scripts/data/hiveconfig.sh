@@ -32,6 +32,43 @@ function dump_config_to_file() {
 	fi
 }
 
+function apply_cloud_equipment_weights() {
+	# $1 = downloaded config (JSON). Absent weights mean the cloud doesn't manage
+	# this hive's equipment yet: keep the local ones.
+	local cfg="$1"
+	local deep
+	deep=$(jq -r '.HIVE_BODY_DEEP_FOUNDATION_WEIGHT // empty' "$cfg" 2>/dev/null)
+	if [ -z "$deep" ] || [ "$deep" == "null" ]; then
+		return 0
+	fi
+	sqlite3 $LOCALDATABASE "CREATE TABLE IF NOT EXISTS hiveequipmentweight (
+		HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT REAL DEFAULT 0, HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT REAL DEFAULT 0,
+		HIVE_FEEDER_WEIGHT REAL DEFAULT 0, HIVE_TOP_INNER_COVER_WEIGHT REAL DEFAULT 0,
+		HIVE_TOP_TELE_COVER_WEIGHT REAL DEFAULT 0, HIVE_TOP_MIGRATORY_COVER_WEIGHT REAL DEFAULT 0,
+		HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT REAL DEFAULT 0, HIVE_BODY_MEDIUM_FOUNDATION_LESS_WEIGHT REAL DEFAULT 0,
+		HIVE_BODY_DEEP_FOUNDATION_WEIGHT REAL DEFAULT 0, HIVE_BODY_DEEP_FOUNDATION_LESS_WEIGHT REAL DEFAULT 0,
+		HIVE_BODY_SHAL_FOUNDATION_WEIGHT REAL DEFAULT 0, HIVE_BODY_SHAL_FOUNDATION_LESS_WEIGHT REAL DEFAULT 0,
+		HIVE_TOP_WEIGHT REAL DEFAULT 0, HIVE_COMPUTER_WEIGHT REAL DEFAULT 0, HIVE_MISC_WEIGHT REAL DEFAULT 0, id INTEGER DEFAULT 1);
+		INSERT INTO hiveequipmentweight (id) SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM hiveequipmentweight WHERE id = 1);"
+	local sets=""
+	local key val
+	for key in HIVE_BASE_SOLID_BOTTOM_BOARD_WEIGHT HIVE_BASE_SCREENED_BOTTOM_BOARD_WEIGHT HIVE_FEEDER_WEIGHT \
+		HIVE_TOP_INNER_COVER_WEIGHT HIVE_TOP_TELE_COVER_WEIGHT HIVE_TOP_MIGRATORY_COVER_WEIGHT \
+		HIVE_BODY_DEEP_FOUNDATION_WEIGHT HIVE_BODY_MEDIUM_FOUNDATION_WEIGHT HIVE_BODY_SHAL_FOUNDATION_WEIGHT \
+		HIVE_BODY_DEEP_FOUNDATION_LESS_WEIGHT HIVE_BODY_MEDIUM_FOUNDATION_LESS_WEIGHT HIVE_BODY_SHAL_FOUNDATION_LESS_WEIGHT \
+		HIVE_TOP_WEIGHT HIVE_COMPUTER_WEIGHT HIVE_MISC_WEIGHT; do
+		val=$(jq -r ".$key // empty" "$cfg" 2>/dev/null)
+		# Numbers only: these go straight into SQL.
+		if [[ "$val" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+			sets="$sets${sets:+, }$key=$val"
+		fi
+	done
+	if [ -n "$sets" ]; then
+		sqlite3 $LOCALDATABASE "UPDATE hiveequipmentweight SET $sets WHERE id=1;"
+		loglocal "$DATE" CONFIG INFO "Applied hive equipment weights from hivecontrol.org"
+	fi
+}
+
 if [ ! -f "$CONFIGOUT" ]; then
    #File Doesnt exist so we need to generate it
     dump_config_to_file
@@ -107,6 +144,12 @@ else # 1.
 		# We are registered, so let's do the needful
 		##############################################	
 		echo "--- Syncing Local Hive Config with hivecontrol.org ---"
+
+		# 2.46: hive equipment moves to the cloud. Until the one-time upload has
+		# gone through, retry it here, before any cloud weights are applied.
+		if [ ! -f /home/HiveControl/data/.equipment_in_cloud ] && [ -x /home/HiveControl/scripts/data/equipment_to_cloud.sh ]; then
+			/home/HiveControl/scripts/data/equipment_to_cloud.sh
+		fi
 		#Check to see what version HiveControl Has
 		#POST_CONFIGVERSION_URL - Returns {"version":"23"}
 		
@@ -513,6 +556,10 @@ else # 1.
 
 			#Update Local DB
 		 	sqlite3 $LOCALDATABASE "UPDATE hiveconfig SET HIVEAPI=\"$HIVEAPI\", HIVENAME=\"$POST_name\", HIVEID=\"$POST_id\", CAMERAMODE=\"$POST_cameramode\", CAMERATYPE=\"$POST_cameratype\", check_for_upgrades=\"$POST_check_for_upgrades\", COMPUTER=\"$POST_computer\", COUNTERTYPE=\"$POST_countertype\", ENABLE_BEECOUNTER=\"$POST_enable_beecounter\", ENABLE_HIVE_CAMERA=\"$POST_enable_hive_camera\", ENABLE_HIVE_TEMP_CHK=\"$POST_enable_hive_temp_chk\", ENABLE_HIVE_WEIGHT_CHK=\"$POST_enable_hive_weight_chk\", ENABLE_LUX=\"$POST_enable_lux\", GDD_BASE_TEMP=\"$POST_gdd_base_temp\", GDD_START_DATE=\"$POST_gdd_start_date\", HCVersion=\"$POST_hc_version\", HIVE_HUMIDITY_INTERCEPT=\"$POST_hive_humidity_intercept\", HIVE_HUMIDITY_SLOPE=\"$POST_hive_humidity_slope\", HIVE_LUX_GPIO=\"$POST_hive_lux_gpio\", HIVE_LUX_INTERCEPT=\"$POST_hive_lux_intercept\", HIVE_LUX_SLOPE=\"$POST_hive_lux_slope\", HIVE_TEMP_GPIO=\"$POST_hive_temp_gpio\", HIVE_TEMP_INTERCEPT=\"$POST_hive_temp_intercept\", HIVE_TEMP_MEASURE=\"$POST_hive_temp_measure\", HIVE_TEMP_SLOPE=\"$POST_hive_temp_slope\", HIVE_WEIGHT_GPIO=\"$POST_hive_weight_gpio\", HIVE_WEIGHT_INTERCEPT=\"$POST_hive_weight_intercept\", HIVE_WEIGHT_SLOPE=\"$POST_hive_weight_slope\", HIVEDEVICE=\"$POST_hivedevice\", INTERNET=\"$POST_internet\", LATITUDE=\"$POST_latitude\", local_wx_type=\"$POST_local_wx_type\", local_wx_url=\"$POST_local_wx_url\", LONGITUDE=\"$POST_longitude\", LUX_SOURCE=\"$POST_lux_source\", NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SCREENED_BOTTOM_BOARD\", NUM_HIVE_BASE_SOLID_BOTTOM_BOARD=\"$POST_NUM_HIVE_BASE_SOLID_BOTTOM_BOARD\", NUM_HIVE_BODY_DEEP_FOUNDATION=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION\", NUM_HIVE_BODY_DEEP_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_DEEP_FOUNDATION_LESS\", NUM_HIVE_BODY_MEDIUM_FOUNDATION=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION\", NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_MEDIUM_FOUNDATION_LESS\", NUM_HIVE_BODY_SHAL_FOUNDATION=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION\", NUM_HIVE_BODY_SHAL_FOUNDATION_LESS=\"$POST_NUM_HIVE_BODY_SHAL_FOUNDATION_LESS\", NUM_HIVE_FEEDER=\"$POST_NUM_HIVE_FEEDER\", NUM_HIVE_TOP_INNER_COVER=\"$POST_NUM_HIVE_TOP_INNER_COVER\", NUM_HIVE_TOP_MIGRATORY_COVER=\"$POST_NUM_HIVE_TOP_MIGRATORY_COVER\", NUM_HIVE_TOP_TELE_COVER=\"$POST_NUM_HIVE_TOP_TELE_COVER\", POWER=\"$POST_power\", PUBLIC_HTML_DIR=\"$POST_public_html_dir\", RUN=\"$POST_run\", SCALETYPE=\"$POST_scaletype\", START_DATE=\"$POST_start_date\", STATUS=\"$POST_status\", TEMPTYPE=\"$POST_temptype\", TIMEZONE=\"$POST_timezone\", VERSION=\"$POST_version\", WEATHER_DETAIL=\"$POST_weather_detail\", WEATHER_LEVEL=\"$POST_weather_level\", WX_HUMIDITY_INTERCEPT=\"$POST_wx_humidity_intercept\", WX_HUMIDITY_SLOPE=\"$POST_wx_humidity_slope\", WXSTATION=\"$POST_wx_station\", WX_TEMP_GPIO=\"$POST_wx_temp_gpio\", WX_TEMP_INTERCEPT=\"$POST_wx_temp_intercept\", WX_TEMP_SLOPE=\"$POST_wx_temp_slope\", WXTEMPTYPE=\"$POST_wx_temp_type\", WX_TEMPER_DEVICE=\"$POST_wx_temper_device\", WEATHER_FALLBACK=\"$POST_weather_fallback\", WEATHER_FALLBACK_2=\"$POST_weather_fallback_2\", WX_MAX_STALE_MINUTES=\"$POST_wx_max_stale_minutes\", KEY_OPENWEATHERMAP=\"$POST_key_openweathermap\", KEY_WEATHERAPI=\"$POST_key_weatherapi\", KEY_VISUALCROSSING=\"$POST_key_visualcrossing\", KEY_PIRATEWEATHER=\"$POST_key_pirateweather\", KEY_TOMORROW=\"$POST_key_tomorrow\", KEY_AMBEE=\"$POST_key_ambee\", KEY_AIRNOW=\"$POST_key_airnow\", ENABLE_AIRNOW=\"$POST_enable_airnow\", AIRNOW_DISTANCE=\"$POST_airnow_distance\";"
+			# Part weights: the cloud sends them once it manages this hive's
+			# equipment (2.46+). Apply them so getweight.sh uses the cloud's tare.
+			apply_cloud_equipment_weights "$HIVE_CONFIG"
+
 			 #Register Success
 				# Use MAX of local and remote VERSION to prevent re-import loops
 				if [ "$DBVERSION" -gt "$POST_version" ]; then

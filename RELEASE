@@ -1,6 +1,23 @@
 Release Notes:
 
 --------------------
+2.46 Release
+--------------------
+HIVE EQUIPMENT MANAGED AT HIVECONTROL.ORG:
+- The hive's equipment (box stack, part weights, sensor and frame feeder positions)
+  is now managed at hivecontrol.org instead of on the Hive Body page
+  * On upgrade, scripts/data/equipment_to_cloud.sh sends this hive's stack order, box
+    counts, part weights, temperature sensor and frame feeder positions to the cloud
+    once. If the cloud already has equipment for the hive, the cloud's is kept.
+  * If hivecontrol.org can't be reached, hiveconfig.sh retries on each config check
+    until it goes through (data/.equipment_in_cloud marks it done)
+  * hiveconfig.sh now applies part weights downloaded with the config to the
+    hiveequipmentweight table, so getweight.sh subtracts the cloud's tare
+  * The Hive Body page shows that the equipment is managed at hivecontrol.org;
+    changes made there are replaced on the next config sync
+
+
+--------------------
 2.45 Release
 --------------------
 UPGRADE CHECK FIX:

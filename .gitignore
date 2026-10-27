@@ -8,3 +8,6 @@ data/
 *.key
 *.pem
 vendor/
+
+# data/ above is meant for the database directory; scripts/data/ holds scripts
+!scripts/data/
