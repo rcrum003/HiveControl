@@ -26,6 +26,23 @@ HISTORY SYNC FIXED:
   * Options: --since YYYY-MM-DD to send only recent readings, --restart to start over
   * Safe to re-run: hivecontrol.org ignores readings it already has
 
+SAFER UPGRADES:
+- upgrade.sh stops instead of reporting success when something goes wrong
+  * If GitHub can't be reached, returns an error page, or the download is
+    incomplete, the upgrade stops before changing anything and can be run again
+  * A database patch that fails stops the upgrade, and DBVERSION stays at the last
+    patch that worked, so the next upgrade retries it instead of skipping it for
+    good. A column or table that already exists isn't treated as a failure.
+  * The database backup (data/hive-data.bckup) is now a consistent copy of the
+    live database, including recent writes still in its WAL file
+- Upgrades now also update www/public_html/dist, images and vendor (the PHP
+  libraries), plus composer.json, composer.lock and index.html. Hives on 2.15 or
+  later never received the PHP library security fixes or the dashboard CSS fix.
+  Camera snapshots in images/ are left alone.
+- The installed version is stored as text, so 2.40 no longer shows as 2.4
+- The repository no longer tracks data/ (the live database, DBVERSION). New
+  installs copy install/database/hive-data.seed.db to data/hive-data.db.
+
 --------------------
 2.45 Release
 --------------------

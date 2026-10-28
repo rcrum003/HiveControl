@@ -11,3 +11,6 @@ vendor/
 
 # data/ above is meant for the database directory; scripts/data/ holds scripts
 !scripts/data/
+
+# The empty database new installs start from (copied to data/hive-data.db)
+!install/database/hive-data.seed.db

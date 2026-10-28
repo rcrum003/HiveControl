@@ -217,6 +217,9 @@ sudo apt-get install jq -y
 sudo cp /etc/apache2/sites-available/000-default.conf /home/HiveControl/install/apache/default.bckup
 sudo cp /home/HiveControl/install/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 sudo apachectl restart
+# Start from the empty database that ships with the code
+sudo mkdir -p /home/HiveControl/data
+sudo cp -n /home/HiveControl/install/database/hive-data.seed.db /home/HiveControl/data/hive-data.db
 # Setup Database to be able to be written to by Apache
 sudo chown www-data:www-data /home/HiveControl/data/hive-data.db
 # Dir needs to be owned by www-data as well

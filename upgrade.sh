@@ -40,9 +40,22 @@ fi
 
 DATE=$(TZ=":$TIMEZONE" date '+%F %T')
 
+# upgrade_failed stops the upgrade before it reports success. upgrade_available
+# stays set, so the upgrade can simply be run again.
+upgrade_failed() {
+	echo "UPGRADE FAILED: $1"
+	loglocal "$DATE" UPGRADE ERROR "Upgrade stopped: $1"
+	exit 1
+}
+
 #Check to see if we are latest version
 Installed_Ver=$(cat /home/HiveControl/VERSION)
 Latest_Ver=$(curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/VERSION)
+
+# A GitHub error or rate-limit page isn't a version number
+if ! echo "$Latest_Ver" | grep -qE '^[0-9]+\.?[0-9]*$'; then
+	upgrade_failed "couldn't get the latest version number from GitHub"
+fi
 
 if [[  $(echo "$Installed_Ver == $Latest_Ver" | bc) -eq 1 ]]; then
 		echo "Nothing to do, you are at the latest version"
@@ -53,7 +66,10 @@ fi
 
 #Back everything up, just in case (mainly the database)
 echo "Backing up Database to hive-data.bckup"
-cp /home/HiveControl/data/hive-data.db /home/HiveControl/data/hive-data.bckup
+# .backup makes a consistent copy of the live database, including recent writes
+# still in its WAL file, which a plain cp can miss
+sqlite3 -cmd ".timeout 10000" /home/HiveControl/data/hive-data.db ".backup '/home/HiveControl/data/hive-data.bckup'" \
+	|| upgrade_failed "couldn't back up the database (is the disk full?)"
 echo "============================================="
 
 # Ensure required directories exist (every upgrade, not version-gated)
@@ -69,7 +85,10 @@ echo "Getting Latest Code"
 #Start in our directory
 	cd /home/HiveControl/upgrade
 #Get the code
-	git clone https://github.com/rcrum003/HiveControl &> /dev/null
+	git clone --quiet --depth 1 https://github.com/rcrum003/HiveControl \
+		|| upgrade_failed "couldn't download the new version from GitHub"
+	[ -f /home/HiveControl/upgrade/HiveControl/VERSION ] \
+		|| upgrade_failed "the download from GitHub is incomplete"
 
 
 #Set some variables
@@ -83,7 +102,9 @@ softwareDest="/home/HiveControl/software"
 #Remove some initial installation files from repository for upgrade
 #Remove the offending file, since we don't want to upgrade these 
 rm -rf $WWWTempRepo/include/db-connect.php
-rm -rf $WWWTempRepo/data/* 
+rm -rf $WWWTempRepo/data/*
+#Camera snapshots belong to this hive; don't replace them with the repository's
+rm -f $WWWTempRepo/images/current.jpg $WWWTempRepo/images/currentsm.jpg $WWWTempRepo/images/hive_snapshot.jpg
 	echo "....... Storing it in /home/HiveControl/upgrade"
 echo "============================================="
 
@@ -93,50 +114,65 @@ echo "============================================="
 #Get DBVersion
 DB_ver=$(cat /home/HiveControl/data/DBVERSION)
 DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
-	#Get the version available
-	DB_latest_ver=$(curl -s -L -H "Cache-Control: no-cache" https://raw.githubusercontent.com/rcrum003/HiveControl/master/data/DBVERSION)
 
-	#if [[ "$DB_ver" -lt "$DB_latest_ver" ]]; then
+# db_patch applies one patch file. A column or table that already exists is
+# fine (the patch ran before, or schema_validate.sh added it). Any other error
+# stops the upgrade with DBVERSION left at the last step that worked, so the
+# next upgrade retries this patch instead of skipping it for good.
+db_patch() {
+	local errors
+	[ -f "$DBPatches/$1" ] || errors="$1 is missing"
+	if [ -z "$errors" ]; then
+		errors=$(sqlite3 "$DestDB" < "$DBPatches/$1" 2>&1 >/dev/null \
+			| grep -E '^(Parse error|Runtime error|Error)' \
+			| grep -vE 'duplicate column name|already exists')
+	fi
+	if [ -n "$errors" ]; then
+		echo $DB_ver > /home/HiveControl/data/DBVERSION
+		upgrade_failed "database patch $1 failed: $errors"
+	fi
+}
+
 		echo "Checking for DB Upgrades"
 		if [[ $DB_ver -eq "0" ]]; then
 			#Upgarding to version 1
 			echo "Applying DB Ver1 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_6 
+			db_patch DB_PATCH_6
 			#Set DB Ver to the next
 			let DB_ver="1"		
 		fi
 		if [[ $DB_ver -eq "1" ]]; then
 			#Upgarding to version 2
 			echo "Applying DB Ver2 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_7 
+			db_patch DB_PATCH_7
 			#Set DB Ver to the next
 			let DB_ver="2"
 		fi
 		if [[ $DB_ver -eq "2" ]]; then
 			#Upgarding to version 2
 			echo "Applying DB Ver3 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_8 
+			db_patch DB_PATCH_8
 			#Set DB Ver to the next
 			let DB_ver="3"
 		fi
 		if [[ $DB_ver -eq "3" ]]; then
 			#Upgarding to version 2
 			echo "Applying DB Ver4 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_9 
+			db_patch DB_PATCH_9
 			#Set DB Ver to the next
 			let DB_ver="4"
 		fi
 		if [[ $DB_ver -eq "4" ]]; then
 			#Upgarding to version 2
 			echo "Applying DB Ver5 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_10
+			db_patch DB_PATCH_10
 			#Set DB Ver to the next
 			let DB_ver="5"
 		fi
 		if [[ $DB_ver -eq "5" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver6 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_11
+			db_patch DB_PATCH_11
 			sqlite3 $DestDB "UPDATE allhivedata SET IN_COUNT=0 WHERE OUT_COUNT is null"
 			sqlite3 $DestDB "UPDATE allhivedata SET OUT_COUNT=0 WHERE OUT_COUNT is null" 
 			#Set DB Ver to the next
@@ -145,7 +181,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		if [[ $DB_ver -eq "6" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver7 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_12
+			db_patch DB_PATCH_12
 			sqlite3 $DestDB "UPDATE allhivedata SET IN_COUNT=0 WHERE OUT_COUNT is null"
 			sqlite3 $DestDB "UPDATE allhivedata SET OUT_COUNT=0 WHERE OUT_COUNT is null" 
 			#Set DB Ver to the next
@@ -154,7 +190,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		if [[ $DB_ver -eq "7" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver8 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_13
+			db_patch DB_PATCH_13
 			#Set DB Ver to the next
 			#Upgrade Cron for Message Queue and Pollen Counter
 			#Get Crontab as it is
@@ -169,15 +205,15 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 			if [[ $DB_ver -eq "8" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver9 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_14
+			db_patch DB_PATCH_14
 			#Set DB Ver to the next
 			let DB_ver="9"
 		fi
 			if [[ $DB_ver -eq "9" ]]; then
 			#Upgarding to next version 
 			echo "Applying DB Ver10 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_15
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_16
+			db_patch DB_PATCH_15
+			db_patch DB_PATCH_16
 			#Set DB Ver to the next
 			let DB_ver="10"
 		fi
@@ -188,12 +224,12 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		fi
 		if [[ $DB_ver -eq "11" ]]; then
 			echo "Applying DB Ver12 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_17
+			db_patch DB_PATCH_17
 			let DB_ver="12"
 		fi
 		if [[ $DB_ver -eq "12" ]]; then
 			echo "Applying DB Ver13 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_18 
+			db_patch DB_PATCH_18
 			sudo crontab -l > /home/HiveControl/install/cron/cron2.orig 
 			#Echo our new content into a new crontab file with the old
 			sudo cat /home/HiveControl/upgrade/HiveControl/patches/cron/CRON_PATCH_2 >> /home/HiveControl/install/cron/cron2.orig
@@ -205,7 +241,7 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 
 		if [[ $DB_ver -eq "13" ]]; then
 			echo "Applying DB Ver14 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_19 
+			db_patch DB_PATCH_19
 			sudo sqlite3 $DestDB "UPDATE hiveconfig SET RUN=\"yes\";"
 			sudo cp /home/HiveControl/upgrade/HiveControl/www/public_html/images/* /home/HiveControl/www/public_html/images/
 			let DB_ver="14"
@@ -213,15 +249,15 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 
 		if [[ $DB_ver -eq "14" ]]; then
 			echo "Applying DB Ver15 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_20 
+			db_patch DB_PATCH_20
 			let DB_ver="15"
 		fi
 		if [[ $DB_ver -eq "15" ]]; then
 			echo "Applying DB Ver16 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_21 
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_22
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_23
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_24
+			db_patch DB_PATCH_21
+			db_patch DB_PATCH_22
+			db_patch DB_PATCH_23
+			db_patch DB_PATCH_24
 			#Update SUDOERs drop-in
 			sudo cp /home/HiveControl/upgrade/HiveControl/install/sudoers.d/hivecontrol.sudoers /etc/sudoers.d/hivecontrol
 			sudo chown root:root /etc/sudoers.d/hivecontrol
@@ -242,32 +278,32 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		fi
 		if [[ $DB_ver -eq "17" ]]; then
 			echo "Applying DB Ver18 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_25
+			db_patch DB_PATCH_25
 			let DB_ver="18"
 		fi
 		if [[ $DB_ver -eq "18" ]]; then
 			echo "Applying DB Ver19 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_26
+			db_patch DB_PATCH_26
 			let DB_ver="19"
 		fi
 		if [[ $DB_ver -eq "19" ]]; then
 			echo "Applying DB Ver20 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_27
+			db_patch DB_PATCH_27
 			let DB_ver="20"
 		fi
 		if [[ $DB_ver -eq "20" ]]; then
 			echo "Applying DB Ver21 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_28
+			db_patch DB_PATCH_28
 			let DB_ver="21"
 		fi
 		if [[ $DB_ver -eq "21" ]]; then
 			echo "Applying DB Ver 22 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_30
+			db_patch DB_PATCH_30
 			let DB_ver="22"
 		fi
 		if [[ $DB_ver -eq "22" ]]; then
 			echo "Applying DB Ver 23 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_31
+			db_patch DB_PATCH_31
 			let DB_ver="23"
 			AIR_QUALITY_NULL=$(sqlite3 $DestDB "SELECT ENABLE_AIR from hiveconfig;")			
 			if [[ $AIR_QUALITY_NULL == "" || $AIR_QUALITY_NULL == "NULL" ]]; then
@@ -277,88 +313,85 @@ DBPatches="/home/HiveControl/upgrade/HiveControl/patches/database"
 		fi
 		if [[ $DB_ver -eq "23" ]]; then
 			echo "Applying DB Ver 24 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_32
+			db_patch DB_PATCH_32
 			let DB_ver="24"
 		fi
 		if [[ $DB_ver -eq "24" ]]; then
 			echo "Applying DB Ver 25 Upgrades - Weight drift compensation"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_33
+			db_patch DB_PATCH_33
 			let DB_ver="25"
 		fi
 		if [[ $DB_ver -eq "25" ]]; then
 			echo "Applying DB Ver 26 Upgrades - Weather fallback support"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_34
+			db_patch DB_PATCH_34
 			let DB_ver="26"
 		fi
 		if [[ $DB_ver -eq "26" ]]; then
 			echo "Applying DB Ver 27 Upgrades - Alert system"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_35
+			db_patch DB_PATCH_35
 			let DB_ver="27"
 		fi
 		if [[ $DB_ver -eq "27" ]]; then
 			echo "Applying DB Ver 28 Upgrades - Weather reliability (cascading fallback, health tracking)"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_36
+			db_patch DB_PATCH_36
 			let DB_ver="28"
 		fi
 		if [[ $DB_ver -eq "28" ]]; then
 			echo "Applying DB Ver 29 Upgrades - Per-provider API key storage"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_37
+			db_patch DB_PATCH_37
 			let DB_ver="29"
 		fi
 		if [[ $DB_ver -eq "29" ]]; then
 			echo "Applying DB Ver 30 Upgrades - Pollen fallback provider keys"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_38
+			db_patch DB_PATCH_38
 			let DB_ver="30"
 		fi
 		if [[ $DB_ver -eq "30" ]]; then
 			echo "Applying DB Ver 31 Upgrades - Expanded air quality"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_39
+			db_patch DB_PATCH_39
 			let DB_ver="31"
 		fi
 		if [[ $DB_ver -eq "31" ]]; then
 			echo "Applying DB Ver 32 Upgrades - EPA air quality table"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_40
+			db_patch DB_PATCH_40
 			let DB_ver="32"
 		fi
 		if [[ $DB_ver -eq "32" ]]; then
 			echo "Applying DB Ver 33 Upgrades - Air quality trend line configs"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_41
+			db_patch DB_PATCH_41
 			let DB_ver="33"
 		fi
 		if [[ $DB_ver -eq "33" ]]; then
 			echo "Applying DB Ver 34 Upgrades - Hive body stack order and sensor placement"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_42 2>/dev/null || true
+			db_patch DB_PATCH_42
 			let DB_ver="34"
 		fi
 		if [[ $DB_ver -eq "34" ]]; then
 			echo "Applying DB Ver 35 Upgrades - WX Underground API key"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_43 2>/dev/null || true
+			db_patch DB_PATCH_43
 			let DB_ver="35"
 		fi
 		if [[ $DB_ver -eq "35" ]]; then
 			echo "Applying DB Ver 36 Upgrades - Pollen enable/disable toggle"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_44 2>/dev/null || true
+			db_patch DB_PATCH_44
 			let DB_ver="36"
 		fi
 		if [[ $DB_ver -eq "36" ]]; then
 			echo "Applying DB Ver 37 Upgrades - In-hive frame feeder placement"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_45 2>/dev/null || true
+			db_patch DB_PATCH_45
 			let DB_ver="37"
 		fi
 		if [[ $DB_ver -eq "37" ]]; then
 			echo "Applying DB Ver 38 Upgrades - ZIP code for pollen and location services"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_46 2>/dev/null || true
+			db_patch DB_PATCH_46
 			let DB_ver="38"
 		fi
 		if [[ $DB_ver -eq "38" ]]; then
 			echo "Applying DB Ver 39 Upgrades - RTSP camera stream support"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_47 2>/dev/null || true
+			db_patch DB_PATCH_47
 			let DB_ver="39"
 		fi
 
-	#else
-	#	echo "Skipping DB, no new database upgrades available"
-	#fi
 	sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
 
 # Validate schema — catches any columns missed by the patch chain
@@ -380,6 +413,13 @@ mkdir -p $DestWWWRepo/api
 cp -Rp $WWWTempRepo/api/* $DestWWWRepo/api/
 mkdir -p $DestWWWRepo/bower_components/jquery-ui/dist
 cp -Rp $WWWTempRepo/bower_components/jquery-ui/dist/* $DestWWWRepo/bower_components/jquery-ui/dist/
+#Theme CSS, icons, and the PHP libraries (vendor/, pinned by composer.lock,
+#which is where library security fixes arrive)
+mkdir -p $DestWWWRepo/dist $DestWWWRepo/images $DestWWWRepo/vendor
+cp -Rp $WWWTempRepo/dist/* $DestWWWRepo/dist/
+cp -Rp $WWWTempRepo/images/* $DestWWWRepo/images/
+cp -Rp $WWWTempRepo/vendor/* $DestWWWRepo/vendor/
+cp -p $WWWTempRepo/composer.json $WWWTempRepo/composer.lock $WWWTempRepo/index.html $DestWWWRepo/
 echo "============================================="
 
 echo "Upgrading our shell scripts"
@@ -492,7 +532,7 @@ if [[ "$Installed_Ver" < "1.90" ]]; then
 
 		if [[ $DB_ver -eq "20" ]]; then
 			echo "Applying DB Ver21 Upgrades"
-			sqlite3 $DestDB < $DBPatches/DB_PATCH_28
+			db_patch DB_PATCH_28
 			let DB_ver="21"
 			sudo echo $DB_ver > /home/HiveControl/data/DBVERSION
 		fi
@@ -936,7 +976,7 @@ source /home/HiveControl/scripts/hiveconfig.inc
 #Advance the version
 ((VERSION++))
 
-sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion=$Latest_Ver, VERSION=$VERSION WHERE id=1"
+sqlite3 $DestDB "UPDATE hiveconfig SET HCVersion='$Latest_Ver', VERSION=$VERSION WHERE id=1"
 
 #Dump our config again
 /home/HiveControl/scripts/data/hiveconfig.sh
